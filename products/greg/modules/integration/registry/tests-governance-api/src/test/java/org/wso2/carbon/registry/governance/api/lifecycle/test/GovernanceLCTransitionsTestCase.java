@@ -1,4 +1,4 @@
-package org.wso2.carbon.registry.governance.api.test;
+package org.wso2.carbon.registry.governance.api.lifecycle.test;
 
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -35,6 +35,7 @@ public class GovernanceLCTransitionsTestCase  {
     private String LIFE_CYCLE_NAME = "StoreServiceLifeCycle";
     private Registry governance;
     private ServiceManager serviceManager;
+    private Service service;
 
     @BeforeClass(alwaysRun = true)
     public void initialize() throws IOException, LoginAuthenticationExceptionException,
@@ -47,7 +48,7 @@ public class GovernanceLCTransitionsTestCase  {
                         ProductConstant.GREG_SERVER_NAME);
         governance = new RegistryProviderUtil().getGovernanceRegistry(wsRegistry, userId);
         serviceManager = new ServiceManager(governance);
-        Service service = serviceManager.newService(new QName("https://www.wso2.com/greg/store", "StoreService")) ;
+        service = serviceManager.newService(new QName("https://www.wso2.com/greg/store", "StoreService")) ;
         service.addAttribute("overview_version", "1.0.0");
         serviceManager.addService(service);
 
@@ -65,12 +66,10 @@ public class GovernanceLCTransitionsTestCase  {
 
     @Test(groups = {"wso2.greg"}, description = "LC Transition")
     public void testAttachLifecycle() throws RegistryException {
-        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
-        Service[] services = serviceManager.getAllServices();
-        Service service = services[0];
-        service.attachLifecycle(LIFE_CYCLE_NAME);
-        String lifecycleName = service.getLifecycleName();
-        String lifecycleState = service.getLifecycleState();
+        Service addedService = getAddedService();
+        addedService.attachLifecycle(LIFE_CYCLE_NAME);
+        String lifecycleName = addedService.getLifecycleName();
+        String lifecycleState = addedService.getLifecycleState();
 
         Assert.assertEquals(lifecycleName, LIFE_CYCLE_NAME, "Different lifecycle found");
         Assert.assertEquals(lifecycleState, "Development", "Different lifecycle state found");
@@ -78,9 +77,7 @@ public class GovernanceLCTransitionsTestCase  {
 
     @Test(groups = {"wso2.greg"}, description = "LC Transition", dependsOnMethods = "testAttachLifecycle")
     public void testGetCheckListItems() throws RegistryException {
-        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
-        Service[] services = serviceManager.getAllServices();
-        Service service = services[0];
+        Service service = getAddedService();
         String[] checklistItems = service.getAllCheckListItemNames();
 
         Assert.assertEquals(checklistItems[0], "Code Completed", "Expected checklist item not found");
@@ -89,9 +86,8 @@ public class GovernanceLCTransitionsTestCase  {
     }
 
     @Test(groups = {"wso2.greg"}, description = "LC Transition", dependsOnMethods = "testGetCheckListItems")
-    public void testCheckLCItem() throws GovernanceException {
-        Service[] services = serviceManager.getAllServices();
-        Service service = services[0];
+    public void testCheckLCItem() throws RegistryException {
+        Service service = getAddedService();
 
         service.checkLCItem(0);
         service.checkLCItem(1);
@@ -107,18 +103,16 @@ public class GovernanceLCTransitionsTestCase  {
     }
 
     @Test(groups = {"wso2.greg"}, description = "LC Transition", dependsOnMethods = "testCheckLCItem")
-    public void testGetVotingEvents() throws GovernanceException {
-        Service[] services = serviceManager.getAllServices();
-        Service service = services[0];
+    public void testGetVotingEvents() throws RegistryException {
+        Service service = getAddedService();
 
         String[] votingItems = service.getAllVotingItems();
         Assert.assertEquals(votingItems[0], "Promote", "Unexpected voting event found");
     }
 
     @Test(groups = {"wso2.greg"}, description = "LC Transition", dependsOnMethods = "testGetVotingEvents")
-    public void testVoting() throws GovernanceException {
-        Service[] services = serviceManager.getAllServices();
-        Service service = services[0];
+    public void testVoting() throws RegistryException {
+        Service service = getAddedService();
 
         service.vote(0);
         Assert.assertTrue(service.isVoted(0), "Not voted");
@@ -130,18 +124,17 @@ public class GovernanceLCTransitionsTestCase  {
     }
 
     @Test(groups = {"wso2.greg"}, description = "LC Transition", dependsOnMethods = "testVoting")
-    public void testGetAllActions() throws GovernanceException {
-        Service[] services = serviceManager.getAllServices();
-        Service service = services[0];
+    public void testGetAllActions() throws RegistryException {
+        Service service = getAddedService();
 
         String[] actions = service.getAllLifecycleActions();
         Assert.assertEquals(actions[0], "Promote", "Unexpected action found");
     }
 
     @Test(groups = {"wso2.greg"}, description = "LC Transition", dependsOnMethods = "testGetAllActions")
-    public void testPromote() throws GovernanceException {
+    public void testPromote() throws RegistryException {
         Service[] services = serviceManager.getAllServices();
-        Service service = services[0];
+        Service service = getAddedService();
 
         Map<String, String> map = new HashMap<String, String>();
         map.put("/_system/governance/trunk/services/com/wso2/www/greg/store/StoreService", "2.3.5");
@@ -162,10 +155,22 @@ public class GovernanceLCTransitionsTestCase  {
     }
 
     @AfterClass(alwaysRun = true)
-    public void cleanUp() throws GovernanceException {
-        Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-            serviceManager.removeService(service.getId());
+    public void cleanUp() throws RegistryException {
+        if (service != null){
+            deleteService(service);
+        }
+    }
+
+    private Service getAddedService() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
+        return serviceManager.getService(service.getId());
+    }
+
+    private void deleteService(Service service) throws RegistryException {
+        if (service != null) {
+            if (governance.resourceExists(service.getPath())) {
+                serviceManager.removeService(service.getId());
+            }
         }
     }
 

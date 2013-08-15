@@ -351,8 +351,10 @@ public class FilterServicesWithAdminTestCase {
             public boolean matches(Service service) throws GovernanceException {
                 String attributeVal = service.getAttribute("overview_description");
                 String attributeVal2 = service.getAttribute("overview_version");
+                String attributeVal3 = service.getAttribute("overview_name");
                 return attributeVal != null && attributeVal.startsWith("Test") &&
-                       attributeVal2.startsWith("5.0.0");
+                       attributeVal2.startsWith("5.0.0") &&
+                       attributeVal3 != null && attributeVal3.startsWith("serviceForSearching") ;
             }
         })[0];
         Assert.assertEquals(searchResult1.getAttribute("overview_name"), "serviceForSearching3", "overview name should be serviceForSearching3");
@@ -363,8 +365,10 @@ public class FilterServicesWithAdminTestCase {
             public boolean matches(Service service) throws GovernanceException {
                 String attributeVal = service.getAttribute("overview_description");
                 String attributeVal2 = service.getAttribute("overview_version");
+                String attributeVal3 = service.getAttribute("overview_name");
                 return attributeVal != null && attributeVal.startsWith("Test") &&
-                       attributeVal2.startsWith("5.0.0");
+                       attributeVal2.startsWith("5.0.0")&&
+                       attributeVal3 != null && attributeVal3.startsWith("serviceForSearching") ;
             }
         });
         Assert.assertEquals(searchResult2.length, 0, "Expecting 0 Search results");
@@ -401,7 +405,7 @@ public class FilterServicesWithAdminTestCase {
         Service searchResult[] = serviceManager.findServices(new ServiceFilter() {
             public boolean matches(Service service) throws GovernanceException {
                 String attributeVal = service.getAttribute("overview_name");
-                return attributeVal != null && attributeVal.startsWith("serviceForSea");
+                return attributeVal != null && attributeVal.startsWith("serviceForSearching");
             }
         });
         Assert.assertEquals(searchResult.length, 4, "Expect only 4 Search result");
@@ -427,8 +431,7 @@ public class FilterServicesWithAdminTestCase {
                 String attributeVal_description = service.getAttribute("overview_description");
                 String attributeVal_messageFormats = service.getAttribute("interface_messageFormats");
                 String attributeVal_messageExchangePatterns = service.getAttribute("interface_messageExchangePatterns");
-
-                return attributeVal_name != null && attributeVal_name.startsWith("serviceForSea") &&
+                return attributeVal_name != null && attributeVal_name.startsWith("serviceForSearching") &&
                         attributeVal_description != null && attributeVal_description.startsWith("Tes") &&
                         attributeVal_messageFormats != null && attributeVal_messageFormats.equals("SOAP 1.2") &&
                         attributeVal_messageExchangePatterns != null && attributeVal_messageExchangePatterns.startsWith("Request Res");

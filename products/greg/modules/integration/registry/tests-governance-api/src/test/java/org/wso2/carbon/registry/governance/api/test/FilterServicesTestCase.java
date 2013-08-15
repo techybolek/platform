@@ -107,7 +107,7 @@ public class FilterServicesTestCase {
         serviceForSearching1 =
                 serviceManager.newService(new QName(
                         "http://service.for.searching1/mnm/",
-                        "serviceForSearching1"));
+                        "testServiceForSearching1"));
         serviceForSearching1.addAttribute("overview_version", "3.0.0");
         serviceForSearching1.addAttribute("overview_description", "Test");
         serviceForSearching1.addAttribute("interface_wsdlUrl", WSDL_URL);
@@ -123,7 +123,7 @@ public class FilterServicesTestCase {
         serviceForSearching2 =
                 serviceManager.newService(new QName(
                         "http://service.for.searching2/mnm/",
-                        "serviceForSearching2"));
+                        "testServiceForSearching2"));
         serviceForSearching2.addAttribute("overview_version", "4.0.0");
         serviceForSearching2.addAttribute("overview_description", "Test");
         serviceForSearching2.addAttribute("interface_wsdlUrl", WSDL_URL);
@@ -139,7 +139,7 @@ public class FilterServicesTestCase {
         serviceForSearching3 =
                 serviceManager.newService(new QName(
                         "http://service.for.searching3/mnm/",
-                        "serviceForSearching3"));
+                        "testServiceForSearching3"));
         serviceForSearching3.addAttribute("overview_version", "5.0.0");
         serviceForSearching3.addAttribute("overview_description", "Test");
         serviceForSearching3.addAttribute("interface_wsdlUrl", WSDL_URL);
@@ -155,7 +155,7 @@ public class FilterServicesTestCase {
         serviceForSearching4 =
                 serviceManager.newService(new QName(
                         "http://service.for.searching4/mnm/",
-                        "serviceForSearching4"));
+                        "testServiceForSearching4"));
         serviceForSearching4.addAttribute("overview_version", "5.1.0");
         serviceForSearching4.addAttribute("overview_description", "Test");
         serviceForSearching4.addAttribute("interface_wsdlUrl", WSDL_URL);
@@ -171,7 +171,7 @@ public class FilterServicesTestCase {
         serviceForSearching5 =
                 serviceManager.newService(new QName(
                         "http://service.for.searching5/mnm/",
-                        "serviceForSearching5"));
+                        "testServiceForSearching5"));
         serviceForSearching5.addAttribute("overview_version", "5.1.1");
         serviceForSearching5.addAttribute("overview_description", "Test");
         serviceForSearching5.addAttribute("interface_wsdlUrl", WSDL_URL);
@@ -202,12 +202,12 @@ public class FilterServicesTestCase {
 
             public boolean matches(Service service) throws GovernanceException {
                 String attributeVal = service.getAttribute("overview_name");
-                return attributeVal != null && attributeVal.startsWith("serviceForSearching1");
+                return attributeVal != null && attributeVal.startsWith("testServiceForSearching1");
             }
         })[0];
 
-        Assert.assertEquals(searchResult.getAttribute("overview_name"), "serviceForSearching1",
-                            "overview_name should be serviceForSearching1");
+        Assert.assertEquals(searchResult.getAttribute("overview_name"), "testServiceForSearching1",
+                            "overview_name should be testServiceForSearching1");
     }
 
     /**
@@ -234,7 +234,7 @@ public class FilterServicesTestCase {
                 String attributeVal9 = service.getAttribute("security_authenticationMechanism");
                 String attributeVal10 = service.getAttribute("security_messageIntegrity");
                 String attributeVal11 = service.getAttribute("security_messageEncryption");
-                return attributeVal1 != null && attributeVal1.startsWith("serviceForSearching4") &&
+                return attributeVal1 != null && attributeVal1.startsWith("testServiceForSearching4") &&
                        attributeVal2 != null && attributeVal2.startsWith("5.1.0") &&
                        attributeVal3 != null && attributeVal3.startsWith("Test") &&
                        attributeVal4 != null && attributeVal4.startsWith(WSDL_URL) &&
@@ -248,7 +248,7 @@ public class FilterServicesTestCase {
             }
         })[0];
 
-        Assert.assertEquals(searchResult.getAttribute("overview_name"), "serviceForSearching4");
+        Assert.assertEquals(searchResult.getAttribute("overview_name"), "testServiceForSearching4");
         Assert.assertEquals(searchResult.getAttribute("overview_version"), "5.1.0");
         Assert.assertEquals(searchResult.getAttribute("overview_description"), "Test");
         Assert.assertEquals(searchResult.getAttribute("interface_wsdlUrl"), WSDL_URL);
@@ -282,7 +282,7 @@ public class FilterServicesTestCase {
             }
         })[0];
 
-        Assert.assertEquals(searchResult.getAttribute("overview_name"), "serviceForSearching2", "overview_name should be serviceForSearching2");
+        Assert.assertEquals(searchResult.getAttribute("overview_name"), "testServiceForSearching2", "overview_name should be testServiceForSearching2");
     }
 
     /**
@@ -351,12 +351,14 @@ public class FilterServicesTestCase {
             public boolean matches(Service service) throws GovernanceException {
                 String attributeVal = service.getAttribute("overview_description");
                 String attributeVal2 = service.getAttribute("overview_version");
+                String attributeVal3 = service.getAttribute("overview_name");
                 return attributeVal != null && attributeVal.startsWith("Test") &&
-                       attributeVal2.startsWith("5.0.0");
+                       attributeVal2.startsWith("5.0.0")&&
+                       attributeVal3 != null && attributeVal3.startsWith("testServiceForSearching") ;
             }
         })[0];
-        Assert.assertEquals(searchResult1.getAttribute("overview_name"), "serviceForSearching3",
-                            "overview name should be serviceForSearching3");
+        Assert.assertEquals(searchResult1.getAttribute("overview_name"), "testServiceForSearching3",
+                            "overview name should be testServiceForSearching3");
 
         serviceForSearching3.removeAttribute("overview_description");
         serviceManager.updateService(serviceForSearching3);
@@ -364,8 +366,10 @@ public class FilterServicesTestCase {
             public boolean matches(Service service) throws GovernanceException {
                 String attributeVal = service.getAttribute("overview_description");
                 String attributeVal2 = service.getAttribute("overview_version");
+                String attributeVal3 = service.getAttribute("overview_name");
                 return attributeVal != null && attributeVal.startsWith("Test") &&
-                       attributeVal2.startsWith("5.0.0");
+                       attributeVal2.startsWith("5.0.0")&&
+                       attributeVal3 != null && attributeVal3.startsWith("testServiceForSearching") ;
             }
         });
         Assert.assertEquals(searchResult2.length, 0, "Expecting 0 Search results");
@@ -383,7 +387,7 @@ public class FilterServicesTestCase {
         Service searchResult[] = serviceManager.findServices(new ServiceFilter() {
             public boolean matches(Service service) throws GovernanceException {
                 String attributeVal = service.getAttribute("overview_name");
-                return attributeVal != null && attributeVal.startsWith("serviceForSearching5");
+                return attributeVal != null && attributeVal.startsWith("testServiceForSearching5");
             }
         });
         Assert.assertEquals(searchResult.length, 0, "Expecting 0 Search results");
@@ -395,27 +399,25 @@ public class FilterServicesTestCase {
      * @throws ResourceAdminServiceExceptionException
      *
      * @throws RemoteException
+     *
+     * @throws RegistryException
      */
     @Test(groups = {"wso2.greg"}, description = "Try out wild card search from the basic filter",
           dependsOnMethods = "testSearchForDeletedService")
     public void testWildCardSearch()
-            throws RemoteException, ResourceAdminServiceExceptionException {
-        String criteria =
-                "<serviceMetaData xmlns=\"http://www.wso2.org/governance/metadata\">" +
-                "<overview><name>serviceForSea[A-Za-z1-9]+</name></overview><serviceLifecycle />" +
-                "<contacts /><interface /><security /><endpoints /><docLinks /><operation xmlns=\"\">Add</operation>" +
-                "<currentName xmlns=\"\"></currentName><currentNamespace xmlns=\"\"></currentNamespace></serviceMetaData>";
-
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames().length, 4, "Expect only 4 Search result");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[0],
-                            "serviceForSearching1");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[1],
-                            "serviceForSearching2");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[2],
-                            "serviceForSearching3");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[3],
-                            "serviceForSearching4");
-
+            throws RemoteException, ResourceAdminServiceExceptionException, RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
+        Service searchResult[] = serviceManager.findServices(new ServiceFilter() {
+            public boolean matches(Service service) throws GovernanceException {
+                String attributeVal = service.getAttribute("overview_name");
+                return attributeVal != null && attributeVal.startsWith("testServiceForSea");
+            }
+        });
+        Assert.assertEquals(searchResult.length, 4, "Expect only 4 Search result");
+        Assert.assertEquals(searchResult[0].getAttribute("overview_name"), "testServiceForSearching1");
+        Assert.assertEquals(searchResult[1].getAttribute("overview_name"), "testServiceForSearching2");
+        Assert.assertEquals(searchResult[2].getAttribute("overview_name"), "testServiceForSearching3");
+        Assert.assertEquals(searchResult[3].getAttribute("overview_name"), "testServiceForSearching4");
     }
 
     /**
@@ -424,29 +426,32 @@ public class FilterServicesTestCase {
      * @throws ResourceAdminServiceExceptionException
      *
      * @throws RemoteException
+     *
+     * @throws RegistryException
      */
     @Test(groups = {"wso2.greg"}, description = "Try out wild card search from the basic filter",
           dependsOnMethods = "testWildCardSearch")
     public void testAdvWildCardSearch() throws RemoteException,
-                                               ResourceAdminServiceExceptionException {
-        String criteria =
-                "<serviceMetaData xmlns=\"http://www.wso2.org/governance/metadata\">" +
-                "<overview><name>serviceForSea[A-Za-z1-9]+</name><description>Tes[A-Za-z1-9]</description>" +
-                "</overview><serviceLifecycle /><contacts /><interface>" +
-                "<messageFormats>SOAP 1.2</messageFormats>" +
-                "<messageExchangePatterns>Request Res[A-Za-z1-9]+</messageExchangePatterns>" +
-                "</interface><security /><endpoints /><docLinks /><operation xmlns=\"\">Add</operation>" +
-                "<currentName xmlns=\"\"></currentName>" +
-                "<currentNamespace xmlns=\"\"></currentNamespace></serviceMetaData>";
+            ResourceAdminServiceExceptionException, RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
+        Service searchResult[] = serviceManager.findServices(new ServiceFilter() {
+            public boolean matches(Service service) throws GovernanceException {
+                String attributeVal_name = service.getAttribute("overview_name");
+                String attributeVal_description = service.getAttribute("overview_description");
+                String attributeVal_messageFormats = service.getAttribute("interface_messageFormats");
+                String attributeVal_messageExchangePatterns = service.getAttribute("interface_messageExchangePatterns");
 
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames().length, 3, "Expect only 3 Search result");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[0],
-                            "serviceForSearching1");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[1],
-                            "serviceForSearching2");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[2],
-                            "serviceForSearching4");
+                return attributeVal_name != null && attributeVal_name.startsWith("testServiceForSea") &&
+                        attributeVal_description != null && attributeVal_description.startsWith("Tes") &&
+                        attributeVal_messageFormats != null && attributeVal_messageFormats.equals("SOAP 1.2") &&
+                        attributeVal_messageExchangePatterns != null && attributeVal_messageExchangePatterns.startsWith("Request Res");
+            }
+        });
 
+        Assert.assertEquals(searchResult.length, 3, "Expect only 3 Search result");
+        Assert.assertEquals(searchResult[0].getAttribute("overview_name"), "testServiceForSearching1");
+        Assert.assertEquals(searchResult[1].getAttribute("overview_name"), "testServiceForSearching2");
+        Assert.assertEquals(searchResult[2].getAttribute("overview_name"), "testServiceForSearching4");
     }
 
 //    TODO: FIXME: The test below has 3 bugs.

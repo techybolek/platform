@@ -51,11 +51,12 @@ import static org.testng.AssertJUnit.assertNull;
 public class LCInGenericArtifactTestCase {
 
     private static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
-    private static final String LC_NAME = "ServiceLifeCycle"; // use the OOTB LC 
+    private static final String LC_NAME = "ServiceLifeCycle"; // use the OOTB LC
     private Registry governance;
     private static final Log log = LogFactory.getLog(LCInGenericArtifactTestCase.class);
     private WSRegistryServiceClient wsRegistry;
     int userId = 1;
+    private String eventWithLCArtifcatId = "";
  	
 
 
@@ -133,7 +134,8 @@ public class LCInGenericArtifactTestCase {
 //        artifact.setAttribute("serviceLifecycle_lifecycleName", "ServiceLifeCycle");
         artifactManager.addGenericArtifact(artifact);
 
-        artifact = artifactManager.getGenericArtifact(artifact.getId());
+        eventWithLCArtifcatId = artifact.getId();
+        artifact = artifactManager.getGenericArtifact(eventWithLCArtifcatId);
         Thread.sleep(3000);
         assertTrue(artifact.getQName().toString().contains("EventWithLC"), "artifact name not found");
 
@@ -154,10 +156,8 @@ public class LCInGenericArtifactTestCase {
     public void endTest() throws RegistryException {
 
         GenericArtifactManager artifactManager = new GenericArtifactManager(governance, "evlc");
-        GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
-        for (GenericArtifact genericArtifact : artifacts) {
-            artifactManager.removeGenericArtifact(genericArtifact.getId());
-        }
+        artifactManager.removeGenericArtifact(eventWithLCArtifcatId);
+
         String rxtLocation = "/_system/governance/repository/components/org.wso2.carbon.governance/types/";
         wsRegistry.delete(rxtLocation + "event_lc.rxt");
 

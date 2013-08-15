@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.registry.governance.api.test;
+package org.wso2.carbon.registry.governance.api.metadata.test;
 
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

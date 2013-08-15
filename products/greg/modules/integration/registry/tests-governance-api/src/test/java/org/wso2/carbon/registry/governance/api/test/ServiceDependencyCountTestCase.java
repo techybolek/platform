@@ -18,6 +18,7 @@ package org.wso2.carbon.registry.governance.api.test;
 
 
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
@@ -27,6 +28,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
@@ -34,6 +36,8 @@ import javax.xml.namespace.QName;
 
 
 public class ServiceDependencyCountTestCase {
+    GenericArtifactManager artifactManager;
+    GenericArtifact service1, service2;
 
     @Test(groups = {"wso2.greg"}, description = "Dependency Verification")
     public void testServiceDependencyCount() throws Exception {
@@ -47,14 +51,14 @@ public class ServiceDependencyCountTestCase {
         GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
 
         //"service" is the short name of the RXT
-        GenericArtifactManager artifactManager = new GenericArtifactManager(registry, "service");
+        artifactManager = new GenericArtifactManager(registry, "service");
 
-        GenericArtifact service1 =
+        service1 =
                 artifactManager.newGovernanceArtifact(new QName("http://dp.com", "S1-REGISTRY-1595"));
         service1.addAttribute("overview_version", "1.1.1");
         artifactManager.addGenericArtifact(service1);
 
-        GenericArtifact service2 =
+        service2 =
                 artifactManager.newGovernanceArtifact(new QName("http://dp.com", "S2-REGISTRY-1595"));
         service1.addAttribute("overview_version", "1.1.2");
         artifactManager.addGenericArtifact(service2);
@@ -78,6 +82,12 @@ public class ServiceDependencyCountTestCase {
         }
         Assert.assertTrue(isCorrectCount, "dependency count is not correct");
 
+    }
+
+    @AfterClass()
+    public void endTest() throws RegistryException {
+        artifactManager.removeGenericArtifact(service1.getId());
+        artifactManager.removeGenericArtifact(service2.getId());
     }
 }
 

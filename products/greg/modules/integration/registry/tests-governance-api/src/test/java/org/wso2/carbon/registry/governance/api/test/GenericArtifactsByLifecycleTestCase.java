@@ -12,6 +12,7 @@ import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder
 import org.wso2.carbon.automation.core.utils.environmentutils.ManageEnvironment;
 import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -43,20 +44,18 @@ public class GenericArtifactsByLifecycleTestCase {
                         ProductConstant.GREG_SERVER_NAME);
         governance = new RegistryProviderUtil().getGovernanceRegistry(wsRegistry, userId);
 
-        //Clean the old resource.
-        governance.delete("/trunk");
+        //Can't clean old resource since tests are executing parallel.
+        //governance.delete("/trunk");
 
         genericArtifactManager = new GenericArtifactManager(governance, "service");
         GenericArtifact genericArtifact = genericArtifactManager.
-                newGovernanceArtifact(new QName("https://www.wso2.com/greg/store", "StoreService"));
+                newGovernanceArtifact(new QName("https://www.wso2.com/greg/store", "GenericArtifactStoreService"));
         genericArtifactManager.addGenericArtifact(genericArtifact);
     }
 
     @Test(groups = {"wso2.greg"}, description = "Artifacts by LC")
     public void testAttachLifecycle() throws RegistryException {
-        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
-        GenericArtifact[] genericArtifacts = genericArtifactManager.getAllGenericArtifacts();
-        GenericArtifact genericArtifact = genericArtifacts[0];
+        GenericArtifact genericArtifact = getAddedGenericArtifact();
         genericArtifact.attachLifecycle(LIFE_CYCLE_NAME);
         String lifecycleName = genericArtifact.getLifecycleName();
         String lifecycleState = genericArtifact.getLifecycleState();
@@ -64,55 +63,61 @@ public class GenericArtifactsByLifecycleTestCase {
         Assert.assertEquals(lifecycleName, LIFE_CYCLE_NAME, "Different lifecycle found");
         Assert.assertEquals(lifecycleState, "Development", "Different lifecycle state found");
 
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         GenericArtifact[] filterByLCName = genericArtifactManager.
-                getAllGenericArtifactsByLifecycle("ServiceLifeCycle");
+                getAllGenericArtifactsByLifecycle(LIFE_CYCLE_NAME);
         Assert.assertEquals(filterByLCName.length, 1,
                 "Wrong number of artifacts associated with the lifecycle found");
-        Assert.assertEquals(filterByLCName[0].getPath(), "/trunk/services/com/wso2/www/greg/store/StoreService",
+        Assert.assertEquals(filterByLCName[0].getPath(), "/trunk/services/com/wso2/www/greg/store/GenericArtifactStoreService",
                 "Different artifact path found");
 
         GenericArtifact[] filterByLCNameAndStatus = genericArtifactManager.
-                getAllGenericArtifactsByLifecycleStatus("ServiceLifeCycle", "Development");
+                getAllGenericArtifactsByLifecycleStatus(LIFE_CYCLE_NAME, "Development");
         Assert.assertEquals(filterByLCNameAndStatus.length, 1,
                 "Wrong number of artifacts associated with the lifecycle in the given lifecycle state found");
-        Assert.assertEquals(filterByLCNameAndStatus[0].getPath(), "/trunk/services/com/wso2/www/greg/store/StoreService",
+        Assert.assertEquals(filterByLCNameAndStatus[0].getPath(), "/trunk/services/com/wso2/www/greg/store/GenericArtifactStoreService",
                         "Different artifact path found");
     }
 
     @Test(groups = {"wso2.greg"}, description = "Artifacts by LC")
     public void testGetArtifactsAfterPromoting() throws RegistryException {
-        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
-        GenericArtifact[] artifacts = genericArtifactManager.getAllGenericArtifacts();
-        GenericArtifact artifact = artifacts[0];
+        GenericArtifact artifact = getAddedGenericArtifact();
         Map<String, String> map = new HashMap<String, String>();
-        map.put("/_system/governance/trunk/services/com/wso2/www/greg/store/StoreService", "2.3.5");
+        map.put("/_system/governance/trunk/services/com/wso2/www/greg/store/GenericArtifactStoreService", "2.3.5");
         artifact.invokeAction("Promote", map);
 
         GenericArtifact[] filterByLCName = genericArtifactManager.
-                getAllGenericArtifactsByLifecycle("ServiceLifeCycle");
+                getAllGenericArtifactsByLifecycle(LIFE_CYCLE_NAME);
         Assert.assertEquals(filterByLCName.length, 2,
                 "Wrong number of artifacts associated with the lifecycle found");
-        Assert.assertEquals(filterByLCName[0].getPath(), "/trunk/services/com/wso2/www/greg/store/StoreService",
+        Assert.assertEquals(filterByLCName[0].getPath(), "/trunk/services/com/wso2/www/greg/store/GenericArtifactStoreService",
                 "Different artifact path found");
-        Assert.assertEquals(filterByLCName[1].getPath(), "/branches/testing/services/com/wso2/www/greg/store/2.3.5/StoreService",
+        Assert.assertEquals(filterByLCName[1].getPath(), "/branches/testing/services/com/wso2/www/greg/store/2.3.5/GenericArtifactStoreService",
                         "Different artifact path found");
 
         GenericArtifact[] filterByLCNameAndStatus = genericArtifactManager.
-                getAllGenericArtifactsByLifecycleStatus("ServiceLifeCycle", "Testing");
+                getAllGenericArtifactsByLifecycleStatus(LIFE_CYCLE_NAME, "Testing");
         Assert.assertEquals(filterByLCNameAndStatus.length, 1,
                         "Wrong number of artifacts associated with the lifecycle in the given lifecycle state found");
         Assert.assertEquals(filterByLCNameAndStatus[0].getPath(),
-                "/branches/testing/services/com/wso2/www/greg/store/2.3.5/StoreService",
+                "/branches/testing/services/com/wso2/www/greg/store/2.3.5/GenericArtifactStoreService",
                 "Different artifact path found");
+    }
+
+    private GenericArtifact getAddedGenericArtifact() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
+        GenericArtifact[] genericArtifacts = genericArtifactManager.findGenericArtifacts(new GenericArtifactFilter() {
+            @Override
+            public boolean matches(GenericArtifact artifact) throws GovernanceException {
+                return artifact.getQName().getLocalPart().equals("GenericArtifactStoreService");
+            }
+        });
+        return genericArtifacts[0];
     }
 
     @AfterClass(alwaysRun = true)
     public void cleanUp() throws RegistryException {
-        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
-        GenericArtifact[] genericArtifacts = genericArtifactManager.getAllGenericArtifacts();
-        for (GenericArtifact artifact : genericArtifacts) {
-            genericArtifactManager.removeGenericArtifact(artifact.getId());
-        }
+        genericArtifactManager.removeGenericArtifact(getAddedGenericArtifact().getId());
     }
 
 }

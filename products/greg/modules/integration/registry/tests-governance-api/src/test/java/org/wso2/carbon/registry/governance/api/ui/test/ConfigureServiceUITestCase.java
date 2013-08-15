@@ -1,4 +1,4 @@
-package org.wso2.carbon.registry.governance.api.test;
+package org.wso2.carbon.registry.governance.api.ui.test;
 
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -21,9 +21,11 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.list.stub.ListMetadataServiceRegistryExceptionException;
 import org.wso2.carbon.governance.services.stub.AddServicesServiceRegistryExceptionException;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
@@ -237,6 +239,7 @@ public class ConfigureServiceUITestCase {
                 new GenericServiceClient(environment.getGreg().getProductVariables().getBackendUrl(),
                                             environment.getGreg().getSessionCookie());
 
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         int servicesAfter = serviceManager.getAllServices().length;
         Assert.assertEquals(servicesAfter - servicesBefore, 3, "Number of services have changed after restart");
 

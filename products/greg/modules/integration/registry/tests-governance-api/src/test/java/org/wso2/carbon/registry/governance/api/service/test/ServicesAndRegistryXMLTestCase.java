@@ -1,4 +1,4 @@
-package org.wso2.carbon.registry.governance.api.test;
+package org.wso2.carbon.registry.governance.api.service.test;
 
 import org.apache.xerces.dom.DeferredElementImpl;
 import org.testng.Assert;
@@ -23,7 +23,9 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.resource.stub.beans.xsd.VersionPath;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
@@ -39,6 +41,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.rmi.RemoteException;
 
+@Test(dependsOnGroups = {"MetaDataServicesTestCase"})
 public class ServicesAndRegistryXMLTestCase {
     int userId = ProductConstant.SUPER_ADMIN_USER_ID;
     ServiceManager serviceManager;
@@ -99,9 +102,10 @@ public class ServicesAndRegistryXMLTestCase {
         Registry governance = new RegistryProviderUtil().getGovernanceRegistry(wsRegistry, userId);
         serviceManager = new ServiceManager(governance);
         service =
-                serviceManager.newService(new QName("http://bang.boom.com/mnm/beep", "MyService"));
+                serviceManager.newService(new QName("http://bang.boom.com/mnm/beep/test", "RegistryXMLService"));
         serviceManager.addService(service);
         String serviceId = service.getId();
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         service = serviceManager.getService(serviceId);
 
         Assert.assertEquals(service.getAttribute("overview_version"), "5.0.0-SNAPSHOT", "overview_version should be 5.0.0-SNAPSHOT");
@@ -116,7 +120,7 @@ public class ServicesAndRegistryXMLTestCase {
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     public void testDefaultLocationChange() throws GovernanceException {
         Assert.assertEquals(service.getPath(),
-                            "/trunk/services/test/com/boom/bang/mnm/beep/MyService");
+                            "/trunk/services/test/com/boom/bang/mnm/beep/test/RegistryXMLService");
     }
 
     /*
