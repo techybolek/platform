@@ -252,7 +252,10 @@ public class TomcatGenericWebappsDeployer {
 
             String bamEnable =   recievePersistedWebappMetaData(webappFile.getName(), WebappsConstants.ENABLE_BAM_STATISTICS);
             if(bamEnable == null || "".equals(bamEnable))  {
-                bamEnable="false";
+                bamEnable = context.findParameter(WebappsConstants.ENABLE_BAM_STATISTICS);
+                if(bamEnable == null || "".equals(bamEnable))  {
+                    bamEnable="false";
+                }
             }
             webapp.addParameter(WebappsConstants.ENABLE_BAM_STATISTICS, bamEnable);
 
