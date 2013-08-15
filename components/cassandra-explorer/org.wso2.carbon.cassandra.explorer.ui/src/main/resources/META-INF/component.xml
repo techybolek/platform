@@ -22,11 +22,11 @@
             <id>cassandra_explorer_menu</id>
             <i18n-key>cassandra.explorer</i18n-key>
             <i18n-bundle>org.wso2.carbon.cassandra.explorer.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>manage_menu</parent-menu>
+            <parent-menu>tools_menu</parent-menu>
             <link>#</link>
-            <region>region1</region>
+            <region>region5</region>
             <order>30</order>
-            <style-class>manage</style-class>
+            <style-class>tools</style-class>
             <icon>../cassandraexplorer/images/explorer.png</icon>
         </menu>
         <menu>
@@ -35,9 +35,9 @@
             <i18n-bundle>org.wso2.carbon.cassandra.explorer.ui.i18n.Resources</i18n-bundle>
             <parent-menu>cassandra_explorer_menu</parent-menu>
             <link>../cassandraexplorer/cassandra_connect.jsp</link>
-            <region>region1</region>
+            <region>region5</region>
             <order>35</order>
-            <style-class>manage</style-class>
+            <style-class>tools</style-class>
             <icon>../cassandraexplorer/images/connect.png</icon>
         </menu>
         <menu>
@@ -46,9 +46,9 @@
             <i18n-bundle>org.wso2.carbon.cassandra.explorer.ui.i18n.Resources</i18n-bundle>
             <parent-menu>cassandra_explorer_menu</parent-menu>
             <link>../cassandraexplorer/cassandra_keyspaces.jsp</link>
-            <region>region1</region>
+            <region>region5</region>
             <order>40</order>
-            <style-class>manage</style-class>
+            <style-class>tools</style-class>
             <icon>../cassandraexplorer/images/keyspaces_list.png</icon>
         </menu>
     </menus>
