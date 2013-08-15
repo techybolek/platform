@@ -223,5 +223,8 @@
     "apiMgrGuide":"WSO2 Practical Guide to API Management",
     "useCase1":"WSO2 Use Case: API Facade Pattern",
     "more":"More >>",
-    "throttlingTier":"Throttling Tier"
+    "throttlingTier":"Throttling Tier",
+	"sequence":"Sequence",
+    "inFlow":"In Flow",
+    "outFlow":"Out Flow"
 }

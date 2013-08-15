@@ -60,8 +60,13 @@ jagg.module("api", {
     },
     getExternalAPIStores:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").getExternalAPIStores.apply(this, arguments);
+    },
+	getCustomInSequences:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getCustomInSequences.apply(this, arguments);
+    },
+    getCustomOutSequences:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getCustomOutSequences.apply(this, arguments);
     }
- 
 
 });
 %>

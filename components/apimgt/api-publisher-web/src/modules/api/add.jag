@@ -132,4 +132,47 @@ var validateRoles = function(roles,username) {
     }
 };
 
+var getCustomInSequences = function () {
+    var sequence,sequences,list=[],log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+    	sequences = provider.getCustomInSequences();
+        if (log.isDebugEnabled()) {
+            log.debug("getCustomInSequences " +  " : " + sequences);
+        }
+     
+        return {
+            error:false,
+            sequences:sequences
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            sequences:null
+        };
+    }
+};
+
+var getCustomOutSequences = function () {
+    var sequence,sequences,list=[],log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+    	sequences = provider.getCustomOutSequences();
+        if (log.isDebugEnabled()) {
+            log.debug("getCustomOutSequences " +  " : " + sequences);
+        }
+     
+        return {
+            error:false,
+            sequences:sequences
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            sequences:null
+        };
+    }
+};
 %>

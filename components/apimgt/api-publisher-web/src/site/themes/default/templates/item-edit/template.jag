@@ -192,6 +192,31 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 </div>
             </div>
 
+
+            <div class="control-group">
+             <label class="control-label" for="sequence"><%=i18n.localize("sequence")%>:</label>
+             <div class="controls">
+             	<table class="table table-bordered table-striped" id="seqTable">
+             		<thead>
+             			<tr>
+             				<th><%=i18n.localize("inFlow")%></th>
+             				<th><%=i18n.localize("outFlow")%></th>
+             			</tr>
+             		</thead>
+             			<tr>
+             				<td>                				
+             					<select id="inSequence" class="selected" name="inSequence"  multiple="multiple">
+             					</select>                					
+             				</td>
+             				<td>                					
+             					<select id="outSequence" class="selected" name="outSequence"  multiple="multiple">
+             					</select>                					
+             				</td>
+             			</tr>
+             		</table>
+              </div>
+         </div>
+         
             <div class="control-group">
                 <label class="control-label" for="editWsdl"><%=i18n.localize("wsdl")%>:</label>
                 <div class="controls">

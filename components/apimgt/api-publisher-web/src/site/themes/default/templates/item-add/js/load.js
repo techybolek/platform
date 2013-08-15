@@ -26,6 +26,9 @@ function loadTiers(row) {
 
 
 $(document).ready(function() {
+	loadInSequences();
+	loadOutSequences();
+	
     var target = document.getElementById("tier");
 
     jagg.post("/site/blocks/item-add/ajax/add.jag", { action:"getTiers" },
@@ -198,4 +201,61 @@ function showUTProductionURL(){
         $('#credentials').hide();
     }
 
+}
+
+function loadInSequences() {
+	var inFlowtarget = document.getElementById("inSequence");
+	jagg.post("/site/blocks/item-add/ajax/add.jag", {
+		action : "getCustomInSequences"
+	},
+			function(result) {
+				if (!result.error) {
+					var arr = [];
+					for ( var j = 0; j < result.sequences.length; j++) {
+						arr.push(result.sequences[j]);
+					}
+					for(var i=0; i<arr.length; i++){
+						inFlowOption = new Option(result.sequences[i],result.sequences[i]);						
+						inFlowtarget.options[i] = inFlowOption;						
+
+						inFlowtarget.options[i].selected = 'selected';						
+						var inSeq = inFlowtarget.options[i].value;					
+					$('<input>').
+						attr('type', 'hidden').
+						attr('name', 'inSeq').
+						attr('id', 'inSeq').
+						attr('value', inSeq).
+						appendTo('#addAPIForm');					
+
+					}
+				}
+			}, "json");
+}
+
+function loadOutSequences() {	
+	var outFlowtarget = document.getElementById("outSequence");
+	jagg.post("/site/blocks/item-add/ajax/add.jag", {
+		action : "getCustomOutSequences"
+	},
+			function(result) {
+				if (!result.error) {
+					var arr = [];
+					for ( var j = 0; j < result.sequences.length; j++) {
+						arr.push(result.sequences[j]);
+					}
+					for(var i=0; i<arr.length; i++){						
+						outFlowOption = new Option(result.sequences[i],	result.sequences[i]);		
+						outFlowtarget.options[i] = outFlowOption;			
+						outFlowtarget.options[i].selected = 'selected';						
+						var outSeq = outFlowtarget.options[i].value;				
+					$('<input>').
+						attr('type', 'hidden').
+						attr('name', 'outSeq').
+						attr('id', 'outSeq').
+						attr('value', outSeq).
+						appendTo('#addAPIForm');
+
+					}
+				}
+			}, "json");
 }
