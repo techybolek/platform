@@ -13,9 +13,7 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 */
-
-
-package org.wso2.carbon.apimgt.impl.utils;
+package org.wso2.carbon.apimgt.impl.publishers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,17 +36,13 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * This class is to support create/update/publish APIs to external APIStores
- */
-public class APIPublisher {
+public class WSO2APIPublisher implements APIPublisher {
     private Log log = LogFactory.getLog(getClass());
 
     /**
@@ -58,7 +52,7 @@ public class APIPublisher {
      * @return   published/not
      */
 
-    public boolean publishToWSO2Store(API api,APIStore store) {
+    public boolean publishToStore(API api,APIStore store) {
         boolean published = false;
 
         if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {
@@ -70,10 +64,10 @@ public class APIPublisher {
         HttpContext httpContext = new BasicHttpContext();
         httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
         if(authenticateAPIM(store,httpContext)){  //First try to login to store
-        boolean added = addAPIToStore(api,store.getEndpoint(),httpContext);
-        if (added) {   //If API creation success,then try publishing the API
-            published = publishAPIToStore(api.getId(),store.getEndpoint(),httpContext);
-        }
+            boolean added = addAPIToStore(api,store.getEndpoint(),httpContext);
+            if (added) {   //If API creation success,then try publishing the API
+                published = publishAPIToStore(api.getId(),store.getEndpoint(),httpContext);
+            }
         }
         return published;
     }
@@ -89,7 +83,7 @@ public class APIPublisher {
             HttpClient httpclient = new DefaultHttpClient();
             String storeEndpoint=store.getEndpoint();
             if(!generateEndpoint(store.getEndpoint())){
-                storeEndpoint=storeEndpoint+APIConstants.APISTORE_LOGIN_URL;
+                storeEndpoint=storeEndpoint+ APIConstants.APISTORE_LOGIN_URL;
             }
             HttpPost httppost = new HttpPost(storeEndpoint);
             // Request parameters and other properties.
@@ -103,7 +97,7 @@ public class APIPublisher {
             HttpResponse response = httpclient.execute(httppost, httpContext);
             if (response.getStatusLine().getStatusCode() != 200) {
                 log.error(" Authentication with external APIStore failed: HTTP error code : " +
-                                           response.getStatusLine().getStatusCode());
+                          response.getStatusLine().getStatusCode());
                 return false;
             } else{
                 return true;
@@ -175,7 +169,24 @@ public class APIPublisher {
         params.add(new BasicNameValuePair("endpointType", String.valueOf(api.isEndpointSecured())));
         params.add(new BasicNameValuePair("epUsername", api.getEndpointUTUsername()));
         params.add(new BasicNameValuePair("epPassword", api.getEndpointUTPassword()));
-        params.add(new BasicNameValuePair("http_checked", api.getTransports()));
+        if(api.getTransports()==null){
+            params.add(new BasicNameValuePair("http_checked",null));
+            params.add(new BasicNameValuePair("https_checked",null));
+        }else{
+        String[] transports=api.getTransports().split(",");
+        if(transports.length==1){
+            if("https".equals(transports[0])){
+                params.add(new BasicNameValuePair("http_checked",null));
+                params.add(new BasicNameValuePair("https_checked",transports[0]));
+            }else{
+                params.add(new BasicNameValuePair("https_checked",null));
+                params.add(new BasicNameValuePair("http_checked",transports[0]));
+            }
+        }else{
+        params.add(new BasicNameValuePair("http_checked", "http"));
+        params.add(new BasicNameValuePair("https_checked", "https"));
+        }
+        }
         params.add(new BasicNameValuePair("resourceCount", "Hello!"));
         Iterator urlTemplate = api.getUriTemplates().iterator();
         int i=0;
@@ -195,7 +206,7 @@ public class APIPublisher {
             int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode== 200 ) {   //If API creation success,then try publishing the API
-               added=true;
+                added=true;
 
             }
         } catch (UnsupportedEncodingException e) {
@@ -222,11 +233,11 @@ public class APIPublisher {
         HttpContext httpContext = new BasicHttpContext();
         httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
         if(authenticateAPIM(store, httpContext)){
-        updateAPIStore(api, store.getEndpoint(), httpContext);
+            updateAPIStore(api, store.getEndpoint(), httpContext);
         }
 
     }
-    public boolean updateAPIStore(API api,String storeEndpoint,HttpContext httpContext) {
+    private boolean updateAPIStore(API api,String storeEndpoint,HttpContext httpContext) {
         boolean updated=false;
         HttpClient httpclient = new DefaultHttpClient();
         if(!generateEndpoint(storeEndpoint)){
@@ -282,7 +293,24 @@ public class APIPublisher {
         params.add(new BasicNameValuePair("endpointType", String.valueOf(api.isEndpointSecured())));
         params.add(new BasicNameValuePair("epUsername", api.getEndpointUTUsername()));
         params.add(new BasicNameValuePair("epPassword", api.getEndpointUTPassword()));
-        params.add(new BasicNameValuePair("http_checked", api.getTransports()));
+        if(api.getTransports()==null){
+            params.add(new BasicNameValuePair("http_checked",null));
+            params.add(new BasicNameValuePair("https_checked",null));
+        }else{
+            String[] transports=api.getTransports().split(",");
+            if(transports.length==1){
+                if("https".equals(transports[0])){
+                    params.add(new BasicNameValuePair("http_checked",null));
+                    params.add(new BasicNameValuePair("https_checked",transports[0]));
+                }else{
+                    params.add(new BasicNameValuePair("https_checked",null));
+                    params.add(new BasicNameValuePair("http_checked",transports[0]));
+                }
+            }else{
+                params.add(new BasicNameValuePair("http_checked", "http"));
+                params.add(new BasicNameValuePair("https_checked", "https"));
+            }
+        }
         params.add(new BasicNameValuePair("resourceCount", "Hello!"));
         Iterator urlTemplate = api.getUriTemplates().iterator();
         int i=0;
@@ -302,7 +330,7 @@ public class APIPublisher {
             int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode== 200 ) {   //If API creation success,then try publishing the API
-               updated=true;
+                updated=true;
 
             }
         } catch (UnsupportedEncodingException e) {
@@ -322,7 +350,7 @@ public class APIPublisher {
         boolean published=false;
         HttpClient httpclient = new DefaultHttpClient();
         if(!generateEndpoint(storeEndpoint)){
-        storeEndpoint=storeEndpoint+APIConstants.APISTORE_PUBLISH_URL;
+            storeEndpoint=storeEndpoint+APIConstants.APISTORE_PUBLISH_URL;
         }
         HttpPost httppost = new HttpPost(storeEndpoint);
 
@@ -343,7 +371,7 @@ public class APIPublisher {
             int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode== 200 ) {   //If API creation success,then try publishing the API
-               published=true;
+                published=true;
 
             }
         } catch (UnsupportedEncodingException e) {
@@ -362,10 +390,9 @@ public class APIPublisher {
     private boolean generateEndpoint(String inputEndpoint) {
         boolean isAbsoluteEndpoint=false;
         if(inputEndpoint.contains("/site/block/")) {
-        isAbsoluteEndpoint=true;
+            isAbsoluteEndpoint=true;
         }
         return isAbsoluteEndpoint;
     }
-
 
 }

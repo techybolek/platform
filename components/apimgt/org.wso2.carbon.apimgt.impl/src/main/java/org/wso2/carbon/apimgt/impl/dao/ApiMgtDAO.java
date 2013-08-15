@@ -4563,7 +4563,6 @@ public class ApiMgtDAO {
             if (apiId==-1) {
                 String msg = "Could not load API record for: " + apiIdentifier.getApiName();
                 log.error(msg);
-                throw new APIManagementException(msg);
             }
 
             Iterator it = apiStoreSet.iterator();
@@ -4735,7 +4734,6 @@ public class ApiMgtDAO {
             if (apiId == -1) {
                 String msg = "Could not load API record for: " + apiIdentifier.getApiName();
                 log.error(msg);
-                throw new APIManagementException(msg);
             }
             ps.setInt(1, apiId);
             rs = ps.executeQuery();

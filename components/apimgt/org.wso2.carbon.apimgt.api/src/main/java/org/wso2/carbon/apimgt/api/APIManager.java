@@ -246,4 +246,13 @@ public interface APIManager {
      */
     public Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException;
 
+    /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    public Set<Tier> getTiers() throws APIManagementException;
+
+
 }

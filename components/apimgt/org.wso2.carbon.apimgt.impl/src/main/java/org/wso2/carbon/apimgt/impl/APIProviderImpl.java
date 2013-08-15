@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
+import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.BasicTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.*;
@@ -292,22 +293,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Failed to get APISubscriptionCount for: " + identifier.getApiName(), e);
         }
         return count;
-    }
-
-    /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
-     *
-     * @return Set<Tier>
-     */
-    public Set<Tier> getTiers() throws APIManagementException {
-        Set<Tier> tiers = new TreeSet<Tier>(new Comparator<Tier>() {
-            public int compare(Tier o1, Tier o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        Map<String,Tier> tierMap = APIUtil.getTiers(tenantId);
-        tiers.addAll(tierMap.values());
-        return tiers;
     }
 
     public void addTier(Tier tier) throws APIManagementException {
@@ -1473,7 +1458,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<APIStore> publishedStores=new HashSet<APIStore>();
         for (APIStore store:apiStoreSet){
             if (APIConstants.WSO2_API_STORE_TYPE.equals(store.getType())) {
-                boolean published=new APIPublisher().publishToWSO2Store(api,store); //First trying to publish the API to external APIStore
+                boolean published=new WSO2APIPublisher().publishToStore(api,store); //First trying to publish the API to external APIStore
                 if(published){ //If published,then save to database.
                     publishedStores.add(store);
                 }
@@ -1544,7 +1529,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         for (APIStore store : apiStoreSet) {
             if (APIConstants.WSO2_API_STORE_TYPE.equals(store.getType())) {//Check external APIStore type is wso2 or not
-                new APIPublisher().updateWSO2Store(api, store);
+                new WSO2APIPublisher().updateWSO2Store(api, store);
             } else { //When the external APIStore is not a WSO2 APIStore
                 log.warn("The configured external APIStore type is currently not supported.Hence ignoring updating the API in - " + store.getDisplayName());
             }

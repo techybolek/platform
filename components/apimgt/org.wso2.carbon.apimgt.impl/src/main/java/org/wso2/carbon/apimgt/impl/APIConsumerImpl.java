@@ -754,22 +754,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPISet;
     }
 
-    /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
-     *
-     * @return Set<Tier>
-     */
-    public Set<Tier> getTiers() throws APIManagementException {
-        Set<Tier> tiers = new TreeSet<Tier>(new Comparator<Tier>() {
-            public int compare(Tier o1, Tier o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        Map<String, Tier> tierMap = APIUtil.getTiers();
-        tiers.addAll(tierMap.values());
-        return tiers;
-    }
-
     private boolean isAllowDisplayAPIsWithMultipleStatus() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
