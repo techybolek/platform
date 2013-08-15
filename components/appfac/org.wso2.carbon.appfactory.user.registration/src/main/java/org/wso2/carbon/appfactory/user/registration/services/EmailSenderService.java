@@ -35,6 +35,8 @@ import java.util.Map;
 public class EmailSenderService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(EmailSenderService.class);
     public static final String CONFIRMATION_EMAIL_CONFIG = "confirmation-email-config.xml";
+    public static final String ORG_REGISTRATION_CONFIRMATION_EMAIL_CONFIG =
+            "org-registration-confirmation-email-config.xml";
 
     public boolean sendActivationEmail(String userName, String firstName, String activationKey,
                                        String email)
@@ -51,6 +53,32 @@ public class EmailSenderService extends AbstractAdmin {
             emailVerifier.requestUserVerification(dataToStore,
                                                   loadEmailVerificationConfiguration(
                                                           EmailSenderService.CONFIRMATION_EMAIL_CONFIG));
+        } catch (Exception e) {
+            String msg = "Activation email sending is failed for  " + userName;
+            log.error(msg, e);
+            throw new UserRegistrationException(msg, e);
+        }
+        return true;
+
+    }
+
+    public boolean sendOrganizationRegistrationConfirmationEmail(String userName, String firstName,
+                                                                 String uuid, String email,
+                                                                 String organizationName)
+            throws UserRegistrationException {
+        EmailVerifcationSubscriber emailVerifier = Util.getEmailVerificationService();
+        Map<String, String> dataToStore = new HashMap<String, String>();
+        dataToStore.put("first-name",
+                        firstName);
+        dataToStore.put("email", email);
+        dataToStore.put("admin", userName);
+        dataToStore.put("tenantDomain", organizationName);
+        dataToStore.put("uuid", uuid);
+
+        try {
+            emailVerifier.requestUserVerification(dataToStore,
+                                                  loadEmailVerificationConfiguration(
+                                                          EmailSenderService.ORG_REGISTRATION_CONFIRMATION_EMAIL_CONFIG));
         } catch (Exception e) {
             String msg = "Activation email sending is failed for  " + userName;
             log.error(msg, e);

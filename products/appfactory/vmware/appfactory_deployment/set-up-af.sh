@@ -28,6 +28,7 @@ cat $resorce_dir/configs/appfactory-carbon.xml | sed -e "s@AF_HOST@$af_host_name
 cat $resorce_dir/configs/appfactory-axis2.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/axis2/axis2.xml
 cat $resorce_dir/configs/appfactory-confirmation-email-config.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/email/confirmation-email-config.xml
 cat $resorce_dir/configs/appfactory-invite-user-email-config.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/email/invite-user-email-config.xml
+cat $resorce_dir/configs/appfactory-invite-user-email-config.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/email/org-registration-confirmation-email-config.xml
 cat $resorce_dir/configs/appfactory-sso-idp-config.xml  | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/sso-idp-config.xml
 cp $resorce_dir/configs/saml2.federation.properties  $APPFACTORY_HOME/repository/conf/security
 cp $resorce_dir/configs/appfactory-humantask.xml $APPFACTORY_HOME/repository/conf/humantask.xml
