@@ -55,18 +55,5 @@
             <icon>../cassandramgt/images/add.gif</icon>
             <require-permission>/permission/admin/manage/add/keyspace</require-permission>
         </menu>
-        <menu>
-            <id>cassandra_cluster_mgt_menu</id>
-            <i18n-key>cassandra.cluster.mgt.menu.text</i18n-key>
-            <i18n-bundle>org.wso2.carbon.cassandra.mgt.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>monitor_menu</parent-menu>
-            <link>../cassandramgt/cassandra_cluster.jsp</link>
-            <region>region4</region>
-            <order>52</order>
-            <style-class>monitor</style-class>
-            <icon>../cassandramgt/images/cassandra-cluster.png</icon>
-            <require-permission>/permission/admin/monitor/cassandra</require-permission>
-            <require-super-tenant>true</require-super-tenant>            
-        </menu>
     </menus>
 </component>
