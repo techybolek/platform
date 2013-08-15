@@ -25,34 +25,14 @@ import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.Event;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
 public class BamDataPublisher {
 
 
     private String APP_CREATION_STREAM = "org.wso2.carbon.appfactory.appCreation" ;
     private String APP_CREATION_STREAM_VERSION = "1.0.0";
-    private LinkedBlockingQueue<Event> publishDataQueue;
-    private int MAX_QUEUE_SIZE = 10;
     private boolean ENABLE_DATA_PUBLISHING;
 
-    private static Log log = LogFactory.getLog(BamDataPublisher.class);
-
-
-    public BamDataPublisher(){
-        try {
-            AppFactoryConfiguration config = AppFactoryUtil.getAppfactoryConfiguration();
-            String EnableStatPublishing = config.getFirstProperty("BAM.EnableStatPublishing");
-            if (EnableStatPublishing != null && EnableStatPublishing.equals("true")) {
-                ENABLE_DATA_PUBLISHING = true;
-            }
-
-        } catch (AppFactoryException e) {
-            String errorMsg = "Unable to create Data publisher " + e.getMessage();
-            log.error(errorMsg, e);
-        }
-    }
-
+    private AsyncDataPublisher asyncDataPublisher;
 
     private String appCreationStream =  "{"+
             " 'name': '"+APP_CREATION_STREAM+"'," +
@@ -71,7 +51,28 @@ public class BamDataPublisher {
             "    ]"+
             "    }";
 
-    AsyncDataPublisher asyncDataPublisher=new AsyncDataPublisher("tcp://localhost:7614", "admin", "admin");
+    private static Log log = LogFactory.getLog(BamDataPublisher.class);
+
+
+    public BamDataPublisher(){
+        try {
+            AppFactoryConfiguration config = AppFactoryUtil.getAppfactoryConfiguration();
+            String EnableStatPublishing = config.getFirstProperty("BAM.EnableStatPublishing");
+            String bamServerURL = config.getFirstProperty("BAM.BAMServerURL");
+            String bamServerUserName = config.getFirstProperty("BAM.BAMUserName");
+            String bamServerPassword = config.getFirstProperty("BAM.BAMPassword");
+
+            if (EnableStatPublishing != null && EnableStatPublishing.equals("true")) {
+                ENABLE_DATA_PUBLISHING = true;
+            }
+
+            asyncDataPublisher = new AsyncDataPublisher(bamServerURL, bamServerUserName, bamServerPassword);
+
+        } catch (AppFactoryException e) {
+            String errorMsg = "Unable to create Data publisher " + e.getMessage();
+            log.error(errorMsg, e);
+        }
+    }
 
     public void PublishAppCreationEvent(String appName, String appKey, String appDescription,String appType,String repoType, double timestamp, String tenantId, String username){
 
@@ -102,18 +103,6 @@ public class BamDataPublisher {
     public void publishEvents(Event event,String Stream, String version) throws AgentException, InterruptedException {
         asyncDataPublisher.publish(Stream,version,event);
         asyncDataPublisher.stop();
-
-
-
-//     if(publishDataQueue.size()<MAX_QUEUE_SIZE){
-//
-//             publishDataQueue.put(event);
-//
-//     } else if(publishDataQueue.size() == MAX_QUEUE_SIZE){
-//        for(int i = 0; i<MAX_QUEUE_SIZE; i++){
-//           asyncDataPublisher.publish(publishDataQueue.poll());
-//        }
-//     }
 
     }
 }
