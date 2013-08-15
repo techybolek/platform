@@ -364,8 +364,8 @@ public class RegistryTopicManager implements TopicManager {
                             getBootstrapRealmConfiguration().getAdminRoleName();
             String[] allRoles = userRealm.getUserStoreManager().getRoleNames();
             // check if more roles available than admin role and anonymous role
-            if (allRoles != null && allRoles.length > 2) {
-                String[] rolesExceptAdminRole = new String[allRoles.length - 2];
+            if (allRoles != null && allRoles.length > 1) {
+                String[] rolesExceptAdminRole = new String[allRoles.length - 1];
                 int index = 0;
                 for (String role : allRoles) {
                     if (!(role.equals(adminRole) ||

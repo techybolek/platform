@@ -39,7 +39,7 @@ public class TopicManagerAdminService {
                 throw new EventAdminException("Topic with name : "+ topic + " already exists!");
             }
         } catch (EventBrokerException e) {
-            throw new EventAdminException(e.getMessage());
+            throw new EventAdminException(e.getMessage(), e);
         }
     }
 
@@ -49,7 +49,7 @@ public class TopicManagerAdminService {
         try {
             eventBroker.getTopicManager().updatePermissions(topic, topicRolePermissions);
         } catch (EventBrokerException e) {
-            throw new EventAdminException("Error: " + e.getMessage());
+            throw new EventAdminException("Error: " + e.getMessage(), e);
         }
     }
 
@@ -170,7 +170,7 @@ public class TopicManagerAdminService {
         try {
             return eventBroker.getTopicManager().removeTopic(topic);
         } catch (EventBrokerException e) {
-            throw new EventAdminException(e.getMessage());
+            throw new EventAdminException(e.getMessage(), e);
         }
     }
 }

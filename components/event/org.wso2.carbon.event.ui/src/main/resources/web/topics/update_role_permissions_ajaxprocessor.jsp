@@ -24,7 +24,11 @@
 
     String topic = (String) session.getAttribute("topic");
     String permissions = request.getParameter("permissions");
-    String[] permissionParams = permissions.split(",");
+    String[] permissionParams = new String[0];
+    if (permissions != null && !"".equals(permissions)) {
+         permissionParams = permissions.split(",");
+    }
+
     ArrayList<TopicRolePermission> topicRolePermissionArrayList = new ArrayList<TopicRolePermission>();
     for (int i = 0; i < permissionParams.length; i++) {
         String role = permissionParams[i];
