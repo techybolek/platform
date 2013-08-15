@@ -55,6 +55,11 @@ public class JmxTask extends AbstractTask {
 
     private static final Log log = LogFactory.getLog(JmxTask.class);
 
+    private static final String EVENT_TYPE = "externalEvent";
+    private static final String STR_NULL = "NULL";
+    private static final char FORWARD_SLASH = '/';
+    static final String STREAM_NAME_PREFIX = "jmx.agent.";
+
     //stores the data publishers of the tenants
     private static HashMap<String, DataPublisher> dataPublisherHashMap;
 
@@ -72,12 +77,12 @@ public class JmxTask extends AbstractTask {
 
         if (log.isDebugEnabled()) {
             log.info("Running the profile : " + this.getProperties().
-                    get(JmxConstant.JmxTaskConstant.JMX_PROFILE_NAME));
+                    get(JmxConstant.JMX_PROFILE_NAME));
         }
 
         Map<String, String> dataMap = this.getProperties();
         //get profile name
-        String profileName = dataMap.get(JmxConstant.JmxTaskConstant.JMX_PROFILE_NAME);
+        String profileName = dataMap.get(JmxConstant.JMX_PROFILE_NAME);
 
         //get the profile
         Profile profile;
@@ -97,7 +102,7 @@ public class JmxTask extends AbstractTask {
                 //create a Jmx JmxAgent to fetch Jmx data
                 JmxAgent jmxAgent = new JmxAgent(profile);
                 //Create a Stream name
-                String streamName = JmxConstant.JmxTaskConstant.STREAM_NAME_PREFIX + profile.getName();
+                String streamName = STREAM_NAME_PREFIX + profile.getName();
 
                 //Append ".0.0 for the sake of string matching! "
                 String version = Integer.toString(profile.getVersion()) + ".0.0";
@@ -195,11 +200,11 @@ public class JmxTask extends AbstractTask {
 
         String host = PublisherUtil.getHostAddress();
         if ((jmxAgent.getProfile() != null) && (jmxAgent.getProfile().getUrl() != null)) {
-            host = jmxAgent.getProfile().getUrl().substring(18, jmxAgent.getProfile().getUrl().indexOf(JmxConstant.JmxTaskConstant.FORWARD_SLASH, 19));
+            host = jmxAgent.getProfile().getUrl().substring(18, jmxAgent.getProfile().getUrl().indexOf(FORWARD_SLASH, 19));
         }
 
         Event jmxEvent = new Event(streamId, System.currentTimeMillis(),
-                                   new Object[]{JmxConstant.JmxDefaultMBeanConstant.EXTERNAL_EVENT, host}, null, arrayList.toArray());
+                                   new Object[]{EVENT_TYPE, host}, null, arrayList.toArray());
         dataPublisher.publish(jmxEvent);
 
         if (log.isDebugEnabled()) {
@@ -253,7 +258,7 @@ public class JmxTask extends AbstractTask {
 
     private void addMBeanDetail(ArrayList<Object> arrayList, Object attrValue) {
         if (attrValue == null) {
-            arrayList.add(JmxConstant.JmxDefaultMBeanConstant.NULL);
+            arrayList.add(STR_NULL);
         } else {
             if (attrValue instanceof String || attrValue instanceof Integer ||
                 attrValue instanceof Long || attrValue instanceof Double ||

@@ -59,7 +59,7 @@ public class JmxTaskServiceComponent {
         }
         BundleContext bundleContext = ctxt.getBundleContext();
         try {
-            getTaskService().registerTaskType(JmxConstant.JmxTaskConstant.JMX_SERVICE_TASK_TYPE);
+            getTaskService().registerTaskType(JmxConstant.JMX_SERVICE_TASK_TYPE);
         } catch (TaskException e) {
             log.error("JmxTaskServiceComponent activation error.", e);
         }

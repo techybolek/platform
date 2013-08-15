@@ -69,7 +69,7 @@ public class JmxAgent {
             JMXServiceURL jmxServiceURL = new JMXServiceURL(profile.getUrl());
 
             Map<String, String[]> map = new HashMap<String, String[]>(1);
-            map.put(JmxConstant.JmxConfigurationConstant.JMX_REMOTE_CREDENTIALS_STR,
+            map.put(JmxConstant.JMX_REMOTE_CREDENTIALS_STR,
                     new String[]{profile.getUserName(), profile.getPass()});
 
             jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, map);

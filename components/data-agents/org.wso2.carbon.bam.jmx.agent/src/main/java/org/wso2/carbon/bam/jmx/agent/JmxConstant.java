@@ -20,28 +20,9 @@
 package org.wso2.carbon.bam.jmx.agent;
 
 
-public interface JmxConstant {
+public class JmxConstant {
 
-    public static class JmxTaskConstant {
-
-        public static final String JMX_SERVICE_TASK_TYPE = "JMX_SERVICE_TASK";
-        public static final char FORWARD_SLASH = '/';
-        public static final String STREAM_NAME_PREFIX = "jmx.agent.";
-        public static String JMX_PROFILE_NAME = "JMX_PROFILE_NAME";
-    }
-
-    public static class JmxConfigurationConstant{
-
-        public static final String JMX_REMOTE_CREDENTIALS_STR = "jmx.remote.credentials";
-
-        public static final String REG_LOCATION =  "repository/components/org.wso2.carbon.publish.jmx.agent/";
-
-        public static final String CARBON_CONFIG_PORT_OFFSET_NODE = "Ports.Offset";
-    }
-
-    public static class JmxDefaultMBeanConstant {
-
-        public static final String NULL = "NULL";
-        public static final String EXTERNAL_EVENT = "externalEvent";
-    }
+    public static final String JMX_REMOTE_CREDENTIALS_STR = "jmx.remote.credentials";
+    public static final String JMX_SERVICE_TASK_TYPE = "JMX_SERVICE_TASK";
+    public static String JMX_PROFILE_NAME = "JMX_PROFILE_NAME";
 }

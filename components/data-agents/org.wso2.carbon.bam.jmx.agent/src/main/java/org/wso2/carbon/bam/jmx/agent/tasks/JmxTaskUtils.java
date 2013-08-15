@@ -35,7 +35,7 @@ public class JmxTaskUtils {
         triggerInfo.setCronExpression(profile.getCronExpression());
 
         Map<String, String> props = new HashMap<String, String>(1);
-        props.put(JmxConstant.JmxTaskConstant.JMX_PROFILE_NAME, profile.getName());
+        props.put(JmxConstant.JMX_PROFILE_NAME, profile.getName());
 
         return new TaskInfo(profile.getName(), JmxTask.class.getName(), props, triggerInfo);
     }

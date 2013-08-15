@@ -359,7 +359,7 @@ public class JmxAgentWebInterface extends AbstractAdmin {
         JMXServiceURL jmxServiceURL = new JMXServiceURL(url);
         Map<String, String[]> map = new HashMap<String, String[]>(1);
 
-        map.put(JmxConstant.JmxConfigurationConstant.JMX_REMOTE_CREDENTIALS_STR, new String[]{userName, password});
+        map.put(JmxConstant.JMX_REMOTE_CREDENTIALS_STR, new String[]{userName, password});
         return JMXConnectorFactory.connect(jmxServiceURL, map);
     }
 

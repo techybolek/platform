@@ -23,7 +23,6 @@ package org.wso2.carbon.bam.jmx.agent.profiles;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.bam.jmx.agent.JmxConstant;
 import org.wso2.carbon.bam.jmx.agent.exceptions.JmxProfileException;
 import org.wso2.carbon.bam.jmx.agent.exceptions.ProfileAlreadyExistsException;
 import org.wso2.carbon.bam.jmx.agent.exceptions.ProfileDoesNotExistException;
@@ -50,6 +49,9 @@ import java.io.IOException;
 public class ProfileManager extends RegistryAbstractAdmin {
 
     private static final Log log = LogFactory.getLog(ProfileManager.class);
+
+    static final String PROFILE_SAVE_REG_LOCATION =  "repository/components/org.wso2.carbon.publish.jmx.agent/";
+    
     private Registry registry;
 
     public ProfileManager() {
@@ -135,7 +137,7 @@ public class ProfileManager extends RegistryAbstractAdmin {
     public boolean addProfile(Profile profile)
             throws ProfileAlreadyExistsException, JmxProfileException {
 
-        String path = JmxConstant.JmxConfigurationConstant.REG_LOCATION + profile.getName();
+        String path = PROFILE_SAVE_REG_LOCATION + profile.getName();
         boolean resourceExist;
 
         try {
@@ -195,7 +197,7 @@ public class ProfileManager extends RegistryAbstractAdmin {
     public Profile getProfile(String profileName)
             throws ProfileDoesNotExistException, JmxProfileException {
 
-        String path = JmxConstant.JmxConfigurationConstant.REG_LOCATION + profileName;
+        String path = PROFILE_SAVE_REG_LOCATION + profileName;
 
         //if the profile does not exist
         try {
@@ -209,7 +211,7 @@ public class ProfileManager extends RegistryAbstractAdmin {
             throw new JmxProfileException("Unable to access to registry", e);
         }
 
-        ByteArrayInputStream byteArrayInputStream = null;
+        ByteArrayInputStream byteArrayInputStream;
         try {
             //if the profile exists
             Resource res = registry.get(path);
@@ -250,7 +252,7 @@ public class ProfileManager extends RegistryAbstractAdmin {
     public boolean updateProfile(Profile profile)
             throws ProfileDoesNotExistException, JmxProfileException {
 
-        String path = JmxConstant.JmxConfigurationConstant.REG_LOCATION + profile.getName();
+        String path = PROFILE_SAVE_REG_LOCATION + profile.getName();
 
         try {
             //check whether the profile already exists
@@ -273,7 +275,7 @@ public class ProfileManager extends RegistryAbstractAdmin {
             throw new JmxProfileException("Unable to encrypt profile", e);
         }
 
-        JAXBContext jaxbContext = null;
+        JAXBContext jaxbContext;
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
             jaxbContext = JAXBContext.newInstance(Profile.class);
@@ -310,7 +312,7 @@ public class ProfileManager extends RegistryAbstractAdmin {
     public boolean deleteProfile(String profileName)
             throws ProfileDoesNotExistException, JmxProfileException {
 
-        String path = JmxConstant.JmxConfigurationConstant.REG_LOCATION + profileName;
+        String path = PROFILE_SAVE_REG_LOCATION + profileName;
 
         try {
             //check whether the profile already exists
@@ -339,9 +341,9 @@ public class ProfileManager extends RegistryAbstractAdmin {
         Profile[] profiles = null;
 
         try {
-            if (registry.resourceExists(JmxConstant.JmxConfigurationConstant.REG_LOCATION)) {
+            if (registry.resourceExists(PROFILE_SAVE_REG_LOCATION)) {
 
-                Resource folder = registry.get(JmxConstant.JmxConfigurationConstant.REG_LOCATION);
+                Resource folder = registry.get(PROFILE_SAVE_REG_LOCATION);
                 String[] content = (String[]) folder.getContent();
 
                 //initiate the profiles array
@@ -558,6 +560,6 @@ public class ProfileManager extends RegistryAbstractAdmin {
     }
 
     public static int getPortOffset() {
-        return CarbonUtils.getPortFromServerConfig(JmxConstant.JmxConfigurationConstant.CARBON_CONFIG_PORT_OFFSET_NODE) + 1;
+        return CarbonUtils.getPortFromServerConfig("Ports.Offset") + 1;
     }
 }
