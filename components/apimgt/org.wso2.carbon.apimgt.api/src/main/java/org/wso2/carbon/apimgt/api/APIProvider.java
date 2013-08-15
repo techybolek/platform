@@ -310,6 +310,24 @@ public interface APIProvider extends APIManager {
      *          If failed to update subscription status
      */
     public Set getTierPermissions() throws APIManagementException;
+    
+    /**
+     * Get the list of Custom InSequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
+    
+    public List<String> getCustomInSequences()  throws APIManagementException;
+    
+    
+    /**
+     * Get the list of Custom OutSequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
+    
+    public List<String> getCustomOutSequences()  throws APIManagementException;
+
 
     /**
      * When enabled publishing to external APIStores support,publish the API to external APIStores

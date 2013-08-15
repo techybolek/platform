@@ -62,8 +62,28 @@ public class API {
     private String endpointUTPassword;
 
     private String transports;
+    private String inSequence;
+    private String outSequence;
+ 
+    /**
+     * The average rating provided by the API subscribers
+     */
+    private float rating;
 
-    public String getTransports() {
+    private boolean isLatest;
+
+    //TODO: missing - total user count, up time statistics,tier
+
+
+    public API(APIIdentifier id) {
+        this.id = id;
+    }
+
+    public APIIdentifier getId() {
+        return id;
+    }
+    
+	public String getTransports() {
         return transports;
     }
 
@@ -102,23 +122,7 @@ public class API {
     public void setBusinessOwnerEmail(String businessOwnerEmail) {
         this.businessOwnerEmail = businessOwnerEmail;
     }
-    /**
-     * The average rating provided by the API subscribers
-     */
-    private float rating;
-
-    private boolean isLatest;
-
-    //TODO: missing - total user count, up time statistics,tier
-
-
-    public API(APIIdentifier id) {
-        this.id = id;
-    }
-
-    public APIIdentifier getId() {
-        return id;
-    }
+   
 
     public String getDescription() {
         return description;
@@ -352,4 +356,28 @@ public class API {
  	public void setEndpointSecured(boolean endpointSecured) {
  		this.endpointSecured = endpointSecured;
  	}
+ 	
+    public String getInSequence() {
+ 		return inSequence;
+ 	}
+
+    /**
+     * 
+     * @param inSeq  insequence for the API
+     */
+ 	public void setInSequence(String inSeq) {
+ 		this.inSequence = inSeq;
+ 	}
+
+ 	 public String getOutSequence() {
+  		return inSequence;
+  	}
+
+     /**
+      * 
+      * @param outSeq outSequence for the API
+      */
+  	public void setOutSequence(String outSeq) {
+  		this.outSequence = outSeq;
+  	}
 }
