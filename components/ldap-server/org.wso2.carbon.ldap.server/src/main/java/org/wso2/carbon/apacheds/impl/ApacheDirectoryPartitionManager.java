@@ -646,39 +646,38 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
         try {
             DN adminDn = new DN(domainName);
 
-            ServerEntry adminEntry = directoryService.newEntry(adminDn);
+			ServerEntry adminEntry = directoryService.newEntry(adminDn);
 
-            List<String> objectClasses = adminInfo.getObjectClasses();
-            if (kdcEnabled) {
-                // Add Kerberose specific object classes
-                objectClasses = new ArrayList<String>(adminInfo.getObjectClasses());
-                objectClasses.add("krb5principal");
-                objectClasses.add("krb5kdcentry");
-            }
+			List<String> objectClasses = adminInfo.getObjectClasses();
 
-            addObjectClasses(adminEntry, objectClasses);
+			// Add Kerberose specific object classes
+			objectClasses = new ArrayList<String>(adminInfo.getObjectClasses());
+			objectClasses.add("krb5principal");
+			objectClasses.add("krb5kdcentry");
 
-            adminEntry.add(adminInfo.getUsernameAttribute(), adminInfo.getAdminUserName());
-            adminEntry.add("sn", adminInfo.getAdminLastName());
-            adminEntry.add("givenName", adminInfo.getAdminCommonName());
-            //setting admin full name as uid since 'cn' is a compulsory attribute when constructing a
-            // user entry.
-            adminEntry.add("cn", adminInfo.getAdminUserName());
-            
-            if (!"mail".equals(adminInfo.getUsernameAttribute())) {
-                adminEntry.add("mail", adminInfo.getAdminEmail());
-            }
+			addObjectClasses(adminEntry, objectClasses);
 
-            if (kdcEnabled) {
-                String principal = adminInfo.getAdminUserName() + "@" + realm;
-                adminEntry.put(KerberosAttribute.KRB5_PRINCIPAL_NAME_AT, principal);
-                adminEntry.put(KerberosAttribute.KRB5_KEY_VERSION_NUMBER_AT, "0");
-            }
+			adminEntry.add(adminInfo.getUsernameAttribute(),
+					adminInfo.getAdminUserName());
+			adminEntry.add("sn", adminInfo.getAdminLastName());
+			adminEntry.add("givenName", adminInfo.getAdminCommonName());
+			// setting admin full name as uid since 'cn' is a compulsory
+			// attribute when constructing a
+			// user entry.
+			adminEntry.add("cn", adminInfo.getAdminUserName());
 
-            addAdminPassword(adminEntry, adminInfo.getAdminPassword(),
-                             adminInfo.getPasswordAlgorithm(), kdcEnabled);
+			if (!"mail".equals(adminInfo.getUsernameAttribute())) {
+				adminEntry.add("mail", adminInfo.getAdminEmail());
+			}
 
-            directoryService.getAdminSession().add(adminEntry);
+			String principal = adminInfo.getAdminUserName() + "@" + realm;
+			adminEntry.put(KerberosAttribute.KRB5_PRINCIPAL_NAME_AT, principal);
+			adminEntry.put(KerberosAttribute.KRB5_KEY_VERSION_NUMBER_AT, "0");
+
+			addAdminPassword(adminEntry, adminInfo.getAdminPassword(),
+					adminInfo.getPasswordAlgorithm(), kdcEnabled);
+
+			directoryService.getAdminSession().add(adminEntry);
 
         } catch (LdapInvalidDnException e) {
             throwDirectoryServerException("Domain name invalid " + domainName, e);

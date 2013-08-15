@@ -174,7 +174,7 @@ public class ApacheKDCServer implements KDCServer {
                                            ConfigurationConstants.KDC_SERVER_COMMON_NAME,
                                            ConfigurationConstants.KDC_SERVER_UID,
                                            partitionInfo.getPartitionKdcPassword(),
-                                           getKDCPrincipleName(partitionInfo));
+                                           getKDCPrincipleName(partitionInfo));      
 
             ctx.createSubcontext("uid=" + ConfigurationConstants.KDC_SERVER_UID, attrs);
 

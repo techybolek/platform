@@ -86,6 +86,12 @@ public class DirectoryActivator implements BundleActivator {
 
                 if (!defaultPartitionAlreadyExisted) {
                     partitionManager.addPartition(defaultPartitionInfo);
+                    if (kdcServer==null) {
+                    	kdcServer =DirectoryServiceFactory.createKDCServer(DirectoryServiceFactory.LDAPServerType.
+                                APACHE_DIRECTORY_SERVICE);
+                    }
+                    kdcServer.kerberizePartition(configurationBuilder.
+                            getPartitionConfigurations(), this.ldapServer);
                 } else {
                     partitionManager.initializeExistingPartition(defaultPartitionInfo);
                 }
@@ -95,12 +101,6 @@ public class DirectoryActivator implements BundleActivator {
 
                     startKDC(configurationBuilder.getKdcConfigurations());
 
-                    // Add kerberos attributes only if the default partition is newly created.
-                    if (!defaultPartitionAlreadyExisted) {
-
-                        kdcServer.kerberizePartition(configurationBuilder.
-                                getPartitionConfigurations(), this.ldapServer);
-                    }
                 }
 
                 //create and register LDAPTenantManager implementation in OSGI.
@@ -210,8 +210,10 @@ public class DirectoryActivator implements BundleActivator {
     private void startKDC(KdcConfiguration kdcConfiguration)
             throws DirectoryServerException {
 
-        kdcServer =DirectoryServiceFactory.createKDCServer(DirectoryServiceFactory.LDAPServerType.
-                APACHE_DIRECTORY_SERVICE);
+		if (kdcServer == null) {
+			kdcServer = DirectoryServiceFactory
+					.createKDCServer(DirectoryServiceFactory.LDAPServerType.APACHE_DIRECTORY_SERVICE);
+		}
         kdcServer.init(kdcConfiguration, this.ldapServer);
 
         kdcServer.start();
