@@ -169,8 +169,12 @@
         <ThriftPort>7612</ThriftPort>
 
         <!--
-            Server URL of the remote BAM server used to collect statistics. Must
+            Server URL of the remote BAM/CEP server used to collect statistics. Must
             be specified in protocol://hostname:port/ format.
+ 
+	    An event can also be published to multiple Receiver Groups each having 1 or more receivers. Receiver
+	    Groups are delimited by curly braces whereas receivers are delimited by commas.
+	    Ex: {tcp://localhost:7612/,tcp://localhost:7613},{tcp://localhost:7712/,tcp://localhost:7713/}
         -->
         <BAMServerURL>tcp://localhost:7612/</BAMServerURL>
 
