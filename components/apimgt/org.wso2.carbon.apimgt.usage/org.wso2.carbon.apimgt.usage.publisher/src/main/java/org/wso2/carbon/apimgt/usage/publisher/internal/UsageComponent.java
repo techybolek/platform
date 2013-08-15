@@ -26,6 +26,10 @@ import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @scr.component name="api.mgt.usage.component" immediate="true"
@@ -40,6 +44,8 @@ public class UsageComponent {
     private static APIMGTConfigReaderService apimgtConfigReaderService;
     private static APIManagerConfigurationService amConfigService;
 
+    private static Map<String, LoadBalancingDataPublisher> dataPublisherMap;
+
     protected void activate(ComponentContext ctx) {
         try {
             apimgtConfigReaderService = new APIMGTConfigReaderService(
@@ -48,6 +54,9 @@ public class UsageComponent {
             bundleContext.registerService(APIMGTConfigReaderService.class.getName(),
                                           apimgtConfigReaderService, null);
             DataPublisherUtil.setEnabledMetering(Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("EnableMetering")));
+
+            dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
+
             log.debug("API Management Usage Publisher bundle is activated ");
         } catch (Throwable e) {
             log.error("API Management Usage Publisher bundle ", e);
@@ -71,4 +80,34 @@ public class UsageComponent {
     public static APIMGTConfigReaderService getApiMgtConfigReaderService() {
         return apimgtConfigReaderService;
     }
+
+    /**
+     * Fetch the data publisher which has been registered under the tenant domain.
+     * @param tenantDomain - The tenant domain under which the data publisher is registered
+     * @return - Instance of the LoadBalancingDataPublisher which was registered. Null if not registered.
+     */
+    public static LoadBalancingDataPublisher getDataPublisher(String tenantDomain){
+        if(dataPublisherMap.containsKey(tenantDomain)){
+            return dataPublisherMap.get(tenantDomain);
+        }
+        return null;
+    }
+
+    /**
+     * Adds a LoadBalancingDataPublisher to the data publisher map.
+     * @param tenantDomain - The tenant domain under which the data publisher will be registered.
+     * @param dataPublisher - Instance of the LoadBalancingDataPublisher
+     * @throws DataPublisherAlreadyExistsException - If a data publisher has already been registered under the
+     * tenant domain
+     */
+    public static void addDataPublisher(String tenantDomain, LoadBalancingDataPublisher dataPublisher)
+            throws DataPublisherAlreadyExistsException {
+        if(dataPublisherMap.containsKey(tenantDomain)){
+            throw new DataPublisherAlreadyExistsException("A DataPublisher has already been created for the tenant " +
+                    tenantDomain);
+        }
+
+        dataPublisherMap.put(tenantDomain, dataPublisher);
+    }
+
 }

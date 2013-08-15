@@ -19,12 +19,6 @@ package org.wso2.carbon.apimgt.usage.publisher.dto;
 
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
-import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
-import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
 
 public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
 
@@ -46,50 +40,38 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
         setApplicationId(responsePublisherDTO.getApplicationId());
     }
 
-    public static String addStreamId(DataPublisher dataPublisher) throws AgentException,
-                                                                         MalformedStreamDefinitionException,
-                                                                         StreamDefinitionException,
-                                                                         DifferentStreamDefinitionAlreadyDefinedException,
-                                                                         NoStreamDefinitionExistException {
+    public static String getStreamDefinition() {
 
-        try {
-            dataPublisher.findStream(APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_NAME,
-                                     APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_VERSION);
+        String streamDefinition = "{" +
+                "  'name':'" + APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_NAME + "'," +
+                "  'version':'" + APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_VERSION + "'," +
+                "  'nickName': 'API Manager Reponse Data'," +
+                "  'description': 'Response Data'," +
+                "  'metaData':[" +
+                "          {'name':'clientType','type':'STRING'}" +
+                "  ]," +
+                "  'payloadData':[" +
+                "          {'name':'consumerKey','type':'STRING'}," +
+                "          {'name':'context','type':'STRING'}," +
+                "          {'name':'api_version','type':'STRING'}," +
+                "          {'name':'api','type':'STRING'}," +
+                "          {'name':'resource','type':'STRING'}," +
+                "          {'name':'method','type':'STRING'}," +
+                "          {'name':'version','type':'STRING'}," +
+                "          {'name':'response','type':'INT'}," +
+                "          {'name':'responseTime','type':'LONG'}," +
+                "          {'name':'serviceTime','type':'LONG'}," +
+                "          {'name':'userId','type':'STRING'}," +
+                "          {'name':'tenantDomain','type':'STRING'}," +
+                "          {'name':'hostName','type':'STRING'}," +
+                "          {'name':'apiPublisher','type':'STRING'}," +
+                "          {'name':'applicationName','type':'STRING'}," +
+                "          {'name':'applicationId','type':'STRING'}" +
+                "  ]" +
 
-        } catch (NoStreamDefinitionExistException e) {
-            dataPublisher.defineStream("{" +
-                                       "  'name':'" + APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_NAME + "'," +
-                                       "  'version':'" + APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_VERSION + "'," +
-                                       "  'nickName': 'API Manager Reponse Data'," +
-                                       "  'description': 'Response Data'," +
-                                       "  'metaData':[" +
-                                       "          {'name':'clientType','type':'STRING'}" +
-                                       "  ]," +
-                                       "  'payloadData':[" +
-                                       "          {'name':'consumerKey','type':'STRING'}," +
-                                       "          {'name':'context','type':'STRING'}," +
-                                       "          {'name':'api_version','type':'STRING'}," +
-                                       "          {'name':'api','type':'STRING'}," +
-                                       "          {'name':'resource','type':'STRING'}," +
-                                       "          {'name':'method','type':'STRING'}," +
-                                       "          {'name':'version','type':'STRING'}," +
-                                       "          {'name':'response','type':'INT'}," +
-                                       "          {'name':'responseTime','type':'LONG'}," +
-                                       "          {'name':'serviceTime','type':'LONG'}," +
-                                       "          {'name':'userId','type':'STRING'}," +
-                                       "          {'name':'tenantDomain','type':'STRING'}," +
-                                       "          {'name':'hostName','type':'STRING'}," +
-                                       "          {'name':'apiPublisher','type':'STRING'}," +
-                                       "          {'name':'applicationName','type':'STRING'}," +
-                                       "          {'name':'applicationId','type':'STRING'}" +
-                                       "  ]" +
+                "}";
 
-                                       "}");
-            System.out.println("adding response stream");
-
-                    }
-        return dataPublisher.findStream(APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_NAME,
-                    APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_VERSION);
+        return streamDefinition;
     }
 
     public Object createPayload(){

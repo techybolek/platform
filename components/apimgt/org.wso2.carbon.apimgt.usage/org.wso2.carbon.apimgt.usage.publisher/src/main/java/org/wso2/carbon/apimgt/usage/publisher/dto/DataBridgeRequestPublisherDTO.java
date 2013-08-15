@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
+import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
 import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
@@ -45,46 +46,35 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setApplicationId(requestPublisherDTO.getApplicationId());
     }
 
-    public static String addStreamId(DataPublisher dataPublisher) throws AgentException,
-                                                                         MalformedStreamDefinitionException,
-                                                                         StreamDefinitionException,
-                                                                         DifferentStreamDefinitionAlreadyDefinedException,
-                                                                         NoStreamDefinitionExistException {
-        try {
-            dataPublisher.findStream(APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_NAME,
-                                     APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_VERSION);
+    public static String getStreamDefinition() {
+        String streamDefinition = "{" +
+                "  'name':'" + APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_NAME + "'," +
+                "  'version':'" + APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_VERSION + "'," +
+                "  'nickName': 'API Manager Request Data'," +
+                "  'description': 'Request Data'," +
+                "  'metaData':[" +
+                "          {'name':'clientType','type':'STRING'}" +
+                "  ]," +
+                "  'payloadData':[" +
+                "          {'name':'consumerKey','type':'STRING'}," +
+                "          {'name':'context','type':'STRING'}," +
+                "          {'name':'api_version','type':'STRING'}," +
+                "          {'name':'api','type':'STRING'}," +
+                "          {'name':'resource','type':'STRING'}," +
+                "          {'name':'method','type':'STRING'}," +
+                "          {'name':'version','type':'STRING'}," +
+                "          {'name':'request','type':'INT'}," +
+                "          {'name':'requestTime','type':'LONG'}," +
+                "          {'name':'userId','type':'STRING'}," +
+                "          {'name':'tenantDomain','type':'STRING'}," +
+                "          {'name':'hostName','type':'STRING'}," +
+                "          {'name':'apiPublisher','type':'STRING'}," +
+                "          {'name':'applicationName','type':'STRING'}," +
+                "          {'name':'applicationId','type':'STRING'}" +
+                "  ]" +
+                "}";
 
-        } catch (NoStreamDefinitionExistException e) {
-            dataPublisher.defineStream("{" +
-                                       "  'name':'" + APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_NAME + "'," +
-                                       "  'version':'" + APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_VERSION + "'," +
-                                       "  'nickName': 'API Manager Request Data'," +
-                                       "  'description': 'Request Data'," +
-                                       "  'metaData':[" +
-                                       "          {'name':'clientType','type':'STRING'}" +
-                                       "  ]," +
-                                       "  'payloadData':[" +
-                                       "          {'name':'consumerKey','type':'STRING'}," +
-                                       "          {'name':'context','type':'STRING'}," +
-                                       "          {'name':'api_version','type':'STRING'}," +
-                                       "          {'name':'api','type':'STRING'}," +
-                                       "          {'name':'resource','type':'STRING'}," +
-                                       "          {'name':'method','type':'STRING'}," +
-                                       "          {'name':'version','type':'STRING'}," +
-                                       "          {'name':'request','type':'INT'}," +
-                                       "          {'name':'requestTime','type':'LONG'}," +
-                                       "          {'name':'userId','type':'STRING'}," +
-                                       "          {'name':'tenantDomain','type':'STRING'}," +
-                                       "          {'name':'hostName','type':'STRING'}," +
-                                       "          {'name':'apiPublisher','type':'STRING'}," +
-                                       "          {'name':'applicationName','type':'STRING'}," +
-                                       "          {'name':'applicationId','type':'STRING'}" +
-                                       "  ]" +
-                                       "}");
-        }
-
-        return dataPublisher.findStream(APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_NAME,
-                                                             APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_VERSION);
+        return streamDefinition;
     }
 
     public Object createPayload(){
