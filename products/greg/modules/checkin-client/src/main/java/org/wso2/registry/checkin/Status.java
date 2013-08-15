@@ -36,6 +36,12 @@ public class Status {
     private void printStatusRecursively(String path) throws SynchronizationException {
         File file = new File(path);
         OMElement metaElement = Utils.getMetaOMElement(path);
+
+        if (metaElement == null) {
+            System.out.println("? "+path);
+            return;
+        }
+
         String status = metaElement.getAttributeValue(new QName("status"));
         if(status != null) {
             if(status.equals("added")){
