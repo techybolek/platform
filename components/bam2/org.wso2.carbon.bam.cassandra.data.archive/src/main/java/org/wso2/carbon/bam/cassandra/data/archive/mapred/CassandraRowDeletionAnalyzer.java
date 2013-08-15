@@ -17,7 +17,7 @@ public class CassandraRowDeletionAnalyzer extends AbstractHiveAnalyzer {
     private static final Log log = LogFactory.getLog(CassandraRowDeletionAnalyzer.class);
 
     @Override
-    public void execute(Map<String, String> stringStringMap) {
+    public void execute() {
 
         CassandraMapReduceRowDeletion mapReduceRowDeletion = new CassandraMapReduceRowDeletion();
         HiveConf hiveConf = HiveContext.getCurrentContext().getConf();
