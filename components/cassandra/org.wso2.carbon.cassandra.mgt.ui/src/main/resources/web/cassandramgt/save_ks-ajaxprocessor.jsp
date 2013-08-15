@@ -28,7 +28,7 @@
         if (ksNames != null && ksNames.length > 0) {
 //            ksTableDisplay = "";
                 for (String  ks : ksNames) {
-                    if(name.equals(ks)){
+                    if(name.equalsIgnoreCase(ks)){
                       backendStatus.put("isExist","yes");
                     }
                 }
