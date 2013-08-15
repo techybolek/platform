@@ -22,7 +22,7 @@ jagg.block("menu/primary", {
                 if(tenant!=null) {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
 
         var mod = jagg.module("manager");
-        var isTenantMode = mod.isTenantMode().isTenantMode;
+        var tenantDomains = mod.getActiveTenantDomains().tenantDomains;
 
        links.push({
             "title":i18n.localize("apis"),
@@ -65,7 +65,7 @@ jagg.block("menu/primary", {
 
         return {
             "links":links,
-            "isTenantMode":isTenantMode
+            "tenantDomains":tenantDomains
         };
     },
 

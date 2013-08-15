@@ -2178,12 +2178,24 @@ public class APIStoreHostObject extends ScriptableObject {
         return OAuthServerConfiguration.getInstance().getDefaultApplicationAccessTokenValidityPeriodInSeconds();
     }
 
-    public static boolean jsFunction_isTenantMode(Context cx, Scriptable thisObj,
-                                                  Object[] args, Function funObj)
+    public static NativeArray jsFunction_getActiveTenantDomains(Context cx, Scriptable thisObj,
+                                                                Object[] args, Function funObj)
             throws APIManagementException {
 
         try {
-            return APIUtil.isTenantMode();
+            Set<String> tenantDomains = APIUtil.getActiveTenantDomains();
+            NativeArray domains = null;
+            int i = 0;
+            if (tenantDomains == null || tenantDomains.size()==0) {
+            return domains;
+            } else {
+                domains=new NativeArray(tenantDomains.size());
+                for (String tenantDomain : tenantDomains) {
+                    domains.put(i, domains, tenantDomain);
+                    i++;
+                }
+            }
+            return domains;
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new APIManagementException("Error while checking the APIStore is running in tenant mode or not.", e);
         }

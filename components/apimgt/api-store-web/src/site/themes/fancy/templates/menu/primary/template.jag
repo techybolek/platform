@@ -27,7 +27,7 @@
                           <div class="navbar-inner">
                               <%
                               var tenantStore=request.getQueryString();
-                              if(!outputs.isTenantMode ||  (tenantStore!=null && tenantStore.indexOf("tenant")==0 )){%>
+                              if(outputs.tenantDomains==null ||  (tenantStore!=null && tenantStore.indexOf("tenant")==0 )){%>
                               <ul class="nav orderFix">
                                   <%
                                   var i, link, links = outputs.links, length = links.length;

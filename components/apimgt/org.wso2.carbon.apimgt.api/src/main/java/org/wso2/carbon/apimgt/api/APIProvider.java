@@ -321,22 +321,13 @@ public interface APIProvider extends APIManager {
     public void publishToExternalAPIStores(API api,Set<APIStore> apiStoreSet) throws APIManagementException;
 
     /**
-     * When enabled publishing to external APIStores support,updating the API existing in external APIStores
+     * Update the API to external APIStores and database
      * @param api The API which need to published
      * @param apiStoreSet The APIStores set to which need to publish API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to update subscription status
      */
-    public void updateAPIInExternalAPIStores(API api,Set<APIStore> apiStoreSet) throws APIManagementException;
-
-    /**
-     * When enabled publishing to external APIStores support,update external apistores data in db
-     * @param apiId The API Identifier which need to update in db
-     * @param apiStoreSet The APIStores set which need to update in db
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     *          If failed to update subscription status
-     */
-    public void updateExternalAPIStoresDetails(APIIdentifier apiId,Set<APIStore> apiStoreSet) throws APIManagementException;
+    public void updateAPIsInExternalAPIStores(API api,Set<APIStore> apiStoreSet) throws APIManagementException;
 
     /**
      * When enabled publishing to external APIStores support,get all the external apistore details which are

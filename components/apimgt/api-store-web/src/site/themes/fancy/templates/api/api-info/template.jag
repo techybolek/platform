@@ -155,7 +155,7 @@ if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
                         var tierKey=tierAttrs[k].split("::")[0];
                         var tierVal=tierAttrs[k].split("::")[1];
                         %>
-                        <span class="help-block" id="tier-attr<%=k%>"><b><%=tierKey%> : <%=tierVal%></b></span>
+                        <span class="help-block" class="tierAttrs" id="tier-attr<%=k%>"><%=tierKey%> : <%=tierVal%></span>
                         <%}}%>
 
                         <div class="simple-space-maker"><button onclick="triggerSubscribe()" id="subscribe-button" class="btn btn-primary <% if(!user) { %>need-login<% } %>"><%=i18n.localize("subscribe")%></button></div>

@@ -95,9 +95,11 @@ public class APIDescriptionGenUtil {
                 for (Iterator childElements = attributes.getChildElements(); childElements
                         .hasNext(); ) {
                     OMElement element = (OMElement) childElements.next();
-                    String localName = element.getLocalName();
-                    String value = element.getText();
-                    attributesMap.put(localName, value);
+                    String displayName=element.getAttributeValue(new QName(APIConstants.THROTTLE_ATTRIBUTE_DISPLAY_NAME));
+                    String localName=element.getLocalName();
+                    String attrName = (displayName!=null?displayName:localName); //If displayName not defined,use the attribute name
+                    String attrValue = element.getText();
+                    attributesMap.put(attrName, attrValue);
                 }
 
 

@@ -1469,14 +1469,59 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
     /**
-     * When enabled publishing to external APIStores support,updating the API existing in external APIStores
+     * Update the API to external APIStores and database
      * @param api The API which need to published
      * @param apiStoreSet The APIStores set to which need to publish API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to update subscription status
      */
     @Override
-    public void updateAPIInExternalAPIStores(API api, Set<APIStore> apiStoreSet)
+    public void updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet)
+            throws APIManagementException {
+
+        Set<APIStore> publishedStores=getPublishedExternalAPIStores(api.getId());
+        Set<APIStore> notPublishedAPIStores = new HashSet<APIStore>();
+        Set<APIStore> modifiedPublishedApiStores = new HashSet<APIStore>();
+        Set<APIStore> updateApiStores = new HashSet<APIStore>();
+
+        for (APIStore apiStore: apiStoreSet) {
+            boolean publishedToStore=false;
+            for (APIStore store : publishedStores) {  //If selected external store in edit page is already saved in db
+                if (store.getName().equals(apiStore.getName())) { //Check if there's a modification happened in config file external store definition
+                    if (!store.getEndpoint().equals(apiStore.getEndpoint()) || !store.getType().equals((apiStore.getType()))||!store.getDisplayName().equals(apiStore.getDisplayName())) {
+                        //Include the store definition to update the db stored APIStore set
+                        modifiedPublishedApiStores.add(store);
+                    }
+                    publishedToStore=true; //Already the API has published to external APIStore
+
+                }
+                //In this case,the API is already added to external APIStore,thus we don't need to publish it again.We need to update the API in external Store.
+                //Include to update API in external APIStore
+                updateApiStores.add(store);
+            }
+            if (!publishedToStore) {  //If the API has not yet published to selected external APIStore
+                notPublishedAPIStores.add(apiStore);
+            }
+        }
+        //Publish API to external APIStore which are not yet published
+        publishToExternalAPIStores(api, notPublishedAPIStores);
+        //Update the APIs which are already exist in the external APIStore
+        updateAPIInExternalAPIStores(api,updateApiStores);
+        updateExternalAPIStoresDetails(api.getId(),modifiedPublishedApiStores); //Update database saved published APIStore details,if there are any
+        //modifications in api-manager.xml
+    }
+
+
+
+    /**
+     * When enabled publishing to external APIStores support,updating the API existing in external APIStores
+     * @param api The API which need to published
+     * @param apiStoreSet The APIStores set to which need to publish API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+
+    private void updateAPIInExternalAPIStores(API api, Set<APIStore> apiStoreSet)
             throws APIManagementException {
 
         for (APIStore store : apiStoreSet) {
@@ -1496,8 +1541,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to update subscription status
      */
-    @Override
-    public void updateExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
+
+    private void updateExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
             throws APIManagementException {
         apiMgtDAO.updateExternalAPIStoresDetails(apiId, apiStoreSet);
 

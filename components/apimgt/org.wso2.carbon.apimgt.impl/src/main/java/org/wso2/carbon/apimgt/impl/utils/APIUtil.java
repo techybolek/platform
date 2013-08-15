@@ -739,6 +739,10 @@ public final class APIUtil {
                     } catch (APIManagementException ex) {
                         desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
                     }
+                    Map<String,Object> tierAttributes=APIDescriptionGenUtil.getTierAttributes(policy);
+                    if(tierAttributes!=null && tierAttributes.size()!=0){
+                        tier.setTierAttributes(APIDescriptionGenUtil.getTierAttributes(policy));
+                    }
                     tier.setDescription(desc);
                     if (!tier.getName().equalsIgnoreCase("Unauthenticated")) {
                         tiers.put(tier.getName(), tier);
@@ -1510,8 +1514,24 @@ public final class APIUtil {
         }
     }
 
-    public static boolean isTenantMode() throws UserStoreException {
-        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants().length!=0;
+
+    /**
+     * Get active tenant domains
+     * @return
+     * @throws UserStoreException
+     */
+    public static Set<String> getActiveTenantDomains() throws UserStoreException {
+        Set<String> tenantDomains = null;
+        Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
+        if (tenants == null || tenants.length == 0) {
+            return tenantDomains;
+        } else {
+            tenantDomains = new HashSet<String>();
+            for (Tenant tenant : tenants) {
+                tenantDomains.add(tenant.getDomain());
+            }
+            return tenantDomains;
+        }
 
     }
 

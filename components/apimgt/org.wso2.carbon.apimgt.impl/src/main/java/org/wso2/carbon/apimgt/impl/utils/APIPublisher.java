@@ -89,7 +89,7 @@ public class APIPublisher {
             HttpClient httpclient = new DefaultHttpClient();
             String storeEndpoint=store.getEndpoint();
             if(!generateEndpoint(store.getEndpoint())){
-                storeEndpoint=storeEndpoint+"/site/blocks/user/login/ajax/login.jag";
+                storeEndpoint=storeEndpoint+APIConstants.APISTORE_LOGIN_URL;
             }
             HttpPost httppost = new HttpPost(storeEndpoint);
             // Request parameters and other properties.
@@ -123,7 +123,7 @@ public class APIPublisher {
         boolean added=false;
         HttpClient httpclient = new DefaultHttpClient();
         if(!generateEndpoint(storeEndpoint)){
-            storeEndpoint=storeEndpoint+"/site/blocks/item-add/ajax/add.jag";
+            storeEndpoint=storeEndpoint+APIConstants.APISTORE_ADD_URL;
         }
         HttpPost httppost = new HttpPost(storeEndpoint);
 
@@ -230,7 +230,7 @@ public class APIPublisher {
         boolean updated=false;
         HttpClient httpclient = new DefaultHttpClient();
         if(!generateEndpoint(storeEndpoint)){
-            storeEndpoint=storeEndpoint+"/site/blocks/item-add/ajax/add.jag";
+            storeEndpoint=storeEndpoint+APIConstants.APISTORE_ADD_URL;
         }
         HttpPost httppost = new HttpPost(storeEndpoint);
 
@@ -322,7 +322,7 @@ public class APIPublisher {
         boolean published=false;
         HttpClient httpclient = new DefaultHttpClient();
         if(!generateEndpoint(storeEndpoint)){
-        storeEndpoint=storeEndpoint+"/site/blocks/life-cycles/ajax/life-cycles.jag";
+        storeEndpoint=storeEndpoint+APIConstants.APISTORE_PUBLISH_URL;
         }
         HttpPost httppost = new HttpPost(storeEndpoint);
 

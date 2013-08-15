@@ -1,4 +1,5 @@
-<% jagg.template("api/tenant-stores-listing", function(inputs, outputs, jagg) { %>
+<% jagg.template("api/tenant-stores-listing", function(inputs, outputs, jagg) {
+ %>
 <div class="thumbnail-custom">
 
     <ul>

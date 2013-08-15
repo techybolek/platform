@@ -80,7 +80,9 @@ $(document).ready(function () {
                         var tierAttrName=tierAttr[k].split("::")[0];
                         var tierAttrValue=tierAttr[k].split("::")[1];
                         if(tierAttrName!='' && tierAttrValue!=''){
-                        $('#tierDesc').append("<br/><span><b>"+tierAttrName+"<b>  :    "+tierAttrValue+"</span>");
+                        $('#tierDesc').val('');
+                        $('.tierAttrs').val('');
+                        $('#tierDesc').append("tierAttrName  :    "+tierAttrValue+"<br\/>");
                         }
                     }
 

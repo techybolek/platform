@@ -642,45 +642,19 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             apiProvider.updateAPI(api);
 
-            //Getting selected external API stores from UI and publish API to thhem.
+            //Getting selected external API stores from UI and publish API to them.
             NativeArray externalAPIStores = (NativeArray) apiData.get("externalAPIStores", apiData);
-            Set<APIStore> publishedStores=apiProvider.getPublishedExternalAPIStores(apiId);
-            //If no external APIStore selected from UI
-            if (externalAPIStores!=null && externalAPIStores.getLength() != 0) {
-                Set<APIStore> apiStores = new HashSet<APIStore>();
-                Set<APIStore> modifiedPublishedApiStores = new HashSet<APIStore>();
-                Set<APIStore> updateApiStores = new HashSet<APIStore>();
-
-                for (int k = 0; k < externalAPIStores.getLength(); k++) {
-                    String apiStoreName = externalAPIStores.get(k, externalAPIStores).toString();
-                    APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                            getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                    APIStore apiStore = config.getExternalAPIStore(apiStoreName); //Get full details of Store
-                    boolean updateAPI=false;
-                    boolean updateDB=false;
-                    boolean publishedToStore=false;
-                    for (APIStore store : publishedStores) {  //If selected external store in edit page is already saved in db
-                        if (store.getName().equals(apiStore.getName())) { //Check if there's a modification happened in config file external store definition
-                            if (!store.getEndpoint().equals(apiStore.getEndpoint()) || !store.getType().equals((apiStore.getType()))||!store.getDisplayName().equals(apiStore.getDisplayName())) {
-                                //Include the store definition to update the db stored APIStore set
-                                modifiedPublishedApiStores.add(store);
-                                updateDB = true;
-                            }
-                            publishedToStore=true; //Already the API has published to external APIStore
-
-                        }
-                        //In this case,the API is already added to external APIStore,thus we don't need to publish it again.We need to update the API in external Store.
-                        //Include to update API in external APIStore
-                        updateApiStores.add(store);
-                    }
-                    if (!publishedToStore) {  //If the API has not yet published to selected external APIStore
-                        apiStores.add(apiStore);
-                    }
+            //Check if no external APIStore selected from UI
+            if (externalAPIStores != null && externalAPIStores.getLength() != 0) {
+                Set<APIStore> inputStores = new HashSet<APIStore>();
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                for (Object store : externalAPIStores) {
+                    APIStore apiStore = config.getExternalAPIStore((String) store); //Get full details of Store
+                    inputStores.add(apiStore);
                 }
-                apiProvider.publishToExternalAPIStores(api, apiStores); //Publish API to external APIStore
-                apiProvider.updateAPIInExternalAPIStores(api,updateApiStores); //Update the API already exists in the external APIStore
-                apiProvider.updateExternalAPIStoresDetails(api.getId(),modifiedPublishedApiStores); //Update database saved published APIStore details,if there are any
-                                                                                                    //modifications in api-manager.xml
+            apiProvider.updateAPIsInExternalAPIStores(api,inputStores);
+
             }
             success = true;
         } catch (Exception e) {

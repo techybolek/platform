@@ -286,6 +286,7 @@ public final class APIConstants {
                                                                      + ".org/products/wso2commons/throttle", "UnitTime");
     public static final QName THROTTLE_ATTRIBUTES_ELEMENT = new QName("http://www.wso2"
                                                                       + ".org/products/wso2commons/throttle", "Attributes");
+    public static final String THROTTLE_ATTRIBUTE_DISPLAY_NAME= "displayName";
 
     public static final String TIER_DESC_NOT_AVAILABLE = "Tire Description is not available";
     
@@ -344,6 +345,9 @@ public final class APIConstants {
     public static final String API_LOGIN_ACTION="login";
     public static final String APISTORE_LOGIN_USERNAME="username";
     public static final String APISTORE_LOGIN_PASSWORD="password";
+    public static final String APISTORE_LOGIN_URL="/site/blocks/user/login/ajax/login.jag";
+    public static final String APISTORE_PUBLISH_URL="/site/blocks/user/login/ajax/login.jag";
+    public static final String APISTORE_ADD_URL="/site/blocks/item-add/ajax/add.jag";
 
     public static final String SWAGGER_VERSION = "1.1";
     
