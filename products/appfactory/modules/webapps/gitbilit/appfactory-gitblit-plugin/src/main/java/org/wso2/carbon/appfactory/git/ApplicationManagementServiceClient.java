@@ -39,6 +39,7 @@ public class ApplicationManagementServiceClient {
     private ApplicationManagementServiceStub serviceStub;
     private GitBlitConfiguration gitBlitConfiguration;
     private ContextHolder holder;
+
     /**
      * Constructor initializing the client with configurations from gitblit.properties or with
      * usual default values
@@ -46,29 +47,26 @@ public class ApplicationManagementServiceClient {
      * @param configuration
      */
     public ApplicationManagementServiceClient(GitBlitConfiguration configuration) {
-        gitBlitConfiguration=configuration;
-        holder=ContextHolder.getHolder(gitBlitConfiguration);
-        String username=configuration.getProperty(GitBlitConstants
-                                                          .APPFACTORY_ADMIN_USERNAME,
-                                                  "admin@admin.com");
-        String password =configuration.getProperty(GitBlitConstants
-                                                           .APPFACTORY_ADMIN_PASSWORD,
-                                                   "admin");
+        gitBlitConfiguration = configuration;
+        holder = ContextHolder.getHolder(gitBlitConfiguration);
+        String username = configuration.getProperty(GitBlitConstants
+                .APPFACTORY_ADMIN_USERNAME,
+                "admin@admin.com");
+        String password = configuration.getProperty(GitBlitConstants
+                .APPFACTORY_ADMIN_PASSWORD,
+                "admin");
 
         try {
-            ConfigurationContext context= holder.getConfigurationContext();
-            serviceStub = new ApplicationManagementServiceStub(context,configuration.getProperty
+            ConfigurationContext context = holder.getConfigurationContext();
+            serviceStub = new ApplicationManagementServiceStub(context, configuration.getProperty
                     (GitBlitConstants.APPFACTORY_URL,
-                     "https://localhost:9443") + "/services/ApplicationManagementService");
+                            "https://localhost:9443") + "/services/ApplicationManagementService");
             CarbonUtils.setBasicAccessSecurityHeaders(username, password, serviceStub._getServiceClient());
             serviceStub._getServiceClient().getOptions().setProperty(Constants.Configuration.ENABLE_REST, Constants.VALUE_TRUE);
             Util.setMaxTotalConnection(serviceStub._getServiceClient());
 
         } catch (AxisFault e) {
             log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
-        } catch (RemoteException e) {
-            log.error("Error while calling ApplicationManagementService:Error is " + e
-                    .getLocalizedMessage(), e);
         }
     }
 
@@ -78,34 +76,34 @@ public class ApplicationManagementServiceClient {
      * @param userName
      * @return List of application key
      */
-    public List<String> getAllApplicationsOfUser(String userName) {
+    public List<String> getAllApplicationsOfUser(String domainName, String userName) {
         String[] apps;
-        apps= holder.getCache().get(userName);
-        if(apps!=null){
+        apps = holder.getCache().get(userName);
+        if (apps != null) {
             return Arrays.asList(apps);
         } else {
-        try {
-            apps = serviceStub.getAllApplications("wso6.io",userName);
-            if (apps != null) {
-                holder.getCache().put(userName,apps);
-                return Arrays.asList(apps);
-            }
-        } catch (AxisFault e) {
-            log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
-        } catch (RemoteException e) {
-            log.error("Error while calling ApplicationManagementService:Error is " + e
-                    .getLocalizedMessage(), e);
-        } catch (ApplicationManagementServiceApplicationManagementExceptionException e) {
-            log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
-        }  finally {
             try {
-                serviceStub._getServiceClient().cleanupTransport();
-                serviceStub._getServiceClient().cleanup();
-                serviceStub.cleanup();
-            } catch (AxisFault fault) {
-                //ignore
+                apps = serviceStub.getAllApplications(domainName, userName);
+                if (apps != null) {
+                    holder.getCache().put(userName, apps);
+                    return Arrays.asList(apps);
+                }
+            } catch (AxisFault e) {
+                log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
+            } catch (RemoteException e) {
+                log.error("Error while calling ApplicationManagementService:Error is " + e
+                        .getLocalizedMessage(), e);
+            } catch (ApplicationManagementServiceApplicationManagementExceptionException e) {
+                log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
+            } finally {
+                try {
+                    serviceStub._getServiceClient().cleanupTransport();
+                    serviceStub._getServiceClient().cleanup();
+                    serviceStub.cleanup();
+                } catch (AxisFault fault) {
+                    //ignore
+                }
             }
-        }
         }
         return Collections.emptyList();
     }

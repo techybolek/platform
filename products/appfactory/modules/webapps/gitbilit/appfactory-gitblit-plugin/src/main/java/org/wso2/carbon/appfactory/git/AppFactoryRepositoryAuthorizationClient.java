@@ -21,11 +21,8 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.context.ConfigurationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.appfactory.git.util.Util;
 import org.wso2.carbon.appfactory.repository.mgt.service.RepositoryAuthenticationServiceStub;
-import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 
 /**
@@ -36,32 +33,31 @@ public class AppFactoryRepositoryAuthorizationClient {
     private RepositoryAuthenticationServiceStub serviceStub;
     private GitBlitConfiguration gitBlitConfiguration;
     private ContextHolder holder;
+
     /**
      * Constructor taking Gitblit configuration
      *
      * @param configuration
      */
     public AppFactoryRepositoryAuthorizationClient(GitBlitConfiguration configuration) {
-        gitBlitConfiguration=configuration;
-        holder=ContextHolder.getHolder(gitBlitConfiguration);
-       String username=configuration.getProperty(GitBlitConstants
-                                                                    .APPFACTORY_ADMIN_USERNAME,
-                                                            "admin@admin.com");
-       String password =configuration.getProperty(GitBlitConstants
-                                                                    .APPFACTORY_ADMIN_PASSWORD,
-                                                            "admin");
+        gitBlitConfiguration = configuration;
+        holder = ContextHolder.getHolder(gitBlitConfiguration);
+       /* String username = configuration.getProperty(GitBlitConstants
+                .APPFACTORY_ADMIN_USERNAME,
+                "admin@admin.com");
+        String password = configuration.getProperty(GitBlitConstants
+                .APPFACTORY_ADMIN_PASSWORD,
+                "admin");*/
 
         try {
-            ConfigurationContext context= holder.getConfigurationContext();
-            serviceStub = new RepositoryAuthenticationServiceStub(context,configuration.getProperty
+            ConfigurationContext context = holder.getConfigurationContext();
+            serviceStub = new RepositoryAuthenticationServiceStub(context, configuration.getProperty
                     (GitBlitConstants
-                             .APPFACTORY_URL, "https://localhost:9443") + "/services/RepositoryAuthenticationService");
-            CarbonUtils.setBasicAccessSecurityHeaders(username, password, serviceStub._getServiceClient());
-            Util.setMaxTotalConnection(serviceStub._getServiceClient());
+                            .APPFACTORY_URL, "https://localhost:9443") + "/services/RepositoryAuthenticationService");
+           /* CarbonUtils.setBasicAccessSecurityHeaders(username, password, serviceStub._getServiceClient());
+            Util.setMaxTotalConnection(serviceStub._getServiceClient());*/
         } catch (AxisFault fault) {
             log.error("Error occurred while initializing client ", fault);
-        } catch (RemoteException e) {
-            log.error("Error occurred in remote end while initializing client ", e);
         }
     }
 
@@ -76,15 +72,12 @@ public class AppFactoryRepositoryAuthorizationClient {
         try {
             if (serviceStub.hasAccess(userName, repositoryName)) {
                 isAuth = true;
-                System.out.println("calling RepositoryAuthenticationServiceStub.hasAccess");
             }
         } catch (AxisFault e) {
             log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
         } catch (RemoteException e) {
             log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
-        } catch (IOException e) {
-            log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
-        }finally {
+        } finally {
             try {
                 serviceStub._getServiceClient().cleanupTransport();
                 serviceStub._getServiceClient().cleanup();
@@ -95,7 +88,8 @@ public class AppFactoryRepositoryAuthorizationClient {
         }
         return isAuth;
     }
-    public void setCookie(String cookie){
+
+    public void setCookie(String cookie) {
         Options options = serviceStub._getServiceClient().getOptions();
         options.setManageSession(true);
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);

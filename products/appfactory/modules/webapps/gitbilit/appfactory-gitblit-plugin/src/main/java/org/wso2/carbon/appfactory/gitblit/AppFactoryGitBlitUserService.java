@@ -23,13 +23,7 @@ import com.gitblit.models.TeamModel;
 import com.gitblit.models.UserModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.appfactory.git.AppFactoryAuthenticationClient;
-import org.wso2.carbon.appfactory.git.AppFactoryGitBlitUserModel;
-import org.wso2.carbon.appfactory.git.AppFactoryRepositoryAuthorizationClient;
-import org.wso2.carbon.appfactory.git.ApplicationManagementServiceClient;
-import org.wso2.carbon.appfactory.git.GitBlitConfiguration;
-import org.wso2.carbon.appfactory.git.GitBlitConstants;
-import org.wso2.carbon.appfactory.git.UserAdminServiceClient;
+import org.wso2.carbon.appfactory.git.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +52,11 @@ import java.util.*;
 public class AppFactoryGitBlitUserService implements IUserService {
     private IStoredSettings settings;
     private static final Logger logger = LoggerFactory.getLogger(AppFactoryGitBlitUserService.class);
-    private  GitBlitConfiguration configuration;
+    private GitBlitConfiguration configuration;
+    /**
+     * key:username value:GitBlitUserModelHolder
+     */
+    private Map<String, GitBlitUserModelHolder> userModelMap = new HashMap<String, GitBlitUserModelHolder>();
 
     public GitBlitConfiguration getConfiguration() {
         return configuration;
@@ -69,23 +67,15 @@ public class AppFactoryGitBlitUserService implements IUserService {
     }
 
     public AppFactoryAuthenticationClient getAppFactoryAuthenticationClient() {
-        AppFactoryAuthenticationClient appFactoryAuthenticationClient;
-        return appFactoryAuthenticationClient =new AppFactoryAuthenticationClient(this.getConfiguration());
-    }
-
-    public ApplicationManagementServiceClient getApplicationProvider() {
-        ApplicationManagementServiceClient applicationProvider;
-        return applicationProvider =new ApplicationManagementServiceClient(getConfiguration());
+        return new AppFactoryAuthenticationClient(this.getConfiguration());
     }
 
     public UserAdminServiceClient getUserAdminServiceClient() {
-        UserAdminServiceClient userAdminServiceClient;
-        return userAdminServiceClient =new UserAdminServiceClient(getConfiguration());
+        return new UserAdminServiceClient(getConfiguration());
     }
 
     public AppFactoryRepositoryAuthorizationClient getRepositoryAuthorizationClient() {
-        AppFactoryRepositoryAuthorizationClient repositoryAuthorizationClient;
-        return repositoryAuthorizationClient =new AppFactoryRepositoryAuthorizationClient(getConfiguration());
+        return new AppFactoryRepositoryAuthorizationClient(getConfiguration());
     }
 
     /**
@@ -98,7 +88,7 @@ public class AppFactoryGitBlitUserService implements IUserService {
         try {
             System.setProperty("javax.net.ssl.trustStore", configuration.getProperty
                     (GitBlitConstants.APPFACTORY_TRUST_STORE_LOCATION,
-                     new File(".").getCanonicalPath() + "/wso2carbon.jks"));
+                            new File(".").getCanonicalPath() + "/wso2carbon.jks"));
         } catch (IOException e) {
             logger.error("Could not find any trust store for communicate with app factory");
         }
@@ -193,30 +183,35 @@ public class AppFactoryGitBlitUserService implements IUserService {
      *         (applications) and repository of user otherwise null
      */
     public UserModel authenticate(String username, char[] password) {
-        if (authenticateAdmin(username,password) || getAppFactoryAuthenticationClient().authenticate(username, new String(password))) {
-            UserModel userModel = getUserModel(username);
+        AppFactoryAuthenticationClient client = getAppFactoryAuthenticationClient();
+        String cookie = null;
+        if (authenticateAdmin(username, password) || (cookie = client.authenticate(username,
+                new String(password))) != null) {
+            UserModel userModel = new AppFactoryGitBlitUserModel(username, getConfiguration(), getRepositoryAuthorizationClient());
             if (username.equals(settings.getString(GitBlitConstants
-                                                           .APPFACTORY_ADMIN_USERNAME,
-                                                   "admin@admin.com"))) {
+                    .APPFACTORY_ADMIN_USERNAME,
+                    "admin@admin.com"))) {
                 userModel.canAdmin = true;
             } else {
                 userModel.canAdmin = false;
+                userModel.cookie = cookie;
             }
             //userModel.cookie = StringUtils.getSHA1(userModel.username + new String(password));
+            userModelMap.put(username, new GitBlitUserModelHolder(userModel));
             return userModel;
         }
         return null;
     }
 
     private boolean authenticateAdmin(String username, char[] password) {
-        String adminUserName=settings.getString(GitBlitConstants
-                                                        .APPFACTORY_ADMIN_USERNAME,
-                                                "admin@admin.com");
-        String adminPassword=settings.getString(GitBlitConstants
-                                                   .APPFACTORY_ADMIN_PASSWORD,
-                                           "admin");
-        if(adminUserName.equals(username)){
-            if(Arrays.equals(adminPassword.toCharArray(),password)){
+        String adminUserName = settings.getString(GitBlitConstants
+                .APPFACTORY_ADMIN_USERNAME,
+                "admin@admin.com");
+        String adminPassword = settings.getString(GitBlitConstants
+                .APPFACTORY_ADMIN_PASSWORD,
+                "admin");
+        if (adminUserName.equals(username)) {
+            if (Arrays.equals(adminPassword.toCharArray(), password)) {
                 return true;
             }
         }
@@ -244,14 +239,13 @@ public class AppFactoryGitBlitUserService implements IUserService {
      */
     @Override
     public UserModel getUserModel(String username) {
-        TeamModel teamModel;
-        UserModel userModel = new AppFactoryGitBlitUserModel(username, getConfiguration(),getRepositoryAuthorizationClient());
+        GitBlitUserModelHolder userModelHolder = userModelMap.get(username);
        /* for (String app : getApplicationProvider().getAllApplicationsOfUser(username)) {
             teamModel = new TeamModel(getGitBlitRepositoryName(app));
             userModel.teams.add(teamModel);
             userModel.addRepository(getGitBlitRepositoryName(app));
         }*/
-        return userModel;
+        return userModelHolder != null ? userModelHolder.getUserModel() : UserModel.ANONYMOUS;
     }
 
     /**
@@ -277,7 +271,7 @@ public class AppFactoryGitBlitUserService implements IUserService {
 
     @Override
     public boolean updateUserModels(Collection<UserModel> userModels) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 
     /**
@@ -335,16 +329,13 @@ public class AppFactoryGitBlitUserService implements IUserService {
     }
 
     /**
-     * Get all available teams.
-     * Hence admin user is member of all applications here we are retrieving the applications of
-     * admin user
+     * Not supported
      *
      * @return list application keys
      */
     @Override
     public List<String> getAllTeamNames() {
-        return getApplicationProvider().getAllApplicationsOfUser(settings.getString(GitBlitConstants
-                .APPFACTORY_ADMIN_USERNAME, "admin@admin.com"));
+        return Collections.emptyList();
 
     }
 
@@ -386,21 +377,14 @@ public class AppFactoryGitBlitUserService implements IUserService {
     }
 
     /**
-     * Returning team model filled with all the users of mapped application from app factory and
-     * a repository with same name
+     * Not supported
      *
      * @param teamName
      * @return
      */
     @Override
     public TeamModel getTeamModel(String teamName) {
-        TeamModel teamModel = new TeamModel(teamName);
-        for (String user : getApplicationProvider().getUsersOfApplication(getAppFactoryApplicationName(teamName)
-        )) {
-            teamModel.addUser(user);
-        }
-        teamModel.addRepository(teamName);
-        return teamModel;
+        return null;
     }
 
     /**
@@ -454,15 +438,14 @@ public class AppFactoryGitBlitUserService implements IUserService {
     }
 
     /**
-     * This return list of users belongs to application in app factory,
-     * because all the user in an application has access to repository for now.
+     * Not supported
      *
      * @param repositoryName
      * @return list of user names
      */
     @Override
     public List<String> getUsernamesForRepositoryRole(String repositoryName) {
-        return getApplicationProvider().getUsersOfApplication(getAppFactoryApplicationName(repositoryName));
+        return Collections.emptyList();
     }
 
     /**
@@ -474,7 +457,7 @@ public class AppFactoryGitBlitUserService implements IUserService {
     public static String getAppFactoryApplicationName(String repositoryName) {
         String domainAwareAppId = repositoryName.substring(0, repositoryName.lastIndexOf(".git"));
         //google.com/app1
-        String applicationName=domainAwareAppId.substring(domainAwareAppId.lastIndexOf("/")+1);
+        String applicationName = domainAwareAppId.substring(domainAwareAppId.lastIndexOf("/") + 1);
         return applicationName;
     }
 

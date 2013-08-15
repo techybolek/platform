@@ -18,6 +18,7 @@ package org.wso2.carbon.appfactory.git;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.ServiceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.appfactory.git.util.Util;
@@ -25,9 +26,7 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.authenticator.stub.LogoutAuthenticationExceptionException;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.Arrays;
 
 /**
  * The client for authenticate user using AuthenticationAdmin web service
@@ -36,54 +35,49 @@ public class AppFactoryAuthenticationClient {
     private static final Logger log = LoggerFactory.getLogger(ApplicationManagementServiceClient.class);
     private AuthenticationAdminStub serviceStub;
     private GitBlitConfiguration gitBlitConfiguration;
-    private ContextHolder holder;
+
     /**
      * Constructor taking Gitblit configuration
      *
      * @param configuration
      */
     public AppFactoryAuthenticationClient(GitBlitConfiguration configuration) {
-        gitBlitConfiguration=configuration;
-        holder=ContextHolder.getHolder(gitBlitConfiguration);
+        gitBlitConfiguration = configuration;
         try {
-            ConfigurationContext context= ContextHolder.getHolder(gitBlitConfiguration).getConfigurationContext();
-            serviceStub = new AuthenticationAdminStub(context,configuration.getProperty(GitBlitConstants
-                                                                                        .APPFACTORY_URL, "https://localhost:9443") + "/services/AuthenticationAdmin");
+            ConfigurationContext context = ContextHolder.getHolder(gitBlitConfiguration).getConfigurationContext();
+            serviceStub = new AuthenticationAdminStub(context, configuration.getProperty(GitBlitConstants
+                    .APPFACTORY_URL, "https://localhost:9443") + "/services/AuthenticationAdmin");
             Util.setMaxTotalConnection(serviceStub._getServiceClient());
         } catch (AxisFault fault) {
             log.error("Error occurred while initializing client ", fault);
-        } catch (RemoteException e) {
-            log.error("Error occurred in remote end while initializing client ", e);
         }
     }
 
     /**
+     * Authenticate user and return a valid cookie
+     *
      * @param userName
      * @param password
-     * @return
+     * @return a valid cookie if authentication is successful otherwise null
      */
-    public boolean authenticate(String userName, String password) {
-        // Create service stub
+    public String authenticate(String userName, String password) {
         boolean isAuth = false;
-      byte[] hashedPassword= holder.getUserPasswordCache().get(userName,password);
-        if(hashedPassword!=null){
-            isAuth= Arrays.equals(hashedPassword, UserPasswordCache.getHashedPassword(password));
-        } else {
-
+        String cookie = null;
+        ServiceContext serviceContext;
         try {
             if (serviceStub.login(userName, password, null)) {
+                serviceContext = serviceStub._getServiceClient().getLastOperationContext()
+                        .getServiceContext();
+                cookie = (String) serviceContext.getProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING);
                 isAuth = true;
-                holder.getUserPasswordCache().put(userName, password);
             }
         } catch (AxisFault e) {
             log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
         } catch (RemoteException e) {
             log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
-        } catch (IOException e) {
-            log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
         } catch (LoginAuthenticationExceptionException e) {
             log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
-        }finally {
+        } finally {
             try {
                 serviceStub._getServiceClient().cleanupTransport();
                 serviceStub._getServiceClient().cleanup();
@@ -92,8 +86,7 @@ public class AppFactoryAuthenticationClient {
                 //ignore
             }
         }
-        }
-        return isAuth;
+        return isAuth ? cookie : null;
     }
 
     public void logout() {
@@ -103,7 +96,7 @@ public class AppFactoryAuthenticationClient {
             log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
         } catch (LogoutAuthenticationExceptionException e) {
             log.error("Error while calling ApplicationManagementService:Error is " + e.getLocalizedMessage(), e);
-        }finally {
+        } finally {
             try {
                 serviceStub._getServiceClient().cleanupTransport();
                 serviceStub._getServiceClient().cleanup();
@@ -113,4 +106,5 @@ public class AppFactoryAuthenticationClient {
             }
         }
     }
+
 }

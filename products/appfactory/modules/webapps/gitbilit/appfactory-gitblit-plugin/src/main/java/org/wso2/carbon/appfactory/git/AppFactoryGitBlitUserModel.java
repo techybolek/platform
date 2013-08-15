@@ -27,15 +27,13 @@ import org.wso2.carbon.appfactory.gitblit.AppFactoryGitBlitUserService;
 public class AppFactoryGitBlitUserModel extends UserModel {
     private transient AppFactoryRepositoryAuthorizationClient appFactoryRepositoryAuthorizationClient;
     private transient GitBlitConfiguration configuration;
-    private boolean canAccess;
-    protected String adminCookie;
 
     public String getAdminCookie() {
-        return adminCookie;
+        return cookie;
     }
 
     public void setAdminCookie(String adminCookie) {
-        this.adminCookie = adminCookie;
+        this.cookie = adminCookie;
     }
 
     public GitBlitConfiguration getConfiguration() {
@@ -51,30 +49,28 @@ public class AppFactoryGitBlitUserModel extends UserModel {
 
     }
 
-
-
     public AppFactoryGitBlitUserModel(String username,
                                       GitBlitConfiguration config, AppFactoryRepositoryAuthorizationClient appFactoryRepositoryAuthorizationClient) {
         this(username);
         this.appFactoryRepositoryAuthorizationClient = appFactoryRepositoryAuthorizationClient;
-        this.configuration=config;
+        this.configuration = config;
 
     }
-
-    public void setCanAccess(boolean canAccess) {
-        this.canAccess = canAccess;
-    }
-    /* */
 
     @Override
     protected boolean canAccess(RepositoryModel repository, Constants.AccessRestrictionType ifRestriction, Constants.AccessPermission requirePermission) {
         if (!username.equals(configuration.getProperty(GitBlitConstants
                 .APPFACTORY_ADMIN_USERNAME,
                 "admin@admin.com"))) {
+            appFactoryRepositoryAuthorizationClient.setCookie(getAdminCookie());
+            if (getName().substring(getName().lastIndexOf("@") + 1).equals(repository.name.substring
+                    (0, repository.name.lastIndexOf("/")))) {
+                String appName = AppFactoryGitBlitUserService.getAppFactoryApplicationName(repository.name);
+                return appFactoryRepositoryAuthorizationClient.authorize(getName(), appName);
+            } else {
+                return false;
+            }
 
-        appFactoryRepositoryAuthorizationClient.setCookie(getAdminCookie());
-        String appName= AppFactoryGitBlitUserService.getAppFactoryApplicationName(repository.name);
-        return appFactoryRepositoryAuthorizationClient.authorize(getName(),appName);
         }
         return true;
     }
@@ -94,8 +90,6 @@ public class AppFactoryGitBlitUserModel extends UserModel {
         return super.canAccessRepository(repository) && getAppFactoryRepositoryAuthorizationClient()
                 .authorize(super.getName(), applicationName);
     }*/
-
-
     public AppFactoryRepositoryAuthorizationClient getAppFactoryRepositoryAuthorizationClient() {
         return new AppFactoryRepositoryAuthorizationClient(getConfiguration());
     }
