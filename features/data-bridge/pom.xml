@@ -39,6 +39,7 @@
         <module>org.wso2.carbon.databridge.receiver.thrift.server.feature</module>
         <module>org.wso2.carbon.databridge.receiver.restapi.server.feature</module>
         <module>org.wso2.carbon.databridge.streamdefn.cassandra.server.feature</module>
+        <module>org.wso2.carbon.databridge.streamdefn.registry.server.feature</module>
         <module>org.wso2.carbon.databridge.datapublisher.feature</module>
         <module>org.wso2.carbon.databridge.datareceiver.feature</module>
         <module>org.wso2.carbon.databridge.streamdefn.cassandra.feature</module>
@@ -117,7 +118,7 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.databridge.restapi</artifactId>
+                <artifactId>org.wso2.carbon.databridge.receiver.restapi</artifactId>
                 <version>${wso2carbon.version.databridge}</version>
             </dependency>
             <dependency>
