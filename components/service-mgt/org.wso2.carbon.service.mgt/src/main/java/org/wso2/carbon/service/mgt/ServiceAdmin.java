@@ -27,7 +27,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.deployment.DeploymentErrorMsgs;
 import org.apache.axis2.description.AxisBinding;
 import org.apache.axis2.description.AxisBindingOperation;
 import org.apache.axis2.description.AxisEndpoint;
@@ -42,7 +41,6 @@ import org.apache.axis2.description.PolicySubject;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEvent;
-import org.apache.axis2.i18n.Messages;
 import org.apache.axis2.util.PolicyLocator;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
@@ -1053,7 +1051,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         AxisServiceGroup serviceGroup = (AxisServiceGroup) service.getParent();
         serviceMetaData.setFoundWebResources(serviceGroup.isFoundWebResources());
         serviceMetaData.setScope(service.getScope());
-        serviceMetaData.setEndPoints(service.getEndpoints());
+        serviceMetaData.setWsdlPorts(service.getEndpoints());
 
         Parameter deploymentTime =
                 service.getParameter(CarbonConstants.SERVICE_DEPLOYMENT_TIME_PARAM);

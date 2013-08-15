@@ -121,8 +121,8 @@
 
 <%
     String endPointStr = "";
-    String[] eps = service.getEndPoints();
-    String[] epsTypes = service.getEndPointsTypes();
+    String[] eps = service.getWsdlPorts();
+    String[] epsTypes = service.getWsdlPortTypes();
 
     boolean isSecured = false;
     isSecured = service.getSecurityScenarioId() != null ? true : false;

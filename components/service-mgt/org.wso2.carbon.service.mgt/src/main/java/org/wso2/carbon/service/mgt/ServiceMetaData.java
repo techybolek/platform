@@ -16,6 +16,8 @@
 package org.wso2.carbon.service.mgt;
 
 import org.apache.axis2.description.AxisEndpoint;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.service.mgt.util.Utils;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -45,29 +47,44 @@ public class ServiceMetaData {
     private String tryitURL;
     private boolean disableDeletion;
     private long deployedTime;
-    private String[] endPoints;
-    private String[] endPointsTypes;
+    private String[] wsdlPorts;
+    private String[] wsdlPortTypes;
 
-    public void setEndPoints(Map endPnts){
-        endPoints = new String[endPnts.keySet().size()];
-        endPointsTypes = new String[endPnts.keySet().size()];
-        int i =0 ;
+    private static final Log log = LogFactory.getLog(ServiceMetaData.class);
 
-        for (Object p : endPnts.keySet())     {
-            this.endPoints[i] = p.toString();
-            AxisEndpoint axisEndpoint = (AxisEndpoint) endPnts.get(p);
-            String endPoint = axisEndpoint.getEndpointURL().substring(0,axisEndpoint.getEndpointURL().indexOf(":"));
-            this.endPointsTypes[i]  =    endPoint;
+    public void setWsdlPorts(Map endPnts) {
+
+        Map<String, String> resultMap = new HashMap<String, String>();
+        int i = 0;
+        for (Object p : endPnts.keySet()) {
+            try {
+                AxisEndpoint axisEndpoint = (AxisEndpoint) endPnts.get(p);
+                if (axisEndpoint.getEndpointURL() != null || !axisEndpoint.getEndpointURL().equals("")) {
+                    String endPoint = axisEndpoint.getEndpointURL().substring(0, axisEndpoint.getEndpointURL().indexOf(":"));
+                    resultMap.put(p.toString(), endPoint);
+                }
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        }
+        wsdlPorts = new String[resultMap.size()];
+        wsdlPortTypes = new String[resultMap.size()];
+
+        for (String a : resultMap.keySet()) {
+            this.wsdlPorts[i] = a;
+            this.wsdlPortTypes[i] = resultMap.get(a);
             i++;
         }
     }
 
-    public String[] getEndPointsTypes(){
-        return endPointsTypes;
+    public String[] getWsdlPortTypes(){
+        return wsdlPortTypes;
     }
 
-    public String[] getEndPoints(){
-        return endPoints;
+    public String[] getWsdlPorts(){
+        return wsdlPorts;
     }
 
     public String getSecurityScenarioId() {
