@@ -1294,4 +1294,13 @@ public class ApplicationManagementService extends AbstractAdmin {
         }
         return roleBeanList;
     }
+    public Application getAppInfo(String domainName,String applicationId){
+
+        try {
+            return  ProjectUtils.getApplicationInfo(applicationId,domainName);
+        } catch (AppFactoryException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return null;
+    }
 }
