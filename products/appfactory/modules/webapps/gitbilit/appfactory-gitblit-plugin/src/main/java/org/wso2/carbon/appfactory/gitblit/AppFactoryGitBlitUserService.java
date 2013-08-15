@@ -384,7 +384,7 @@ public class AppFactoryGitBlitUserService implements IUserService {
      */
     @Override
     public TeamModel getTeamModel(String teamName) {
-        return null;
+        return new TeamModel(teamName);
     }
 
     /**
@@ -400,7 +400,7 @@ public class AppFactoryGitBlitUserService implements IUserService {
 
     @Override
     public boolean updateTeamModels(Collection<TeamModel> teamModels) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 
     /**
