@@ -19,12 +19,15 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.config.xml.SequenceMediatorFactory;
+import org.apache.synapse.mediators.base.SequenceMediator;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
@@ -72,7 +75,10 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -81,6 +87,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.Properties;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -137,7 +144,10 @@ public final class APIUtil {
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
             api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
             api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
+            api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
 
+            
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
@@ -241,6 +251,9 @@ public final class APIUtil {
             api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
             api.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
             api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
+            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
+            
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -306,6 +319,8 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME, api.getEndpointUTUsername());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD, api.getEndpointUTPassword());
             artifact.setAttribute(APIConstants.API_OVERVIEW_TRANSPORTS, api.getTransports());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_INSEQUENCE, api.getInSequence());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE, api.getOutSequence());
             
             String tiers = "";
             for (Tier tier : api.getAvailableTiers()) {
@@ -1660,5 +1675,99 @@ public final class APIUtil {
     	Gson gson = new Gson();
     	return gson.toJson(apidefinition); 
      }
+    
+    /**
+     * Build OMElement from inputstream
+     * @param inputStream 
+     * @return  OMElement
+     * @throws Exception
+     * @return 
+     */
+    public static OMElement buildOMElement(InputStream inputStream) throws Exception {
+        XMLStreamReader parser;
+        StAXOMBuilder builder;
+        try {
+            parser = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+             builder = new StAXOMBuilder(parser);            
+        }
+        catch (XMLStreamException e) {
+            String msg = "Error in initializing the parser.";
+            log.error(msg, e);
+            throw new Exception(msg, e);
+        }        
+   
+        return builder.getDocumentElement();
+    }
+    
+  
+	/**
+	 * Get stored custom sequences from governanceSystem registry
+	 * 
+	 * @param sequenceName
+	 *            -The sequence to be retrieved
+	 * @param tenantId
+	 * @param direction
+	 *            - Direction indicates in Sequence/outSequence. Values would be
+	 *            "in" or "out"
+	 * @return
+	 * @throws APIManagementException
+	 */
+	public static SequenceMediator getCustomSequence(String sequenceName, int tenantId,
+	                                                 String direction)
+	                                                                  throws APIManagementException {
+		org.wso2.carbon.registry.api.Collection seqCollection = null;
 
+		try {
+			UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+			                                              .getGovernanceSystemRegistry(tenantId);
+			if ("in".equals(direction)) {
+				seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
+			}
+			if ("out".equals(direction)) {
+				seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+			}
+			if (seqCollection != null) {
+				SequenceMediatorFactory factory = new SequenceMediatorFactory();
+				String[] childPaths = seqCollection.getChildren();
+
+				for (int i = 0; i < childPaths.length; i++) {
+					Resource sequence = registry.get(childPaths[i]);
+					OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+					if ((seqElment instanceof OMElement)) {
+						SequenceMediator customSequence = (SequenceMediator) factory.createMediator(seqElment,
+						                                                                            new Properties());
+						if (sequenceName.equals(customSequence.getName())) {
+							return customSequence;
+						}
+
+					} else {
+						String msg = "Invalid sequence is retrived from registry";
+						log.error(msg);
+						throw new APIManagementException(msg);
+					}
+				}
+			}
+		} catch (Exception e) {
+			String msg = "Issue is in accessing the Registry";
+			log.error(msg);
+			throw new APIManagementException(msg, e);
+		}
+		return null;
+	}
+	
+	/**
+	 * Return the sequence extension name.
+	 * eg: admin--testAPi--v1.00
+	 * 
+	 * @param api
+	 * @return 
+	 */
+	public static String getSequenceExtensionName(API api) {
+
+		String seqExt = api.getId().getProviderName() + "--" + api.getId().getApiName() + ":v" +
+		                        api.getId().getVersion();
+
+		return seqExt;
+
+	}
 }

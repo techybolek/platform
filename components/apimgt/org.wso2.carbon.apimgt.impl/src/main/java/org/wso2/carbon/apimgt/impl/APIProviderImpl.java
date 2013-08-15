@@ -1,3 +1,21 @@
+/*
+*  Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
+
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -6,8 +24,8 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.config.xml.SequenceMediatorFactory;
+import org.apache.synapse.mediators.base.SequenceMediator;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
@@ -1588,6 +1606,76 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+	/**
+	 * Get stored custom inSequences from governanceSystem registry
+	 * 
+	 * @throws APIManagementException
+	 */
+
+	public List<String> getCustomInSequences() throws APIManagementException {
+
+		List<String> sequenceList = new ArrayList<String>();
+		try {
+			UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+			                                              .getGovernanceSystemRegistry(tenantId);
+			org.wso2.carbon.registry.api.Collection inSeqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
+
+			SequenceMediatorFactory factory = new SequenceMediatorFactory();
+			String[] inSeqChildPaths = inSeqCollection.getChildren();
+
+			for (int i = 0; i < inSeqChildPaths.length; i++) {
+				Resource inSequence = registry.get(inSeqChildPaths[i]);
+				OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+				if ((seqElment instanceof OMElement)) {
+					SequenceMediator customInSequence =
+					                                    (SequenceMediator) factory.createMediator(seqElment,
+					                                                                              new Properties());
+					sequenceList.add(customInSequence.getName());
+				} else {
+					handleException("Invalid inSequence is retrived from registry");
+				}
+			}
+
+		} catch (Exception e) {
+			handleException("Issue is in getting custom InSequences from the Registry", e);
+		}
+		return sequenceList;
+	}
+
+	/**
+	 * Get stored custom outSequences from governanceSystem registry
+	 * 
+	 * @throws APIManagementException
+	 */
+
+	public List<String> getCustomOutSequences() throws APIManagementException {
+
+		List<String> sequenceList = new ArrayList<String>();
+		try {
+			UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+			                                              .getGovernanceSystemRegistry(tenantId);
+			org.wso2.carbon.registry.api.Collection outSeqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+
+			SequenceMediatorFactory factory = new SequenceMediatorFactory();
+			String[] outSeqChildPaths = outSeqCollection.getChildren();
+
+			for (int i = 0; i < outSeqChildPaths.length; i++) {
+				Resource outSequence = registry.get(outSeqChildPaths[i]);
+				OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+				if ((seqElment instanceof OMElement)) {
+					SequenceMediator customOutSequence = (SequenceMediator) factory.createMediator(seqElment,
+					                                                                               new Properties());
+					sequenceList.add(customOutSequence.getName());
+				} else {
+					handleException("Invalid outSequence is retrived from registry");
+				}
+			}
+
+		} catch (Exception e) {
+			handleException("Issue is in getting custom OutSequences from the Registry", e);
+		}
+		return sequenceList;
+	}
 }
 
 

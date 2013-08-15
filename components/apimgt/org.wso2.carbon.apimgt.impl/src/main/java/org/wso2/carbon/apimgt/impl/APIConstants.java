@@ -31,6 +31,9 @@ public final class APIConstants {
     //key value of the APIImpl rxt
     public static final String API_KEY = "api";
     
+    //governance registry apimgt root location
+    public static final String APIMGT_REGISTRY_LOCATION = "/apimgt";
+    
     public static final String API_CONTEXT_ID = "api.context.id";
     //This is the resource name of API
     public static final String API_RESOURCE_NAME ="/api";
@@ -49,7 +52,7 @@ public final class APIConstants {
     //registry location of providers
     public static final String PROVIDERS_PATH = "/providers";
     
-    public static final String API_APPLICATION_DATA_LOCATION = "/apimgt/applicationdata";
+    public static final String API_APPLICATION_DATA_LOCATION = APIMGT_REGISTRY_LOCATION +"/applicationdata";
 
     //registry location of API
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
@@ -63,6 +66,13 @@ public final class APIConstants {
     
     //registry location for API documentation
     public static final String API_DOC_LOCATION = API_APPLICATION_DATA_LOCATION + "/api-docs";
+    
+    //registry location for Custom sequences
+    public static final String API_CUSTOM_SEQUENCE_LOCATION = APIMGT_REGISTRY_LOCATION+"/customsequences";
+    
+    public static final String API_CUSTOM_INSEQUENCE_LOCATION = API_CUSTOM_SEQUENCE_LOCATION +"/in";
+  
+    public static final String API_CUSTOM_OUTSEQUENCE_LOCATION = API_CUSTOM_SEQUENCE_LOCATION +"/out";
     
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
     
@@ -109,7 +119,9 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
-
+    public static final String API_OVERVIEW_INSEQUENCE = "overview_inSequence";
+    public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
+    
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME= "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
