@@ -48,7 +48,7 @@ function getRecommendation() {
     var userVersionNumber = version.versionNumber();
 
     // Fetch information about the latest release of the Mashup Server
-    var history = system.getXML('https://svn.wso2.org/repos/wso2/trunk/carbon/products/ms/modules/samples/product/upgradeChecker/upgradeChecker.resources/history.xml');
+    var history = system.getXML('https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/as/modules/samples/mashupSamples/upgradeChecker/upgradeChecker.resources/history.xml');
     if (history == null)
         throw "Trouble contacting the Mashup Server project for release history.";
 
