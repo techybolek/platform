@@ -29,7 +29,7 @@ body#home{
 
 
     function doSubmit() {
-          /*  jagg.post("../blocks/register/ajax/register.jag", {
+            jagg.post("../blocks/register/ajax/register.jag", {
             		action:"registerOrganization",
             		firstName:$("#firstName").attr('value'),
             		lastName:$("#lastName").attr('value'),
@@ -50,8 +50,8 @@ body#home{
             		window.location.href = "index.jag";
                   	}
                   });
-        }); */
-        jagg.post("../blocks/register/ajax/register.jag", {
+        }); 
+       /* jagg.post("../blocks/register/ajax/register.jag", {
             action:"registerOrg",
             firstName:$("#firstName").attr('value'),
             lastName:$("#lastName").attr('value'),
@@ -76,7 +76,7 @@ body#home{
             		window.location.href = "index.jag";
                   	}
                   });
-                });
+                });*/
     }
 
     function validateEmail(){
