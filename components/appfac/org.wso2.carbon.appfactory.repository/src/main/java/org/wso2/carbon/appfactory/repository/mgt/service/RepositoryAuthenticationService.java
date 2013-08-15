@@ -43,7 +43,7 @@ public class RepositoryAuthenticationService extends AbstractAdmin {
             String permission = configuration.getFirstProperty(String.format(
                     AppFactoryConstants.SCM_READ_WRITE_PERMISSION, repositoryType));
             if (realm != null && realm.getAuthorizationManager().
-                    isUserAuthorized(username, permission, CarbonConstants.UI_PERMISSION_ACTION)) {
+                    isUserAuthorized(getUsername(), permission, CarbonConstants.UI_PERMISSION_ACTION)) {
                 return true;
             }
         } catch (UserStoreException e) {
