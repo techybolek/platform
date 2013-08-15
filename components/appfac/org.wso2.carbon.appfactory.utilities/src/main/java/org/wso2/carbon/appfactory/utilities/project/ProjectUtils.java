@@ -30,6 +30,7 @@ import org.wso2.carbon.appfactory.core.dto.Application;
 import org.wso2.carbon.appfactory.core.dto.Version;
 import org.wso2.carbon.appfactory.core.governance.RxtManager;
 import org.wso2.carbon.appfactory.utilities.internal.ServiceReferenceHolder;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -644,10 +645,11 @@ public class ProjectUtils {
             log.error(errorMsg, e);
             throw new AppFactoryException(errorMsg, e);
         }
-        updateBranchCount(userRegistry, applicationId);
+        updateBranchCount(userRegistry, applicationId, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
-    private static void updateBranchCount(UserRegistry userRegistry, String applicationId) throws AppFactoryException {
+    private static void updateBranchCount(UserRegistry userRegistry, String applicationId,
+                                          String domainName) throws AppFactoryException {
         GenericArtifact artifact = null;
         try {
             Resource resource =
@@ -660,13 +662,14 @@ public class ProjectUtils {
             artifact = artifactManager.getGenericArtifact(resource.getUUID());
 
             RxtManager rxtManager = new RxtManager();
-            List<Artifact> appVersions = rxtManager.getAppVersionRxtForApplication(applicationId);
+            List<Artifact> appVersions = rxtManager.getAppVersionRxtForApplication(domainName,
+                    applicationId);
             String newBranchCount = String.valueOf(appVersions.size());
 
             artifact.setAttribute("application_branchcount", newBranchCount);
 
             artifactManager.updateGenericArtifact(artifact);
-            updateBranchCount(userRegistry, applicationId);
+            updateBranchCount(userRegistry, applicationId,domainName);
 
             log.info(String.format("Application - %s Branch count is updated to - %s", applicationId, newBranchCount));
         } catch (RegistryException e) {
@@ -682,11 +685,11 @@ public class ProjectUtils {
         RegistryService registryService =
                 ServiceReferenceHolder.getInstance()
                         .getRegistryService();
-        UserRegistry userRegistry = null;
+        UserRegistry userRegistry;
         try {
             userRegistry = registryService.getGovernanceSystemRegistry(
                     ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(domainName));
-            updateBranchCount(userRegistry, applicationId);
+            updateBranchCount(userRegistry, applicationId,domainName);
         } catch (UserStoreException e) {
             String errorMsg =
                     String.format("Unable to get tenant id for domain: %s",
