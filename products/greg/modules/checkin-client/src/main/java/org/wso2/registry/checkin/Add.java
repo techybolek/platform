@@ -51,6 +51,11 @@ public class Add {
 
     private void addResourceMetadataRecursively(String path, String parentRegistryPath, boolean root) throws SynchronizationException {
         File file = new File(path);
+
+        if (!file.exists()) {
+            throw new SynchronizationException(MessageCode.FILE_DOES_NOT_EXIST);
+        }
+
         String registryPath = parentRegistryPath + File.separator + file.getName();
         System.out.println("A " + path);
         String metaFilePath;
