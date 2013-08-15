@@ -18,5 +18,23 @@
 
 package org.wso2.carbon.automation.core.context.usermanagementcontext;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserManagerContext {
+
+    private List<Tenant> tenant = new ArrayList<Tenant>();
+
+    public void setTenant(List tenant){
+
+        this.tenant=tenant;
+    }
+
+    public List getTenant(){
+
+        return tenant;
+    }
+
+
+
 }

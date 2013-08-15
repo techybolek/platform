@@ -16,29 +16,42 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.context.databasecontext;
-
-import org.wso2.carbon.automation.core.context.usermanagementcontext.User;
+package org.wso2.carbon.automation.core.context.usermanagementcontext;
 
 
-import java.util.HashMap;
-import java.util.Map;
+public class User {
 
-public class DatabaseContext {
+    private String key;
+    private String userName;
+    private String password;
+
+    public void setKey(String key) {
 
 
-    private Map<String, Configuration> databaseConfigurations = new HashMap<String, Configuration>();
-
-    public void setDatabaseConfigurations(Map<String,Configuration> config){
-
-        this.databaseConfigurations=config;
-    }
-
-    public  Map<String,Configuration> getDatabaseConfigurations(){
-
-           return databaseConfigurations;
+        this.key = key;
 
     }
+
+
+    public void setUserName(String userName) {
+
+        this.userName = userName;
+    }
+
+    public String getKey() {
+
+        return key;
+    }
+
+    public String getUserName() {
+
+        return userName;
+    }
+
+    public String getPassword() {
+
+        return password;
+    }
+
+
 }
-
-
