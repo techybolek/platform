@@ -46,7 +46,7 @@ public class MSTaskAdmin extends AbstractAdmin {
             }
             return result.toArray(new String[result.size()]);
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new AxisFault("Error in getting task names: " + e.getMessage(), e);
         }
     }
@@ -57,7 +57,7 @@ public class MSTaskAdmin extends AbstractAdmin {
                     MSTaskConstants.MS_TASK_TYPE);
             return MSTaskUtils.convert(tm.getTask(taskName));
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new AxisFault("Error getting task info for task: " + taskName, e);
         }
     }
@@ -71,12 +71,12 @@ public class MSTaskAdmin extends AbstractAdmin {
             tm.registerTask(taskInfo);
             tm.scheduleTask(taskInfo.getName());
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             if (tm != null) {
                 try {
                     tm.deleteTask(msTaskInfo.getName());
                 } catch (TaskException e1) {
-                    log.error(e1);
+                    log.error(e1.getMessage(), e1);
                 }
             }
             throw new AxisFault("Error scheduling task: " + msTaskInfo.getName(), e);
@@ -91,7 +91,7 @@ public class MSTaskAdmin extends AbstractAdmin {
             tm.registerTask(taskInfo);
             tm.rescheduleTask(taskInfo.getName());
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new AxisFault("Error rescheduling task: " + msTaskInfo.getName(), e);
         }
         return true;
@@ -114,7 +114,7 @@ public class MSTaskAdmin extends AbstractAdmin {
                 tm.deleteTask(newTaskName);
             }
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new AxisFault("Error deleting task: " + taskName, e);
         }
     }
@@ -137,7 +137,7 @@ public class MSTaskAdmin extends AbstractAdmin {
                     MSTaskConstants.MS_TASK_TYPE);
             return tm.isTaskScheduled(taskName);
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new AxisFault("Error checking task scheduled status: " + taskName, e);
         }
     }

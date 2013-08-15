@@ -270,7 +270,7 @@ public class JSDeployer extends AbstractDeployer {
                 try {
         			taskAdmin.deleteTask(service.getName());
         		} catch (AxisFault e) {
-        			log.error("Unable to delete job : " + e.getFaultAction());
+        			log.error("Unable to delete job : " + e.getFaultAction(), e);
         		}
 
                 /*
