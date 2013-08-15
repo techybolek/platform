@@ -147,9 +147,9 @@ public class JenkinsBuildServiceComponent {
                                               jenkinsCISystemDriver, null);
 
                 // Registering the Jenkins application event listener.
-                bundleContext.registerService(ApplicationEventsListener.class.getName(),
+               /* bundleContext.registerService(ApplicationEventsListener.class.getName(),
                                               new JenkinsApplicationEventsListener(
-                                                      jenkinsListnerPriority), null);
+                                                      jenkinsListnerPriority), null);*/
 
                 JenkinsStorage jenkinsStorage = new JenkinsStorage(connector);
                 bundleContext.registerService(Storage.class.getName(), jenkinsStorage, null);
