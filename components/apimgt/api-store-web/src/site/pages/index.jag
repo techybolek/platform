@@ -10,12 +10,11 @@ i18n.init(request,localeResourcesBasePath);
 
  (function () {
      var mod = jagg.module("manager");
-     var result = mod.getActiveTenantDomains().tenantDomains;
+     var result = mod.getActiveTenantDomains();
      var tenantStore=request.getQueryString();
-
-    if(tenantDomains==null ||  (tenantStore!=null && tenantStore.indexOf("tenant")==0 )){
-    response.sendRedirect(jagg.getAbsoluteUrl("/site/pages/list-apis.jag"));
-
+     var tenantDomainsArr=result.tenantDomains;     
+     if(tenantDomainsArr==null||  (tenantStore!=null && tenantStore.indexOf("tenant")==0 )){
+     response.sendRedirect(jagg.getAbsoluteUrl("/site/pages/list-apis.jag"));
 
     }else{
     jagg.render({

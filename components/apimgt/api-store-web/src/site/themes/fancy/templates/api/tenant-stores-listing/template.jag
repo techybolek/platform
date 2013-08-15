@@ -1,53 +1,59 @@
 <% jagg.template("api/tenant-stores-listing", function(inputs, outputs, jagg) {
+var tenantDomains=outputs.tenantDomains;
  %>
-<div class="thumbnail-custom">
 
-    <ul>
-
-
-        <li>
-            <div><h3>Tenant WSO2's APIStore</h3>
-                <a href="/store/apis/info?name=api19&amp;version=1.2.3&amp;provider=admin">
-                    <b>https://localhost:9443/store?tenant=wso2.com</b>
-                </a>
+<div class="container-fluid" id="layout-base">
+    <div class="row-fluid">
 
 
+        <div class="span12" id="middle">
+
+
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span3">
+                        <div class="left-side-col">
+                        </div>
+                    </div>
+                    <div class="span6" style="margin-left:14px">
+                        <div class="title-section">
+                            <h2>Select an APIStore to continue</h2>
+                        </div>
+
+                        <div class="clear"></div>
+                        <div class="content-section shadow-up">
+                            <div class="content-data">
+                                <ul class="big-data-listing">
+
+                                    <%for(var i=0;i< tenantDomains.length;i++){
+                                      var currentURL = request.getRequestURL();
+                                    %>
+
+                                    <li>
+                                   <div><h3>Tenant <%=tenantDomains[i]%>'s Store</h3>
+                                   <div class="tenant-info-back">
+                                   <a href="<%=currentURL%>?tenant=<%=tenantDomains[i]%>">
+                                   <b><%=currentURL%>?tenant=<%=tenantDomains[i]%></b>
+                                    </a>
+                                   </div>
+
+                                   </div>
+                                   </li>
+                                   <%}%>                                
+                                   
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span4">
+                    </div>
+                </div>
+                <div id="push"></div>
             </div>
-        </li>
-        <li>
-            <div><h3>Tenant Apache's APIStore</h3>
-                <a href="/store/apis/info?name=api19&amp;version=1.2.3&amp;provider=admin">
-                    <b>https://localhost:9443/store?tenant=apache</b>
-                </a>
-
-
-            </div>
-        </li>
-        <li>
-            <div><h3>Tenant Lalaji's APIStore</h3>
-                <a href="/store/apis/info?name=api19&amp;version=1.2.3&amp;provider=admin">
-                    <b>https://localhost:9443/store?tenant=lalaji</b>
-                </a>
-
-
-            </div>
-        </li>
-        <li>
-            <div><h3>Tenant Lakmali's APIStore</h3>
-                <a href="/store/apis/info?name=api19&amp;version=1.2.3&amp;provider=admin">
-                    <b>https://localhost:9443/store?tenant=lakmali</b>
-                </a>
-
-
-            </div>
-        </li>
-
-    </ul>
-
-
-
-
+        </div>
+    </div>
 </div>
 
 
 <% }); %>
+

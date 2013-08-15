@@ -5,10 +5,20 @@ jagg.block("api/tenant-stores-listing", {
 
     },
 
-    getInputs:function () {
+    getOutputs:function (inputs) {        
+        var mod = jagg.module("manager");
+        var tenantDomains = mod.getActiveTenantDomains().tenantDomains;       
 
+        return {            
+            "tenantDomains":tenantDomains
+        };
+    },
+
+    getStaticBlocks:function () {
+        return [
+            "user/login"
+        ];
     }
-
 
 });
 %>
