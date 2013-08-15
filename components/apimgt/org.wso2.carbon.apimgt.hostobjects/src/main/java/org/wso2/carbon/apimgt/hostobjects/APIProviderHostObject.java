@@ -313,6 +313,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
+
+        String inSequence =  (String) apiData.get("inSequence", apiData);
+        String outSequence = (String) apiData.get("outSequence", apiData);
+        
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
@@ -379,6 +383,9 @@ public class APIProviderHostObject extends ScriptableObject {
         api.addTags(tag);
         api.setTransports(transport);
 
+        api.setInSequence(inSequence);
+        api.setOutSequence(outSequence);
+        
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
         if (tier != null) {
@@ -493,6 +500,9 @@ public class APIProviderHostObject extends ScriptableObject {
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
 
+        String inSequence =  (String) apiData.get("inSequence", apiData);
+        String outSequence = (String) apiData.get("outSequence", apiData);
+        
         if (sandboxUrl != null && sandboxUrl.trim().length() == 0) {
             sandboxUrl = null;
         }
@@ -616,7 +626,9 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setTechnicalOwner(techOwner);
         api.setTechnicalOwnerEmail(techOwnerEmail);
         api.setTransports(transport);
-
+        api.setInSequence(inSequence);
+        api.setOutSequence(outSequence);
+        
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
             api.setEndpointSecured(true);
@@ -2646,7 +2658,59 @@ public class APIProviderHostObject extends ScriptableObject {
 
     }
 
+    /**
+     * Retrieves custom sequences from registry
+     * @param cx
+     * @param thisObj
+     * @param args
+     * @param funObj
+     * @return
+     * @throws APIManagementException
+     */
+	public static NativeArray jsFunction_getCustomOutSequences(Context cx, Scriptable thisObj,
+	                                                        Object[] args, Function funObj)
+	                                                                                       throws APIManagementException {
+		APIProvider apiProvider = getAPIProvider(thisObj);
+		List<String> sequenceList = apiProvider.getCustomOutSequences();
 
+		NativeArray myn = new NativeArray(0);
+		if (sequenceList == null) {
+			return null;
+		} else {
+			for (int i = 0; i < sequenceList.size(); i++) {
+				myn.put(i, myn, sequenceList.get(i));
+			}
+			return myn;
+		}
+
+	}
+	
+	/**
+     * Retrieves custom sequences from registry
+     * @param cx
+     * @param thisObj
+     * @param args
+     * @param funObj
+     * @return
+     * @throws APIManagementException
+     */
+	public static NativeArray jsFunction_getCustomInSequences(Context cx, Scriptable thisObj,
+	                                                        Object[] args, Function funObj)
+	                                                                                       throws APIManagementException {
+		APIProvider apiProvider = getAPIProvider(thisObj);
+		List<String> sequenceList = apiProvider.getCustomInSequences();
+
+		NativeArray myn = new NativeArray(0);
+		if (sequenceList == null) {
+			return null;
+		} else {
+			for (int i = 0; i < sequenceList.size(); i++) {
+				myn.put(i, myn, sequenceList.get(i));
+			}
+			return myn;
+		}
+
+	}
 }
 
 
