@@ -117,7 +117,7 @@
                                  		 "Cookie", value:modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL))
                                   }
                                   ];
-         var payload = '<p:getAllApplications xmlns:p="http://service.mgt.application.appfactory.carbon.wso2.org"><p:domainName>'+modManager.getTenantDomain()+'</p:domainName> <p:userName>' +modManager.getTenantAwareUsername(userName) + '</p:userName><p:domainName>wso6.io</p:domainName></p:getAllApplications>';
+         var payload = '<p:getAllApplications xmlns:p="http://service.mgt.application.appfactory.carbon.wso2.org"><p:domainName>'+modManager.getTenantDomain()+'</p:domainName> <p:userName>' +modManager.getTenantAwareUsername(userName) + '</p:userName></p:getAllApplications>';
          var result;
 
          try {
@@ -193,29 +193,29 @@
         //jagg.module("permission").checkUserActionPermission(applicationKey, PERMISSION_APPLICATION_MEMBER);
         var path = APPLICATIONS + applicationKey + APP_INFO;
 
-        if (modResource.resourceExists(path)) {
-            var resource = modResource.getResource(path);
-            var resourceContent = resource.content;
-
-            if (resourceContent. *::application. *::key.text() != undefined){
+       // if (modResource.resourceExists(path)) {
+         //   var resource = modResource.getResource(path);
+            var resourceContent = server.osgiService('org.wso2.carbon.appfactory.application.mgt.service.ApplicationManagementService'). getAppInfo(modManager.getTenantDomain(),applicationKey);
+              log.info("appInfo"+resourceContent.id);
+         //   if (resourceContent. *::application. *::key.text() != undefined){
                 var application = {};
-                application.key = resourceContent. *::application. *::key.text();
-                application.name = resourceContent. *::application. *::name.text();
-                application.description = resourceContent. *::application. *::description.text();
-                application.type = resourceContent. *::application. *::type.text();
+                application.key = resourceContent.id;
+                application.name = resourceContent.name;
+                application.description = resourceContent.description;
+                application.type = resourceContent.type;
                 application.typeDisplayName = getProperty("ApplicationType." + application.type + ".Property.DisplayName");
                
-                application.repositoryType = resourceContent. *::application. *::repositorytype.text();
+                application.repositoryType = resourceContent.repositorytype;
                
                 application.repositoryTypeDisplayName = getProperty("RepositoryProviderConfig."+ application.repositoryType + ".Property.DisplayName");
                 
                // application.roles = modApplication.getUserRolesForApplication(application.key, application.name);
-                if(username != null){
-                	application.roles = modApplication.getUserRolesForApplication(application.key, username);
-                }
+       //         if(username != null){
+         //       	application.roles = modApplication.getUserRolesForApplication(application.key, username);
+           //     }
                 return application;
-            }
-        }
+           // }
+       // }
 
         return null;
     }
@@ -383,7 +383,7 @@
     ;
 
     var getBranchInfo= function(applicationKey){
-    	return getApplicationManagementService().getBasicApplicationInfo(applicationKey);
+    	return getApplicationManagementService().getBasicApplicationInfo(modManager.getTenantDomain(),applicationKey);
     }
     
     var getApplicationManagementService=function(){

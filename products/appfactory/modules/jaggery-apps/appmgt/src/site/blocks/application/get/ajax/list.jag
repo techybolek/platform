@@ -121,13 +121,14 @@ var log=new Log();
             	var info = mod.getBranchInfo(exApp.key);
             	exApp.branches = info.branchCount;
             	exApp.inProduction = info.production;
+                exApp.roles='appOwner/nDeveloper'
                 var userRoles=exApp.roles.split('\n');  //to get role names
                 var rolesDisplayNames=[];
                 for(var r in userRoles){
                     var role= getProperty("ApplicationRoles.Role." + userRoles[r] + ".DisplayName"); //get the display name of the role
                     rolesDisplayNames.push(role);
                 }
-            	exApp.roles = rolesDisplayNames.join(', '); //send to front in displayable format
+              	exApp.roles = rolesDisplayNames.join(', '); //send to front in displayable format
 
             } 
             
