@@ -1,0 +1,310 @@
+<!--
+
+  ~  Copyright (c) 2005-2010, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+  ~
+  ~  WSO2 Inc. licenses this file to you under the Apache License,
+  ~  Version 2.0 (the "License"); you may not use this file except
+  ~  in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+
+-->
+<automation>
+    <!--  =================================================  -->
+    <!--                   Parameters                        -->
+    <!--  =================================================  -->
+    <configurations>
+        <!--
+         Change this to edit wait time for test artifact deployment
+        -->
+        <deploymentDelay>60000</deploymentDelay>
+        <!--
+         Change this to product|platform/cloud to execute test on specific environment
+        -->
+        <executionEnvironment>product</executionEnvironment>
+        <!--
+         Change this to user/tenant to execute test with user mode or tenant mode
+        -->
+        <executionMode>user</executionMode>
+        <!--
+         Change this to true if you want to enable cloud mode
+        -->
+        <cloudEnabled>true</cloudEnabled>
+        <!--
+         Change this to true if you want to enable to run tests on clustered environment
+        -->
+        <clustering>false</clustering>
+        <!--
+         Change this to true if you want to generate coverage statistics
+        -->
+        <coverage>true</coverage>
+        <!--
+         Change this to true if you want to enable framework dashboard
+        -->
+        <frameworkDashboard>false</frameworkDashboard>
+        <!--
+         Browser type with used by framework to execute UI test, supported types - chrome|firefox|opera|ie|htmlUnit
+        -->
+    </configurations>
+    <tools>
+        <selenium>
+            <!-- Change to enable remote webDriver -->
+            <!-- URL of remote webDriver server  -->
+            <remoteDriverUrl enable="true">http://10.100.2.51:4444/wd/hub/</remoteDriverUrl>
+
+            <!-- Type of the browser selenium tests are running" -->
+            <browser>
+                <browserType>firefox</browserType>
+                <!-- path to webDriver executable - required only for chrome-->
+                <webdriverPath enable="false">/home/test/name/webDriver</webdriverPath>
+            </browser>
+        </selenium>
+    </tools>
+    <!--
+    Database configuration to be used for data service testing. DB configuration in dbs files will be replaced with
+               below configuration at test run time
+    -->
+    <databases>
+        <database name="dataService">
+            <url>jdbc:h2:testDB</url>
+            <username>wso2carbon</username>
+            <password>wso2carbon</password>
+            <driverClassName>org.h2.Driver</driverClassName>
+        </database>
+        <database name="testDashboard">
+            <url>jdbc:mysql://127.0.0.1:3306/FRAMEWORK_DB</url>
+            <username>root</username>
+            <password>root</password>
+            <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+        </database>
+        <database name="rss">
+            <username>testUser1</username>
+            <password>testUser1</password>
+        </database>
+    </databases>
+    <security>
+        <!--
+                    KeyStore which will be used for encrypting/decrypting passwords
+                    and other sensitive information.
+        -->
+        <keystore name="wso2">
+            <!--  Keystore file location -->
+            <fileName>wso2carbon.jks</fileName>
+            <!--  Keystore type (JKS/PKCS12 etc.) -->
+            <type>JKS</type>
+            <!--  Keystore password -->
+            <password>wso2carbon</password>
+            <!--  Private Key alias -->
+            <keyAlias>wso2carbon</keyAlias>
+            <!--  Private Key password -->
+            <keyPassword>wso2carbon</keyPassword>
+        </keystore>
+        <!--
+                    System wide trust-store which is used to maintain the certificates of all
+                    the trusted parties.
+        -->
+        <truststore name="wso2">
+            <!--  trust-store file location  -->
+            <fileName>client-truststore.jks</fileName>
+            <!--  trust-store type (JKS/PKCS12 etc.)  -->
+            <type>JKS</type>
+            <!--  trust-store password  -->
+            <password>wso2carbon</password>
+        </truststore>
+    </security>
+    <featureManagement>
+        <p2Repositories>
+            <repository repo-id="online-repository">https://wso2.org/repo</repository>
+            <repository repo-id="file-repository">file:///home/krishantha/test</repository>
+        </p2Repositories>
+    </featureManagement>
+    <!--
+               System wide users who to be registered at the test initiation
+    -->
+    <userManagement>
+        <tenant key="testten1" domain="carbon.super">
+            <!-- superTenant element illustrates this tenant will act as a super tenet -->
+            <tenantAdmin>
+                <userName>admin</userName>
+                <password>admin</password>
+            </tenantAdmin>
+            <tenantUsers>
+                <user key="user1">
+                    <userName>test1</userName>
+                    <password>123</password>
+                </user>
+                <user key="user2">
+                    <userName>test1</userName>
+                    <password>123</password>
+                </user>
+            </tenantUsers>
+        </tenant>
+        <tenant key="testten1" domain="test.domain">
+            <tenantAdmin>
+                <userName>testadmin</userName>
+                <password>admin123</password>
+            </tenantAdmin>
+            <tenantUsers>
+                <user key="user1">
+                    <userName>test1</userName>
+                    <password>123</password>
+                </user>
+                <user key="user2">
+                    <userName>test2</userName>
+                    <password>123</password>
+                </user>
+            </tenantUsers>
+        </tenant>
+    </userManagement>
+    <!--
+   This section will initiate the initial deployment of the platform required by
+   the test suites.
+-->
+    <platform>
+        <product id="AS">
+            <!--
+            cluster instance details to be used to platform test execution
+            -->
+            <cluster>
+                <!--
+                     List of workers which will assign id the suite is directed to execute
+                         in a clustered environment with worker manager separation
+                -->
+                <!--Types worker/manager/lb_worker/lb_manager-->
+                <instance name="asw001" type="worker">
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance name="asw002" type="worker">
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <!--
+                    List of managers which will assign id the suite is directed to execute
+                        in a clustered environment with worker manager separation
+                   -->
+                <instance name="asm001" type="manager">
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance name="asm002" type="manager">
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <!--Configuration of the fronted LB on a LB fronted deployment-->
+                <instance name="lbw001" type="lb_worker">
+                    <host>localhost</host>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance name="lbm001" type="lb_manager">
+                    <host>localhost</host>
+                    <httpport>9765</httpport>
+                    <httpsport>9445</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+            </cluster>
+            <!--
+            Product instance details to be used for integration test level
+            -->
+            <instances>
+                <!--Types individual/lb-->
+                <instance type="individual" id="001">
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance type="individual" id="002">
+                    <host>localhost</host>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance type="lb" id="lb002">
+                    <host>localhost</host>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+            </instances>
+        </product>
+        <product id="ESB">
+            <cluster>
+                <instance name="esbw001" type="instance">
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance name="esbw002" type="instance">
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance name="esbm001" type="manager">
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance name="esbm002" type="manager">
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance name="lbw001" type="lb_worker">
+                    <host>localhost</host>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance name="lbm001" type="lb_manager">
+                    <host>localhost</host>
+                    <httpport>9765</httpport>
+                    <httpsport>9445</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+            </cluster>
+            <instances>
+                <instance type="individual" id="in001">
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance type="individual" id="in002">
+                    <host>localhost</host>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+                <instance type="lb" id="lb002">
+                    <host>localhost</host>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
+                    <webContext>/</webContext>
+                </instance>
+            </instances>
+        </product>
+    </platform>
+</automation>
