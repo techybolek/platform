@@ -51,6 +51,7 @@ public abstract class AbstractTwitterConnector extends AbstractConnector {
 	 */
 	public OMElement parseJsonToXml(String sb) throws JSONException, XMLStreamException,
 			IOException {
+		System.out.println("test");
 		StringWriter sw = new StringWriter(5120);
 		org.codehaus.jettison.json.JSONObject jsonObject = new org.codehaus.jettison.json.JSONObject(
 				sb);
