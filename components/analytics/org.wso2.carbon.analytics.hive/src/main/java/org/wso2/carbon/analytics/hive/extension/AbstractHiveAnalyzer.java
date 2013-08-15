@@ -17,11 +17,10 @@ package org.wso2.carbon.analytics.hive.extension;
 
 import org.apache.hadoop.hive.metastore.HiveContext;
 
-import java.util.Map;
-
+@Deprecated
 public abstract class AbstractHiveAnalyzer {
 
-    public abstract void execute(Map<String,String> parameters);
+    public abstract void execute();
 
     public void setProperty(String key, String value) {
         HiveContext.getCurrentContext().setProperty(key, value);

@@ -18,21 +18,18 @@ package org.wso2.carbon.analytics.hive.extension.builtin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.analytics.hive.extension.AnalyzerContext;
+import org.wso2.carbon.analytics.hive.extension.HiveAnalyzer;
 
-import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
-
-import java.util.Map;
-
-public class ResolvePathAnalyzer extends AbstractHiveAnalyzer {
-
+public class ResolvePathAnalyzer implements HiveAnalyzer {
 
     private static final Log log = LogFactory.getLog(ResolvePathAnalyzer.class);
 
     @Override
-    public void execute(Map<String,String> parameters) {
+    public void execute(AnalyzerContext analyzerContext) {
         String path = null;
 
-        String filePath= parameters.get("path");
+        String filePath= analyzerContext.getParameters().get("path");
 
         try {
             path = resolvePath(filePath);
@@ -40,7 +37,7 @@ public class ResolvePathAnalyzer extends AbstractHiveAnalyzer {
             log.error("Couldn't resolve file path", e);
         }
         if (path != null) {
-            setProperty("FILE_PATH", path);
+            analyzerContext.setProperty("FILE_PATH", path);
         }
     }
 

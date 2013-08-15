@@ -57,5 +57,8 @@ public class HiveConstants {
     public static final String ANALYZER_NAME_ELEMENT = "name";
     public static final String ANALYZER_CLASS_ELEMENT = "class";
     public static final String ANALYZER_PARAMS_ELEMENT = "parameters";
+    public static final String ANALYZER_KEY = "analyzer";
+
+
 
 }

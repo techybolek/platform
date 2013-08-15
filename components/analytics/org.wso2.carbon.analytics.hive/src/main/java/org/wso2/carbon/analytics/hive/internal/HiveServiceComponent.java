@@ -15,7 +15,6 @@
  */
 package org.wso2.carbon.analytics.hive.internal;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.common.ServerUtils;
@@ -30,11 +29,12 @@ import org.apache.thrift.transport.TTransportFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.analytics.hive.HiveConstants;
 import org.wso2.carbon.analytics.hive.ServiceHolder;
 import org.wso2.carbon.analytics.hive.Utils;
 import org.wso2.carbon.analytics.hive.exception.AnalyzerConfigException;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
-import org.wso2.carbon.analytics.hive.extension.util.AnalyzerBuilder;
+import org.wso2.carbon.analytics.hive.extension.util.AnalyzerFactory;
 import org.wso2.carbon.analytics.hive.impl.HiveExecutorServiceImpl;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
 import org.wso2.carbon.analytics.hive.web.HiveScriptStoreService;
@@ -46,6 +46,7 @@ import org.wso2.carbon.rssmanager.core.service.RSSManagerService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.utils.ServerConstants;
 
 import java.io.File;
 import java.util.Map;
@@ -114,8 +115,10 @@ public class HiveServiceComponent {
         hiveServerPool.submit(new HiveRunnable());
 
         try {
-            OMElement config= AnalyzerBuilder.loadConfigXML();
-            AnalyzerBuilder.populateAnalyzers(config);
+            String carbonConf = System.getProperty(ServerConstants.CARBON_CONFIG_DIR_PATH);
+            String path = carbonConf + File.separator + HiveConstants.ANALYZER_CONFIG_XML;
+
+            AnalyzerFactory.loadAnalyzers(path);
         } catch (AnalyzerConfigException e) {
             String errorMessage = "Error loading analyzer-config.xml";
             log.error(errorMessage, e);

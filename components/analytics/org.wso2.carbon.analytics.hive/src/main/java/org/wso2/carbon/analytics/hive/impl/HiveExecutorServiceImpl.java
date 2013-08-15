@@ -25,10 +25,14 @@ import org.wso2.carbon.analytics.hive.Utils;
 import org.wso2.carbon.analytics.hive.dto.QueryResult;
 import org.wso2.carbon.analytics.hive.dto.QueryResultRow;
 import org.wso2.carbon.analytics.hive.dto.ScriptResult;
+import org.wso2.carbon.analytics.hive.exception.AnalyzerConfigException;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
 import org.wso2.carbon.analytics.hive.exception.RegistryAccessException;
+import org.wso2.carbon.analytics.hive.extension.AnalyzerContext;
+import org.wso2.carbon.analytics.hive.extension.HiveAnalyzer;
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
-import org.wso2.carbon.analytics.hive.extension.util.AnalyzerBuilder;
+import org.wso2.carbon.analytics.hive.extension.AnalyzerMeta;
+import org.wso2.carbon.analytics.hive.extension.util.AnalyzerHolder;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveMultitenantUtil;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveRSSMetastoreManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
@@ -323,7 +327,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                         executeClassAnalyzer(trimmedCmdLine);
 
                     } else if (trimmedCmdLine.startsWith("analyzer") ||    // custom analyzer for executing custom logic with parameters
-                            trimmedCmdLine.startsWith("CLASS")) {
+                            trimmedCmdLine.startsWith("ANALYZER")) {
                         executeAnalyzer(trimmedCmdLine);
 
                     } else { // Normal hive query
@@ -380,6 +384,11 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                 result.setErrorMessage("Error while executing Hive script." + e.getMessage());
 
                 return result;
+            } catch (AnalyzerConfigException e) {
+                ScriptResult result = new ScriptResult();
+                result.setErrorMessage("Error while executing Hive analyzer." + e.getMessage());
+
+                return result;
             } finally {
                 if (null != con) {
                     try {
@@ -392,13 +401,16 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
         }
 
 
-        private void executeAnalyzer(String trimmedCmdLine) {
-            String name = "";
-            String conf = "";
-            HashMap<String, String> parameters = new HashMap<String, String>(); // annotation execution
-            String[] tokens = trimmedCmdLine.split("analyzer");
+        private void executeAnalyzer(String trimmedCmdLine) throws AnalyzerConfigException {
+            String name;
+            String conf;
+            HashMap<String, String> parameters = new HashMap<String, String>();
+            String[] tokens = trimmedCmdLine.split(HiveConstants.ANALYZER_KEY);
             if (tokens != null && tokens.length >= 2) {
                 conf = tokens[1];
+            } else {
+                String errorMessage = "Error in parameter parsing: " + trimmedCmdLine;
+                throw new AnalyzerConfigException(errorMessage);
             }
 
             String regEx = "(\\(.*\\))";
@@ -406,69 +418,83 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
             String[] tokensName = conf.trim().split(regEx);
 
 
-            if (tokensName != null && tokensName.length >= 2) {
+            if (tokensName != null) {
                 name = tokensName[0];
+            } else {
+                String errorMessage = "Error in processing analyzer command " + trimmedCmdLine;
+                throw new AnalyzerConfigException(errorMessage);
             }
-            // Round Braces 1
 
-            Pattern p = Pattern.compile(regEx, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-            Matcher m = p.matcher(conf.trim());
-            if (m.find()) {
-                String rBraces = m.group(1);
+            Pattern pattern = Pattern.compile(regEx, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            Matcher matcher = pattern.matcher(conf.trim());
+            if (matcher.find()) {
+                String rBraces = matcher.group(1);
                 int temp = rBraces.trim().length();
 
                 String s = rBraces.substring(1, temp - 1);
 
                 String[] variables = s.split(",");
 
-                for (String g : variables) {
-                    String[] values = g.split("=");
+                for (String variable : variables) {
+                    String[] values = variable.split("=");
                     String key = values[0].trim();
                     String valueTemp = values[1].trim();
                     String value = valueTemp.substring(1, valueTemp.length() - 1);
                     parameters.put(key, value);
                 }
+            }else{
+                parameters =null;
             }
 
-            Map<String, Set<String>> paramConf = AnalyzerBuilder.getAnalyzerParams();
+            String className;
 
-            Map<String, String> analyzerConf = AnalyzerBuilder.getAnalyzerClasses();
+            if (AnalyzerHolder.isAnalyzer(name)) {
+                AnalyzerMeta analyzerMeta = AnalyzerHolder.getAnalyzer(name);
 
-
-            Set<String> paramValues = paramConf.get(name);
-            Set<String> params = parameters.keySet();
-
-            if (paramValues == null || paramValues.size() != params.size() || !paramValues.containsAll(params)) {
-                log.warn("No variables defined under this analyzer or variable definition mismatch...");
+                Set<String> paramValues = analyzerMeta.getParameters();
+                Set<String> params = parameters.keySet();
+                className = analyzerMeta.getClassAnalyzer();
+                if (paramValues.size() != params.size() || !paramValues.containsAll(params)) {
+                    log.warn("No variables defined under this analyzer or variable definition mismatch...");
+                }
+            } else {
+                log.warn("No alias found and loading as a analyzer class ..");
+                className = name;
             }
 
-            String className = analyzerConf.get(name);
-            Class clazz = null;
+            AnalyzerContext analyzerContext= new AnalyzerContext();
+
+            analyzerContext.setAnalyzerName(name);
+            analyzerContext.setParameters(parameters);
+
+            Class clazz;
             try {
                 clazz = Class.forName(className, true,
                         this.getClass().getClassLoader());
             } catch (ClassNotFoundException e) {
                 log.error("Unable to find custom analyzer class..", e);
+                return;
             }
 
             if (clazz != null) {
-                Object analyzer = null;
+                Object analyzer;
                 try {
                     analyzer = clazz.newInstance();
                 } catch (InstantiationException e) {
                     log.error("Unable to instantiate custom analyzer class..", e);
+                    return;
                 } catch (IllegalAccessException e) {
                     log.error("Unable to instantiate custom analyzer class..", e);
+                    return;
                 }
 
-                if (analyzer instanceof AbstractHiveAnalyzer) {
-                    AbstractHiveAnalyzer hiveAnnotation =
-                            (AbstractHiveAnalyzer) analyzer;
+                if (analyzer instanceof HiveAnalyzer) {
+                    HiveAnalyzer hiveAnalyzer =
+                            (HiveAnalyzer) analyzer;
 
-
-                    hiveAnnotation.execute(parameters);
+                    hiveAnalyzer.execute(analyzerContext);
                 } else {
-                    log.error("Custom analyzers should extend AbstractHiveAnalayzer..");
+                    log.error("Custom analyzers should extend HiveAnalyzer..");
                 }
 
             }
@@ -666,7 +692,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                     if (analyzer instanceof AbstractHiveAnalyzer) {
                         AbstractHiveAnalyzer hiveAnalyzer =
                                 (AbstractHiveAnalyzer) analyzer;
-                        hiveAnalyzer.execute(null);
+                        hiveAnalyzer.execute();
                     } else {
                         log.error("Custom analyzers should extend AbstractHiveAnalyzer..");
                     }
