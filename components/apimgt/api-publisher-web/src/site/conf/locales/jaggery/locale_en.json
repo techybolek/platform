@@ -226,5 +226,6 @@
     "throttlingTier":"Throttling Tier",
 	"sequence":"Sequence",
     "inFlow":"In Flow",
-    "outFlow":"Out Flow"
+    "outFlow":"Out Flow",
+    "sequenceMsg":"Check to select  a custom sequence to be executed in the message flow"
 }

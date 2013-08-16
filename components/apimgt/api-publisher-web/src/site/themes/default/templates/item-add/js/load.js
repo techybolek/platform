@@ -259,3 +259,11 @@ function loadOutSequences() {
 				}
 			}, "json");
 }
+
+function toggleSequence(checkbox){
+	if($(checkbox).is(":checked")){
+		$(checkbox).parent().next().show();
+	}else{
+		$(checkbox).parent().next().hide();
+	}
+}

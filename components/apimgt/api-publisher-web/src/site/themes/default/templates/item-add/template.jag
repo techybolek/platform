@@ -170,11 +170,16 @@
                         <p class="help-block"><%=i18n.localize("sandboxHelpMsg")%></p>
                     </div>
                 </div>
-
+               
                <div class="control-group">
                 <label class="control-label" for="sequence"><%=i18n.localize("sequence")%>:</label>
+                
+                
                 <div class="controls">
-                	<table class="table table-bordered table-striped" id="seqTable">
+                	<label class="checkbox">
+                		<input type="checkbox" onclick="toggleSequence(this)" name="sequence_check"><%=i18n.localize("sequenceMsg")%>
+                	</label>
+                	<table class="table table-bordered table-striped" id="seqTable" style="display:none">
                 		<thead>
                 			<tr>
                 				<th><%=i18n.localize("inFlow")%></th>
