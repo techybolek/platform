@@ -92,7 +92,7 @@ public class APIGatewayManager {
 					// We need to remove the api from the environment since its
 					// relevant url has been removed.
 					client.deleteApi(tenantDomain);
-					undeployCustomSequences(api, environment);
+					undeployCustomSequences(api,tenantDomain, environment);
 				} else {
 					if (debugEnabled) {
 						log.debug("API exists, updating existing API " + api.getId().getApiName() +
@@ -148,7 +148,7 @@ public class APIGatewayManager {
 					          environment.getName());
 				}
 				client.deleteApi(tenantDomain);
-				undeployCustomSequences(api, environment);
+				undeployCustomSequences(api, tenantDomain,environment);
 			}
 		}
 	}
@@ -209,7 +209,7 @@ public class APIGatewayManager {
 	        		inSequence.setName(inSeqExt);
 	        		inSequence.setFileName(inSeqExt);
 	        		OMElement sequence = seqSerializer.serializeSpecificMediator(inSequence);
-	        		seqClient.addSequence(sequence);
+	        		seqClient.addSequence(sequence,tenantDomain);
 	        	}
 	        }
 
@@ -223,7 +223,7 @@ public class APIGatewayManager {
 	        		outSequence.setName(outSeqExt);
 	        		outSequence.setFileName(outSeqExt);
 	        		OMElement sequence = seqSerializer.serializeSpecificMediator(outSequence);
-	        		seqClient.addSequence(sequence);
+	        		seqClient.addSequence(sequence,tenantDomain);
 
 	        	}
 	        }
@@ -243,18 +243,18 @@ public class APIGatewayManager {
 	 * @param environment
 	 * @throws APIManagementException
 	 */
-	private void undeployCustomSequences(API api, Environment environment) {	
+	private void undeployCustomSequences(API api,String tenantDomain, Environment environment) {	
 		
 		try {
 			SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
 
 			if (api.getInSequence() != null) {			
 				String inSequence = APIUtil.getSequenceExtensionName(api) + "--In";
-				seqClient.deleteSequence(inSequence);
+				seqClient.deleteSequence(inSequence,tenantDomain);
 			} 
 			if (api.getOutSequence() != null) {			
 				String outSequence = APIUtil.getSequenceExtensionName(api) + "--Out";
-				seqClient.deleteSequence(outSequence);
+				seqClient.deleteSequence(outSequence,tenantDomain);
 			}
 			
 			// when deleting the API we pass apiIdentifier, which contains few
@@ -264,11 +264,11 @@ public class APIGatewayManager {
 				String sequence = APIUtil.getSequenceExtensionName(api);
 				String inSequenceName = sequence + "--In";
 				String outSequenceName = sequence + "--Out";
-				if (seqClient.getSequence(inSequenceName) != null) {
-					seqClient.deleteSequence(inSequenceName);
+				if (seqClient.getSequence(inSequenceName,tenantDomain) != null) {
+					seqClient.deleteSequence(inSequenceName,tenantDomain);
 				}
-				if (seqClient.getSequence(outSequenceName) != null) {
-					seqClient.deleteSequence(outSequenceName);
+				if (seqClient.getSequence(outSequenceName,tenantDomain) != null) {
+					seqClient.deleteSequence(outSequenceName,tenantDomain);
 				}
 			}
 			
@@ -292,16 +292,16 @@ public class APIGatewayManager {
 			SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
 			if (api.getInSequence() != null) {				
 				String inSequence = APIUtil.getSequenceExtensionName(api)+ "--In";
-				if (seqClient.getSequence(inSequence) != null) {
-					seqClient.deleteSequence(inSequence);
+				if (seqClient.getSequence(inSequence,tenantDomain) != null) {
+					seqClient.deleteSequence(inSequence,tenantDomain);
 					deployCustomSequences(api, tenantDomain, environment);
 				}
 			}
 			if (api.getOutSequence() != null) {
 			
 				String outSequence = APIUtil.getSequenceExtensionName(api)+ "--Out";
-				if (seqClient.getSequence(outSequence) != null) {
-					seqClient.deleteSequence(outSequence);
+				if (seqClient.getSequence(outSequence,tenantDomain) != null) {
+					seqClient.deleteSequence(outSequence,tenantDomain);
 					deployCustomSequences(api, tenantDomain, environment);
 				}
 			}

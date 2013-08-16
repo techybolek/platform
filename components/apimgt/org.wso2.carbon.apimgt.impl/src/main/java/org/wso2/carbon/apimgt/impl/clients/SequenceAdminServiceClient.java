@@ -23,6 +23,7 @@ import org.apache.axis2.AxisFault;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.AbstractAPIGatewayAdminClient;
 import org.wso2.carbon.sequences.stub.types.SequenceAdminServiceStub;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * SequenceAdmin service client to deploy the custom sequences to multiple gateway environemnets.
@@ -42,11 +43,18 @@ public class SequenceAdminServiceClient extends AbstractAPIGatewayAdminClient {
 	 * Deploy the sequence to the gateway
 	 * 
 	 * @param sequence  - The sequence element , which to be deployed in synapse
+	 * @param tenantDomain
 	 * @throws AxisFault
 	 */
-	public void addSequence(OMElement sequence) throws AxisFault {
+	public void addSequence(OMElement sequence, String tenantDomain) throws AxisFault {
 		try {
-			sequenceAdminStub.addSequence(sequence);
+			if (tenantDomain != null && !("").equals(tenantDomain) &&
+			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+				sequenceAdminStub.addSequenceForTenant(sequence, tenantDomain);
+			} else {
+				sequenceAdminStub.addSequence(sequence);
+			}
+
 		} catch (Exception e) {
 			throw new AxisFault("Error while adding new sequence", e);
 		}
@@ -55,24 +63,40 @@ public class SequenceAdminServiceClient extends AbstractAPIGatewayAdminClient {
 	/**
 	 * Undeploy the sequence from gateway
 	 * @param sequenceName -The sequence name, which need to be undeployed from synapse configuration
+	 * @param tenantDomain
 	 * @throws AxisFault
 	 */
-	public void deleteSequence(String  sequenceName) throws AxisFault {
+	public void deleteSequence(String sequenceName, String tenantDomain) throws AxisFault {
 		try {
-			sequenceAdminStub.deleteSequence(sequenceName);
+			if (tenantDomain != null && !("").equals(tenantDomain) &&
+			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+				sequenceAdminStub.deleteSequenceForTenant(sequenceName, tenantDomain);
+			} else {
+				sequenceAdminStub.deleteSequence(sequenceName);
+			}
+
 		} catch (Exception e) {
 			throw new AxisFault("Error while deleting sequence", e);
 		}
 	}
-	
+
 	/**
 	 * get the sequence from gateway
-	 * @param sequenceName -The sequence name,
+	 * 
+	 * @param sequenceName
+	 *            -The sequence name,
+	 * @param tenantDomain
 	 * @throws AxisFault
 	 */
-	public OMElement getSequence(String  sequenceName) throws AxisFault {
+	public OMElement getSequence(String sequenceName, String tenantDomain) throws AxisFault {
 		try {
-			return sequenceAdminStub.getSequence(sequenceName);
+			if (tenantDomain != null && !("").equals(tenantDomain) &&
+			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+				return (OMElement) sequenceAdminStub.getSequenceForTenant(sequenceName, tenantDomain);
+			} else {
+				return  (OMElement) sequenceAdminStub.getSequence(sequenceName);
+			}
+			
 		} catch (Exception e) {
 			throw new AxisFault("Error while retriving the sequence", e);
 		}
