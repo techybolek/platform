@@ -87,7 +87,7 @@ public class UserStoreConfigAdminServiceClient {
      * @throws Exception
      */
     public void addUserStore(UserStoreDTO userStoreDTO) throws Exception {
-         stub.addUserStore(userStoreDTO,true);
+         stub.addUserStore(userStoreDTO);
     }
 
     /**
