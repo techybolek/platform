@@ -126,7 +126,7 @@ public class SCIMUserManager implements UserManager {
             String[] userNames = carbonUM.getUserList(SCIMConstants.ID_URI, userId,
                                                       UserCoreConstants.DEFAULT_PROFILE);
 
-            if (userNames == null && userNames.length == 0) {
+            if (userNames == null || userNames.length == 0) {
                 if (log.isDebugEnabled()) {
                     log.debug("User with SCIM id: " + userId + " does not exist in the system.");
                 }
@@ -557,6 +557,20 @@ public class SCIMUserManager implements UserManager {
             if (log.isDebugEnabled()) {
                 log.debug("Updating group: " + oldGroup.getDisplayName());
             }
+            
+            /*we need to set the domain name for the newGroup if it doesn't have it */
+            // we should be able get the domain name like bellow, cause we set it by force at create group
+            String domainName = oldGroup.getDisplayName().split(CarbonConstants.DOMAIN_SEPARATOR)[0];
+            String newGroupName = newGroup.getDisplayName();
+            if (newGroupName.indexOf(CarbonConstants.DOMAIN_SEPARATOR) < 1) {
+            	// set the domain name 
+            	 String newGroupNameWithDomain = domainName + CarbonConstants.DOMAIN_SEPARATOR + newGroupName;
+            	 if(log.isDebugEnabled()) {
+            		 log.debug("Updated the group name to: " + newGroupNameWithDomain);
+            	 }
+            	 newGroup.setDisplayName(newGroupNameWithDomain);
+            }
+            
             try {
                 /*set thread local property to signal the downstream SCIMUserOperationListener
                 about the provisioning route.*/
@@ -714,6 +728,11 @@ public class SCIMUserManager implements UserManager {
             if (attributes.containsKey(SCIMConstants.ADDRESSES_URI)) {
                 attributes.remove(SCIMConstants.ADDRESSES_URI);
             }
+            // with the JDBC userstore manager the userName is not returned as a claim, so adding it
+            if(!attributes.containsKey(SCIMConstants.USER_NAME_URI)) {
+            	attributes.put(SCIMConstants.USER_NAME_URI, userName);
+            }
+            
             //get groups of user and add it as groups attribute
             String[] roles = carbonUM.getRoleListOfUser(userName);
             //construct the SCIM Object from the attributes
