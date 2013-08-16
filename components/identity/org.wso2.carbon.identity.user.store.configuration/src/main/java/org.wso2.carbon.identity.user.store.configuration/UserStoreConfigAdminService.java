@@ -160,9 +160,9 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
      * @throws TransformerException
      * @throws ParserConfigurationException
      */
-    public void addUserStore(UserStoreDTO userStoreDTO, Boolean isAdd) throws UserStoreException {
+    public void addUserStore(UserStoreDTO userStoreDTO) throws UserStoreException {
         String domainName = userStoreDTO.getDomainId();
-        if(!xmlProcessorUtils.isValidDomain(domainName,isAdd)){
+        if(!xmlProcessorUtils.isValidDomain(domainName,true)){
             throw new UserStoreException("Invalid domain name submitted.");
         }
         File userStoreConfigFile = createConfigurationFile(domainName);
@@ -171,7 +171,6 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
             //throw
             userStoreConfigFile.delete();
         }
-
         writeUserMgtXMLFile(userStoreConfigFile,userStoreDTO);
     }
 
@@ -184,7 +183,18 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
      * @throws ParserConfigurationException
      */
     public void editUserStore(UserStoreDTO userStoreDTO) throws UserStoreException {
-        addUserStore(userStoreDTO, false);
+        boolean isAdd = false;
+        String domainName = userStoreDTO.getDomainId();
+        if(!xmlProcessorUtils.isValidDomain(domainName,isAdd)){
+            throw new UserStoreException("Invalid domain name submitted.");
+        }
+        File userStoreConfigFile = createConfigurationFile(domainName);
+        // This part makes this method to used for editing as well
+        if (userStoreConfigFile.exists()) {
+            //throw
+            userStoreConfigFile.delete();
+        }
+
     }
 
     /**
@@ -386,7 +396,7 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
                 userStoreProperties.put("Class", className);
                 userStoreProperties.put("Disabled", isDisable.toString());
                 userStoreDTO.setProperties(convertMapToArray(userStoreProperties));
-                addUserStore(userStoreDTO, true);
+                addUserStore(userStoreDTO);
                 break;
             }
             secondaryRealmConfiguration = secondaryRealmConfiguration.getSecondaryRealmConfig();
