@@ -31,6 +31,7 @@ import org.apache.axiom.soap.SOAPFactory;
 import org.wso2.carbon.caching.core.CachableResponse;
 import org.wso2.carbon.caching.core.CachingConstants;
 import org.wso2.carbon.caching.core.CachingException;
+import org.wso2.carbon.caching.core.util.CachingUtils;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
@@ -40,6 +41,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 public class CacheMessageReceiver extends AbstractMessageReceiver {
+
+
+    private  static int i=0;
 
     /**
      * This variable will hold the log4j appender
@@ -79,21 +83,24 @@ public class CacheMessageReceiver extends AbstractMessageReceiver {
                 
                 Object cachedObj =
                         opCtx.getPropertyNonReplicable(CachingConstants.CACHED_OBJECT);
-                if (cachedObj != null && cachedObj instanceof CachableResponse) {
+                /**
+                 * This was introduced to  avoid cache being expired before this below code executed.
+                 */
+                byte [] bt = (byte[]) opCtx.getPropertyNonReplicable(CachingConstants.CACHEENVELOPE);
+
+                if (bt != null ) {
                     try {
                         MessageFactory mf = MessageFactory.newInstance();
                         SOAPMessage smsg;
                         if (messageCtx.isSOAP11()) {
-                            smsg = mf.createMessage(new MimeHeaders(), new ByteArrayInputStream(
-                                    ((CachableResponse) cachedObj).getResponseEnvelope()));
+                            smsg = mf.createMessage(new MimeHeaders(), new ByteArrayInputStream(bt));
                             ((CachableResponse) cachedObj).setInUse(false);
                         } else {
                             MimeHeaders mimeHeaders = new MimeHeaders();
                             mimeHeaders.addHeader("Content-ID", IDGenerator.generateID());
                             mimeHeaders.addHeader("content-type",
                                     HTTPConstants.MEDIA_TYPE_APPLICATION_SOAP_XML);
-                            smsg = mf.createMessage(mimeHeaders, new ByteArrayInputStream(
-                                    ((CachableResponse) cachedObj).getResponseEnvelope()));
+                            smsg = mf.createMessage(mimeHeaders, new ByteArrayInputStream(bt));
                             ((CachableResponse) cachedObj).setInUse(false);
                         }
 

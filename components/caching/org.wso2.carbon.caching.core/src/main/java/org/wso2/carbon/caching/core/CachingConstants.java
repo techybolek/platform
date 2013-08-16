@@ -93,4 +93,6 @@ public final class CachingConstants {
 
     /** Default cache size (in-memory) */
     public static final int DEFAULT_CACHE_SIZE = 1000;
+
+    public static final String CACHEENVELOPE = "cacheEnvelop";
 }

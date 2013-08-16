@@ -92,7 +92,11 @@ public class CachableResponse implements Serializable {
      */
     public void reincarnate(long timeout) {
         if(!isExpired()){
-            throw new IllegalStateException("Unexpired Cached Responses cannot be reincarnated");
+            /**
+             * This cause a concurrency modification issue, when another thread has already updated the cache. previous code gives an error
+             * It should not give an error, instead it should return.
+             */
+            return;
         }
         responseEnvelope = null;
         responseHash = null;

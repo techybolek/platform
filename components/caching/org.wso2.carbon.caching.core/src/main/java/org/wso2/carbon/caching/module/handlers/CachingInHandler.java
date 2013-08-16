@@ -108,6 +108,19 @@ public class CachingInHandler extends CachingHandler {
                 //mark CachedObject as in use to prevent cleanup
                 cachedResponse.setInUse(true);
                 opCtx.setNonReplicableProperty(CachingConstants.CACHED_OBJECT, cachedResponse);
+
+                /**
+                 * Following change was done due to concurrency issue, There is a minimal chance to expire the cache before the rest of the code execute.
+                 * That cause an error for refering to a cache object which does not exist.
+                 *
+                 */
+                byte [] bt =   cachedResponse.getResponseEnvelope();
+                if(bt != null)  {
+                    opCtx.setNonReplicableProperty(CachingConstants.CACHEENVELOPE, bt);
+                } else {
+                    return InvocationResponse.CONTINUE;
+                }
+
                 // Forcefully dispatch the request to the CachedOperation,
                 // bypassing the dispatching to the requested operation.
                 // So, the CacheMessageReceiver will be invoked once we CONTINUE
