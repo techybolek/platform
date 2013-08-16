@@ -31,11 +31,11 @@
                 <module>dependencies</module>
                 <module>service-stubs</module>
                 <module>components</module>
-                <module>platform-integration/test-automation-framework</module>
+                <!--module>platform-integration/test-automation-framework</module-->
 		<module>features</module>
 		<!--module>samples/shopping-cart</module>
 		<module>samples/shopping-cart-global</module-->
-                <module>products</module>
+                <!--module>products</module-->
              </modules>
 	</profile>
 	<profile>

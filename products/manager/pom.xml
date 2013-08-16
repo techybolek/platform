@@ -399,7 +399,7 @@
 	<shoppingcart.global.version>2.1.0-SNAPSHOT</shoppingcart.global.version>
 	<carbon.kernel.version>4.1.0-SNAPSHOT</carbon.kernel.version>
 	<version.synapse>2.1.1-wso2v3</version.synapse>
-	<carbon.p2.plugin.version>1.5.2-SNAPSHOT</carbon.p2.plugin.version>
+	<carbon.p2.plugin.version>1.5.4-SNAPSHOT</carbon.p2.plugin.version>
     </properties>
 
 </project>

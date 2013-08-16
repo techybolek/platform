@@ -118,7 +118,7 @@
         <carbon.version.406>4.0.6</carbon.version.406>
         <carbon.version.405>4.0.5</carbon.version.405>
         <carbon.version.400>4.0.0</carbon.version.400>
-        <carbon.p2.plugin.version>1.5.2-SNAPSHOT</carbon.p2.plugin.version>
+        <carbon.p2.plugin.version>1.5.4-SNAPSHOT</carbon.p2.plugin.version>
     </properties>
 
 
