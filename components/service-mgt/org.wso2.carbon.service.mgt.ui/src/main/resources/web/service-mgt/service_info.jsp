@@ -140,7 +140,9 @@
             continue;
         }
     }
-    endPointStr = endPointStr.substring(0, endPointStr.length() - 1);
+    if(!"".equals(endPointStr)) {
+        endPointStr = endPointStr.substring(0, endPointStr.length() - 1);
+    }
 
 %>
 
