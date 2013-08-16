@@ -172,33 +172,7 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
             userStoreConfigFile.delete();
         }
 
-        StreamResult result = new StreamResult(userStoreConfigFile);
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-
-        try {
-            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            Document doc = docBuilder.newDocument();
-
-            //create UserStoreManager element
-            Element userStoreElement = doc.createElement(UserCoreConstants.RealmConfig.LOCAL_NAME_USER_STORE_MANAGER);
-            doc.appendChild(userStoreElement);
-
-            Attr attrClass = doc.createAttribute("class");
-            attrClass.setValue(userStoreDTO.getClassName());
-            userStoreElement.setAttributeNode(attrClass);
-
-            addProperties(userStoreDTO.getProperties(), doc, userStoreElement);
-            addProperty(UserStoreConfigConstants.DOMAIN_NAME, userStoreDTO.getDomainId(), doc, userStoreElement);
-            addProperty(DESCRIPTION, userStoreDTO.getDescription(), doc, userStoreElement);
-            DOMSource source = new DOMSource(doc);
-
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.transform(source, result);
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
-            throw new UserStoreException(ex);
-        }
+        writeUserMgtXMLFile(userStoreConfigFile,userStoreDTO);
     }
 
 
@@ -284,35 +258,7 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
 
         previousUserStoreConfigFile.delete();
 
-        StreamResult result = new StreamResult(userStoreConfigFile);
-
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            Document doc = docBuilder.newDocument();
-
-            //create UserStoreManager element
-            Element userStoreElement = doc.createElement(UserCoreConstants.RealmConfig.LOCAL_NAME_USER_STORE_MANAGER);
-            doc.appendChild(userStoreElement);
-
-            Attr attrClass = doc.createAttribute("class");
-            attrClass.setValue(userStoreDTO.getClassName());
-            userStoreElement.setAttributeNode(attrClass);
-
-            addProperties(userStoreDTO.getProperties(), doc, userStoreElement);
-            addProperty(UserStoreConfigConstants.DOMAIN_NAME, userStoreDTO.getDomainId(), doc, userStoreElement);
-            addProperty(DESCRIPTION, userStoreDTO.getDescription(), doc, userStoreElement);
-            DOMSource source = new DOMSource(doc);
-
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.transform(source, result);
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
-            throw new UserStoreException(ex);
-        }
-
-
+        writeUserMgtXMLFile(userStoreConfigFile,userStoreDTO);
     }
 
     /**
@@ -487,5 +433,35 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
             userStoreConfigFile = new File(tenantFilePath + File.separator + fileName + ".xml");
         }
         return userStoreConfigFile;
+    }
+
+    private void writeUserMgtXMLFile(File userStoreConfigFile,UserStoreDTO userStoreDTO) throws UserStoreException{
+        StreamResult result = new StreamResult(userStoreConfigFile);
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+
+        try {
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.newDocument();
+
+            //create UserStoreManager element
+            Element userStoreElement = doc.createElement(UserCoreConstants.RealmConfig.LOCAL_NAME_USER_STORE_MANAGER);
+            doc.appendChild(userStoreElement);
+
+            Attr attrClass = doc.createAttribute("class");
+            attrClass.setValue(userStoreDTO.getClassName());
+            userStoreElement.setAttributeNode(attrClass);
+
+            addProperties(userStoreDTO.getProperties(), doc, userStoreElement);
+            addProperty(UserStoreConfigConstants.DOMAIN_NAME, userStoreDTO.getDomainId(), doc, userStoreElement);
+            addProperty(DESCRIPTION, userStoreDTO.getDescription(), doc, userStoreElement);
+            DOMSource source = new DOMSource(doc);
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.transform(source, result);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            throw new UserStoreException(ex);
+        }
     }
 }
