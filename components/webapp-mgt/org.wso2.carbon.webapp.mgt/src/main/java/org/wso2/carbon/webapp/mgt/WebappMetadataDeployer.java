@@ -100,9 +100,7 @@ public class WebappMetadataDeployer extends AbstractDeployer {
         Properties prop = manager.loadParameters(path);
         for (String propName : prop.stringPropertyNames()) {
             String propValue = prop.getProperty(propName);
-            if(propValue != null) {
-                webapp.addParameter(propName, propValue);
-            }
+            webapp.addParameter(propName, propValue);
         }
     }
 
