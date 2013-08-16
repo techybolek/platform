@@ -29,6 +29,7 @@
             <order>47</order>
             <style-class>monitor</style-class>
             <icon>../bampubsvcstat/images/chart_bar.gif</icon>
+            <require-permission>/permission/admin/configure/bampubsvcstat</require-permission>
         </menu>
     </menus>
 </component>
