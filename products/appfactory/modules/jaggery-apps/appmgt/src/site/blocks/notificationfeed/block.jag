@@ -1,7 +1,0 @@
-<%
-jagg.block("notificationfeed", {
-    initialize:function (data) {
-
-    }
-});
-%>

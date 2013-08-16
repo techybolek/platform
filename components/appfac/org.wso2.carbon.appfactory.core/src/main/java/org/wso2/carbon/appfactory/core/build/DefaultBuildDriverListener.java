@@ -41,7 +41,6 @@ public class DefaultBuildDriverListener implements BuildDriverListener {
         log.info(applicationId + "-" + version + " build successfully");
         String event = version + " build " +buildId;
         updateLastBuildStatus(applicationId, version, "build " + buildId + " " + SUCCESS);
-        AppFactoryCoreUtil.sendEventNotification(applicationId, event, SUCCESS);
     }
 
     @Override
@@ -49,8 +48,6 @@ public class DefaultBuildDriverListener implements BuildDriverListener {
         log.info(applicationId + "-" + version + " failed to build");
         log.info(errorMessage);
         updateLastBuildStatus(applicationId, version, "build " + buildId + " " + FAILED);
-        String event = version + " build "+buildId;
-        AppFactoryCoreUtil.sendEventNotification(applicationId, event, FAILED);
     }
 
     /**

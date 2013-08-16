@@ -56,46 +56,6 @@
     }
     ;
 
-    var getEventInfoOfApplications = function(userName, appIDs)
-    {
-        jagg.module("permission").checkUserAuthenticated();
-
-        var ws = require('ws');
-        var request = new ws.WSRequest();
-        var options =[];
-        options.useSOAP = 1.2;
-        options.timeout = 1000000;
-        options.action = "urn:getEventsForApplications";
-        options["HTTPHeaders"] =[
-                                 {
-                                	 name:
-                                		 "Cookie", value:modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL))
-                                 }
-                                 ];
-
-        var payload = '<ser:getEventsForApplications xmlns:ser="http://service.notification.events.appfactory.carbon.wso2.org">' +
-                appIds +
-                '<ser:userName>' + userName + '</ser:userName>' +
-                '</ser:getEventsForApplications>';
-
-        var result;
-        try {
-        	var endPoint = getProperty(APPFACTORY_SERVER_URL) + "EventNotificationService";
-        	request.open(options,endPoint, false);
-        	request.send(payload);
-        	result = request.responseE4X;
-        	log.info("Invoking service endpoint:" + endPoint + " returned result:" + result);
-        } catch (e) {
-        	log.error("Error while retrieving event notifications \n" + e.message);
-        	throw "Error while retrieving event notifications";
-        }
-        var resultXml = new XML(result);
-
-        return (resultXml. *::["return"]);
-
-    }
-    ;
-
 //checked - private method 
     var getAllApps = function(userName)
     {

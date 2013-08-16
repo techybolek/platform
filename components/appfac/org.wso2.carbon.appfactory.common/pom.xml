@@ -45,12 +45,6 @@
             <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.appfactory.events.notification.stub</artifactId>
-            <scope>provided</scope>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.jaggeryjs</groupId>
             <artifactId>org.jaggeryjs.scriptengine</artifactId>
 	    <version>0.9.0.ALPHA3-wso2v6</version>

@@ -316,7 +316,6 @@ public class ApplicationDeployer {
             String errorMsg = String.format("Unable to find the application type for application id: %s",
                     applicationId);
             log.error(errorMsg, e);
-            AppFactoryCoreUtil.sendEventNotification(applicationId, event, "failed");
             throw new AppFactoryException(errorMsg, e);
         }
 

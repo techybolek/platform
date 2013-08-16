@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.common.AppFactoryConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
-import org.wso2.carbon.appfactory.common.util.NotificationSender;
 import org.wso2.carbon.appfactory.core.internal.ServiceHolder;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -80,16 +79,4 @@ public class AppFactoryCoreUtil {
 	        }
 	        return stage;
 	    }
-
-    public static void sendEventNotification(final String applicationId, final String event, final String result) {
-        try {
-            AppFactoryConfiguration configuration = ServiceHolder.getAppFactoryConfiguration();
-            String serverUrl = configuration.getFirstProperty(AppFactoryConstants.APPFACTORY_SERVER_URL);
-            NotificationSender notificationSender = new NotificationSender(serverUrl);
-            notificationSender.publishEvents(applicationId, event, result);
-        } catch (RemoteException e) {
-            log.error("Notification sending failed "+e.getMessage(), e);
-        }
-    }
-
 }

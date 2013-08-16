@@ -27,10 +27,6 @@ jagg.module("application", {
     getDeployedBuildId:function () {
     	return jagg.require(jagg.getModulesDir() + "application/get/list.jag").getDeployedBuildId.apply(this, arguments);
     },
-
-    getEventInfoOfApplications:function () {
-        return jagg.require(jagg.getModulesDir() + "application/get/list.jag").getEventInfoOfApplications.apply(this, arguments);
-    },
     
     checkSystemStatus:function () {
         return jagg.require(jagg.getModulesDir() + "application/get/list.jag").checkSystemStatus.apply(this, arguments);

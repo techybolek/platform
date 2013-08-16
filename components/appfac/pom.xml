@@ -41,7 +41,6 @@
         <module>org.wso2.carbon.appfactory.hostobjects</module>
         <module>org.wso2.carbon.appfactory.login.ui</module>
         <module>org.wso2.carbon.appfactory.tenant.roles</module>
-        <module>org.wso2.carbon.appfactory.events.notification</module>
         <module>org.wso2.carbon.appfactory.apimanager.integration</module>
         <module>org.wso2.carbon.appfactory.bam.integration</module>
         <module>org.wso2.carbon.appfactory.repository</module>
