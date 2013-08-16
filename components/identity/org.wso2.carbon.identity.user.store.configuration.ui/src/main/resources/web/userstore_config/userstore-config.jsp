@@ -30,6 +30,8 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.ResourceBundle" %>
+<%@ page import="java.util.Iterator" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <jsp:include page="../dialog/display_messages.jsp"/>
@@ -55,6 +57,7 @@
     private String className;
     private Boolean isEditing;
     private int isBoolean;
+    private String existingDomains;
     private int i;
 
     private int isBoolean(String value) {
@@ -102,6 +105,13 @@
                 (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         UserStoreConfigAdminServiceClient userStoreConfigAdminServiceClient = new UserStoreConfigAdminServiceClient(cookie, backendServerURL, configContext);
         classApplies = userStoreConfigAdminServiceClient.getAvailableUserStoreClasses();
+        Iterator<String> iterator = UserStoreMgtDataKeeper.getAvailableDomainNames().iterator();
+        existingDomains = "";
+        while (iterator.hasNext()) {
+            existingDomains = existingDomains + "\"" + iterator.next().toUpperCase() + "\",";
+        }
+        existingDomains = "[" + existingDomains + "\"PRIMARY\"]";
+
         if (!domain.equals("0")) {
 
             //Get the defined properties of user store manager
@@ -159,20 +169,26 @@
 
     var allPropertiesSelected = false;
     function doSubmit() {
-        if (doValidationDomainNameOnly()) {
-//        	if(doValidationMandatoryProperties()){
-        	document.dataForm.action = "userstore-config-finish.jsp";
-        	document.dataForm.submit();
-			}
-//        }
+        if (doValidationDomainNameOnly() && doValidationDomainExistence()) {
+            if (doValidationMandatoryProperties()) {
+                document.dataForm.action = "userstore-config-finish.jsp";
+                document.dataForm.submit();
+            }
+        }
     }
-    
+
     function doUpdate() {
-        if (doValidationDomainNameOnly()) {
-        	//if(doValidationMandatoryProperties()){
-        	document.dataForm.action = "userstore-config-finish.jsp";
-        	document.dataForm.submit();
-			//}
+        if (doValidateUpdate()) {
+            if (doValidationMandatoryProperties()) {
+                document.dataForm.action = "userstore-config-finish.jsp";
+                document.dataForm.submit();
+            }
+        }
+        else if (doValidationDomainNameOnly() && doValidationDomainExistence()) {
+            if (doValidationMandatoryProperties()) {
+                document.dataForm.action = "userstore-config-finish.jsp";
+                document.dataForm.submit();
+            }
         }
     }
 
@@ -285,11 +301,40 @@
             CARBON.showWarningDialog('<fmt:message key="domain.name.is.required"/>');
             return false;
         }
-        if (value.contains("_")) {
+        if (value.indexOf("_") >= 0) {
             CARBON.showWarningDialog('<fmt:message key="cannot.contain.character"/>');
             return false;
         }
+        return true;
+    }
 
+    function doValidationDomainExistence() {
+        var domainsArray = <%=existingDomains%>;
+        var value = document.getElementsByName("domainId")[0].value;
+        if ($.inArray(value.toUpperCase(), domainsArray) != -1) {
+            CARBON.showWarningDialog('<fmt:message key="domain.already.exists"/>');
+            return false;
+        }
+        return true;
+    }
+
+    function doValidateUpdate() {
+        var value = document.getElementsByName("domainId")[0].value.toUpperCase();
+        var domain = "<%=domain.toUpperCase()%>";
+        if (value.localeCompare(domain)) {
+            return false;
+        }
+        return true;
+    }
+
+    function doValidationMandatoryProperties() {
+        var length = <%=mandatories.length%>;
+        for (var j = 1; j <= length; j++) {
+            if (document.getElementsByName("propertyValue_" + j)[0].value.trim().length == 0) {
+                CARBON.showWarningDialog(document.getElementsByName("propertyName_" + j)[0].value + " " + '<fmt:message key="is.required"/>');
+                return false;
+            }
+        }
         return true;
     }
 
@@ -339,12 +384,12 @@
                 if (domain != null && domain.trim().length() > 0 && !domain.equals("0")) {
             %>
             <td><input type="text" name="domainId" id="domainId" width="" value="<%=domain%>"/></td>
-           	<td><input type="hidden" name="previousDomainId" id="previousDomainId" value="<%=domain%>"/></td>
+            <td><input type="hidden" name="previousDomainId" id="previousDomainId" value="<%=domain%>"/></td>
             <%
             } else {
             %>
             <td><input type="text" name="domainId" id="domainId"/></td>
-           	<td><input type="hidden" name="previousDomainId" id="previousDomainId" value=""/></td>
+            <td><input type="hidden" name="previousDomainId" id="previousDomainId" value=""/></td>
             <%
                 }
             %>
@@ -378,7 +423,7 @@
 <div class="sectionSeperator" id="userStoreTypeSub"><%="Define Properties For "%><strong></strong></div>
 <div class="sectionSub">
         <%--MandatoryProperties--%>
-    <%if(mandatories[0]!=null){%>
+    <%if (mandatories[0] != null) {%>
     <table id="mandatoryPropertiesTable">
         <tr data-value="0">
             <td>
@@ -480,7 +525,7 @@
         </tr>
     </table>
     <%
-        }else{
+        } else {
 
         }
     %>
@@ -492,7 +537,7 @@
 <div class="sectionSeperator"><fmt:message key='optional'/></div>
 <div class="sectionSub">
         <%--Optional properties--%>
-    <%if(optionals[0]!=null){%>
+    <%if (optionals[0] != null) {%>
     <table id="propertiesTable">
         <tr data-value="0">
             <td>
@@ -593,7 +638,7 @@
         </tr>
     </table>
     <%
-        }else{
+        } else {
 
         }
     %>

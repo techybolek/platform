@@ -22,10 +22,8 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.identity.user.store.configuration.stub.UserStoreConfigAdminServiceStub;
-import org.wso2.carbon.identity.user.store.configuration.stub.dto.UserStoreDTO;
 import org.wso2.carbon.identity.user.store.configuration.stub.api.Properties;
-
-import java.rmi.RemoteException;
+import org.wso2.carbon.identity.user.store.configuration.stub.dto.UserStoreDTO;
 
 public class UserStoreConfigAdminServiceClient {
     private UserStoreConfigAdminServiceStub stub;
@@ -54,7 +52,6 @@ public class UserStoreConfigAdminServiceClient {
      * @throws Exception
      */
     public UserStoreDTO[] getActiveDomains() throws Exception {
-
         return stub.getSecondaryRealmConfigurations();
     }
 
@@ -90,7 +87,7 @@ public class UserStoreConfigAdminServiceClient {
      * @throws Exception
      */
     public void addUserStore(UserStoreDTO userStoreDTO) throws Exception {
-         stub.addUserStore(userStoreDTO);
+         stub.addUserStore(userStoreDTO,true);
     }
 
     /**
@@ -106,7 +103,7 @@ public class UserStoreConfigAdminServiceClient {
     /**
      * Deletes a given user store
      *
-     * @param userStores : domain name of the user store to deleted
+     * @param userStore : domain name of the user store to deleted
      * @throws Exception
      */
     public void deleteUserStore(String userStore) throws Exception {

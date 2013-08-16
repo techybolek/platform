@@ -21,6 +21,7 @@ import org.wso2.carbon.identity.user.store.configuration.stub.dto.PropertyDTO;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public final class UserStoreMgtDataKeeper {
 
@@ -44,6 +45,10 @@ public final class UserStoreMgtDataKeeper {
      */
     public static Map<String, String> getUserStoreManager(String domainName) {
         return userStoreManagers.get(domainName);
+    }
+
+    public static Set<String> getAvailableDomainNames(){
+        return userStoreManagers.keySet();
     }
 
     /**
