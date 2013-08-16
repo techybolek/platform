@@ -19,6 +19,7 @@ package org.wso2.carbon.databridge.streamdefn.registry.datastore;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Credentials;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.utils.DataBridgeCommonsUtils;
@@ -31,6 +32,7 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,40 +50,88 @@ public class RegistryStreamDefinitionStore extends
     public StreamDefinition getStreamDefinitionFromStore(Credentials credentials,
                                                          String name, String version)
             throws StreamDefinitionStoreException {
+
         try {
-            UserRegistry registry = ServiceHolder.getRegistryService().getGovernanceUserRegistry(credentials.getUsername(), credentials.getPassword());
-            if (registry.resourceExists(STREAM_DEFINITION_STORE + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version)) {
-                Resource resource = registry.get(STREAM_DEFINITION_STORE + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version);
-                Object content = resource.getContent();
-                if (content != null) {
-                    return EventDefinitionConverterUtils.convertFromJson(RegistryUtils.decodeBytes((byte[]) resource.getContent()));
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getCurrentContext();
+
+            privilegedCarbonContext.setTenantId(ServiceHolder.getRealmService().getTenantManager().getTenantId(credentials.getDomainName()));
+            privilegedCarbonContext.setTenantDomain(credentials.getDomainName());
+
+            try {
+                UserRegistry registry = ServiceHolder.getRegistryService().getGovernanceUserRegistry(credentials.getUsername(), credentials.getPassword());
+                if (registry.resourceExists(STREAM_DEFINITION_STORE + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version)) {
+                    Resource resource = registry.get(STREAM_DEFINITION_STORE + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version);
+                    Object content = resource.getContent();
+                    if (content != null) {
+                        return EventDefinitionConverterUtils.convertFromJson(RegistryUtils.decodeBytes((byte[]) resource.getContent()));
+                    }
                 }
+                return null;
+            } catch (Exception e) {
+                log.error("Error in getting Stream Definition " + name + ":" + version, e);
+                throw new StreamDefinitionStoreException("Error in getting Stream Definition " + name + ":" + version, e);
             }
-            return null;
-        } catch (Exception e) {
-            log.error("Error in getting Stream Definition " + name + ":" + version);
-            throw new StreamDefinitionStoreException("Error in getting Stream Definition " + name + ":" + version, e);
+
+        } catch (UserStoreException e) {
+            throw new StreamDefinitionStoreException("Error in getting definition from registry for streamId " + name + ":" + version + ", " + e.getMessage(), e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
+
+
     }
 
     @Override
     protected StreamDefinition getStreamDefinitionFromStore(Credentials credentials,
                                                             String streamId)
             throws StreamDefinitionStoreException {
-        return getStreamDefinitionFromStore(credentials, DataBridgeCommonsUtils.getStreamNameFromStreamId(streamId),
-                                            DataBridgeCommonsUtils.getStreamVersionFromStreamId(streamId));
+
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getCurrentContext();
+
+            privilegedCarbonContext.setTenantId(ServiceHolder.getRealmService().getTenantManager().getTenantId(credentials.getDomainName()));
+            privilegedCarbonContext.setTenantDomain(credentials.getDomainName());
+
+
+            return getStreamDefinitionFromStore(credentials, DataBridgeCommonsUtils.getStreamNameFromStreamId(streamId),
+                                                DataBridgeCommonsUtils.getStreamVersionFromStreamId(streamId));
+
+        } catch (UserStoreException e) {
+            throw new StreamDefinitionStoreException("Error in getting definition from registry for streamId " + streamId + ", " + e.getMessage(), e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+
     }
 
     @Override
     protected boolean removeStreamDefinition(Credentials credentials, String name, String version) {
         try {
-            UserRegistry registry = ServiceHolder.getRegistryService().getGovernanceUserRegistry(credentials.getUsername(), credentials.getPassword());
-            registry.delete(STREAM_DEFINITION_STORE + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version);
-            return !registry.resourceExists(STREAM_DEFINITION_STORE + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version);
-        } catch (RegistryException e) {
-            log.error("Error in deleting Stream Definition " + name + ":" + version);
-            return false;
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getCurrentContext();
+
+            privilegedCarbonContext.setTenantId(ServiceHolder.getRealmService().getTenantManager().getTenantId(credentials.getDomainName()));
+            privilegedCarbonContext.setTenantDomain(credentials.getDomainName());
+
+
+            try {
+                UserRegistry registry = ServiceHolder.getRegistryService().getGovernanceUserRegistry(credentials.getUsername(), credentials.getPassword());
+                registry.delete(STREAM_DEFINITION_STORE + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version);
+                return !registry.resourceExists(STREAM_DEFINITION_STORE + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version);
+            } catch (RegistryException e) {
+                log.error("Error in deleting Stream Definition " + name + ":" + version);
+            }
+
+
+        } catch (UserStoreException e) {
+            log.error("Error in removing definition from registry for streamId " + name + ":" + version + ", " + e.getMessage(), e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
+
+        return false;
     }
 
     @Override
@@ -89,14 +139,30 @@ public class RegistryStreamDefinitionStore extends
                                                StreamDefinition streamDefinition)
             throws StreamDefinitionStoreException {
         try {
-            UserRegistry registry = ServiceHolder.getRegistryService().getGovernanceUserRegistry(credentials.getUsername(), credentials.getPassword());
-            Resource resource = registry.newResource();
-            resource.setContent(EventDefinitionConverterUtils.convertToJson(streamDefinition));
-            resource.setMediaType("application/json");
-            registry.put(STREAM_DEFINITION_STORE + RegistryConstants.PATH_SEPARATOR + streamDefinition.getName() + RegistryConstants.PATH_SEPARATOR + streamDefinition.getVersion(), resource);
-        } catch (RegistryException e) {
-            log.error("Error in saving Stream Definition " + streamDefinition);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getCurrentContext();
+
+            privilegedCarbonContext.setTenantId(ServiceHolder.getRealmService().getTenantManager().getTenantId(credentials.getDomainName()));
+            privilegedCarbonContext.setTenantDomain(credentials.getDomainName());
+
+
+            try {
+                UserRegistry registry = ServiceHolder.getRegistryService().getGovernanceUserRegistry(credentials.getUsername(), credentials.getPassword());
+                Resource resource = registry.newResource();
+                resource.setContent(EventDefinitionConverterUtils.convertToJson(streamDefinition));
+                resource.setMediaType("application/json");
+                registry.put(STREAM_DEFINITION_STORE + RegistryConstants.PATH_SEPARATOR + streamDefinition.getName() + RegistryConstants.PATH_SEPARATOR + streamDefinition.getVersion(), resource);
+            } catch (RegistryException e) {
+                log.error("Error in saving Stream Definition " + streamDefinition);
+            }
+
+        } catch (UserStoreException e) {
+            throw new StreamDefinitionStoreException("Error in saving definition " + streamDefinition + " to registry, " + e.getMessage(), e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
+
+
     }
 
     public Collection<StreamDefinition> getAllStreamDefinitionsFromStore(
@@ -104,32 +170,46 @@ public class RegistryStreamDefinitionStore extends
         ConcurrentHashMap<String, StreamDefinition> map = new ConcurrentHashMap<String, StreamDefinition>();
 
         try {
-            UserRegistry registry = ServiceHolder.getRegistryService().getGovernanceUserRegistry(credentials.getUsername(), credentials.getPassword());
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getCurrentContext();
+            privilegedCarbonContext.setTenantId(ServiceHolder.getRealmService().getTenantManager().getTenantId(credentials.getDomainName()));
+            privilegedCarbonContext.setTenantDomain(credentials.getDomainName());
 
-            if (!registry.resourceExists(STREAM_DEFINITION_STORE)) {
-                registry.put(STREAM_DEFINITION_STORE, registry.newCollection());
-            } else {
-                org.wso2.carbon.registry.core.Collection collection = (org.wso2.carbon.registry.core.Collection) registry.get(STREAM_DEFINITION_STORE);
-                for (String streamNameCollection : collection.getChildren()) {
+            try {
+                UserRegistry registry = ServiceHolder.getRegistryService().getGovernanceUserRegistry(credentials.getUsername(), credentials.getPassword());
 
-                    org.wso2.carbon.registry.core.Collection innerCollection = (org.wso2.carbon.registry.core.Collection) registry.get(streamNameCollection);
-                    for (String streamVersionCollection : innerCollection.getChildren()) {
+                if (!registry.resourceExists(STREAM_DEFINITION_STORE)) {
+                    registry.put(STREAM_DEFINITION_STORE, registry.newCollection());
+                } else {
+                    org.wso2.carbon.registry.core.Collection collection = (org.wso2.carbon.registry.core.Collection) registry.get(STREAM_DEFINITION_STORE);
+                    for (String streamNameCollection : collection.getChildren()) {
 
-                        Resource resource = (Resource) registry.get(streamVersionCollection);
-                        try {
-                            StreamDefinition streamDefinition = EventDefinitionConverterUtils.convertFromJson(RegistryUtils.decodeBytes((byte[]) resource.getContent()));
-                            map.put(streamDefinition.getStreamId(), streamDefinition);
-                        } catch (Throwable e) {
-                            log.error("Error in retrieving streamDefinition from the resource at " + resource.getPath(), e);
+                        org.wso2.carbon.registry.core.Collection innerCollection = (org.wso2.carbon.registry.core.Collection) registry.get(streamNameCollection);
+                        for (String streamVersionCollection : innerCollection.getChildren()) {
+
+                            Resource resource = (Resource) registry.get(streamVersionCollection);
+                            try {
+                                StreamDefinition streamDefinition = EventDefinitionConverterUtils.convertFromJson(RegistryUtils.decodeBytes((byte[]) resource.getContent()));
+                                map.put(streamDefinition.getStreamId(), streamDefinition);
+                            } catch (Throwable e) {
+                                log.error("Error in retrieving streamDefinition from the resource at " + resource.getPath(), e);
+                            }
                         }
                     }
                 }
+
+            } catch (RegistryException e) {
+                log.error("Error in retrieving streamDefinitions from the registry", e);
             }
 
-        } catch (RegistryException e) {
-            log.error("Error in retrieving streamDefinitions from the registry", e);
+        } catch (UserStoreException e) {
+            log.error("Error in getting definitions from registry for user " + credentials.getUsername() + ", " + e.getMessage(), e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
+
         return map.values();
+
 
     }
 
