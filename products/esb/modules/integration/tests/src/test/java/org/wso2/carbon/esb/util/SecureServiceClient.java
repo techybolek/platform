@@ -21,6 +21,8 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.utils.UserInfo;
 import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkFactory;
@@ -29,6 +31,8 @@ import org.wso2.carbon.automation.utils.axis2client.SecureAxisServiceClient;
 import java.io.File;
 
 public class SecureServiceClient {
+    private static final Log logger = LogFactory.getLog(SecureServiceClient.class.getName());
+
     private SecureAxisServiceClient secureClient;
 
     public SecureServiceClient() {
@@ -68,6 +72,17 @@ public class SecureServiceClient {
             userCertAlias = "wso2carbon";
             encryptionUser = "wso2carbon";
             keyStorePassword = "wso2carbon";
+        }
+        if (logger.isDebugEnabled()) {
+            logger.info("username:        " + userInfo.getUserName());
+            logger.info("password:        " + userInfo.getPassword());
+            logger.info("endpoint Ref:    " + trpUrl);
+            logger.info("operation:       " + action);
+            logger.info("policy path:     " + policyPath);
+            logger.info("user Cert:       " + userCertAlias);
+            logger.info("encryption user: " + encryptionUser);
+            logger.info("keystore path:   " + keyStorePath);
+            logger.info("keystorepassword:" + keyStorePassword);
         }
         return secureClient.sendReceive(userInfo.getUserName(), userInfo.getPassword(), trpUrl, action
                 , payload, policyPath, userCertAlias, encryptionUser, keyStorePath, keyStorePassword);
