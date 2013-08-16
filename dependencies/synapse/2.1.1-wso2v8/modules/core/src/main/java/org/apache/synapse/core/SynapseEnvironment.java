@@ -22,6 +22,7 @@ package org.apache.synapse.core;
 import org.apache.axiom.util.blob.OverflowBlob;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.ServerContextInformation;
+import org.apache.synapse.carbonext.TenantInfoConfigurator;
 import org.apache.synapse.task.SynapseTaskManager;
 import org.apache.synapse.aspects.statistics.StatisticsCollector;
 import org.apache.synapse.config.SynapseConfiguration;
@@ -160,5 +161,10 @@ public interface SynapseEnvironment {
      */
     public Map<QName, SynapseXpathVariableResolver> getXpathVariableExtensions();
 
+    /**
+     *
+     * @return
+     */
+    public TenantInfoConfigurator getTenantInfoConfigurator();
 
 }

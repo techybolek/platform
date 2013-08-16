@@ -30,6 +30,7 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.aspects.ComponentType;
 import org.apache.synapse.aspects.statistics.StatisticsReporter;
+import org.apache.synapse.carbonext.TenantInfoConfigurator;
 import org.apache.synapse.endpoints.Endpoint;
 import org.apache.synapse.mediators.MediatorFaultHandler;
 
@@ -76,7 +77,10 @@ public class ProxyServiceMessageReceiver extends SynapseMessageReceiver {
         }
 
         MessageContext synCtx = MessageContextCreatorForAxis2.getSynapseMessageContext(mc);
-
+        TenantInfoConfigurator configurator = synCtx.getEnvironment().getTenantInfoConfigurator();
+        if (configurator != null) {
+            configurator.extractTenantInfo(synCtx);
+        }
         TransportInDescription trpInDesc = mc.getTransportIn();
         if (trpInDesc != null) {
             synCtx.setProperty(SynapseConstants.TRANSPORT_IN_NAME, trpInDesc.getName());

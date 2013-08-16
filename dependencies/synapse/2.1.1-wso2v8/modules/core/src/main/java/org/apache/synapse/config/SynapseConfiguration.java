@@ -45,6 +45,8 @@ import org.apache.synapse.Startup;
 import org.apache.synapse.SynapseArtifact;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
+import org.apache.synapse.carbonext.TenantInfoConfigProvider;
+import org.apache.synapse.carbonext.TenantInfoConfigurator;
 import org.apache.synapse.commons.datasource.DataSourceRepositoryHolder;
 import org.apache.synapse.commons.executors.PriorityExecutor;
 import org.apache.synapse.config.xml.MediatorFactoryFinder;
@@ -1394,6 +1396,8 @@ public class SynapseConfiguration implements ManagedLifecycle, SynapseArtifact {
         //we initialize xpath extensions here since synapse environment is available
         initXpathExtensions(se);
 
+        initCarbonTenantConfigurator(se);
+
         //initialize endpoints
         for (Endpoint endpoint : getDefinedEndpoints().values()) {
             endpoint.init(se);
@@ -1896,6 +1900,16 @@ public class SynapseConfiguration implements ManagedLifecycle, SynapseArtifact {
             axis2SynapseEnvironment.setXpathVariableExtensions(variableExtension);
         }
 
+    }
+
+    /**
+     *
+     * @param se
+     */
+    private void initCarbonTenantConfigurator(SynapseEnvironment se) {
+        Axis2SynapseEnvironment axis2SynapseEnvironment = (Axis2SynapseEnvironment) se;
+        TenantInfoConfigurator configurator = TenantInfoConfigProvider.getConfigurator();
+        axis2SynapseEnvironment.setTenantInfoConfigurator(configurator);
     }
 
 }

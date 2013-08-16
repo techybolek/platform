@@ -35,6 +35,7 @@ import org.apache.synapse.ServerContextInformation;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.aspects.statistics.StatisticsCollector;
+import org.apache.synapse.carbonext.TenantInfoConfigurator;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.endpoints.EndpointDefinition;
@@ -81,6 +82,9 @@ public class Axis2SynapseEnvironment implements SynapseEnvironment {
     /** Map containing Xpath Variable Context Extensions */
     Map<QName, SynapseXpathVariableResolver> xpathVariableExtensions =
             new HashMap<QName, SynapseXpathVariableResolver>();
+
+    /** Tenant info configurator */
+    TenantInfoConfigurator tenantInfoConfigurator;
 
     public Axis2SynapseEnvironment(SynapseConfiguration synCfg) {
 
@@ -512,6 +516,10 @@ public class Axis2SynapseEnvironment implements SynapseEnvironment {
         return xpathVariableExtensions;
     }
 
+    public TenantInfoConfigurator getTenantInfoConfigurator() {
+        return tenantInfoConfigurator;
+    }
+
     public void setXpathFunctionExtensions(SynapseXpathFunctionContextProvider functionExt){
          if(functionExt!=null) {
              xpathFunctionExtensions.put(functionExt.getResolvingQName(), functionExt);
@@ -525,7 +533,11 @@ public class Axis2SynapseEnvironment implements SynapseEnvironment {
          }
     }
 
-
+    public void setTenantInfoConfigurator(TenantInfoConfigurator configurator) {
+        if (configurator != null) {
+            tenantInfoConfigurator = configurator;
+        }
+    }
 
     private void handleException(String message, Throwable e) {
         log.error(message, e);

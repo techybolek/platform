@@ -157,6 +157,7 @@
 							org.apache.synapse.startup.*,
 							org.apache.synapse.util.*,
 							org.apache.synapse.libraries.*,
+							org.apache.synapse.carbonext.*,
                         </Export-Package>
 						<Import-Package>
 							!javax.xml.namespace,

@@ -41,6 +41,7 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.aspects.statistics.ErrorLogFactory;
 import org.apache.synapse.aspects.statistics.StatisticsReporter;
+import org.apache.synapse.carbonext.TenantInfoConfigurator;
 import org.apache.synapse.config.SynapseConfigUtils;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.endpoints.Endpoint;
@@ -190,7 +191,12 @@ public class SynapseCallbackReceiver extends CallbackReceiver {
      */
     private void handleMessage(String messageID ,MessageContext response,
         org.apache.synapse.MessageContext synapseOutMsgCtx, AsyncCallback callback) throws AxisFault {
-
+        // apply the tenant information to the out message context
+        TenantInfoConfigurator configurator = synapseOutMsgCtx.getEnvironment()
+                .getTenantInfoConfigurator();
+        if (configurator != null) {
+            configurator.applyTenantInfo(synapseOutMsgCtx);
+        }
         Object o = response.getProperty(SynapseConstants.SENDING_FAULT);
         if (o != null && Boolean.TRUE.equals(o)) {
 
