@@ -20,8 +20,6 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.config.xml.SequenceMediatorSerializer;
-import org.apache.synapse.mediators.base.SequenceMediator;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -32,6 +30,8 @@ import org.wso2.carbon.apimgt.impl.utils.RESTAPIAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.SequenceAdminServiceClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import java.util.List;
+
+import javax.xml.namespace.QName;
 
 public class APIGatewayManager {
 
@@ -194,9 +194,7 @@ public class APIGatewayManager {
 		String direction;
 		
 		try {
-	        SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
-	        SequenceMediatorSerializer seqSerializer = new SequenceMediatorSerializer();
-
+	        SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);	     
 	        PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
 	        int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
 
@@ -204,12 +202,10 @@ public class APIGatewayManager {
 	        	direction = "in";
 	        	String inSeqExt = APIUtil.getSequenceExtensionName(api)+ "--In";
 	        	String inSequenceName = api.getInSequence();
-	        	SequenceMediator inSequence = APIUtil.getCustomSequence(inSequenceName, tenantId, direction);
+	        	OMElement inSequence = APIUtil.getCustomSequence(inSequenceName, tenantId, direction);
 	        	if (inSequence != null) {
-	        		inSequence.setName(inSeqExt);
-	        		inSequence.setFileName(inSeqExt);
-	        		OMElement sequence = seqSerializer.serializeSpecificMediator(inSequence);
-	        		seqClient.addSequence(sequence,tenantDomain);
+	        		inSequence.getAttribute(new QName("name")).setAttributeValue(inSeqExt);	        		        	
+	        		seqClient.addSequence(inSequence,tenantDomain);
 	        	}
 	        }
 
@@ -218,12 +214,10 @@ public class APIGatewayManager {
 	        	direction = "out";
 	        	String outSeqExt = APIUtil.getSequenceExtensionName(api)+ "--Out";
 	        	String outSequenceName = api.getOutSequence();
-	        	SequenceMediator outSequence = APIUtil.getCustomSequence(outSequenceName, tenantId, direction);
+	        	OMElement outSequence = APIUtil.getCustomSequence(outSequenceName, tenantId, direction);
 	        	if (outSequence != null) {
-	        		outSequence.setName(outSeqExt);
-	        		outSequence.setFileName(outSeqExt);
-	        		OMElement sequence = seqSerializer.serializeSpecificMediator(outSequence);
-	        		seqClient.addSequence(sequence,tenantDomain);
+	        		outSequence.getAttribute(new QName("name")).setAttributeValue(outSeqExt);	        		        		
+	        		seqClient.addSequence(outSequence ,tenantDomain);
 
 	        	}
 	        }

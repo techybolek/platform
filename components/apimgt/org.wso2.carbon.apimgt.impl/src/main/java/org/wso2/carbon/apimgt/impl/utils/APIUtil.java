@@ -26,8 +26,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.config.xml.SequenceMediatorFactory;
-import org.apache.synapse.mediators.base.SequenceMediator;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
@@ -75,6 +73,7 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -87,7 +86,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.Properties;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -1712,7 +1710,7 @@ public final class APIUtil {
 	 * @return
 	 * @throws APIManagementException
 	 */
-	public static SequenceMediator getCustomSequence(String sequenceName, int tenantId,
+	public static OMElement getCustomSequence(String sequenceName, int tenantId,
 	                                                 String direction)
 	                                                                  throws APIManagementException {
 		org.wso2.carbon.registry.api.Collection seqCollection = null;
@@ -1727,26 +1725,17 @@ public final class APIUtil {
 				seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
 			}
 			if (seqCollection != null) {
-				SequenceMediatorFactory factory = new SequenceMediatorFactory();
 				String[] childPaths = seqCollection.getChildren();
 
 				for (int i = 0; i < childPaths.length; i++) {
 					Resource sequence = registry.get(childPaths[i]);
 					OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
-					if ((seqElment instanceof OMElement)) {
-						SequenceMediator customSequence = (SequenceMediator) factory.createMediator(seqElment,
-						                                                                            new Properties());
-						if (sequenceName.equals(customSequence.getName())) {
-							return customSequence;
-						}
-
-					} else {
-						String msg = "Invalid sequence is retrived from registry";
-						log.error(msg);
-						throw new APIManagementException(msg);
+					if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+						return seqElment;
 					}
 				}
 			}
+			
 		} catch (Exception e) {
 			String msg = "Issue is in accessing the Registry";
 			log.error(msg);
