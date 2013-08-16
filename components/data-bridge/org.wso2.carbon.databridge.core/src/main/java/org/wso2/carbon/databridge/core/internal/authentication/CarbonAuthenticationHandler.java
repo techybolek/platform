@@ -18,6 +18,7 @@
 package org.wso2.carbon.databridge.core.internal.authentication;
 
 import org.wso2.carbon.identity.authentication.AuthenticationService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
  * CarbonAuthenticationHandler implementation that authenticate Agents
@@ -33,4 +34,11 @@ public class CarbonAuthenticationHandler implements AuthenticationHandler {
     public boolean authenticate(String userName, String password) {
         return authenticationService.authenticate(userName, password);
     }
+
+    @Override
+    public String getTenantDomain(String userName) {
+      return   MultitenantUtils.getTenantDomain(userName);
+    }
+
+
 }

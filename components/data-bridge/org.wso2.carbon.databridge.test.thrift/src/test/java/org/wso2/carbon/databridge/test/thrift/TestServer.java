@@ -55,6 +55,11 @@ public class TestServer extends TestCase {
                 return true;// allays authenticate to true
 
             }
+
+            @Override
+            public String getTenantDomain(String userName) {
+                return "admin";
+            }
         }, new InMemoryStreamDefinitionStore());
 
         thriftDataReceiver = new ThriftDataReceiver(receiverPort, databridge);

@@ -69,7 +69,7 @@ public final class Authenticator {
         boolean isSuccessful = authenticationHandler.authenticate(userName, password);
         if (isSuccessful) {
             String sessionId = UUID.randomUUID().toString();
-            Credentials credentials = new Credentials(userName, password, MultitenantUtils.getTenantDomain(userName));
+            Credentials credentials = new Credentials(userName, password, authenticationHandler.getTenantDomain(userName));
             sessionCache.getSession(new SessionBean(sessionId, credentials));
             return sessionId;
         }

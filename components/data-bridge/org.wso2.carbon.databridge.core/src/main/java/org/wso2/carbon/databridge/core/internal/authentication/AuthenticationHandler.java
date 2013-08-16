@@ -22,4 +22,6 @@ package org.wso2.carbon.databridge.core.internal.authentication;
  */
 public interface AuthenticationHandler {
     boolean authenticate(String userName, String password);
+
+    String getTenantDomain(String userName);
 }

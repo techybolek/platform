@@ -77,6 +77,11 @@ public class AgentBackend {
                 return true;// allays authenticate to true
 
             }
+
+            @Override
+            public String getTenantDomain(String userName) {
+                return "admin";
+            }
         }, new InMemoryStreamDefinitionStore());
         thriftDataReceiver = new ThriftDataReceiver(thriftDataReceiverConfiguration, databridge);
         databridge.subscribe(assignAgentCallback());
