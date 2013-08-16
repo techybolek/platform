@@ -1550,21 +1550,24 @@ public class APIStoreHostObject extends ScriptableObject {
 
         NativeArray myn = new NativeArray(0);
         if (args!=null && isStringArray(args)) {
-            String name = (String) args[0];
+            String applicationName = (String) args[0];
             String username = (String) args[1];
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
-            Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber);
+            Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber,applicationName);
+
             int i = 0;
-            for (SubscribedAPI api : subscribedAPIs) {
-                if (api.getApplication().getName().equals(name)) {
+            for (SubscribedAPI subscribedAPI : subscribedAPIs) {
+                    API api = apiConsumer.getAPI(subscribedAPI.getApiId());
                     NativeObject row = new NativeObject();
-                    row.put("apiName", row, api.getApiId().getApiName());
-                    row.put("apiVersion", row, api.getApiId().getVersion());
-                    row.put("apiProvider", row, APIUtil.replaceEmailDomainBack(api.getApiId().getProviderName()));
+                    row.put("apiName", row, subscribedAPI.getApiId().getApiName());
+                    row.put("apiVersion", row, subscribedAPI.getApiId().getVersion());
+                    row.put("apiProvider", row, APIUtil.replaceEmailDomainBack(subscribedAPI.getApiId().getProviderName()));
+                    row.put("description", row, api.getDescription());
+                    row.put("subscribedTier", row, subscribedAPI.getTier().getName());
+                    row.put("status", row, api.getStatus().getStatus());
                     myn.put(i, myn, row);
                     i++;
-                }
             }
         }
         return myn;

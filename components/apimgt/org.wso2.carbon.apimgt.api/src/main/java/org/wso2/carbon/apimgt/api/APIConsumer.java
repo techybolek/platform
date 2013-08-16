@@ -104,7 +104,16 @@ public interface APIConsumer extends APIManager {
      * @return Set<API>
      * @throws APIManagementException if failed to get API for subscriber
      */
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException;    
+    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException;
+
+    /**
+     * Returns a set of SubscribedAPIs filtered by the given application name.
+     *
+     * @param subscriber Subscriber
+     * @return Set<API>
+     * @throws APIManagementException if failed to get API for subscriber
+     */
+    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName) throws APIManagementException;
 
     /**
      * Returns true if a given user has subscribed to the API

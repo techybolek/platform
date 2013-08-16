@@ -581,6 +581,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
+    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber,String applicationName) throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = null;
+        try {
+            subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber,applicationName);
+        } catch (APIManagementException e) {
+            handleException("Failed to get APIs of " + subscriber.getName()+ " under application "+applicationName, e);
+        }
+        return subscribedAPIs;
+    }
+
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException {
         try {
             return apiMgtDAO.getAPIByConsumerKey(accessToken);

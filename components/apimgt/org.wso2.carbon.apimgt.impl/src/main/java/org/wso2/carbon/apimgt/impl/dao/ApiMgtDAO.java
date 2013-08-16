@@ -980,6 +980,87 @@ public class ApiMgtDAO {
     }
 
     /**
+     * This method returns the set of APIs for given subscriber, subscribed under the specified application.
+     *
+     * @param subscriber subscriber
+     * @param applicationName Application Name
+     * @return Set<API>
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          if failed to get SubscribedAPIs
+     */
+    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber,String applicationName)
+            throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT " +
+                    "   SUBS.SUBSCRIPTION_ID" +
+                    "   ,API.API_PROVIDER AS API_PROVIDER" +
+                    "   ,API.API_NAME AS API_NAME" +
+                    "   ,API.API_VERSION AS API_VERSION" +
+                    "   ,SUBS.TIER_ID AS TIER_ID" +
+                    "   ,APP.APPLICATION_ID AS APP_ID" +
+                    "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" +
+                    "   ,SUBS.SUB_STATUS AS SUB_STATUS" +
+                    "   ,APP.NAME AS APP_NAME " +
+                    "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                    "FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_API API " +
+                    "WHERE " +
+                    "   SUB.USER_ID = ? " +
+                    "   AND SUB.TENANT_ID = ? " +
+                    "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+                    "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                    "   AND API.API_ID=SUBS.API_ID" +
+                    "   AND APP.NAME= ? ";
+
+
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setString(1, subscriber.getName());
+            int tenantId = IdentityUtil.getTenantIdOFUser(subscriber.getName());
+            ps.setInt(2, tenantId);
+            ps.setString(3, applicationName);
+            result = ps.executeQuery();
+
+            if (result == null) {
+                return subscribedAPIs;
+            }
+
+            while (result.next()) {
+                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                        result.getString("API_NAME"), result.getString("API_VERSION"));
+
+                SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
+                subscribedAPI.setTier(new Tier(
+                        result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
+                subscribedAPI.setLastAccessed(result.getDate(
+                        APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
+
+                Application application = new Application(result.getString("APP_NAME"), subscriber);
+                subscribedAPI.setApplication(application);
+                subscribedAPIs.add(subscribedAPI);
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
+        } catch (IdentityException e) {
+            handleException("Failed get tenant id of user " + subscriber.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+        return subscribedAPIs;
+    }
+
+    /**
      * This method returns the set of APIs for given subscriber
      *
      * @param subscriber subscriber
