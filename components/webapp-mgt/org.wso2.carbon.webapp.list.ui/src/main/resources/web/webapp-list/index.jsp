@@ -644,7 +644,8 @@
             if(!currentWebappType.equalsIgnoreCase("JaxWebapp")) {
                 if (vWebapp.getStatistics().getActiveSessions() != 0) {
         %>
-        <a href="sessions.jsp?webappFileName=<%= vWebapp.getWebappFile() %>">
+        <a href="sessions.jsp?webappFileName=<%=
+              URLEncoder.encode(vWebapp.getWebappFile(), "UTF-8") %>">
             <%= vWebapp.getStatistics().getActiveSessions() %>
         </a>
         <%

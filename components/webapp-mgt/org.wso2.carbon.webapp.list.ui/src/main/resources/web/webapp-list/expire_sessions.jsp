@@ -22,6 +22,8 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.webapp.list.ui.WebappAdminClient" %>
 <%@ page import="java.util.ResourceBundle" %>
+<%@ page import="java.net.URLEncoder" %>
+
 <%
     String[] webappFileNames = request.getParameterValues("webappFileName");
     String pageNumber = request.getParameter("pageNumber");
@@ -83,7 +85,7 @@
         }
 %>
 <script>
-    location.href = '<%= redirectPage %>?pageNumber=<%=pageNumberInt%>&webappFileName=<%= webappFileNames[0] %>'
+    location.href = '<%= redirectPage %>?pageNumber=<%=pageNumberInt%>&webappFileName=<%= URLEncoder.encode(webappFileNames[0], "UTF-8") %>'
             <% if (hostName != null && httpPort != null) { %>
             + '&hostName=<%= hostName %>&httpPort=<%= httpPort %>'
             <% } %> ;
@@ -94,7 +96,7 @@
     CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request);
 %>
 <script type="text/javascript">
-    location.href = "<%= redirectPage %>?pageNumber=<%=pageNumberInt%>&webappFileName=<%= webappFileNames[0] %>"
+    location.href = "<%= redirectPage %>?pageNumber=<%=pageNumberInt%>&webappFileName=<%= URLEncoder.encode(webappFileNames[0], "UTF-8") %>"
                     <% if (hostName != null && httpPort != null) { %>
                     +"&hostName=<%= hostName %>&httpPort=<%= httpPort %>"
                     <% } %> ;

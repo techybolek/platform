@@ -22,6 +22,8 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.webapp.list.ui.WebappAdminClient" %>
 <%@ page import="java.util.ResourceBundle" %>
+<%@ page import="java.net.URLEncoder" %>
+
 <%
     String[] webappFileNames = request.getParameterValues("webappFileName");
     String pageNumber = request.getParameter("pageNumber");
@@ -42,7 +44,7 @@
         redirectUrl = redirectPage + "?pageNumber=" + pageNumberInt;
     } else {
         redirectUrl = redirectPage + "?pageNumber=" + pageNumberInt + "&webappFileName=" +
-                      webappFileNames[0];
+                      URLEncoder.encode(webappFileNames[0], "UTF-8");
         if (hostName != null && httpPort != null) {
             redirectUrl += "&hostName=" + hostName + "&httpPort=" + httpPort;
         }

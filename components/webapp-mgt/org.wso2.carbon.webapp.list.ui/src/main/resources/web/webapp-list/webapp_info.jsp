@@ -25,6 +25,7 @@
 <%@ page import="org.wso2.carbon.webapp.list.ui.WebappAdminClient" %>
 <%@ page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappMetadata" %>
 <%@ page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappStatistics" %>
+<%@ page import="java.net.URLEncoder" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="java.util.List" %>
@@ -126,7 +127,7 @@
     function expireAllSessions() {
         CARBON.showConfirmationDialog("<fmt:message key="session.expiry.selected.webapps.prompt"/>",
                                       function() {
-                                          location.href = 'expire_sessions.jsp?webappFileName=<%= webappFileName %>&redirectPage=webapp_info.jsp'
+                                          location.href = 'expire_sessions.jsp?webappFileName=<%= URLEncoder.encode(webappFileName, "UTF-8")%>&redirectPage=webapp_info.jsp'
                                                   +'&hostName=<%= hostName %>&httpPort=<%= httpPort %>';
                                       }
                 );
@@ -135,7 +136,7 @@
     function reloadWebapp() {
         CARBON.showConfirmationDialog("<fmt:message key="reload.selected.webapps.prompt"/>",
                                       function() {
-                                          location.href = 'reload_webapps.jsp?webappFileName=<%= webappFileName %>&redirectPage=webapp_info.jsp'
+                                          location.href = 'reload_webapps.jsp?webappFileName=<%= URLEncoder.encode(webappFileName, "UTF-8") %>&redirectPage=webapp_info.jsp'
                                                   +'&hostName=<%= hostName %>&httpPort=<%= httpPort %>';
                                       }
                 );
@@ -144,7 +145,7 @@
     function stopWebapp() {
         CARBON.showConfirmationDialog("<fmt:message key="stop.selected.webapps.prompt"/>",
                                       function() {
-                                          location.href = 'stop_webapps.jsp?webappFileName=<%= webappFileName %>&redirectPage=webapp_info.jsp'
+                                          location.href = 'stop_webapps.jsp?webappFileName=<%= URLEncoder.encode(webappFileName, "UTF-8") %>&redirectPage=webapp_info.jsp'
                                                   +'&hostName=<%= hostName %>&httpPort=<%= httpPort %>';
                                       }
                 );
@@ -153,7 +154,7 @@
     function startWebapp() {
         CARBON.showConfirmationDialog("<fmt:message key="start.selected.webapps.prompt"/>",
                                       function() {
-                                          location.href = 'start_webapps.jsp?webappFileName=<%= webappFileName %>&redirectPage=webapp_info.jsp'
+                                          location.href = 'start_webapps.jsp?webappFileName=<%= URLEncoder.encode(webappFileName, "UTF-8") %>&redirectPage=webapp_info.jsp'
                                                   +'&hostName=<%= hostName %>&httpPort=<%= httpPort %>&webappType=<%= webappType %>';
                                       }
                 );
@@ -493,7 +494,7 @@
                                                 jQuery.noConflict();
                                                 var refresh;
                                                 function refreshStats() {
-                                                    var url = "../statistics/webapplication_stats_ajaxprocessor.jsp?webAppNameName=<%=  webappFileName %>";
+                                                    var url = "../statistics/webapplication_stats_ajaxprocessor.jsp?webAppNameName=<%= URLEncoder.encode(webappFileName, "UTF-8") %>";
                                                     try {
                                                         jQuery("#result").load(url, null, function (responseText, status, XMLHttpRequest) {
                                                             if (status != "success") {
@@ -699,7 +700,7 @@
                         <td><fmt:message key="active.sessions"/></td>
                         <td>
                             <% if (stats.getActiveSessions() > 0) { %>
-                            <a href="sessions.jsp?webappFileName=<%= webapp.getWebappFile() %>">
+                            <a href="sessions.jsp?webappFileName=<%= URLEncoder.encode(webapp.getWebappFile(), "UTF-8") %>">
                                 <%= stats.getActiveSessions()%>
                             </a>
                             <% } else { %>
@@ -757,12 +758,8 @@
 <script type="text/javascript">
     jQuery(function(){
         jQuery(".bam_statistics").click(function(){
-            <%
-         String webAppName = webappFileName;
-
-         %>
             //var webappFileName=
-            var dataVal = "webappFileName="+'<%=webAppName%>';
+            var dataVal = "webappFileName="+'<%= URLEncoder.encode(webappFileName, "UTF-8") %>';
             if(jQuery(this).is(":checked")){
                 dataVal = dataVal + '&value=1'
             } else{

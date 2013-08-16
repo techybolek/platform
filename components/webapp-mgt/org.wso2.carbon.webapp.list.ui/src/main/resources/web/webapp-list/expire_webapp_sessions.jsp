@@ -22,6 +22,7 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.webapp.list.ui.WebappAdminClient" %>
 <%@ page import="java.util.ResourceBundle" %>
+<%@ page import="java.net.URLEncoder" %>
 <%
     String[] sessionIDs = request.getParameterValues("sessionId");
     String webappFileName = request.getParameter("webappFileName");
@@ -62,7 +63,7 @@
                                                 CarbonUIMessage.INFO, request);
 %>
 <script>
-    location.href = 'sessions.jsp?webappFileName=<%= webappFileName %>&pageNumber=<%= pageNumberInt %>'
+    location.href = 'sessions.jsp?webappFileName=<%= URLEncoder.encode(webappFileName, "UTF-8") %>&pageNumber=<%= pageNumberInt %>'
 </script>
 <%
 } else {
@@ -77,7 +78,7 @@
     }
 %>
 <script>
-    location.href = 'sessions.jsp?webappFileName=<%= webappFileName %>&pageNumber=<%= pageNumberInt %>'
+    location.href = 'sessions.jsp?webappFileName=<%= URLEncoder.encode(webappFileName, "UTF-8") %>&pageNumber=<%= pageNumberInt %>'
 </script>
 
 <%
