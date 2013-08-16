@@ -93,7 +93,7 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
                     if (webApplication != null) {
                         GhostWebappDeployerUtils.updateLastUsedTime(webApplication);
                         //skip ghost meta file generation for worker nodes
-                        if(!CarbonUtils.isWorkerNode()) {
+                        if (!CarbonUtils.isWorkerNode()) {
                             GhostWebappDeployerUtils.serializeWebApp(webApplication, axisConfig, absoluteFilePath);
                         }
                     }
@@ -111,7 +111,7 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
 
                         log.info("Deploying Ghost webapp : " + ghostWebappFileName);
                         webappsHolder.getStartedWebapps().put(ghostWebappFileName,
-                                                              ghostWebApplication);
+                                ghostWebApplication);
                         webappsHolder.getFaultyWebapps().remove(ghostWebappFileName);
                     }
 
@@ -164,13 +164,15 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
     }
 
     public void undeploy(String fileName) throws DeploymentException {
-        File webappToUndeploy = new File(fileName);        
-        handleUndeployment(fileName, webappToUndeploy);
-        File file = new File(fileName.concat(".war"));
-        if(file.exists() && file.isFile()){
-            handleRedeployment(file);
+        File webappFile = new File(fileName);
+        File warFile = new File(fileName.concat(".war"));
+
+        if (!((warFile.exists() && warFile.isFile()) && webappFile.exists())) {
+            handleUndeployment(fileName, webappFile);
+            if ((warFile.exists() && warFile.isFile()) && !webappFile.exists()) {
+                handleRedeployment(warFile);
+            }
         }
-        
     }
 
     @Override
@@ -220,37 +222,37 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
         String webappFilePath = webappFile.getPath();
         boolean isSkipped = true;
 
-        if(webappFilePath.contains( WebappsConstants.VERSION_MARKER)) {
+        if (webappFilePath.contains(WebappsConstants.VERSION_MARKER)) {
             log.info("Unsupported file path format : " + webappFile);
-            return  true;
+            return true;
         }
 
         // Here we are checking WebappDeployer with .war extension or null extension
         // If foo.war and foo dir is found, then we will allow  .war based WebappDeployer to deploy that webapp.
         // If only foo dir found then directory based WebappDeployer will deploy that webapp.
         if ("war".equals(extension) || webappFilePath.endsWith(".war")) {
-             // We should not deploy .WAR files inside a another application. e.g- webapps/mvcapp/newapp.war
-        	 return isInsideAnotherApp(webappFilePath);
+            // We should not deploy .WAR files inside a another application. e.g- webapps/mvcapp/newapp.war
+            return isInsideAnotherApp(webappFilePath);
         } else {
             // return false if jaxwebapp or jaggery app is being deployed
             if (webappFilePath.contains("jaxwebapps") || webappFilePath.contains("jaggeryapps")
                     || webappFilePath.contains("carbonapps")) {
                 return false;
             }
-            
-            
+
+
             // if it's a dir  then make sure it is not a unpacked content of .WAR file.
             String warFilePath = webappFilePath.concat(".war");
             File warFile = new File(warFilePath);
             if (warFile.exists()) {
                 // .WAR exists skip this dir
                 return true;
-               }
-            
+            }
+
             Host host = DataHolder.getCarbonTomcatService().getTomcat().getHost();
             String webappContext = "/" + webappFile.getName();
             //Make sure we are not re-deploying faulty apps on faulty list again.
-            boolean  isExistingFaultyApp = isExistingFaultyApp(webappFile.getName());
+            boolean isExistingFaultyApp = isExistingFaultyApp(webappFile.getName());
             if (host.findChild(webappContext) == null && webappFile.isDirectory() && !isExistingFaultyApp) {
                 isSkipped = false;
             }
@@ -274,12 +276,12 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
                         getDummyContextFile(fileName, axisConfig);
                 if (ghostFile != null && ghostFile.exists() && !ghostFile.delete()) {
                     log.error("Error while deleting Ghost webapp file : " +
-                              ghostFile.getAbsolutePath());
+                            ghostFile.getAbsolutePath());
                 }
                 if (dummyContextDir != null && dummyContextDir.exists() &&
-                    !dummyContextDir.delete()) {
+                        !dummyContextDir.delete()) {
                     log.error("Error while deleting dummy context file : " +
-                              dummyContextDir.getAbsolutePath());
+                            dummyContextDir.getAbsolutePath());
                 }
             }
 
