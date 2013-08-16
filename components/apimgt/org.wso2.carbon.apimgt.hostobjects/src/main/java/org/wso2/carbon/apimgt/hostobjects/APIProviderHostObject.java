@@ -451,7 +451,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
     private static String getTransports(NativeObject apiData) {
-        String transportStr = (String) apiData.get("transports", apiData);
+        String transportStr = String.valueOf(apiData.get("transports", apiData));
         String transport  = transportStr;
         if (transportStr != null) {
             if ((transportStr.indexOf(",") == 0) || (transportStr.indexOf(",") == (transportStr.length()-1))) {
