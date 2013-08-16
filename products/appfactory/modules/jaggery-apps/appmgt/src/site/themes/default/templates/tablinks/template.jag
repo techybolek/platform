@@ -26,33 +26,31 @@
 
     var tenantDomain = mod.getTenantDomain();
 
-    // var superTenantDomain =  x.getTenantManager().getSuperTenantDomain();
-    // var superTenantID = x.getTenantManager().getTenantId(superTenantDomain);
-
     var tenantID = realmService.getTenantManager().getTenantId(tenantDomain);
     var rolesArray = realmService.getTenantUserRealm(tenantID).getUserStoreManager().getRoleListOfUser(userName);
 
-    log.info("Role list length = " + rolesArray.length);
-    log.info("Real User Name == " + userName);
+    // log.info("Role list length = " + rolesArray.length);
+    // log.info("Real User Name == " + userName);
 
         for (var i=0;i<rolesArray.length;i++){
                 var role = rolesArray[i];
-                var roleName = role.roleName;
-                var isSelected = role.isSelected;
 
-                log.info("i== " + i + ", role ==" + role);
+                // log.info("i== " + i + ", role ==" + role);
 
-                if(roleName == "admin" && isSelected == "true"){
+                if(role == "admin"){
                    dashboardPath = getProperty(ADMIN_DASHBOARD_PATH);
                    dashboardUrl = serverUrl + dashboardPath;
+		   break;
 
-                }else if(roleName == "ceo" && isSelected == "true"){
+                }else if(role == "ceo"){
                     dashboardPath = getProperty(CEO_DASHBOARD_PATH);
                     dashboardUrl = serverUrl + dashboardPath;
+		    break;
                 }
-                else if(roleName == "appFactoryUsers" && isSelected == "true"){
+                else if(role == "appFactoryUsers"){
                     dashboardPath = getProperty(AF_USERS_DASHBOARD_PATH);
-                    dashboardUrl = serverUrl + dashboardPath ;;
+                    dashboardUrl = serverUrl + dashboardPath ;
+		    break;
               }
         }
 
