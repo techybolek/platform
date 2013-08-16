@@ -247,6 +247,16 @@
         </includes>
         </fileSet>
 
+        <!--Copying modules coming from jaggery feature-->
+        <fileSet>
+        <directory>../../p2-profile/product/target/wso2carbon-core-${carbon.platform.version}/modules</directory>
+        <outputDirectory>${pom.artifactId}-${pom.version}/modules/</outputDirectory>
+        <excludes>
+        <exclude>**/carbon/**</exclude>
+        <exclude>**/process/**</exclude>
+        </excludes>
+        </fileSet>
+
         <!--End of  API Manager related -->
     </fileSets>
     <dependencySets>
