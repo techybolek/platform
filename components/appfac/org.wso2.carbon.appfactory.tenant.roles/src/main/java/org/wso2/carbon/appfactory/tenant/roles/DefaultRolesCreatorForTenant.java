@@ -18,46 +18,124 @@ package org.wso2.carbon.appfactory.tenant.roles;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
-import org.wso2.carbon.appfactory.common.util.AppFactoryUtil;
-import org.wso2.carbon.appfactory.tenant.roles.internal.ServiceHolder;
-import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.appfactory.tenant.roles.util.Util;
+import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.Permission;
+import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
-import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
-import org.wso2.carbon.user.mgt.UserMgtConstants;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Adds roles such as developer,devOps,qa,appOwner,admin,ceo
- * to "User Manager Database" on Tenant(application) creation
+ * Tenant level roles defined in appfactory.xml are created through this
+ * class.
+ * All the permissions defined are assigned to the roles and if the role is
+ * existing, permissions
+ * are updated.
  */
 public class DefaultRolesCreatorForTenant implements TenantMgtListener {
-    private static Log log = LogFactory.getLog(DefaultRolesCreatorForTenant.class);
+    private static Log log = LogFactory.getLog(DefaultRolesCreatorForSuperTenant.class);
+    private List<RoleBean> roleBeanList = null;
     private static final int EXEC_ORDER = 40;
-
+   
     @Override
     public void onTenantCreate(TenantInfoBean tenantInfoBean) throws StratosException {
+        roleBeanList = new ArrayList<RoleBean>();
         try {
-
-            Registry registry = ServiceHolder.getRegistryService().getGovernanceSystemRegistry();
-            Collection resource = registry.newCollection();
-            resource.setProperty(UserMgtConstants.DISPLAY_NAME, "appfactory");
-            registry.put("/permission/admin/appfactory", resource);
-
-            AppFactoryConfiguration config = AppFactoryUtil.getAppfactoryConfiguration();
-            String[] permissionList = config.getProperties("Permissions.Permission");
-            for (String permission : permissionList) {
-                String permissionName = config.getFirstProperty("Permissions.Permission." + permission);
-                resource = registry.newCollection();
-                resource.setProperty(UserMgtConstants.DISPLAY_NAME, permissionName);
-                registry.put(permission, resource);
-            }
-
-        } catch (Exception e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            createDefaultRoles(tenantInfoBean);
+        } catch (UserStoreException e) {
+            String message = "Failed to read roles from appfactory configuration.";
+            log.error(message);
+            throw new StratosException(message, e);
         }
+    }
+
+    private void loadPlatformDefaultRoleConfigurations(AppFactoryConfiguration configuration,
+                                                       String adminUser) {
+        String[] roles = configuration.getProperties("TenantRoles.DefaultUserRole");
+        for (String role : roles) {
+            String permissionIdString =configuration.
+            getFirstProperty("TenantRoles.DefaultUserRole." +
+                             role + ".Permission");
+            String[] permissionIds = permissionIdString.split(",");
+            RoleBean roleBean = new RoleBean(role.trim());
+            roleBean.addUser(adminUser);
+            for (String permissionId : permissionIds) {
+                String[] resourceAndActionParts = permissionId.trim().split(":");
+                if (resourceAndActionParts.length == 2) {
+                    Permission permission =new Permission(resourceAndActionParts[0],
+                                                           resourceAndActionParts[1]);
+                    roleBean.addPermission(permission);
+
+                } else if (resourceAndActionParts.length == 1) {
+                    Permission permission =new Permission(resourceAndActionParts[0],
+                                                          CarbonConstants.UI_PERMISSION_ACTION);
+                    roleBean.addPermission(permission);
+                }
+            }
+            roleBeanList.add(roleBean);
+        }
+    }
+
+    private void loadPlatformRoleConfigurations(AppFactoryConfiguration configuration,
+                                                String adminUser) {
+        String[] roles = configuration.getProperties("TenantRoles.Role");
+        for (String role : roles) {
+            String permissionIdString =configuration.getFirstProperty("TenantRoles.Role." +
+                                                                       role + ".Permission");
+            String[] permissionIds = permissionIdString.split(",");
+            RoleBean roleBean = new RoleBean(role.trim());
+            roleBean.addUser(adminUser);
+            for (String permissionId : permissionIds) {
+                String[] resourceAndActionParts = permissionId.trim().split(":");
+                if (resourceAndActionParts.length == 2) {
+                    Permission permission =new Permission(resourceAndActionParts[0],
+                                                           resourceAndActionParts[1]);
+                    roleBean.addPermission(permission);
+
+                } else if (resourceAndActionParts.length == 1) {
+                    Permission permission =new Permission(resourceAndActionParts[0],
+                                                           CarbonConstants.UI_PERMISSION_ACTION);
+                    roleBean.addPermission(permission);
+                }
+            }
+            roleBeanList.add(roleBean);
+        }
+    }
+
+    private void createDefaultRoles(TenantInfoBean tenantInfoBean) throws UserStoreException {
+    	AppFactoryConfiguration configuration = Util.getConfiguration();
+    	String adminUser =tenantInfoBean.getAdmin();
+    	
+    	loadPlatformDefaultRoleConfigurations(configuration, adminUser);
+        loadPlatformRoleConfigurations(configuration, adminUser);
+    	
+    	UserStoreManager userStoreManager = Util.getRealmService().getTenantUserRealm(tenantInfoBean.getTenantId()).getUserStoreManager();
+        AuthorizationManager authorizationManager =Util.getRealmService().getTenantUserRealm(tenantInfoBean.getTenantId()).
+        											getAuthorizationManager();
+        for (RoleBean roleBean : roleBeanList) {
+            if (!userStoreManager.isExistingRole(roleBean.getRoleName())) {
+                userStoreManager.addRole(roleBean.getRoleName(),
+                                         roleBean.getUsers().toArray(new String[roleBean.getUsers().size()]),
+                                         roleBean.getPermissions().toArray(new Permission[roleBean.getPermissions().size()]));
+            } else {
+                for (Permission permission : roleBean.getPermissions()) {
+                    if (!authorizationManager.isRoleAuthorized(roleBean.getRoleName(),
+                                                               permission.getResourceId(),
+                                                               permission.getAction())) {
+                        authorizationManager.authorizeRole(roleBean.getRoleName(),
+                                                           permission.getResourceId(),
+                                                           permission.getAction());
+                    }
+                }
+            }
+        }
+
     }
 
     @Override

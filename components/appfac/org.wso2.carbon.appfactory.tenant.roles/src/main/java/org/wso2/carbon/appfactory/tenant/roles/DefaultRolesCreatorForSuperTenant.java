@@ -39,6 +39,7 @@ import java.util.List;
 public class DefaultRolesCreatorForSuperTenant {
     private static Log log = LogFactory.getLog(DefaultRolesCreatorForSuperTenant.class);
     private List<RoleBean> roleBeanList = null;
+    private static final int EXEC_ORDER = 40;
 
     public DefaultRolesCreatorForSuperTenant() throws Exception {
         roleBeanList = new ArrayList<RoleBean>();
@@ -58,10 +59,10 @@ public class DefaultRolesCreatorForSuperTenant {
 
     private void loadPlatformDefaultRoleConfigurations(AppFactoryConfiguration configuration,
                                                        String adminUser) {
-        String[] roles = configuration.getProperties("PlatformRoles.DefaultUserRole");
+        String[] roles = configuration.getProperties("TenantRoles.DefaultUserRole");
         for (String role : roles) {
             String permissionIdString =configuration.
-            getFirstProperty("PlatformRoles.DefaultUserRole." +
+            getFirstProperty("TenantRoles.DefaultUserRole." +
                              role + ".Permission");
             String[] permissionIds = permissionIdString.split(",");
             RoleBean roleBean = new RoleBean(role.trim());
@@ -85,9 +86,9 @@ public class DefaultRolesCreatorForSuperTenant {
 
     private void loadPlatformRoleConfigurations(AppFactoryConfiguration configuration,
                                                 String adminUser) {
-        String[] roles = configuration.getProperties("PlatformRoles.Role");
+        String[] roles = configuration.getProperties("TenantRoles.Role");
         for (String role : roles) {
-            String permissionIdString =configuration.getFirstProperty("PlatformRoles.Role." +
+            String permissionIdString =configuration.getFirstProperty("TenantRoles.Role." +
                                                                        role + ".Permission");
             String[] permissionIds = permissionIdString.split(",");
             RoleBean roleBean = new RoleBean(role.trim());
@@ -114,6 +115,7 @@ public class DefaultRolesCreatorForSuperTenant {
         getUserStoreManager();
         AuthorizationManager authorizationManager =Util.getRealmService().getBootstrapRealm().
         getAuthorizationManager();
+
         for (RoleBean roleBean : roleBeanList) {
             if (!userStoreManager.isExistingRole(roleBean.getRoleName())) {
                 userStoreManager.addRole(roleBean.getRoleName(),

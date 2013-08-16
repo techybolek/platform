@@ -59,7 +59,7 @@ public class DefaultRolesCreatorServiceComponent {
     protected void activate(ComponentContext context) {
 
         try {
-           /* DefaultRolesCreatorForTenant rolesCreatorForTenant = new DefaultRolesCreatorForTenant();
+           /*DefaultRolesCreatorForTenant rolesCreatorForTenant = new DefaultRolesCreatorForTenant();
             context.getBundleContext()
             .registerService(org.wso2.carbon.stratos.common.listeners.TenantMgtListener.class.getName(),
                              rolesCreatorForTenant, null);*/
@@ -71,8 +71,11 @@ public class DefaultRolesCreatorServiceComponent {
                                                        new S2IntegrationTenantActivationListener(),
                                                        null);*/
             context.getBundleContext().registerService(TenantMgtListener.class.getName(),
-                    new AppFactoryTenantMgtListener(),
-                    null);
+                                                       new AppFactoryTenantMgtListener(),
+                                                       null);
+            context.getBundleContext().registerService(TenantMgtListener.class.getName(),
+                                                       new DefaultRolesCreatorForTenant(),
+                                                       null);
             if (log.isDebugEnabled()) {
                 log.debug("DefaultRolesCreatorServiceComponent Service  bundle is activated");
             }
@@ -84,8 +87,9 @@ public class DefaultRolesCreatorServiceComponent {
             DefaultRolesCreatorForSuperTenant rolesCreatorForSuperTenant =
                 new DefaultRolesCreatorForSuperTenant();
             rolesCreatorForSuperTenant.createDefaultRoles();
+
         } catch (Exception e) {
-            log.error("Failed to create default roles for super tenant.", e);
+            log.error("Failed to create default roles for tenant.", e);
         }
     }
 
