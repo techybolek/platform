@@ -26,13 +26,11 @@ import org.wso2.carbon.automation.core.utils.coreutils.CodeCoverageUtils;
 import org.wso2.carbon.automation.core.utils.fileutils.FileManager;
 import org.wso2.carbon.utils.ServerConstants;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 
 /**
  * This class can be used to configure server by  replacing axis2.xml or carbon.xml
@@ -81,6 +79,53 @@ public class ServerConfigurationManager {
         backUpConfig = new File(confDir + fileName + ".backup");
         originalConfig.renameTo(backUpConfig);
         isFileBackUp = true;
+    }
+
+     /**
+        *  Backup a file residing in a cabron server.
+        *  @param file file residing in server to backup.
+        */
+    private void backupConfiguration(File file) {
+        //restore backup configuration
+        originalConfig = file;
+        backUpConfig = new File(file.getAbsolutePath() + File.separator + file.getName() + ".backup");
+        originalConfig.renameTo(backUpConfig);
+        isFileBackUp = true;
+    }
+
+    /**
+     *  Apply configuration from source file to a target file without restarting.
+     * @param sourceFile Source file to copy.
+     * @param targetFile Target file that is to be backed up and replaced.
+     * @param backup boolean value, set this to true if you want to backup the original file.
+     *
+     * @throws Exception
+     */
+    public void applyConfigurationWithoutRestart(File sourceFile, File targetFile, boolean backup) throws Exception {
+        // Using inputstreams to copy bytes instead of Readers that copy chars. Otherwise thigns like JKS files get corrupted during copy.
+        FileChannel source = null;
+        FileChannel destination = null;
+
+        if(backup) {
+            backupConfiguration(targetFile);
+            source = new FileInputStream(sourceFile).getChannel();
+            destination = new FileOutputStream(originalConfig).getChannel();
+        } else {
+            if(!targetFile.exists()) {
+                targetFile.createNewFile();
+            }
+            source = new FileInputStream(sourceFile).getChannel();
+            destination = new FileOutputStream(targetFile).getChannel();
+        }
+
+        destination.transferFrom(source, 0, source.size());
+
+        if(source != null) {
+            source.close();
+        }
+        if(destination != null) {
+            destination.close();
+        }
     }
 
     /**
