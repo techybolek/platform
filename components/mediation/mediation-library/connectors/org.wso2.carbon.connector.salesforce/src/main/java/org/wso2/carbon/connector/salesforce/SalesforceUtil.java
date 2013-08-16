@@ -31,8 +31,7 @@ import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseLog;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.mediation.library.connectors.core.util.ConnectorUtils;
+import org.wso2.carbon.connector.core.util.ConnectorUtils;
 
 public final class SalesforceUtil {
 

@@ -7,7 +7,7 @@
 	<artifactId>org.wso2.carbon.connector.twilio</artifactId>
 	<version>4.2.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>twilio-cloud-connector</name>
+	<name>WSO2 Carbon - Cloud Connector For Twilio</name>
 	<url>http://maven.apache.org</url>
 
 
@@ -19,7 +19,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
-			<artifactId>org.wso2.carbon.mediation.library.connectors.core</artifactId>
+			<artifactId>org.wso2.carbon.connectors.core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

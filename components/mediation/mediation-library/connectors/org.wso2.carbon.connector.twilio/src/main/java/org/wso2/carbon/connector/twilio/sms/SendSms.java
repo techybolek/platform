@@ -17,20 +17,20 @@
  */
 package org.wso2.carbon.connector.twilio.sms;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.resource.factory.SmsFactory;
-import com.twilio.sdk.resource.instance.Sms;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.connector.core.AbstractConnector;
+import org.wso2.carbon.connector.core.util.ConnectorUtils;
 import org.wso2.carbon.connector.twilio.util.TwilioUtil;
-import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
-import org.wso2.carbon.mediation.library.connectors.core.util.ConnectorUtils;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.resource.factory.SmsFactory;
+import com.twilio.sdk.resource.instance.Sms;
 
 /*
  * Class mediator for sending an SMS.

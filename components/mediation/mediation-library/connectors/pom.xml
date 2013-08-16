@@ -28,50 +28,18 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>connectors</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Mediation Template Libray Connectors</name>
+    <name>Building wso2 CARBON connectors</name>
     <url>http://wso2.org</url>
     <modules>
-        <!--<module>org.wso2.carbon.mediation.library.connectors.linked-in</module> -->
-        <!--<module>org.wso2.carbon.mediation.library.connectors.twitter</module> -->
-        <module>org.wso2.carbon.mediation.library.connectors.core</module>
+        <module>org.wso2.carbon.connector.core</module>
+	<module>org.wso2.carbon.connector.twitter</module>
+ 	<module>org.wso2.carbon.connector.jira</module>
+	<module>org.wso2.carbon.connector.salesforce</module>
+	<module>org.wso2.carbon.connector.twilio</module>
+
     </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-                <version>${wso2carbon.version.cloudConnectors}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.mediation.library.connectors.core</artifactId>
-                <version>${wso2carbon.version.cloudConnectors}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.user.core</artifactId>
-                <version>${wso2carbon.version.cloudConnectors}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.synapse</groupId>
-                <artifactId>synapse-core</artifactId>
-                <version>${synapse.version.cloudConnectors}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.linkedin.wso2</groupId>
-                <artifactId>linkedinj</artifactId>
-                <version>${orbit.version.cloudConnectors}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.twitter.wso2</groupId>
-                <artifactId>twitter4j</artifactId>
-                <version>${orbit.version.cloudConnectors}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
+   
     <properties>
         <wso2carbon.version.cloudConnectors>${wso2carbon.version}</wso2carbon.version.cloudConnectors>
         <axis2.wso2.version.cloudConnectors>${axis2.wso2.version}</axis2.wso2.version.cloudConnectors>

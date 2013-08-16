@@ -18,6 +18,8 @@
  */
 package org.wso2.carbon.connector.salesforce;
 
+import java.util.Iterator;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -26,9 +28,7 @@ import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseLog;
-import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
-
-import java.util.Iterator;
+import org.wso2.carbon.connector.core.AbstractConnector;
 
 /**
  * The QueryMoreIterator inject Payload that can be used with WSO2-ESB Iterator

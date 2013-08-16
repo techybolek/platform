@@ -20,17 +20,17 @@ package org.wso2.carbon.connector.twilio.sms;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.TwilioRestResponse;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.connector.core.AbstractConnector;
+import org.wso2.carbon.connector.core.ConnectException;
+import org.wso2.carbon.connector.core.util.ConnectorUtils;
 import org.wso2.carbon.connector.twilio.util.TwilioUtil;
-import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
-import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
-import org.wso2.carbon.mediation.library.connectors.core.util.ConnectorUtils;
+
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.TwilioRestResponse;
 
 /*
  * Class mediator for getting the short code based on the Sid.

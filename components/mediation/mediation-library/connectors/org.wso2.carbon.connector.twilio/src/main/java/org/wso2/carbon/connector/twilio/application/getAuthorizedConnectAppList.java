@@ -21,8 +21,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.connector.core.AbstractConnector;
 import org.wso2.carbon.connector.twilio.util.TwilioUtil;
-import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
 
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestResponse;

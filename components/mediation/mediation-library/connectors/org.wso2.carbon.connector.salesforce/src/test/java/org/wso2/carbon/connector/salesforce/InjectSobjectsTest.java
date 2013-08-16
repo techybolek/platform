@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Stack;
 
+import junit.framework.TestCase;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -19,13 +21,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
 import org.apache.synapse.mediators.Value;
 import org.apache.synapse.mediators.template.TemplateContext;
-import org.wso2.carbon.connector.salesforce.SalesforceUtil;
-import org.wso2.carbon.connector.salesforce.SetupCreateSobjects;
-import org.wso2.carbon.connector.salesforce.SetupUpdateSobjects;
-import org.wso2.carbon.connector.salesforce.SetupUpsertSobjects;
-import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
-
-import junit.framework.TestCase;
+import org.wso2.carbon.connector.core.AbstractConnector;
 
 public class InjectSobjectsTest extends TestCase {
 

@@ -23,7 +23,7 @@ import java.util.List;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.synapse.MessageContext;
-import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+import org.wso2.carbon.connector.core.ConnectException;
 
 import twitter4j.Location;
 import twitter4j.Twitter;

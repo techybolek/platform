@@ -29,7 +29,7 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+import org.wso2.carbon.connector.core.ConnectException;
 
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestResponse;

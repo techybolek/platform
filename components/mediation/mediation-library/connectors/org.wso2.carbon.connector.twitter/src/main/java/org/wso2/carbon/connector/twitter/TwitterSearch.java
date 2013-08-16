@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.codehaus.jettison.json.JSONException;
-import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+import org.wso2.carbon.connector.core.ConnectException;
 
 import twitter4j.GeoLocation;
 import twitter4j.Query;

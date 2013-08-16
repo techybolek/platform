@@ -30,13 +30,11 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPBody;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.codehaus.jettison.AbstractXMLStreamReader;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.mapped.MappedXMLStreamReader;
-import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
+import org.wso2.carbon.connector.core.AbstractConnector;
 
 public abstract class AbstractTwitterConnector extends AbstractConnector {
 

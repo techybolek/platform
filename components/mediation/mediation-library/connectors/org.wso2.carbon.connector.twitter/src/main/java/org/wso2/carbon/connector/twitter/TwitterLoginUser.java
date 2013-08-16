@@ -21,8 +21,8 @@ package org.wso2.carbon.connector.twitter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
-import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+import org.wso2.carbon.connector.core.AbstractConnector;
+import org.wso2.carbon.connector.core.ConnectException;
 
 public class TwitterLoginUser extends AbstractConnector {
 

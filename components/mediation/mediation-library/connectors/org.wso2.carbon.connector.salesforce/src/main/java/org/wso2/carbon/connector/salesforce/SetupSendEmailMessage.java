@@ -20,7 +20,7 @@ package org.wso2.carbon.connector.salesforce;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseLog;
-import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
+import org.wso2.carbon.connector.core.AbstractConnector;
 
 public class SetupSendEmailMessage extends AbstractConnector {
 

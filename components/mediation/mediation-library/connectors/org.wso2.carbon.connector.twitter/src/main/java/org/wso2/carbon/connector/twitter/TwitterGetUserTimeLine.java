@@ -29,14 +29,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.codehaus.jettison.json.JSONException;
-import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+import org.wso2.carbon.connector.core.ConnectException;
 
 import twitter4j.Paging;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
 
 public class TwitterGetUserTimeLine extends AbstractTwitterConnector {

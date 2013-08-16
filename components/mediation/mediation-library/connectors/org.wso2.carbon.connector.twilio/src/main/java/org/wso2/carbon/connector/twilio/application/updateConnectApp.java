@@ -17,22 +17,19 @@
  */
 package org.wso2.carbon.connector.twilio.application;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.TwilioRestException;
-import com.twilio.sdk.resource.instance.Application;
-import com.twilio.sdk.resource.instance.ConnectApp;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.connector.core.AbstractConnector;
+import org.wso2.carbon.connector.core.util.ConnectorUtils;
 import org.wso2.carbon.connector.twilio.util.TwilioUtil;
-import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
-import org.wso2.carbon.mediation.library.connectors.core.util.ConnectorUtils;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.resource.instance.ConnectApp;
 
 /*
  * Class mediator for updating a connect app instance with optional parameters
