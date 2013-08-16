@@ -30,13 +30,13 @@
                         <!--<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"-->
                         <!--xmlns:throttle="http://www.wso2.org/products/wso2commons/throttle">-->
                         <throttle:MediatorThrottleAssertion>
-                            <throttle:MaximumConcurrentAccess>6</throttle:MaximumConcurrentAccess>
+                            <throttle:MaximumConcurrentAccess>10</throttle:MaximumConcurrentAccess>
                             <wsp:Policy>
                                 <throttle:ID throttle:type="IP">other</throttle:ID>
                                 <wsp:Policy>
                                     <throttle:Control>
                                         <wsp:Policy>
-                                            <throttle:MaximumCount>10</throttle:MaximumCount>
+                                            <throttle:MaximumCount>6</throttle:MaximumCount>
                                             <throttle:UnitTime>800000</throttle:UnitTime>
                                             <throttle:ProhibitTimePeriod wsp:Optional="true">1000</throttle:ProhibitTimePeriod>
                                         </wsp:Policy>
