@@ -54,10 +54,9 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
         no_of_requests = 1;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -78,10 +77,9 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
         no_of_requests = 2;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -102,10 +100,9 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
         no_of_requests = 100;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -127,10 +124,9 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
         no_of_requests = 4;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -152,10 +148,9 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
         no_of_requests = 10;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -177,10 +172,9 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
         no_of_requests = 3;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 

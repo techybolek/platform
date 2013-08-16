@@ -51,11 +51,10 @@ public class HighTimeoutWithLessMessagesTestCase extends ESBIntegrationTest {
     public void maxValueTest() throws IOException, XMLStreamException {
         int responseCount = 0;
 
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
 
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 

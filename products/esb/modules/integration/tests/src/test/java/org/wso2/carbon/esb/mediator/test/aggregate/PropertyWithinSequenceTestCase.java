@@ -52,10 +52,9 @@ public class PropertyWithinSequenceTestCase extends ESBIntegrationTest {
     public void testPropertyWithinIteratorMediator() throws IOException, XMLStreamException {
         int responseCount = 0;
         for (int i = 0; i < 10; i++) {
-            String Response = aggregatedRequestClient.getResponse();
+            OMElement Response = aggregatedRequestClient.getResponse();
             Assert.assertNotNull(Response);
-            OMElement Response2 = AXIOMUtil.stringToOM(Response);
-            OMElement soapBody = Response2.getFirstElement();
+            OMElement soapBody = Response.getFirstElement();
             Iterator iterator = soapBody.getChildrenWithLocalName("getQuoteResponse");
 
             while (iterator.hasNext()) {

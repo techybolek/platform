@@ -54,7 +54,7 @@ public class NestedAggregatesTestCase extends ESBIntegrationTest {
     public void test() throws IOException, XMLStreamException {
         int responseCount = 0;
 
-        OMElement response = AXIOMUtil.stringToOM(aggregatedRequestClient.getResponse());
+        OMElement response = aggregatedRequestClient.getResponse();
         OMElement soapBody = response.getFirstElement();
 
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",

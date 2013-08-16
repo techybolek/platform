@@ -52,10 +52,9 @@ public class SpecifyMaxMessageCountAsExpressionTestCase extends ESBIntegrationTe
         int responseCount = 0;
         no_of_requests = 3;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -73,10 +72,9 @@ public class SpecifyMaxMessageCountAsExpressionTestCase extends ESBIntegrationTe
         int responseCount = 0;
         no_of_requests = minMessageCount;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -94,10 +92,9 @@ public class SpecifyMaxMessageCountAsExpressionTestCase extends ESBIntegrationTe
         int responseCount = 0;
         no_of_requests = maxMessageCount;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -115,10 +112,9 @@ public class SpecifyMaxMessageCountAsExpressionTestCase extends ESBIntegrationTe
         int responseCount = 0;
         no_of_requests = 8;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -136,10 +132,9 @@ public class SpecifyMaxMessageCountAsExpressionTestCase extends ESBIntegrationTe
         int responseCount = 0;
         no_of_requests = 15;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 

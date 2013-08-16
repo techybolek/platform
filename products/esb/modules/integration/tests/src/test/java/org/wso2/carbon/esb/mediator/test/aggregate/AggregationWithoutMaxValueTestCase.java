@@ -53,10 +53,9 @@ public class AggregationWithoutMaxValueTestCase extends ESBIntegrationTest {
 
         no_of_requests = 20;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -75,10 +74,9 @@ public class AggregationWithoutMaxValueTestCase extends ESBIntegrationTest {
         int responseCount = 0;
         no_of_requests = 50;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 
@@ -99,10 +97,9 @@ public class AggregationWithoutMaxValueTestCase extends ESBIntegrationTest {
 
         no_of_requests = 80;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
+        OMElement soapBody = Response.getFirstElement();
         Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
                                                                    "getQuoteResponse"));
 

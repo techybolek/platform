@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.esb.mediator.test.aggregate;
 
+import org.apache.axiom.om.OMElement;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -45,8 +46,9 @@ public class AggregateWithinTimeoutTestCase extends ESBIntegrationTest {
     public void test() throws IOException {
         int companyCount = 0, responseTagCount = 0, SoapEnvCount = 0;
 
-        String Response = aggregatedRequestClient.getResponse();
-        String[] response = getTagArray(Response);
+        OMElement Response = aggregatedRequestClient.getResponse();
+        String responseStr = Response.toString();
+        String[] response = getTagArray(responseStr);
 
         for (int i = 0; i < response.length; i++) {
             if (response[i].contains("soapenv")) {
@@ -59,8 +61,8 @@ public class AggregateWithinTimeoutTestCase extends ESBIntegrationTest {
         }
 
 
-        Assert.assertTrue(Response.contains("WSO2 Company"));
-        Assert.assertTrue(Response.contains("getQuoteResponse"));
+        Assert.assertTrue(responseStr.contains("WSO2 Company"));
+        Assert.assertTrue(responseStr.contains("getQuoteResponse"));
         Assert.assertTrue(2 * no_of_requests > responseTagCount);
         Assert.assertTrue((no_of_requests > companyCount));
     }

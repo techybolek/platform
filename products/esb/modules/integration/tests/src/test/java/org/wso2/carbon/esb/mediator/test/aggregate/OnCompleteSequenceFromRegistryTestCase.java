@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.esb.mediator.test.aggregate;
 
+import org.apache.axiom.om.OMElement;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -54,8 +55,9 @@ public class OnCompleteSequenceFromRegistryTestCase extends ESBIntegrationTest {
     public void test() throws IOException, XMLStreamException {
 
 
-        String Response = aggregatedRequestClient.getResponse();
-        Assert.assertNotNull(Response, "Response message is null");
+        OMElement response = aggregatedRequestClient.getResponse();
+        Assert.assertNotNull(response, "Response message is null");
+        String Response = response.toString();
         Assert.assertTrue(Response.contains("getQuoteResponse"), "payload factory in registry sequence has not run");
         Assert.assertTrue(Response.contains("responseFromPayloadFactory"), "payload factory in registry sequence has not run");
         Assert.assertTrue(Response.contains("WSO2"), "payload factory in registry sequence has not run");

@@ -52,12 +52,11 @@ public class CheckAggregateContentTestCase extends ESBIntegrationTest {
     public void test() throws IOException, XMLStreamException {
 
 
-        String Response = aggregatedRequestClient.getResponse();
+        OMElement Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
 
 
-        OMElement responseParts = Response2.getFirstElement().getFirstElement();
+        OMElement responseParts = Response.getFirstElement().getFirstElement();
         String singleResponse = responseParts.toString();
 
         Assert.assertTrue(singleResponse.contains("return"), "return child message does not exist in the aggregated response");

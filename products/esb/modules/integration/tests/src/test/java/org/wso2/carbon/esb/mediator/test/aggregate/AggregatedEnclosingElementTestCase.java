@@ -49,13 +49,12 @@ public class AggregatedEnclosingElementTestCase extends ESBIntegrationTest {
     public void testEncloseElementToResponseAggregatorCheck() throws IOException, XMLStreamException {
         no_of_requests = 1;
         aggregatedRequestClient.setNoOfIterations(no_of_requests);
-        String Response = aggregatedRequestClient.getResponse();
-        Assert.assertNotNull(Response);
-        OMElement Response2 = AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
-        Assert.assertTrue(soapBody.getFirstOMChild().toString().contains("WSO2"));
-        Assert.assertTrue(soapBody.getFirstOMChild().toString().contains("RootElement"));
-        Assert.assertTrue(soapBody.getFirstOMChild().toString().contains("www.wso2esb.com"));
+        OMElement response = aggregatedRequestClient.getResponsenew();
+        Assert.assertNotNull(response);
+        String responseStr = response.toString();
+        Assert.assertTrue(responseStr.contains("WSO2"));
+        Assert.assertTrue(responseStr.contains("rootelement"));
+        Assert.assertTrue(responseStr.contains("www.wso2esb.com"));
     }
 
     @AfterClass(alwaysRun = true)

@@ -45,19 +45,33 @@ public class AggregatedRequestClient {
     }
 
 
-    public String getResponse() throws IOException {
+    public OMElement getResponsenew() throws IOException {
         AxisOperationClient operationClient = new AxisOperationClient();
         OMElement response = null;
         try {
             response = operationClient.send(proxyServiceUrl, null,
-                                            createMultipleQuoteRequestBody(symbol, no_of_iterations), "urn:getQuote");
+                                            createMultipleQuoteRequestBodynew(symbol, no_of_iterations), "urn:getQuote");
         } finally {
             operationClient.destroy();
         }
-        Assert.assertNotNull(response, "Response Message is null");
-        return response.toString();
+
+        return response;
 
     }
+
+    public OMElement getResponse() throws IOException {
+          AxisOperationClient operationClient = new AxisOperationClient();
+          OMElement response = null;
+          try {
+              response = operationClient.send(proxyServiceUrl, null,
+                                              createMultipleQuoteRequestBody(symbol, no_of_iterations), "urn:getQuote");
+          } finally {
+              operationClient.destroy();
+          }
+
+          return response;
+
+      }
 
     public String getResponse(OMElement payload) throws IOException {
         AxisOperationClient operationClient = new AxisOperationClient();
@@ -89,6 +103,21 @@ public class AggregatedRequestClient {
             method1.addChild(method2);
         }
         return method1;
+    }
+
+    private OMElement createMultipleQuoteRequestBodynew(String symbol, int iterations) {
+        SOAPFactory fac = OMAbstractFactory.getSOAP11Factory();
+        OMNamespace omNs = fac.createOMNamespace("http://services.samples", "ns");
+        OMElement method2 = fac.createOMElement("getQuote", omNs);
+
+        for (int i = 0; i < iterations; i++) {
+            OMElement value1 = fac.createOMElement("request", omNs);
+            OMElement value2 = fac.createOMElement("symbol", omNs);
+            value2.addChild(fac.createOMText(value1, symbol));
+            value1.addChild(value2);
+            method2.addChild(value1);
+        }
+        return method2;
     }
 
 
