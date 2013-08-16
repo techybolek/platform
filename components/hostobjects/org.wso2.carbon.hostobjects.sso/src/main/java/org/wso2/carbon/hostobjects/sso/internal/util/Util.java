@@ -209,44 +209,7 @@ public class Util {
      * @return decoded AuthReq
      */
     public static String decode(String encodedStr) throws Exception {
-        try {
-            org.apache.commons.codec.binary.Base64 base64Decoder = new org.apache.commons.codec.binary.Base64();
-            byte[] xmlBytes = encodedStr.getBytes("UTF-8");
-            byte[] base64DecodedByteArray = base64Decoder.decode(xmlBytes);
-
-            try {
-                Inflater inflater = new Inflater(true);
-                inflater.setInput(base64DecodedByteArray);
-                byte[] xmlMessageBytes = new byte[5000];
-                int resultLength = inflater.inflate(xmlMessageBytes);
-
-                if (!inflater.finished()) {
-                    throw new RuntimeException("didn't allocate enough space to hold "
-                                               + "decompressed data");
-                }
-
-                inflater.end();
-                return new String(xmlMessageBytes, 0, resultLength, "UTF-8");
-
-            } catch (DataFormatException e) {
-                ByteArrayInputStream bais = new ByteArrayInputStream(
-                        base64DecodedByteArray);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                InflaterInputStream iis = new InflaterInputStream(bais);
-                byte[] buf = new byte[1024];
-                int count = iis.read(buf);
-                while (count != -1) {
-                    baos.write(buf, 0, count);
-                    count = iis.read(buf);
-                }
-                iis.close();
-
-                return new String(baos.toByteArray());
-            }
-        } catch (IOException e) {
-            throw new Exception("Error when decoding the SAML Request.", e);
-        }
-
+       return new String(Base64.decode(encodedStr));
     }
 
     /**
