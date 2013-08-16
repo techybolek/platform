@@ -31,7 +31,13 @@ import org.apache.synapse.config.xml.XMLConfigConstants;
 import org.apache.synapse.endpoints.Endpoint;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.registry.Registry;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.XMLPrettyPrinter;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.CarbonConfigurationContextFactory;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.mediation.dependency.mgt.services.DependencyManagementService;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
@@ -44,6 +50,7 @@ import org.wso2.carbon.sequences.common.factory.SequenceInfoFactory;
 import org.wso2.carbon.sequences.common.to.ConfigurationObject;
 import org.wso2.carbon.sequences.common.to.SequenceInfo;
 import org.wso2.carbon.sequences.internal.ConfigHolder;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
@@ -211,6 +218,28 @@ public class SequenceAdmin extends AbstractServiceBusAdmin {
     }
 
     /**
+     * Set the tenant domain when a publisher deletes custom sequences in MT mode. When publisher 
+     * deletes the sequence, we login the gateway as supertenant. But we need to delete in the particular 
+	 * tenant domain.
+	 *
+     * @param sequenceName
+     * @param tenantDomain
+     * @throws SequenceEditorException 
+     */
+    public void deleteSequenceForTenant(String sequenceName, String tenantDomain) throws SequenceEditorException{
+
+		try {
+			PrivilegedCarbonContext.startTenantFlow();
+			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,
+			                                                                      true);
+			deleteSequence(sequenceName);
+		} catch (Exception e) {
+			  handleException("Issue is in deleting the sequence definition");
+        } finally {
+			PrivilegedCarbonContext.endTenantFlow();
+		}
+    }
+    /**
      * Delete Selected Sequence in the synapse configuration
      *
      * @param sequenceNames
@@ -307,6 +336,31 @@ public class SequenceAdmin extends AbstractServiceBusAdmin {
     }
 
     /**
+     * Set the tenant domain when a publisher tries to get custom sequences in MT mode. When publisher 
+     * tries to get the sequence, we login the gateway as supertenant. But we need to get in the particular 
+	 * tenant domain.
+	 *
+     * @param sequenceName
+     * @param tenantDomain
+     * @throws SequenceEditorException 
+     * 
+     */
+    public OMElement getSequenceForTenant(String sequenceName, String tenantDomain) throws SequenceEditorException{
+
+		try {
+			PrivilegedCarbonContext.startTenantFlow();
+			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,
+			                                                                      true);
+			OMElement seq = getSequence(sequenceName);
+			return seq;
+		} catch (Exception e) {
+			  handleException("Issue is in getting the sequence definition");
+        } finally {
+			PrivilegedCarbonContext.endTenantFlow();
+		}
+		return null;
+    }
+    /**
      * Add a sequence into the synapseConfiguration
      *
      * @param sequenceElement - Sequence object to be added as an OMElement
@@ -352,6 +406,30 @@ public class SequenceAdmin extends AbstractServiceBusAdmin {
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * Set the tenant domain when a publisher deploys custom sequences in MT mode. When publisher 
+     * deploys the sequence, we login the gateway as supertenant. But we need to deploy in the particular 
+	 * tenant domain.
+	 *
+     * @param sequenceElement
+     * @param tenantDomain
+     * @throws SequenceEditorException 
+     */
+    public void addSequenceForTenant(OMElement sequenceElement, String tenantDomain) throws SequenceEditorException{
+
+		try {
+			PrivilegedCarbonContext.startTenantFlow();
+			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,
+			                                                                      true);
+			addSequence(sequenceElement);
+		
+		} catch (Exception e) {
+			  handleException("Issue in deploying the sequence definition");
+        } finally {
+			PrivilegedCarbonContext.endTenantFlow();
+		}
     }
 
     /**
@@ -737,4 +815,44 @@ public class SequenceAdmin extends AbstractServiceBusAdmin {
         }
         pm.saveItem(sequence.getName(), ServiceBusConstants.ITEM_TYPE_SEQUENCE);
     }
+    
+    /**
+ 	 * Override the AbstarctAdmin.java's getAxisConfig() to create the CarbonContext from ThreadLoaclContext.
+ 	 * We do this to support, publishing APIs as a supertenant but want to deploy that in tenant space.
+ 	 * (This model is needed for APIManager)
+ 	 */
+ 	
+ 	protected AxisConfiguration getAxisConfig() {
+ 		return (axisConfig != null) ? axisConfig : getConfigContext().getAxisConfiguration();
+ 	}
+
+ 	protected ConfigurationContext getConfigContext() {
+ 		if (configurationContext != null) {
+ 			return configurationContext;
+ 		}
+ 		
+ 		MessageContext msgContext = MessageContext.getCurrentMessageContext();
+ 		if (msgContext != null) {
+ 			ConfigurationContext mainConfigContext = msgContext.getConfigurationContext();
+
+ 			// If a tenant has been set, then try to get the
+ 			// ConfigurationContext of that tenant
+ 			PrivilegedCarbonContext carbonContext =
+ 			                                        PrivilegedCarbonContext.getThreadLocalCarbonContext();
+ 			String domain = carbonContext.getTenantDomain();
+ 			if (domain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)) {
+ 				return TenantAxisUtils.getTenantConfigurationContext(domain, mainConfigContext);
+ 			} else if (carbonContext.getTenantId() == MultitenantConstants.SUPER_TENANT_ID) {
+ 				return mainConfigContext;
+ 			} else {
+ 				throw new UnsupportedOperationException(
+ 				                                        "Tenant domain unidentified. "
+ 				                                                + "Upstream code needs to identify & set the tenant domain & tenant ID. "
+ 				                                                + " The TenantDomain SOAP header could be set by the clients or "
+ 				                                                + "tenant authentication should be carried out.");
+ 			}
+ 		} else {
+ 			return CarbonConfigurationContextFactory.getConfigurationContext();
+ 		}
+ 	}
 }
