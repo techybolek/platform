@@ -27,11 +27,11 @@
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyCreationException" %>
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.util.PolicyEditorUtil" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.EntitlementConstants" %>
 <jsp:useBean id="entitlementPolicyBean"
              type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
@@ -91,17 +91,17 @@
         }
     }
 
-    SOAPolicyEditorDTO editorDTO = null;
+    SimplePolicyEditorDTO editorDTO = null;
     String forwardTo = null;
 
     if(policyId != null && policyId.trim().length() > 0){
 
-        editorDTO = new SOAPolicyEditorDTO();
+        editorDTO = new SimplePolicyEditorDTO();
         editorDTO.setAppliedCategory(dynamicCategory);
         editorDTO.setPolicyId(policyId);
         editorDTO.setDescription(policyDescription);
 
-        List<SOAPolicyEditorElementDTO>  elementDTOs = new ArrayList<SOAPolicyEditorElementDTO>();
+        List<SimplePolicyEditorElementDTO>  elementDTOs = new ArrayList<SimplePolicyEditorElementDTO>();
 
         if(PolicyEditorConstants.SOA_CATEGORY_RESOURCE.equals(dynamicCategory)){
             String resourceValue = CharacterEncoder.getSafeText(request.getParameter("resourceValue"));
@@ -133,7 +133,7 @@
 
         for(int rowNumber = 0; rowNumber < maxRows + 1; rowNumber++){
 
-            SOAPolicyEditorElementDTO elementDTO = new SOAPolicyEditorElementDTO();
+            SimplePolicyEditorElementDTO elementDTO = new SimplePolicyEditorElementDTO();
 
             String userAttributeId = CharacterEncoder.getSafeText(request.
                     getParameter("userRuleAttributeId_" + rowNumber));
@@ -206,7 +206,7 @@
             
             elementDTOs.add(elementDTO);
         }
-        editorDTO.setSOAPolicyEditorElementDTOs(elementDTOs);
+        editorDTO.setSimplePolicyEditorElementDTOs(elementDTOs);
     }
 
     try {
@@ -215,14 +215,10 @@
                 serverURL, configContext);
         PolicyDTO policyDTO = null;
         if(editorDTO != null){
-            String[] policyData = PolicyEditorUtil.createBasicPolicyData(editorDTO,
-                                                                            entitlementPolicyBean);
-            editorDTO.setAttributeIdDataTypeMap(entitlementPolicyBean.getAttributeIdDataTypeMap());
-            editorDTO.setAttributeIdMap(entitlementPolicyBean.getDefaultAttributeIdMap());
-            editorDTO.setDataTypeMap(entitlementPolicyBean.getDefaultDataTypeMap());
+            String[] policyData = PolicyEditorUtil.createBasicPolicyData(editorDTO);
             String policy = creator.createSOAPolicy(editorDTO);
             try{
-                policyDTO = client.getPolicy(policyId);
+                policyDTO = client.getPolicy(policyId, false);
             } catch (Exception e){
                 //ignore
             }
@@ -234,8 +230,8 @@
             if(policy != null){                                                 
                 policyDTO.setPolicyId(policyId);
                 policyDTO.setPolicy(policy);
-                policyDTO.setBasicPolicyEditorMetaData(policyData);
-                policyDTO.setPolicyEditor(PolicyEditorConstants.SOA_POLICY_EDITOR);
+                policyDTO.setPolicyEditorData(policyData);
+                policyDTO.setPolicyEditor(EntitlementConstants.PolicyEditor.RBAC);
             }
         }
 
@@ -247,10 +243,6 @@
 
         String message = resourceBundle.getString("ent.policy.added.successfully");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
-        forwardTo = "index.jsp?";
-    } catch (EntitlementPolicyCreationException e) {
-        String message = resourceBundle.getString("error.while.creating.policy");
-        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         forwardTo = "index.jsp?";
     } catch (Exception e) {
         String message = resourceBundle.getString("error.while.adding.policy") + " " + e.getMessage();

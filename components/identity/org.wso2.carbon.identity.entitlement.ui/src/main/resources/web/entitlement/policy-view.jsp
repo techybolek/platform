@@ -34,7 +34,7 @@
 
 <%@page import="java.lang.Exception"%>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
-
+<%@ page import="java.text.MessageFormat" %>
 <%
 	String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
 	ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
@@ -52,7 +52,7 @@
 		policyId = request.getParameter("policyid");
 
         if(policyId != null && policyId.trim().length() > 0){
-            PolicyDTO dto = client.getPolicy(policyId);
+            PolicyDTO dto = client.getPolicy(policyId,false);
             if(dto != null){
                 policy = dto.getPolicy();
             }
@@ -62,11 +62,18 @@
 			policy = policy.trim().replaceAll("><", ">\n<");
 		}
 	} catch (Exception e) {
-		String message = resourceBundle.getString("error.while.retreiving.policies"
-                + " " + e.getMessage());
-		CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.ERROR, request);
-		forwardTo = "index.jsp";
-	}
+        String message = MessageFormat.format(resourceBundle.
+                getString("error.while.retreiving.policies"), e.getMessage());
+%>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>',  function () {
+            location.href = "index.jsp";
+        });
+    });
+</script>
+<%
+    }
 %>
 
 	<div style="display: none;">

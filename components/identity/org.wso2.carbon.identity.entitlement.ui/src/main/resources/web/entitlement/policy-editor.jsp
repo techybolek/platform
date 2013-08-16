@@ -17,15 +17,14 @@
 -->
 
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.Set" %>
-<%@ page import="java.util.Arrays" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.*" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
-<%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.common.PolicyEditorEngine" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.common.dto.PolicyEditorDataHolder" %>
+<%@ page import="java.text.MessageFormat" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.EntitlementConstants" %>
+<%@ page import="java.util.*" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <jsp:useBean id="entitlementPolicyBean"
@@ -35,8 +34,23 @@
 
 
 <%
-
-    PolicyEditorDataHolder holder = PolicyEditorEngine.getInstance().getPolicyEditorData();
+    String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
+    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+    PolicyEditorDataHolder holder = PolicyEditorEngine.getInstance().
+            getPolicyEditorData(EntitlementConstants.PolicyEditor.STANDARD);
+    if(holder == null){
+        //String message = MessageFormat.format(resourceBundle.getString("no.policy.editor.data"));
+        String message = "Policy Editor data can not loaded. Please check with policy editor configurations";
+%>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>',  function () {
+            location.href = "role-mgt.jsp";
+        });
+    });
+</script>
+<%
+    }
 
     String ruleId = null;
     RuleDTO ruleDTO = null;
@@ -422,10 +436,7 @@
 
 <script type="text/javascript">
 
-function orderRuleElement() {
-
-}
-
+var regString = /^[a-zA-Z0-9._-]{3,10}$/;    // TODO make this configurable
 
 function submitForm() {
     preSubmit();
@@ -447,14 +458,28 @@ function doValidation() {
         return false;
     }
 
-    value = document.getElementsByName("ruleId")[0].value;
-    if (value == '') {
+    var ruleValue = document.getElementsByName("ruleId")[0].value;
+    if (ruleValue == '') {
         CARBON.showWarningDialog('<fmt:message key="rule.id.is.required"/>');
+        return false;
+    }
+
+    var tmp = jQuery("#dataTable tbody tr input");
+    for (var j = 0; j < tmp.length; j++) {
+        if((tmp[j].value == ruleValue) && (ruleValue != "<%=ruleId%>")){
+            CARBON.showWarningDialog('<fmt:message key="rule.id.is.existing"/>');
+            return false;
+        }
+    }
+
+    if(!ruleValue.match(new RegExp(regString))) {
+        CARBON.showWarningDialog('<fmt:message key="rule.id.is.not.conformance"/>');
         return false;
     }
 
     return true;
 }
+
 
 function doValidationPolicyNameOnly() {
 
@@ -464,6 +489,10 @@ function doValidationPolicyNameOnly() {
         return false;
     }
 
+    if(!value.match(new RegExp(regString))) {
+        CARBON.showWarningDialog('<fmt:message key="policy.name.is.conformance"/>');
+        return false;
+    }
     return true;
 }
 
@@ -512,7 +541,7 @@ function selectAttributesForRule(index) {
 function selectAttributesForRuleTarget(index) {
     preSubmit();
     if (doValidationPolicyNameOnly()) {
-        document.dataForm.action = "update-rule.jsp?nextPage=select_attribute_values&updateRule=true&targetRuleRowIndex="
+        document.dataForm.action = "update-rule.jsp?nextPage=select-attribute&updateRule=true&targetRuleRowIndex="
                 + index;
         document.dataForm.submit();
     }
@@ -558,7 +587,7 @@ function preSubmit(){
     function selectAttributesForTarget(index) {
         preSubmit();
         if (doValidationPolicyNameOnly()) {
-            document.dataForm.action = "update-rule.jsp?nextPage=select_attribute_values&ruleId=&targetRowIndex="
+            document.dataForm.action = "update-rule.jsp?nextPage=select-attribute&ruleId=&targetRowIndex="
                     + index;
             document.dataForm.submit();
         }

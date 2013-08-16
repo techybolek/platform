@@ -23,7 +23,7 @@ import java.util.*;
 /**
  *
  */
-public class SOAPolicyEditorDTO {
+public class SimplePolicyEditorDTO {
 
     private String policyId;
 
@@ -44,15 +44,9 @@ public class SOAPolicyEditorDTO {
     private String function;
 
     private String environmentId;
-
-    private Map<String, String> attributeIdDataTypeMap = new HashMap<String, String>();
-
-    private Map<String, Set<String>> attributeIdMap = new HashMap<String, Set<String>>();
-
-    private Map<String, Set<String>> dataTypeMap = new HashMap<String, Set<String>>();
     
-    private List<SOAPolicyEditorElementDTO> SOAPolicyEditorElementDTOs =
-                                                    new ArrayList<SOAPolicyEditorElementDTO>();
+    private List<SimplePolicyEditorElementDTO> SimplePolicyEditorElementDTOs =
+                                                    new ArrayList<SimplePolicyEditorElementDTO>();
 
     public String getPolicyId() {
         return policyId;
@@ -78,18 +72,18 @@ public class SOAPolicyEditorDTO {
         this.description = description;
     }
 
-    public List<SOAPolicyEditorElementDTO> getSOAPolicyEditorElementDTOs() {
-        return SOAPolicyEditorElementDTOs;
+    public List<SimplePolicyEditorElementDTO> getSimplePolicyEditorElementDTOs() {
+        return SimplePolicyEditorElementDTOs;
     }
 
-    public void setSOAPolicyEditorElementDTOs(List<SOAPolicyEditorElementDTO>
-                                                      SOAPolicyEditorElementDTOs) {
-        this.SOAPolicyEditorElementDTOs = SOAPolicyEditorElementDTOs;
+    public void setSimplePolicyEditorElementDTOs(List<SimplePolicyEditorElementDTO>
+                                                         simplePolicyEditorElementDTOs) {
+        this.SimplePolicyEditorElementDTOs = simplePolicyEditorElementDTOs;
     }
 
-     public void setBasicPolicyEditorElementDTO(SOAPolicyEditorElementDTO
-                                                        SOAPolicyEditorElementDTO) {
-        this.SOAPolicyEditorElementDTOs.add(SOAPolicyEditorElementDTO);
+     public void setBasicPolicyEditorElementDTO(SimplePolicyEditorElementDTO
+                                                        SimplePolicyEditorElementDTO) {
+        this.SimplePolicyEditorElementDTOs.add(SimplePolicyEditorElementDTO);
     }
 
     public String getUserAttributeValue() {
@@ -146,29 +140,5 @@ public class SOAPolicyEditorDTO {
 
     public void setEnvironmentId(String environmentId) {
         this.environmentId = environmentId;
-    }
-
-    public Map<String, String> getAttributeIdDataTypeMap() {
-        return attributeIdDataTypeMap;
-    }
-
-    public void setAttributeIdDataTypeMap(Map<String, String> attributeIdDataTypeMap) {
-        this.attributeIdDataTypeMap = attributeIdDataTypeMap;
-    }
-
-    public Map<String, Set<String>> getAttributeIdMap() {
-        return attributeIdMap;
-    }
-
-    public void setAttributeIdMap(Map<String, Set<String>> attributeIdMap) {
-        this.attributeIdMap = attributeIdMap;
-    }
-
-    public Map<String, Set<String>> getDataTypeMap() {
-        return dataTypeMap;
-    }
-
-    public void setDataTypeMap(Map<String, Set<String>> dataTypeMap) {
-        this.dataTypeMap = dataTypeMap;
     }
 }

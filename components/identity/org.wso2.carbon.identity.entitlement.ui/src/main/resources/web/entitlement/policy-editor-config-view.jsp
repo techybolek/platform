@@ -23,9 +23,14 @@
 <jsp:include page="../dialog/display_messages.jsp"/>
 
 <%@ page import="org.wso2.carbon.identity.entitlement.common.PolicyEditorEngine" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.EntitlementConstants" %>
 
 <%
-    String editorConfig = PolicyEditorEngine.getInstance().getConfig();
+    String type = request.getParameter("type");
+    if(type == null || type.trim().length() == 0){
+        type = EntitlementConstants.PolicyEditor.STANDARD;
+    }
+    String editorConfig = PolicyEditorEngine.getInstance().getConfig(type);
     if(editorConfig == null){
         editorConfig = "";
     }
@@ -36,7 +41,7 @@
 <div id="middle">
 <h2><fmt:message key='policy.editor.config'/></h2>
 <div id="workArea">
-    <form method="post" name="configForm" id="configForm" action="add-policy.jsp">
+    <form method="post" name="configForm" id="configForm" action="add-policy.jsp?type=<%=type%>">
         <table class="styledLeft" style="width:100%">
             <thead>
             <tr>

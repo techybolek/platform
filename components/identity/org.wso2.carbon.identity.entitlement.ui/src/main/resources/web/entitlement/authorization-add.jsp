@@ -26,7 +26,7 @@
 <%@page import="java.util.ResourceBundle"%>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.SOAPolicyEditorElementDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.SimplePolicyEditorElementDTO" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyCreator" %>
@@ -53,14 +53,14 @@
 			EntitlementPolicyAdminServiceClient client =
                     new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
             int i = 0;
-			dto = client.getPolicy(policyid);
+			dto = client.getPolicy(policyid, false);
             String[] data = dto.getBasicPolicyEditorMetaData();
 
             if(data != null){
                 i = (data.length -11)/11;
             }
-            List<SOAPolicyEditorElementDTO> elementDTOs = new  ArrayList<SOAPolicyEditorElementDTO>();
-            SOAPolicyEditorElementDTO elementDTO = new SOAPolicyEditorElementDTO();
+            List<SimplePolicyEditorElementDTO> elementDTOs = new  ArrayList<SimplePolicyEditorElementDTO>();
+            SimplePolicyEditorElementDTO elementDTO = new SimplePolicyEditorElementDTO();
             if("permit".equals(action)){
                 elementDTO.setOperationType(PolicyEditorConstants.PreFunctions.CAN_DO);
             }

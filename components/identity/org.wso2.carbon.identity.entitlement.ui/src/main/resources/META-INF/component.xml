@@ -29,14 +29,38 @@
             <icon>../entitlement/images/policy.gif</icon>
             <require-permission>/permission/admin/configure</require-permission>           
         </menu>
-		<menu>
-            <id>pdp_menu</id>
-            <i18n-key>identity.pdp</i18n-key>
+        <menu>
+            <id>my_pdp_menu</id>
+            <i18n-key>my.pdp</i18n-key>
             <i18n-bundle>org.wso2.carbon.identity.entitlement.ui.i18n.Resources</i18n-bundle>
             <parent-menu>identity_entitlement_menu</parent-menu>
-            <link>../entitlement/pdp-manage.jsp</link>
+            <link>#</link>
+            <region>region1</region>
+            <order>60</order>
+            <style-class>manage</style-class>
+            <icon>../entitlement/images/policy.gif</icon>
+            <require-permission>/permission/admin/configure</require-permission>
+        </menu>
+        <menu>
+            <id>pdp_policy_menu</id>
+            <i18n-key>identity.pdp.policy</i18n-key>
+            <i18n-bundle>org.wso2.carbon.identity.entitlement.ui.i18n.Resources</i18n-bundle>
+            <parent-menu>my_pdp_menu</parent-menu>
+            <link>../entitlement/my-pdp.jsp</link>
             <region>region1</region>
             <order>6</order>
+            <style-class>manage</style-class>
+            <icon>../entitlement/images/policy.gif</icon>
+            <require-permission>/permission/admin/configure</require-permission>
+        </menu>
+		<menu>
+            <id>pdp_config_menu</id>
+            <i18n-key>identity.pdp.config</i18n-key>
+            <i18n-bundle>org.wso2.carbon.identity.entitlement.ui.i18n.Resources</i18n-bundle>
+            <parent-menu>my_pdp_menu</parent-menu>
+            <link>../entitlement/pdp-manage.jsp</link>
+            <region>region1</region>
+            <order>7</order>
             <style-class>manage</style-class>
             <icon>../entitlement/images/config.gif</icon>
             <require-permission>/permission/admin/configure</require-permission>
@@ -48,7 +72,7 @@
             <parent-menu>identity_entitlement_menu</parent-menu>
             <link>../entitlement/create-evaluation-request.jsp</link>
             <region>region1</region>
-            <order>7</order>
+            <order>8</order>
             <style-class>manage</style-class>
             <icon>../entitlement/images/evaluate.png</icon>
             <require-permission>/permission/admin/configure</require-permission>
@@ -60,7 +84,7 @@
             <parent-menu>identity_entitlement_menu</parent-menu>
             <link>../entitlement/policy-publish.jsp</link>
             <region>region1</region>
-            <order>8</order>
+            <order>9</order>
             <style-class>manage</style-class>
             <icon>../entitlement/images/publish.gif</icon>
             <require-permission>/permission/admin/configure</require-permission>
@@ -72,7 +96,7 @@
             <parent-menu>identity_entitlement_menu</parent-menu>
             <link>../entitlement/advance-search.jsp</link>
             <region>region1</region>
-            <order>9</order>
+            <order>10</order>
             <style-class>manage</style-class>
             <icon>../entitlement/images/search-top.png</icon>
             <require-permission>/permission/admin/configure</require-permission>

@@ -24,7 +24,6 @@
 <%@page
 	import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient"%>
 <%@page import="java.util.ResourceBundle"%>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
 <%
 	String serverURL = CarbonUIUtil.getServerURL(config
 			.getServletContext(), session);
@@ -33,35 +32,29 @@
 					CarbonConstants.CONFIGURATION_CONTEXT);
 	String cookie = (String) session
 			.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-	String forwardTo = null;
+	String forwardTo = "index.jsp";
 	String action = request.getParameter("action");
 	String policyid = request.getParameter("policyid");
-	PolicyDTO dto = null;
 	String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
 	if ((request.getParameter("policyid") != null)) {
-
 		try {
+            String isPDP = request.getParameter("pdp");
 			EntitlementPolicyAdminServiceClient client =
                     new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
-			dto = client.getLightPolicy(policyid);
-			if ("enable".equals(action)){
-				dto.setActive(true);
-			} else if("disable".equals(action)) {
-				dto.setActive(false);
-			}
-			client.updatePolicy(dto);
-			//session.setAttribute("entitlementpolicy", dto.getPolicy());
-			forwardTo = "index.jsp?region=region1&item=policy_menu";
+            if(Boolean.parseBoolean(isPDP)){
+                if ("enable".equals(action)){
+                    client.enableDisablePolicy(policyid, true);
+                } else if("disable".equals(action)) {
+                    client.enableDisablePolicy(policyid, false);
+                }
+                forwardTo = "my-pdp.jsp";
+            }
 		} catch (Exception e) {
 			String message = resourceBundle.getString("invalid.policy.not.updated");
-			//session.setAttribute("entitlementpolicy", dto.getPolicy());
 			CarbonUIMessage.sendCarbonUIMessage(message,	CarbonUIMessage.ERROR, request);
-			forwardTo = "index.jsp?region=region1&item=policy_menu";
-		}
-	} else {
-		forwardTo = "index.jsp?region=region1&item=policy_menu";
+        }
 	}
 %>
 

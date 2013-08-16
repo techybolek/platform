@@ -21,7 +21,7 @@ package org.wso2.carbon.identity.entitlement.ui.dto;
 /**
  *
  */
-public class SOAPolicyEditorElementDTO {
+public class SimplePolicyEditorElementDTO {
 
     private String userAttributeId;
 

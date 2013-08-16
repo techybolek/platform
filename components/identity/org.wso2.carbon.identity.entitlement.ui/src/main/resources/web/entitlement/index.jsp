@@ -100,7 +100,8 @@
     try {
         EntitlementPolicyAdminServiceClient client =
                 new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
-        paginatedPolicySetDTO = client.getAllPolicies(policyTypeFilter, policySearchString, pageNumberInt);
+        paginatedPolicySetDTO = client.
+                getAllPolicies(policyTypeFilter, policySearchString, pageNumberInt, false);
         EntitlementFinderDataHolder [] entitlementFinders = client.getEntitlementDataModules();
         if(entitlementFinders != null){
             for(EntitlementFinderDataHolder holder : entitlementFinders){
@@ -144,10 +145,7 @@
     var allPolicesSelected = false;        
 
     function removePolicies() {
-
-
         location.href = "remove-policy.jsp";
-
     }
 
     function edit(policy) {
@@ -420,41 +418,6 @@
         </tr>
     </table>
 
-    <table class="styledLeft" style="margin-top:10px;margin-bottom:10px;">
-        <tr>
-            <td>
-            <table  style="border:0; !important" >
-                <tr>
-                <td style="border:0; !important"><fmt:message key="policy.combining.algorithm"/></td>
-                <td style="border:0; !important">
-                  <select id="globalAlgorithmName" name="globalAlgorithmName" class="text-box-big">
-                <%
-                  if (policyCombiningAlgorithms != null && policyCombiningAlgorithms.length > 0) {
-                      for (String algorithmName : policyCombiningAlgorithms) {
-                          if(algorithmName.equals(globalPolicyCombiningAlgorithm)){
-                %>
-                      <option value="<%=algorithmName%>" selected="selected"><%=globalPolicyCombiningAlgorithm%></option>
-                <%
-                            } else {
-                %>
-                      <option value="<%=algorithmName%>"><%=algorithmName%></option>
-                <%
-                            }
-                        }
-                    }
-                %>
-                  </select>
-                </td>
-                <td style="border:0; !important">
-                    <input type="button" class="button"  tabindex="4" value="Update"
-                           onclick="setPolicyCombineAlgorithm();"/>
-                </td>
-                </tr>
-            </table>
-            </td>
-        </tr>
-    </table>
-
     <form action="index.jsp" name="searchForm" method="post">
         <table id="searchTable" name="searchTable" class="styledLeft" style="border:0;
                                                 !important margin-top:10px;margin-bottom:10px;">
@@ -552,8 +515,6 @@
             if (policies != null) {
                 for (int i = 0; i < policies.length; i++) {
                     if(policies[i] != null){
-                    boolean edit = policies[i].getPolicyEditable();
-                    boolean delete = policies[i].getPolicyCanDelete();
             %>
             <tr>
                 <td style="width:100px;">
@@ -565,11 +526,11 @@
                 <td width="10px" style="text-align:center; !important">
                     <input type="checkbox" name="policies"
                            value="<%=policies[i].getPolicyId()%>"
-                           onclick="resetVars()" class="chkBox" <% if(!delete){%>disabled="disabled"<% } %>/>
+                           onclick="resetVars()" class="chkBox" />
                 </td>
 
                 <td>
-                    <a <% if(edit) { %>href="policy-view.jsp?policyid=<%=policies[i].getPolicyId()%>" <% } %>><%=policies[i].getPolicyId()%></a>
+                    <a href="policy-view.jsp?policyid=<%=policies[i].getPolicyId()%>"><%=policies[i].getPolicyId()%></a>
                 </td>
 
                 <td width="20px" style="text-align:left;">
@@ -588,20 +549,9 @@
                 
                 <td width="50%">
                     <a title="<fmt:message key='edit.policy'/>"
-                    <% if(edit){%> onclick="edit('<%=policies[i].getPolicyId()%>');return false;" <%}%>
+                     onclick="edit('<%=policies[i].getPolicyId()%>');return false;"
                     href="#" style="background-image: url(images/edit.gif);" class="icon-link">
                     <fmt:message key='edit'/></a>
-                    <% if (Boolean.toString(policies[i].getActive()).equals("true")) { %>
-                    <a title="<fmt:message key='disable.policy'/>"
-                    <% if(edit){%> onclick="disable('<%=policies[i].getPolicyId()%>');return false;" <%}%>
-                    href="#" style="background-image: url(images/disable.gif);" class="icon-link">
-                    <fmt:message key='disable.policy'/></a>
-                    <% }else { %>
-                    <a title="<fmt:message key='enable.policy'/>"
-                    <% if(edit){%> onclick="enable('<%=policies[i].getPolicyId()%>');return false;"  <%}%>
-                    href="#" style="background-image: url(images/enable.gif);" class="icon-link">
-                    <fmt:message key='enable.policy'/></a>
-                    <%} %>
                     <a title="<fmt:message key='publish.to.pdp'/>"   id="publish"
                        onclick="publishPolicyToPDP('<%=policies[i].getPolicyId()%>');return false;"
                        href="#" style="background-image: url(images/publish.gif);" class="icon-link">
@@ -616,8 +566,7 @@
                         <fmt:message key='view.status'/></a>
                 </td>
             </tr>
-            <%} }
-            } else { %>
+            <%} } } else { %>
             <tr>
                 <td colspan="2"><fmt:message key='no.policies.defined'/></td>
             </tr>

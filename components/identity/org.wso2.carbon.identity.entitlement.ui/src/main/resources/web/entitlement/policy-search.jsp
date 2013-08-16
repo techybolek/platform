@@ -79,7 +79,7 @@
                     toArray(new AttributeDTO[attributeValueDTOs.size()]));
             if(results != null){
                 for (String result : results){
-                    policies.add(client.getPolicy(result));
+                    policies.add(client.getPolicy(result, false));
                 }
             }
         }

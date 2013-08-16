@@ -22,19 +22,25 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.common.PolicyEditorException" %>
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.EntitlementConstants" %>
+<%@ page import="java.text.MessageFormat" %>
 
 
 <%
-    String forwardTo = null;
     String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+    String forwardTo = null;
+    String type = request.getParameter("type");
     if(request.getParameter("editorConfig") != null){
         try {
-            PolicyEditorEngine.getInstance().persistConfig(request.getParameter("editorConfig"));
+            PolicyEditorEngine.getInstance().persistConfig(type, request.getParameter("editorConfig"));
+            String message = resourceBundle.getString("policy.editor.config.update");
+            CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
         } catch (PolicyEditorException e) {
-            String message = "Config can not be updated. " + e.getMessage();
+            String message = resourceBundle.
+                    getString("policy.editor.config.can.not.update") + e.getMessage();
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
-            forwardTo = "policy-editor-config-view.jsp";
+            forwardTo = "policy-editor-config-view.jsp?type=" + type;
             %>
             <script type="text/javascript">
                 function forward() {
@@ -67,23 +73,25 @@
                     <tbody>
                         <tr class="tableOddRow">
                             <td width="20%">
-                                <a href="rbac-policy-editor.jsp"><fmt:message key="add.new.policy.rbac"/></a>
+                                <a href="simple-policy-editor.jsp"><fmt:message key="add.new.policy.simple"/></a>
                             </td>
-                            <td><fmt:message key="add.new.policy.rbac.description"/></td>
+                            <td><fmt:message key="add.new.policy.simple.description"/></td>
                         </tr>
                         <tr class="tableEvenRow">
                             <td width="20%">
                                 <a href="basic-policy-editor.jsp"><fmt:message key="add.new.policy.basic"/></a>
                             </td>
                             <td><fmt:message key="add.new.policy.basic.description"/>
-                                                    <a href="policy-editor-config-view.jsp"> here</a></td>
+                            <a href="policy-editor-config-view.jsp?type=<%=EntitlementConstants.PolicyEditor.BASIC%>">
+                                <fmt:message key="here"/></a></td>
                         </tr>
                         <tr class="tableOddRow">
                             <td width="20%">
                                 <a href="policy-editor.jsp"><fmt:message key="add.new.policy.editor"/></a>
                             </td>
                             <td><fmt:message key="add.new.policy.editor.description"/>
-                                            <a href="policy-editor-config-view.jsp"> here</a></td>
+                            <a href="policy-editor-config-view.jsp?type=<%=EntitlementConstants.PolicyEditor.STANDARD%>">
+                                <fmt:message key="here"/></a></td>
                         </tr>
                         <tr class="tableEvenRow">
                             <td width="20%">

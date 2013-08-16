@@ -67,14 +67,15 @@ public class EntitlementPolicyAdminServiceClient {
      * @param policyTypeFilter
      * @param policySearchString
      * @param pageNumber
+     * @param isPDPPolicy
      * @return PaginatedPolicySetDTO object containing the number of pages and the set of policies that reside in the
      * given page.
      * @throws AxisFault
      */
     public PaginatedPolicySetDTO getAllPolicies(String policyTypeFilter,String policySearchString,
-                                                int pageNumber) throws AxisFault {
+                                                int pageNumber, boolean isPDPPolicy) throws AxisFault {
         try {
-            return stub.getAllPolicies(policyTypeFilter, policySearchString, pageNumber);
+            return stub.getAllPolicies(policyTypeFilter, policySearchString, pageNumber, isPDPPolicy);
         } catch (Exception e) {
             String message = "Error while loading all policies from backend service";
             handleException(e);
@@ -88,13 +89,14 @@ public class EntitlementPolicyAdminServiceClient {
 	 * Gets policy DTO for given policy id
 	 *
 	 * @param policyId policy id
-	 * @return returns policy DTO
+	 * @param isPDPPolicy
+     * @return returns policy DTO
      * @throws AxisFault throws
      */
-    public PolicyDTO getPolicy(String policyId) throws AxisFault {
+    public PolicyDTO getPolicy(String policyId, boolean isPDPPolicy) throws AxisFault {
         PolicyDTO dto = null;
         try {
-            dto = stub.getPolicy(policyId);
+            dto = stub.getPolicy(policyId, isPDPPolicy);
             if(dto != null && dto.getPolicy() != null) {
                 dto.setPolicy(dto.getPolicy().trim().replaceAll("><", ">\n<"));     
             }
@@ -124,30 +126,37 @@ public class EntitlementPolicyAdminServiceClient {
 
 
     /**
-	 * Gets light weight policy DTO with attribute Meta data for given policy id
-	 *
-	 * @param policyId policy id
-	 * @return returns policy DTO
-     * @throws AxisFault throws        // TODO
-     */
-//    public PolicyDTO getMetaDataPolicy(String policyId) throws AxisFault {
-//        PolicyDTO dto = null;
-//        try {
-//            dto = stub.getMetaDataPolicy(policyId);
-//        } catch (Exception e) {
-//            String message = "Error while loading the policy from backend service";
-//            handleException(message, e);
-//        }
-//        return dto;
-//    }
-    /**
      * 
      * @param policyId
      * @throws AxisFault
      */
-    public void removePolicy(String policyId) throws AxisFault {
+    public void removePolicy(String policyId, boolean dePromote) throws AxisFault {
         try {
-            stub.removePolicy(policyId);
+            stub.removePolicy(policyId, dePromote);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    public void dePromotePolicy(String policyId) throws AxisFault {
+        try {
+            stub.dePromotePolicy(policyId);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    public void enableDisablePolicy(String policyId, boolean enable) throws AxisFault {
+        try {
+            stub.enableDisablePolicy(policyId, enable);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    public void orderPolicy(String policyId, int order) throws AxisFault {
+        try {
+            stub.orderPolicy(policyId, order);
         } catch (Exception e) {
             handleException(e);
         }
@@ -244,6 +253,12 @@ public class EntitlementPolicyAdminServiceClient {
 
     /**
      * Gets attribute value tree for given attribute type
+     *
+     * @param dataModule
+     * @param category
+     * @param regexp
+     * @param dataLevel
+     * @param limit
      * @return attribute value tree
      * @throws AxisFault throws
      */
@@ -258,6 +273,11 @@ public class EntitlementPolicyAdminServiceClient {
         return null;
     }
 
+    /**
+     *
+     * @return
+     * @throws AxisFault
+     */
     public EntitlementFinderDataHolder[] getEntitlementDataModules() throws AxisFault {
 
         try {
@@ -268,21 +288,6 @@ public class EntitlementPolicyAdminServiceClient {
 
         return null;
     }
-
-    /**
-     * Reorder policies
-     *
-     * @param policyDTOs policies as PolicyDTO arrays
-     * @throws AxisFault throws
-     */
-//    public void reOderPolicies(PolicyDTO[] policyDTOs)
-//            throws AxisFault {
-//        try {
-//           stub.reOderPolicies(policyDTOs);
-//        } catch (Exception e) {
-//           handleException(e.getMessage(), e);
-//        }
-//    }
 
     /**
      * Gets all subscriber ids
@@ -362,14 +367,35 @@ public class EntitlementPolicyAdminServiceClient {
      * @param policies policy ids as String array, if null or empty, all policies are published
      * @param version
      * @param action
+     * @param order
+     * @param subscriberId subscriber ids as String array, if null or empty, publish to all subscribers
+     * @throws AxisFault throws
+     */
+    public void publishAll(String[] policies, String version, String action, int order,
+                                                        String[] subscriberId) throws AxisFault {
+
+        try {
+            stub.publishPolicies(policies, version, action, order, subscriberId);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    /**
+     * Publishes given set of policies to given set of subscribers
+     *
+     *
+     * @param policies policy ids as String array, if null or empty, all policies are published
+     * @param version
+     * @param action
      * @param subscriberId subscriber ids as String array, if null or empty, publish to all subscribers
      * @throws AxisFault throws
      */
     public void publishAll(String[] policies, String version, String action,
-                                                        String[] subscriberId) throws AxisFault {
+                           String[] subscriberId) throws AxisFault {
 
         try {
-            stub.publishPolicies(policies, version, action, subscriberId);
+            stub.publishPolicies(policies, version, action, 0, subscriberId);
         } catch (Exception e) {
             handleException(e);
         }

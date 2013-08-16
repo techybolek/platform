@@ -38,7 +38,7 @@ public class EntitlementPolicyBean {
 
 	private String userInputData;
 
-    private SOAPolicyEditorDTO SOAPolicyEditorDTO;
+    private SimplePolicyEditorDTO SimplePolicyEditorDTO;
 
 	private Map<String, String> subjectTypeMap = new HashMap<String, String>();
 
@@ -129,7 +129,7 @@ public class EntitlementPolicyBean {
 
         attributeIdDataTypeMap.clear();
 
-        SOAPolicyEditorDTO = null;
+        SimplePolicyEditorDTO = null;
 
         basicTargetDTO = null;
         
@@ -409,58 +409,13 @@ public class EntitlementPolicyBean {
         this.preFunctions.add(preFunction);
     }
 
-    public Map<String, String> getSubjectTypeMap() {
-        return subjectTypeMap;
+
+    public SimplePolicyEditorDTO getSimplePolicyEditorDTO() {
+        return SimplePolicyEditorDTO;
     }
 
-    public void setSubjectTypeMap(Map<String, String> subjectTypeMap) {
-        this.subjectTypeMap = subjectTypeMap;
-    }
-
-    public Map<String, Set<String>> getDefaultDataTypeMap() {
-        return defaultDataTypeMap;
-    }
-
-    public void addDefaultDataType(String category, String defaultDataType) {
-        Set<String> dtoSet = this.defaultDataTypeMap.get(category);
-        if(dtoSet != null){
-            dtoSet.add(defaultDataType);
-        } else {
-            Set<String> newDtoSet = new HashSet<String>();
-            newDtoSet.add(defaultDataType);
-            this.defaultDataTypeMap.put(category, newDtoSet);
-        }
-    }
-
-    public Map<String, Set<String>> getDefaultAttributeIdMap() {
-        return defaultAttributeIdMap;
-    }
-
-    public void addDefaultAttributeId(String category, String defaultAttributeId) {
-        Set<String> dtoSet = this.defaultAttributeIdMap.get(category);
-        if(dtoSet != null){
-            dtoSet.add(defaultAttributeId);
-        } else {
-            Set<String> newDtoSet = new HashSet<String>();
-            newDtoSet.add(defaultAttributeId);
-            this.defaultAttributeIdMap.put(category, newDtoSet);
-        }
-    }
-
-    public SOAPolicyEditorDTO getSOAPolicyEditorDTO() {
-        return SOAPolicyEditorDTO;
-    }
-
-    public void setSOAPolicyEditorDTO(SOAPolicyEditorDTO SOAPolicyEditorDTO) {
-        this.SOAPolicyEditorDTO = SOAPolicyEditorDTO;
-    }
-
-    public Map<String, String> getAttributeIdDataTypeMap() {
-        return attributeIdDataTypeMap;
-    }
-
-    public void setAttributeIdDataTypeMap(Map<String, String> attributeIdDataTypeMap) {
-        this.attributeIdDataTypeMap = attributeIdDataTypeMap;
+    public void setSimplePolicyEditorDTO(SimplePolicyEditorDTO simplePolicyEditorDTO) {
+        this.SimplePolicyEditorDTO = simplePolicyEditorDTO;
     }
 
     public Map<String, EntitlementFinderDataHolder> getEntitlementFinders() {

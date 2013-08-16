@@ -26,6 +26,8 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="org.wso2.balana.utils.policy.dto.BasicRuleDTO" %>
 <%@ page import="org.wso2.balana.utils.policy.dto.BasicTargetDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.EntitlementConstants" %>
+<%@ page import="java.text.MessageFormat" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
@@ -34,7 +36,8 @@
 
 <%
     BasicRuleDTO basicRuleDTO = null;
-    PolicyEditorDataHolder holder = PolicyEditorEngine.getInstance().getPolicyEditorData();
+    PolicyEditorDataHolder holder = PolicyEditorEngine.getInstance().
+                                    getPolicyEditorData(EntitlementConstants.PolicyEditor.BASIC);
     Set<String> functionIds = holder.getRuleFunctions();
     Set<String> preFunctionIds = holder.getPreFunctionMap().keySet();
     Set<String> targetFunctionIds = holder.getTargetFunctions();
@@ -43,9 +46,6 @@
     Set<String> environmentIds = holder.getCategoryAttributeIdMap().get(PolicyEditorConstants.SOA_CATEGORY_ENVIRONMENT);
     Set<String> algorithmNames = holder.getRuleCombiningAlgorithms().keySet();
     Set<String> availableCategories = holder.getCategoryMap().keySet();
-
-    String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
-    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
     List<BasicRuleDTO> basicRuleDTOs = entitlementPolicyBean.getBasicRuleDTOs();
     BasicTargetDTO basicTargetDTO = entitlementPolicyBean.getBasicTargetDTO();
@@ -386,6 +386,8 @@
 
 <script type="text/javascript">
 
+    var regString = /^[a-zA-Z0-9._-]{3,10}$/;    // TODO make this configurable
+
     function preSubmit(){
 
         var ruleElementOrder = new Array();
@@ -417,9 +419,22 @@
             return false;
         }
 
-        value = document.getElementsByName("ruleId")[0].value;
-        if (value == '') {
+        var ruleValue = document.getElementsByName("ruleId")[0].value;
+        if (ruleValue == '') {
             CARBON.showWarningDialog('<fmt:message key="rule.id.is.required"/>');
+            return false;
+        }
+
+        var tmp = jQuery("#dataTable tbody tr input");
+        for (var j = 0; j < tmp.length; j++) {
+            if((tmp[j].value == ruleValue) && (ruleValue != "<%=ruleId%>")){
+                CARBON.showWarningDialog('<fmt:message key="rule.id.is.existing"/>');
+                return false;
+            }
+        }
+
+        if(!ruleValue.match(new RegExp(regString))) {
+            CARBON.showWarningDialog('<fmt:message key="rule.id.is.not.conformance"/>');
             return false;
         }
 
@@ -434,6 +449,10 @@
             return false;
         }
 
+        if(!value.match(new RegExp(regString))) {
+            CARBON.showWarningDialog('<fmt:message key="policy.name.is.conformance"/>');
+            return false;
+        }
         return true;
     }
 
@@ -446,11 +465,9 @@
     }
 
     function doCancelRule(){
-        if(doValidation()){
-            preSubmit();
-            document.dataForm.action = "basic-policy-update.jsp?nextPage=basic-policy-editor&ruleId=";
-            document.dataForm.submit();
-        }
+        preSubmit();
+        document.dataForm.action = "basic-policy-update.jsp?nextPage=basic-policy-editor&ruleId=";
+        document.dataForm.submit();
     }
 
     function deleteRule(ruleId) {
@@ -524,6 +541,27 @@
     function getCategoryType() {
         document.dataForm.submit();
     }
+
+    jQuery(document).ready(function() {
+
+        <%if(basicRuleDTO == null){%>
+        jQuery("#newRuleLinkRow").hide();
+        <%}else{ %>
+        jQuery("#newRuleLinkRow").show();
+        <% } %>
+
+        jQuery("h2.trigger").click(function() {
+            if (jQuery(this).next().is(":visible")) {
+                this.className = "active trigger";
+            } else {
+                this.className = "trigger";
+            }
+
+            jQuery(this).next().slideToggle("fast");
+            return false; //Prevent the browser jump to the link anchor
+        });
+    });
+
 </script>
 
 
@@ -550,7 +588,7 @@
     </tr>
 
     <%
-        if(holder.isShowRuleAlgorithms()){
+        if(holder.isShowRuleAlgorithms() && algorithmNames != null){
     %>
     <tr>
         <td><fmt:message key="rule.combining.algorithm"/></td>
@@ -603,6 +641,7 @@
             <select id="policyApplied" name="policyApplied" <%if(entitlementPolicyBean.isEditPolicy()){%> disabled="disabled" <%}%>
                     onchange="getCategoryType();">
                 <%
+                    if(availableCategories != null){
                     for (String availableCategory : availableCategories) {
                         if(availableCategory != null && availableCategory.equals(selectedCategory)){
                 %>
@@ -613,6 +652,7 @@
                 <option value="<%=availableCategory%>" ><%=availableCategory%></option>
                 <%
                         }
+                    }
                     }
                 %>
             </select>
@@ -636,15 +676,17 @@
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="subjectIdTarget" name="subjectIdTarget" class="leftCol-small">
                             <%
-                                for (String id : subjectIds) {
-                                    if (id.equals(subjectIdTarget)) {
+                                if(subjectIds != null){
+                                    for (String id : subjectIds) {
+                                        if (id.equals(subjectIdTarget)) {
                             %>
                             <option value="<%=id%>" selected="selected"><%=id%></option>
                             <%
-                            } else {
+                                    } else {
                             %>
                             <option value="<%=id%>"><%=id%></option>
                             <%
+                                        }
                                     }
                                 }
                             %>
@@ -653,6 +695,7 @@
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="functionOnSubjectsTarget" name="functionOnSubjectsTarget" class="leftCol-small">
                             <%
+                                if(targetFunctionIds != null){
                                 for (String functionId : targetFunctionIds) {
                                     if (functionId.equals(functionOnSubjectsTarget)) {
                             %>
@@ -665,6 +708,7 @@
                             </option>
                             <%
                                     }
+                                }
                                 }
                             %>
                         </select>
@@ -697,6 +741,7 @@
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="functionOnActionsTarget" name="functionOnActionsTarget" class="leftCol-small">
                             <%
+                                if(targetFunctionIds != null){
                                 for (String functionId : targetFunctionIds) {
                                     if (functionId.equals(functionOnActionsTarget)) {
                             %>
@@ -709,6 +754,7 @@
                             </option>
                             <%
                                     }
+                                }
                                 }
                             %>
                         </select>
@@ -747,6 +793,7 @@
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="functionOnResourcesTarget" name="functionOnResourcesTarget" class="leftCol-small">
                             <%
+                                if(targetFunctionIds != null){
                                 for (String functionId : targetFunctionIds) {
                                     if (functionId.equals(functionOnResourcesTarget)) {
                             %>
@@ -759,6 +806,7 @@
                             </option>
                             <%
                                     }
+                                }
                                 }
                             %>
                         </select>
@@ -797,6 +845,7 @@
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="environmentIdTarget" name="environmentIdTarget" class="leftCol-small">
                             <%
+                                if(environmentIds != null){
                                 for (String id : environmentIds) {
                                     if (id.equals(environmentIdTarget)) {
                             %>
@@ -808,12 +857,14 @@
                             <%
                                     }
                                 }
+                                }
                             %>
                         </select>
                     </td>
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="functionOnEnvironmentTarget" name="functionOnEnvironmentTarget" class="leftCol-small">
                             <%
+                                if(targetFunctionIds != null){
                                 for (String functionId : targetFunctionIds) {
                                     if (functionId.equals(functionOnEnvironmentTarget)) {
                             %>
@@ -826,6 +877,7 @@
                             </option>
                             <%
                                     }
+                                }
                                 }
                             %>
                         </select>
@@ -860,8 +912,10 @@
 
     <tr>
     <td colspan="2" style="margin-top:10px;">
-    <h2 class="trigger  <%if(basicRuleDTO == null){%>active<%} %>"><a href="#"><fmt:message key="add.new.entitlement.rule"/></a></h2>
+    <h2 class="trigger  <%if(basicRuleDTO == null){%>active<%} %>"><a href="#"><fmt:message
+            key="add.new.entitlement.rule"/></a></h2>
     <div class="toggle_container" id="newRuleLinkRow">
+
     <table class="noBorders" id="ruleTable" style="width: 100%">
         <tr>
         <td class="formRow" style="padding:0 !important">
@@ -957,6 +1011,7 @@
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="preFunctionOnResources" name="preFunctionOnResources" class="leftCol-small">
                             <%
+                                if(preFunctionIds != null){
                                 for (String preFunctionId : preFunctionIds) {
                                     if (preFunctionId.equals(preFunctionOnResources)) {
                             %>
@@ -970,12 +1025,14 @@
                             <%
                                     }
                                 }
+                                }
                             %>
                         </select>
                     </td>
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="functionOnResources" name="functionOnResources" class="leftCol-small">
                             <%
+                                if(functionIds != null){
                                 for (String functionId : functionIds) {
                                     if (functionId.equals(functionOnResources)) {
                             %>
@@ -988,6 +1045,7 @@
                             </option>
                             <%
                                     }
+                                }
                                 }
                             %>
                         </select>
@@ -1033,15 +1091,17 @@
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="subjectId" name="subjectId" class="leftCol-small">
                             <%
-                                for (String id : subjectIds) {
-                                    if (id.equals(subjectId)) {
+                                if(subjectIds != null){
+                                    for (String id : subjectIds) {
+                                        if (id.equals(subjectId)) {
                             %>
                             <option value="<%=id%>" selected="selected"><%=id%></option>
                             <%
-                            } else {
+                                        } else {
                             %>
                             <option value="<%=id%>"><%=id%></option>
                             <%
+                                        }
                                     }
                                 }
                             %>
@@ -1050,6 +1110,7 @@
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="preFunctionOnSubjects" name="preFunctionOnSubjects" class="leftCol-small">
                             <%
+                                if(preFunctionIds != null){
                                 for (String preFunctionId : preFunctionIds) {
                                     if (preFunctionId.equals(preFunctionOnSubjects)) {
                             %>
@@ -1063,12 +1124,14 @@
                             <%
                                     }
                                 }
+                                }
                             %>
                         </select>
                     </td>
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="functionOnSubjects" name="functionOnSubjects" class="leftCol-small">
                             <%
+                                if(functionIds != null){
                                 for (String functionId : functionIds) {
                                     if (functionId.equals(functionOnSubjects)) {
                             %>
@@ -1081,6 +1144,7 @@
                             </option>
                             <%
                                     }
+                                }
                                 }
                             %>
                         </select>
@@ -1123,23 +1187,26 @@
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="preFunctionOnActions" name="preFunctionOnActions" class="leftCol-small">
                             <%
-                            for (String preFunctionId : preFunctionIds) {
-                                if (preFunctionId.equals(preFunctionOnActions)) {
+                                if(preFunctionIds != null){
+                                    for (String preFunctionId : preFunctionIds) {
+                                        if (preFunctionId.equals(preFunctionOnActions)) {
                             %>
                             <option value="<%=preFunctionId%>" selected="selected"><%=preFunctionId%></option>
                             <%
-                                } else {
+                                    } else {
                             %>
                             <option value="<%=preFunctionId%>"><%=preFunctionId%></option>
                             <%
+                                        }
+                                    }
                                 }
-                            }
                             %>
                         </select>
                     </td>
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="functionOnActions" name="functionOnActions" class="leftCol-small">
                             <%
+                                if(functionIds != null){
                                 for (String functionId : functionIds) {
                                     if (functionId.equals(functionOnActions)) {
                             %>
@@ -1152,6 +1219,7 @@
                             </option>
                             <%
                                     }
+                                }
                                 }
                             %>
                         </select>
@@ -1197,6 +1265,7 @@
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="environmentId" name="environmentId" class="leftCol-small">
                             <%
+                                if(environmentIds != null){
                                 for (String id : environmentIds) {
                                     if (id.equals(environmentId)) {
                             %>
@@ -1208,12 +1277,14 @@
                             <%
                                     }
                                 }
+                                }
                             %>
                         </select>
                     </td>
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="preFunctionOnEnvironment" name="preFunctionOnEnvironment" class="leftCol-small">
                             <%
+                                if(preFunctionIds != null){
                                 for (String preFunctionId : preFunctionIds) {
                                     if (preFunctionId.equals(preFunctionOnEnvironment)) {
                             %>
@@ -1227,12 +1298,14 @@
                             <%
                                     }
                                 }
+                                }
                             %>
                         </select>
                     </td>
                     <td style="padding-left:0px !important;padding-right:0px !important">
                         <select id="functionOnEnvironment" name="functionOnEnvironment" class="leftCol-small">
                             <%
+                                if(functionIds != null){
                                 for (String functionId : functionIds) {
                                     if (functionId.equals(functionOnEnvironment)) {
                             %>
@@ -1245,6 +1318,7 @@
                             </option>
                             <%
                                     }
+                                }
                                 }
                             %>
                         </select>

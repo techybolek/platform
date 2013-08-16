@@ -32,7 +32,7 @@
 	String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
     EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
     String policyId = request.getParameter("policyid");
-    PolicyDTO policyDTO = client.getPolicy(policyId);
+    PolicyDTO policyDTO = client.getPolicy(policyId, false);
 
     try {
         if(EntitlementPolicyConstants.POLICY_SET_ELEMENT.equals(policyDTO.getPolicyType())){
@@ -86,10 +86,10 @@
                     forwardTo="policy-view.jsp?policyid=" + policyId;
                 }
             } else if (EntitlementPolicyConstants.SOA_POLICY_EDITOR.equals(policyDTO.getPolicyEditor())) {
-//                SOAPolicyEditorDTO editorDTO = PolicyEditorUtil.createBasicPolicyEditorDTO(policyEditorData);
-//                entitlementPolicyBean.setSOAPolicyEditorDTO(editorDTO);
+//                SimplePolicyEditorDTO editorDTO = PolicyEditorUtil.createBasicPolicyEditorDTO(policyEditorData);
+//                entitlementPolicyBean.setSimplePolicyEditorDTO(editorDTO);
                 entitlementPolicyBean.setEditPolicy(true);
-                forwardTo="rbac-policy-editor.jsp";
+                forwardTo="simple-policy-editor.jsp";
             } else {
                 forwardTo="policy-view.jsp?policyid=" + policyId;
             }

@@ -86,7 +86,7 @@
 
         if(entitlementPolicyBean.isEditPolicy()){
             try{
-                policyDTO = client.getPolicy(policyName);
+                policyDTO = client.getPolicy(policyName, false);
             } catch (Exception e){
                 //ignore
             }

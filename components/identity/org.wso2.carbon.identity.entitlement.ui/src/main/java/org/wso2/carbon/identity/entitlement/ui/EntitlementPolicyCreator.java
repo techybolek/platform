@@ -113,7 +113,7 @@ public class EntitlementPolicyCreator {
      * @return  String object of the XACML policy
      * @throws PolicyEditorException throws
      */
-    public String createSOAPolicy(SOAPolicyEditorDTO policyEditorDTO) throws PolicyEditorException {
+    public String createSOAPolicy(SimplePolicyEditorDTO policyEditorDTO) throws PolicyEditorException {
 
         return PolicyEditorUtil.createSOAPolicy(policyEditorDTO);
     }

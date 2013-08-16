@@ -63,49 +63,49 @@ public class PolicyEditorConstants {
 
     public static final String ATTRIBUTE_DESIGNATOR = "AttributeDesignator";
 
-
-    public static final class RuleFunctions {
-
-        public static final String FUNCTION_GREATER_EQUAL_AND_LESS_EQUAL = "greater-than-or-equal-and-less-than-or-equal";
-
-        public static final String FUNCTION_GREATER_AND_LESS_EQUAL= "greater-than-and-less-than-or-equal";
-
-        public static final String FUNCTION_GREATER_EQUAL_AND_LESS = "greater-than-or-equal-and-less-than";
-
-        public static final String FUNCTION_GREATER_AND_LESS = "greater-than-and-less-than";
-
-        public static final String FUNCTION_GREATER = "greater-than";
-
-        public static final String FUNCTION_GREATER_EQUAL = "greater-than-or-equal";
-
-        public static final String FUNCTION_LESS = "less-than";
-
-        public static final String FUNCTION_AT_LEAST_ONE = "at-least-one-member-of";
-
-        public static final String FUNCTION_IS_IN = "is-in";
-
-        public static final String FUNCTION_SET_EQUALS = "set-equals";
-
-        public static final String FUNCTION_LESS_EQUAL = "less-than-or-equal";
-
-        public static final String FUNCTION_ADD = "add";
-
-        public static final String FUNCTION_MULTIPLY = "multiply";
-
-        public static final String FUNCTION_SUBTRACT = "sub";
-
-        public static final String FUNCTION_DIVIDE = "divide";
-
-        public static final String FUNCTION_EQUAL = "equal";
-
-    }
-
+//
+//    public static final class RuleFunctions {
+//
+//        public static final String FUNCTION_GREATER_EQUAL_AND_LESS_EQUAL = "greater-than-or-equal-and-less-than-or-equal";
+//
+//        public static final String FUNCTION_GREATER_AND_LESS_EQUAL= "greater-than-and-less-than-or-equal";
+//
+//        public static final String FUNCTION_GREATER_EQUAL_AND_LESS = "greater-than-or-equal-and-less-than";
+//
+//        public static final String FUNCTION_GREATER_AND_LESS = "greater-than-and-less-than";
+//
+//        public static final String FUNCTION_GREATER = "greater-than";
+//
+//        public static final String FUNCTION_GREATER_EQUAL = "greater-than-or-equal";
+//
+//        public static final String FUNCTION_LESS = "less-than";
+//
+//        public static final String FUNCTION_AT_LEAST_ONE = "at-least-one-member-of";
+//
+//        public static final String FUNCTION_IS_IN = "is-in";
+//
+//        public static final String FUNCTION_SET_EQUALS = "set-equals";
+//
+//        public static final String FUNCTION_LESS_EQUAL = "less-than-or-equal";
+//
+//        public static final String FUNCTION_ADD = "add";
+//
+//        public static final String FUNCTION_MULTIPLY = "multiply";
+//
+//        public static final String FUNCTION_SUBTRACT = "sub";
+//
+//        public static final String FUNCTION_DIVIDE = "divide";
+//
+//        public static final String FUNCTION_EQUAL = "equal";
+//
+//    }
+//
     public static final class PreFunctions {
 
         public static final String PRE_FUNCTION_IS = "is";
 
         public static final String PRE_FUNCTION_IS_NOT = "is-not";
-        
+
         public static final String PRE_FUNCTION_ARE = "are";
 
         public static final String PRE_FUNCTION_ARE_NOT = "are-not";

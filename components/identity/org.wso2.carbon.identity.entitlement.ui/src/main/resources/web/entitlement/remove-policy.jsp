@@ -27,22 +27,28 @@
     ConfigurationContext configContext =
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-	String forwardTo = null;
-	PolicyDTO dto = new PolicyDTO();
+	String forwardTo = "index.jsp";
 	String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
     try {
-    	EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);        
+        String isPDP = request.getParameter("pdp");
+        String dePromote = request.getParameter("dePromote");
+    	EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
         String[] selectedPolicies = request.getParameterValues("policies");
         for(String policyId :selectedPolicies){
-            client.removePolicy(policyId);
+            if(Boolean.parseBoolean(isPDP)){
+                client.dePromotePolicy(policyId);
+                forwardTo = "my-pdp.jsp";
+            } else if(Boolean.parseBoolean(dePromote)) {
+                client.removePolicy(policyId, true);
+            } else {
+                client.removePolicy(policyId, false);
+            }
         }
-        forwardTo="index.jsp?region=region1&item=policy_menu";
     } catch (Exception e) {
     	String message = resourceBundle.getString("policy.could.not.be.deleted");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
-        forwardTo = "index.jsp?region=region1&item=policy_menu";
     }
 %>
 

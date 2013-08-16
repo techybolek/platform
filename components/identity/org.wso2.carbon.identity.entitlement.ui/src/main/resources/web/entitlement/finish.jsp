@@ -25,9 +25,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyCreator" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.*" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyCreationException" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.util.PolicyEditorUtil" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.EntitlementConstants" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
 <jsp:setProperty name="entitlementPolicyBean" property="*" />
@@ -56,8 +55,6 @@
     TargetDTO targetDTO = entitlementPolicyBean.getTargetDTO();
     List<ObligationDTO> obligationDTOs = entitlementPolicyBean.getObligationDTOs();
 
-
-
     PolicyDTO  policyDTO = new PolicyDTO();
     if(policyName != null && policyName.trim().length() > 0 && algorithmName != null
             && algorithmName.trim().length() > 0) {
@@ -65,18 +62,18 @@
         policyDTO.setRuleAlgorithm(algorithmName);
         policyDTO.setDescription(policyDescription);
         policyDTO.setRuleOrder(ruleElementOrder);
+        policyDTO.setRuleDTOs(ruleDTOs);
+        policyDTO.setTargetDTO(targetDTO);
+        policyDTO.setObligationDTOs(obligationDTOs);        
     }
-
-    policyDTO.setRuleDTOs(ruleDTOs);
-    policyDTO.setTargetDTO(targetDTO);
-    policyDTO.setObligationDTOs(obligationDTOs);
 
     try {
 
         EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
                 serverURL, configContext);
+        EntitlementPolicyCreator policyCreator = new EntitlementPolicyCreator();
         try{
-            policy = client.getPolicy(policyName);
+            policy = client.getPolicy(policyName, false);
         } catch (Exception e){
             //ignore
         }
@@ -85,34 +82,23 @@
             policy = new  org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO();
         }
 
-
-            policyMetaData = PolicyEditorUtil.processPolicyData(targetDTO, ruleDTOs, obligationDTOs,
-                                                            ruleElementOrder, entitlementPolicyBean);
-            policy = policyCreator.createBasicPolicy(policyElement, ruleDTOs, targetDTO, obligationDTOs);
-            policyDTO.setPolicyEditor(EntitlementPolicyConstants.BASIC_POLICY_EDITOR);
-            if(policyMetaData != null){
-                policyDTO.setBasicPolicyEditorMetaData(policyMetaData);
-            }
-
-        } else {
-            policy = policyCreator.createPolicy(policyElement, subElementDTOs, ruleElementDTOs);
+        String[] policyEditorData = PolicyEditorUtil.processPolicyData(policyDTO);
+        String policyString = policyCreator.createPolicy(policyDTO);
+        policy.setPolicyEditor(EntitlementConstants.PolicyEditor.STANDARD);
+        if(policyEditorData != null){
+            policy.setPolicyEditorData(policyEditorData);
         }
-
-        policyDTO.setPolicyId(policyName);
-        policyDTO.setPolicy(policy);
+        policy.setPolicyId(policyName);
+        policy.setPolicy(policyString);
 
         if(entitlementPolicyBean.isEditPolicy()){
-            client.updatePolicy(policyDTO);    
+            client.updatePolicy(policy);
         } else {
-            client.addPolicy(policyDTO);
+            client.addPolicy(policy);
         }
         entitlementPolicyBean.cleanEntitlementPolicyBean();
         String message = resourceBundle.getString("ent.policy.added.successfully");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
-        forwardTo = "index.jsp?";
-    } catch (EntitlementPolicyCreationException e) {
-        String message = resourceBundle.getString("error.while.creating.policy");
-        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         forwardTo = "index.jsp?";
     } catch (Exception e) {
         String message = resourceBundle.getString("error.while.adding.policy") + " " + e.getMessage();
