@@ -22,7 +22,12 @@ include("/jagg/jagg.jag");
 
             apiData.version = request.getParameter("version");
             apiData.description = request.getParameter("description","UTF-8");
-            apiData.transports = request.getParameter("http_checked")+","+request.getParameter("https_checked");
+            if(request.getParameter("http_checked") == null && request.getParameter("https_checked") == null){
+                apiData.transports = null;
+            }
+            else{
+                request.getParameter("http_checked")+","+request.getParameter("https_checked");
+            }
             apiData.endpoint = request.getParameter("endpoint");
             apiData.sandbox = request.getParameter("sandbox");
             apiData.wsdl = request.getParameter("wsdl");
