@@ -191,6 +191,7 @@
     float factor = 1.0f; // default value
     String timeOutErrorCode = "";
     String retryDisabledErrorCodes = "";
+    String retryEnabledErrorCodes = "";
     int retryTimeOut = 0;
     int retryDelayTimeOut = 0;
     boolean isNeverTimeout = true, isDiscardMessage = false, isFaultSequence = false;
@@ -281,6 +282,10 @@
         //non-retry error codes
         if (endpoint.getRetryDisabledErrorCodes() != null) {
             retryDisabledErrorCodes = endpoint.getRetryDisabledErrorCodes().trim();
+        }
+        //Retry error Codes
+        if (endpoint.getRetryEnabledErrorCodes() != null) {
+            retryEnabledErrorCodes = endpoint.getRetryEnabledErrorCodes().trim();
         }
         // Retry time out
         //this is the delay between retries for a timeout-out on a endpoint
@@ -376,6 +381,40 @@
 
     function validateForm() {
         return validateAddressEndpoint(false, false);
+    }
+
+    function handleClick(myRadio) {
+        if (myRadio.value == "disabledErrorCode" ) {
+            document.getElementById("disabledErrorCodes").disabled = false;
+            document.getElementById('disabledErrorCodesLink').style.visibility = 'visible';
+            document.getElementById("enableErrorCodes").disabled = true;
+            document.getElementById('enableErrorCodesLink').style.visibility = 'hidden';
+            document.getElementById('enableErrorCodes').value="";
+        }
+        else{
+            document.getElementById("disabledErrorCodes").disabled = true;
+            document.getElementById('disabledErrorCodesLink').style.visibility = 'hidden';
+            document.getElementById("enableErrorCodes").disabled = false;
+            document.getElementById('enableErrorCodesLink').style.visibility = 'visible';
+            document.getElementById('disabledErrorCodes').value="";
+        }
+    }
+
+    function changeRetry(valueRetry) {
+        if (valueRetry == "disabledErrorCode" ) {
+            document.getElementById("disabledErrorCodes").disabled = false;
+            document.getElementById('disabledErrorCodesLink').style.visibility = 'visible';
+            document.getElementById("enableErrorCodes").disabled = true;
+            document.getElementById('enableErrorCodesLink').style.visibility = 'hidden';
+            document.getElementById('radioDisabledErrorCode').checked=true;
+        }
+        else if(valueRetry == "enableErrorCodes"){
+            document.getElementById("disabledErrorCodes").disabled = true;
+            document.getElementById('disabledErrorCodesLink').style.visibility = 'hidden';
+            document.getElementById("enableErrorCodes").disabled = false;
+            document.getElementById('enableErrorCodesLink').style.visibility = 'visible';
+            document.getElementById('radioEnableErrorCode').checked=true;
+        }
     }
 
 </script>
@@ -620,13 +659,28 @@
 </tr>
 
 <% if (isRetryAvailableInParentEndpoint) {
+    if (retryDisabledErrorCodes != null && !"".equals(retryDisabledErrorCodes)) {
+%>
+<script>
+    changeRetry("disabledErrorCode");
+</script>
+<%
+} else if (retryEnabledErrorCodes!=null && !"".equals(retryEnabledErrorCodes)) {
+%>
+<script>
+    changeRetry("enableErrorCodes");
+</script>
+<%
+    }
+
 %>
 <tr>
     <td colspan="2" class="sub-header"><fmt:message key="failover.retry"/></td>
 </tr>
 <tr id="disabled_error_codes">
     <td>
-        <div class="indented"><fmt:message key="disabled.error.codes"/></div>
+        <div class="indented"><input type="radio" name="retryCode" value="disabledErrorCode" id="radioDisabledErrorCode"
+                                     onclick="handleClick(this);"><fmt:message key="disabled.error.codes"/></div>
     </td>
     <td>
         <table class="normal">
@@ -634,9 +688,29 @@
                 <td><input type="text" id="disabledErrorCodes" name="disabledErrorCodes" class="longInput"
                            value="<%=retryDisabledErrorCodes%>" size="75"></td>
                 <td>
-                    <a class="errorcode-picker-icon-link"
+                    <a id="disabledErrorCodesLink" class="errorcode-picker-icon-link"
                        style="padding-left:20px;padding-right:20px"
                        onclick="showErrorCodeEditor('disabledErrorCodes')"><fmt:message
+                            key="errorcode.editor.link"/></a>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+<tr id="enable_error_codes">
+    <td>
+        <div class="indented"><input type="radio" name="retryCode" value="enableErrorCode" id="radioEnableErrorCode" onclick="handleClick(this);"><fmt:message
+                key="enable.error.codes"/></div>
+    </td>
+    <td>
+        <table class="normal">
+            <tr>
+                <td><input type="text" id="enableErrorCodes" name="enableErrorCodes" class="longInput"
+                           value="<%=retryEnabledErrorCodes%>" size="75"></td>
+                <td>
+                    <a id="enableErrorCodesLink" class="errorcode-picker-icon-link"
+                       style="padding-left:20px;padding-right:20px"
+                       onclick="showErrorCodeEditor('enableErrorCodes')"><fmt:message
                             key="errorcode.editor.link"/></a>
                 </td>
             </tr>

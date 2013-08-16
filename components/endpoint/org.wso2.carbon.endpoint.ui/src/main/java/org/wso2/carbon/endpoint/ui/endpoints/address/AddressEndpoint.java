@@ -42,6 +42,7 @@ public class AddressEndpoint extends Endpoint {
     private boolean pox = false;
     private String timedOutErrorCodes;
     private String retryDisabledErrorCodes;
+    private String retryEnabledErrorCodes;
     private String retryTimeout;
     private String retryDelay;
     private String timeoutAction;
@@ -246,11 +247,16 @@ public class AddressEndpoint extends Endpoint {
     public void setRetryDisabledErrorCodes(String retryDisabledErrorCodes) {
         this.retryDisabledErrorCodes = retryDisabledErrorCodes;
     }
-
     public String getRetryDisabledErrorCodes() {
         return retryDisabledErrorCodes;
     }
+    public String getRetryEnabledErrorCodes() {
+        return retryEnabledErrorCodes;
+    }
 
+    public void setRetryEnabledErrorCodes(String retryEnabledErrorCodes) {
+        this.retryEnabledErrorCodes = retryEnabledErrorCodes;
+    }
     public String getTimedOutErrorCodes() {
         return timedOutErrorCodes;
     }
@@ -388,6 +394,14 @@ public class AddressEndpoint extends Endpoint {
             addressElement.addChild(retryConfig);
         }
 
+        if ((retryEnabledErrorCodes != null) && (!"".equals(retryEnabledErrorCodes))) {
+            OMElement retryConfig = fac.createOMElement("retryConfig", synNS);
+            OMElement enabledErrorCodes = fac.createOMElement("enabledErrorCodes", synNS);
+            enabledErrorCodes.setText(retryEnabledErrorCodes);
+            retryConfig.addChild(enabledErrorCodes);
+            addressElement.addChild(retryConfig);
+        }
+
         // time out configuration
         String timeOutConfiguration;
         if (((timeoutAction != null && !"".equals(timeoutAction)) || (timeoutActionDuration != null && !"".equals(timeoutActionDuration)))
@@ -515,6 +529,7 @@ public class AddressEndpoint extends Endpoint {
         setErrorCodes(EndpointConfigurationHelper.errorCodeListBuilder(addressEndpoint.getDefinition().getSuspendErrorCodes()).trim());
         setRetryDisabledErrorCodes(EndpointConfigurationHelper.errorCodeListBuilder(addressEndpoint.getDefinition().
                 getRetryDisabledErrorCodes()).trim());
+        setRetryEnabledErrorCodes(EndpointConfigurationHelper.errorCodeListBuilder(addressEndpoint.getDefinition().getRetryEnableErrorCodes()).trim());
         setTimedOutErrorCodes(EndpointConfigurationHelper.errorCodeListBuilder(addressEndpoint.getDefinition().getTimeoutErrorCodes()));
         setRetryTimeout(String.valueOf(addressEndpoint.getDefinition().getRetriesOnTimeoutBeforeSuspend()));
         setRetryDelay(String.valueOf(addressEndpoint.getDefinition().getRetryDurationOnTimeout()));

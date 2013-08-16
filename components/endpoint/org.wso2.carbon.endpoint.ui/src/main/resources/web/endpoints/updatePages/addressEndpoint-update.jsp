@@ -37,6 +37,8 @@
     String retriesOnTimeOut = request.getParameter("retryTimeOut");
     String retryDelay = request.getParameter("retryDelay");
     String disabledErrorCodes = request.getParameter("disabledErrorCodes");
+    String enabledErrorCodes = request.getParameter("enableErrorCodes");
+    String retryCodeRadio = request.getParameter("retryCode");
     String action = request.getParameter("actionSelect");
     String actionDuration = null;
     if (action != null && !action.equals("neverTimeout")) {
@@ -124,9 +126,19 @@
         addressEndpoint.setRetryDelay(retryDelay);
         addressEndpoint.setRetryDelay(retryDelay);
     }
-    if (disabledErrorCodes != null) {
-        addressEndpoint.setRetryDisabledErrorCodes(disabledErrorCodes);
+
+    if (retryCodeRadio!=null && retryCodeRadio.equals("disabledErrorCode")) {
+        if (disabledErrorCodes != null) {
+            addressEndpoint.setRetryDisabledErrorCodes(disabledErrorCodes);
+            addressEndpoint.setRetryEnabledErrorCodes(null);
+        }
+    }else if (retryCodeRadio!=null && retryCodeRadio.equals("enableErrorCode")) {
+        if (enabledErrorCodes!=null) {
+            addressEndpoint.setRetryEnabledErrorCodes(enabledErrorCodes);
+            addressEndpoint.setRetryDisabledErrorCodes(null);
+        }
     }
+
     if (action != null) {
         if (action.equals("discardMessage")) {
             addressEndpoint.setTimeoutAction("discard");
