@@ -188,11 +188,11 @@
                 		</thead>
                 			<tr>
                 				<td>                				
-                					<select id="inSequence" class="selected" name="inSequence"  multiple="multiple">
+                					<select id="inSequence"  name="inSequence" >
                 					</select>                					
                 				</td>
                 				<td>                					
-                					<select id="outSequence" class="selected" name="outSequence"  multiple="multiple">
+                					<select id="outSequence"  name="outSequence">
                 					</select>                					
                 				</td>
                 			</tr>

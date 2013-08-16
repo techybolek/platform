@@ -224,8 +224,8 @@
     "useCase1":"WSO2 Use Case: API Facade Pattern",
     "more":"More >>",
     "throttlingTier":"Throttling Tier",
-	"sequence":"Sequence",
+	"sequence":"Sequences",
     "inFlow":"In Flow",
     "outFlow":"Out Flow",
-    "sequenceMsg":"Check to select  a custom sequence to be executed in the message flow"
+    "sequenceMsg":"Check to select a custom sequence to be executed in the message flow"
 }

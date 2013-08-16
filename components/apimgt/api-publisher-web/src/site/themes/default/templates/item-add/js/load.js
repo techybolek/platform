@@ -116,7 +116,8 @@ $(document).ready(function() {
 
     var v = $("#addAPIForm").validate({
                                           submitHandler: function(form) {
-                                              //Adding custom validation for the resource url UI
+                                              // Adding custom validation for
+												// the resource url UI
                                               if(validateResourceTable() != ""){
                                                   return;
                                               }
@@ -208,28 +209,37 @@ function loadInSequences() {
 	jagg.post("/site/blocks/item-add/ajax/add.jag", {
 		action : "getCustomInSequences"
 	},
-			function(result) {
-				if (!result.error) {
-					var arr = [];
-					for ( var j = 0; j < result.sequences.length; j++) {
-						arr.push(result.sequences[j]);
-					}
-					for(var i=0; i<arr.length; i++){
-						inFlowOption = new Option(result.sequences[i],result.sequences[i]);						
-						inFlowtarget.options[i] = inFlowOption;						
-
-						inFlowtarget.options[i].selected = 'selected';						
-						var inSeq = inFlowtarget.options[i].value;					
-					$('<input>').
-						attr('type', 'hidden').
-						attr('name', 'inSeq').
-						attr('id', 'inSeq').
-						attr('value', inSeq).
-						appendTo('#addAPIForm');					
-
-					}
+ 	function(result) {
+		if (!result.error) {
+			var arr = [];
+			if (result.sequences.length == 0) {
+				var msg = "No defined sequences";
+				$('<input>').
+				attr('type', 'hidden').
+				attr('name', 'inSeq').
+				attr('id', 'inSeq').
+				attr('value', msg).
+				appendTo('#addAPIForm');
+			} else {
+				for ( var j = 0; j < result.sequences.length; j++) {
+					arr.push(result.sequences[j]);
 				}
-			}, "json");
+				for ( var i = 0; i < arr.length; i++) {
+					inFlowOption = new Option(result.sequences[i],
+							result.sequences[i]);
+					inFlowtarget.options[i] = inFlowOption;
+					var inSeq = inFlowOption.value;
+					$('<input>').
+					attr('type', 'hidden').
+					attr('name', 'inSeq').
+					attr('id', 'inSeq').
+					attr('value', inSeq).
+					appendTo('#addAPIForm');
+
+				}
+			}
+		}
+	}, "json");
 }
 
 function loadOutSequences() {	
@@ -240,21 +250,30 @@ function loadOutSequences() {
 			function(result) {
 				if (!result.error) {
 					var arr = [];
-					for ( var j = 0; j < result.sequences.length; j++) {
-						arr.push(result.sequences[j]);
-					}
-					for(var i=0; i<arr.length; i++){						
-						outFlowOption = new Option(result.sequences[i],	result.sequences[i]);		
-						outFlowtarget.options[i] = outFlowOption;			
-						outFlowtarget.options[i].selected = 'selected';						
-						var outSeq = outFlowtarget.options[i].value;				
-					$('<input>').
+					if (result.sequences.length == 0) {
+						var msg = "No defined sequences";
+						$('<input>').
 						attr('type', 'hidden').
 						attr('name', 'outSeq').
 						attr('id', 'outSeq').
-						attr('value', outSeq).
+						attr('value', msg).
 						appendTo('#addAPIForm');
+					}else {
+						for ( var j = 0; j < result.sequences.length; j++) {
+							arr.push(result.sequences[j]);
+						}
+						for(var i=0; i<arr.length; i++){						
+							outFlowOption = new Option(result.sequences[i],	result.sequences[i]);		
+							outFlowtarget.options[i] = outFlowOption;							
+							var outSeq = outFlowOption.value;				
+							$('<input>').
+							attr('type', 'hidden').
+							attr('name', 'outSeq').
+							attr('id', 'outSeq').
+							attr('value', outSeq).
+							appendTo('#addAPIForm');
 
+						}
 					}
 				}
 			}, "json");
@@ -266,4 +285,5 @@ function toggleSequence(checkbox){
 	}else{
 		$(checkbox).parent().next().hide();
 	}
+	
 }
