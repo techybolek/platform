@@ -54,6 +54,12 @@
         <field type="text" url="true">
             <name>Sandbox URL</name>
         </field>
+		 <field type="text">
+            <name>InSequence</name>
+        </field>
+        <field type="text">
+            <name>OutSequence</name>
+        </field>
         <field type="text">
             <name>WSDL</name>
         </field>
