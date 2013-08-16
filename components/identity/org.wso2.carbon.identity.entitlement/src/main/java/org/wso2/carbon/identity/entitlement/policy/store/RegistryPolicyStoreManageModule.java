@@ -55,8 +55,6 @@ public class RegistryPolicyStoreManageModule extends AbstractPolicyFinderModule
     private static final String DEFAULT_POLICY_STORE_PATH = "/repository/identity/entitlement" +
             "/policy/pdp/";
 
-    private static final String KEY_VALUE_POLICY_ODER = "policyOrder";
-
     private static final String KEY_VALUE_POLICY_META_DATA = "policyMetaData";
 
     private static final String POLICY_MEDIA_TYPE = "application/xacml-policy+xml";
@@ -104,8 +102,7 @@ public class RegistryPolicyStoreManageModule extends AbstractPolicyFinderModule
             } else {
                 resource = registry.newResource();
             }
-
-            resource.setProperty(KEY_VALUE_POLICY_ODER, Integer.toString(policy.getPolicyOrder()));
+;
             resource.setContent(policy.getPolicy());
             resource.setMediaType(POLICY_MEDIA_TYPE);
             AttributeDTO[] attributeDTOs = policy.getAttributeDTOs();
@@ -120,8 +117,8 @@ public class RegistryPolicyStoreManageModule extends AbstractPolicyFinderModule
     }
 
     @Override
-    public void updatePolicy(PolicyStoreDTO policy) {
-
+    public void updatePolicy(PolicyStoreDTO policy) throws EntitlementException {
+        addPolicy(policy);
     }
 
 

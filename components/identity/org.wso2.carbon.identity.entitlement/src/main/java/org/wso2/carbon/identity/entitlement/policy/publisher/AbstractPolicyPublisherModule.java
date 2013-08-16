@@ -114,16 +114,23 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
     }
 
     @Override
-    public void publish(PolicyDTO policyDTO, String action) throws EntitlementException {
+    public void publish(PolicyDTO policyDTO, String action, int order) throws EntitlementException {
 
         if(EntitlementConstants.PolicyPublish.ACTION_CREATE.equals(action)){
             publishNew(policyDTO);
         } else if(EntitlementConstants.PolicyPublish.ACTION_DELETE.equals(action)){
-
+            delete(policyDTO);
         } else if(EntitlementConstants.PolicyPublish.ACTION_UPDATE.equals(action)){
-
+            update(policyDTO);
         } else if(EntitlementConstants.PolicyPublish.ACTION_ENABLE.equals(action)){
-
+            policyDTO.setActive(true);
+            enable(policyDTO);
+        } else if(EntitlementConstants.PolicyPublish.ACTION_DISABLE.equals(action)){
+            policyDTO.setActive(false);
+            disable(policyDTO);
+        } else if(EntitlementConstants.PolicyPublish.ACTION_ORDER.equals(action)){
+            policyDTO.setPolicyOrder(order);
+            order(policyDTO);
         }
     }
 
@@ -140,4 +147,10 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
     public abstract void update(PolicyDTO policyDTO) throws EntitlementException;
 
     public abstract void delete(PolicyDTO policyDTO) throws EntitlementException;
+
+    public abstract void order(PolicyDTO policyDTO) throws EntitlementException;
+
+    public abstract void disable(PolicyDTO policyDTO) throws EntitlementException;
+
+    public abstract void enable(PolicyDTO policyDTO) throws EntitlementException;
 }

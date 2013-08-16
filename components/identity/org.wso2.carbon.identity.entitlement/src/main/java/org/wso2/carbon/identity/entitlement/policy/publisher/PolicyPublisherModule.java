@@ -62,8 +62,9 @@ public interface PolicyPublisherModule {
      *
      * @param policyDTO policy as PolicyDTO
      * @param action
+     * @param order
      * @throws EntitlementException throws, if any error is occurred.
      */
-    public void publish(PolicyDTO policyDTO , String action) throws EntitlementException;
+    public void publish(PolicyDTO policyDTO , String action, int order) throws EntitlementException;
 
 }

@@ -46,7 +46,7 @@ public class CarbonPDPPublisher implements PolicyPublisherModule{
     }
 
     @Override
-    public void publish(PolicyDTO policyDTO, String action) throws EntitlementException {
+    public void publish(PolicyDTO policyDTO, String action,  int order) throws EntitlementException {
 
         PolicyStoreManager manager = EntitlementAdminEngine.getInstance().getPolicyStoreManager();
 
@@ -57,7 +57,14 @@ public class CarbonPDPPublisher implements PolicyPublisherModule{
         } else if(EntitlementConstants.PolicyPublish.ACTION_UPDATE.equals(action)){
             manager.updatePolicy(policyDTO);
         } else if(EntitlementConstants.PolicyPublish.ACTION_ENABLE.equals(action)){
-
+            policyDTO.setActive(true);
+            manager.updatePolicy(policyDTO);
+        } else if(EntitlementConstants.PolicyPublish.ACTION_DISABLE.equals(action)){
+            policyDTO.setActive(false);
+            manager.updatePolicy(policyDTO);
+        } else if(EntitlementConstants.PolicyPublish.ACTION_ORDER.equals(action)){
+            policyDTO.setPolicyOrder(order);
+            manager.updatePolicy(policyDTO);
         }
     }
 }

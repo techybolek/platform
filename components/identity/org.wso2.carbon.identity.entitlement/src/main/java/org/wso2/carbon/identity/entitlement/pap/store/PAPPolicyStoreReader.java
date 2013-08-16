@@ -113,38 +113,17 @@ public class PAPPolicyStoreReader {
     public PolicyDTO readPolicyDTO(String policyId) throws EntitlementException {
         Resource resource = null;
         PolicyDTO dto = null;
-        boolean policyEditable = false;
-        boolean policyCanDelete = false;        
         try {
             resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
             if (resource == null) {
                 log.error("Policy does not exist in the system with id " + policyId);
                 throw new EntitlementException("Policy does not exist in the system with id " + policyId);
             }
-            String userName = CarbonContext.getCurrentContext().getUsername();
-            int tenantId = CarbonContext.getCurrentContext().getTenantId();
-            RealmService realmService = EntitlementServiceComponent.getRealmservice();
-            if(realmService != null){
-                policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                resource.getPath(),"write" );
-                policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                resource.getPath(),"delete" );
-            }
+
             dto = new PolicyDTO();
             dto.setPolicyId(policyId);
             dto.setPolicy(new String((byte[]) resource.getContent(), Charset.forName("UTF-8")));
-            dto.setPolicyEditable(policyEditable);
-            dto.setPolicyCanDelete(policyCanDelete);            
-            if ("true".equals(resource.getProperty(PDPConstants.ACTIVE_POLICY))) {
-                dto.setActive(true);
-            }
-
-            if ("true".equals(resource.getProperty(PDPConstants.PROMOTED_POLICY))) {
-                dto.setPromote(true);
-            }
-
+            dto.setActive(Boolean.parseBoolean(resource.getProperty(PDPConstants.ACTIVE_POLICY)));
             String policyOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
             if(policyOrder != null){
                 dto.setPolicyOrder(Integer.parseInt(policyOrder));
@@ -183,10 +162,6 @@ public class PAPPolicyStoreReader {
             log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
             throw new EntitlementException("Error while loading entitlement policy " + policyId +
                     " from PAP policy store");
-        } catch (UserStoreException e) {
-            log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
-            throw new EntitlementException("Error while loading entitlement policy " + policyId +
-                    " from PAP policy store");
         }
     }
 
@@ -201,61 +176,34 @@ public class PAPPolicyStoreReader {
 
         Resource resource = null;
         PolicyDTO dto = null;
-        boolean policyEditable = false;
-        boolean policyCanDelete = false;
-        try {
-            resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
-            if (resource == null) {
-                return null;
-            }
-            String userName = CarbonContext.getCurrentContext().getUsername();
-            int tenantId = CarbonContext.getCurrentContext().getTenantId();
-            RealmService realmService = EntitlementServiceComponent.getRealmservice();
-            if(realmService != null){
-                policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                resource.getPath(), "write");
-                policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                resource.getPath(), "delete");
-            }
-            dto = new PolicyDTO();
-            dto.setPolicyId(policyId);
-            dto.setPolicyEditable(policyEditable);
-            dto.setPolicyCanDelete(policyCanDelete);
-            if ("true".equals(resource.getProperty(PDPConstants.ACTIVE_POLICY))) {
-                dto.setActive(true);
-            }
-            if ("true".equals(resource.getProperty(PDPConstants.PROMOTED_POLICY))) {
-                dto.setPromote(true);
-            }
-
-            String policyOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
-            if(policyOrder != null){
-                dto.setPolicyOrder(Integer.parseInt(policyOrder));
-            } else {
-                dto.setPolicyOrder(0);
-            }
-            dto.setPolicyType(resource.getProperty(PDPConstants.POLICY_TYPE));
-
-            String policyReferences = resource.getProperty(PDPConstants.POLICY_REFERENCE);
-            if(policyReferences != null && policyReferences.trim().length() > 0){
-                dto.setPolicyIdReferences(policyReferences.split(PDPConstants.ATTRIBUTE_SEPARATOR));
-            }
-
-            String policySetReferences = resource.getProperty(PDPConstants.POLICY_SET_REFERENCE);
-            if(policySetReferences != null && policySetReferences.trim().length() > 0){
-                dto.setPolicySetIdReferences(policySetReferences.split(PDPConstants.ATTRIBUTE_SEPARATOR));
-            }
-            
-            dto.setPolicyEditor(resource.getProperty(PDPConstants.POLICY_EDITOR_TYPE));
-
-            return dto;
-        } catch (UserStoreException e) {
-            log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
-            throw new EntitlementException("Error while loading entitlement policy " + policyId +
-                    " from PAP policy store");
+        resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
+        if (resource == null) {
+            return null;
         }
+        dto = new PolicyDTO();
+        dto.setPolicyId(policyId);
+        dto.setActive(Boolean.parseBoolean(resource.getProperty(PDPConstants.ACTIVE_POLICY)));
+        String policyOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
+        if(policyOrder != null){
+            dto.setPolicyOrder(Integer.parseInt(policyOrder));
+        } else {
+            dto.setPolicyOrder(0);
+        }
+        dto.setPolicyType(resource.getProperty(PDPConstants.POLICY_TYPE));
+
+        String policyReferences = resource.getProperty(PDPConstants.POLICY_REFERENCE);
+        if(policyReferences != null && policyReferences.trim().length() > 0){
+            dto.setPolicyIdReferences(policyReferences.split(PDPConstants.ATTRIBUTE_SEPARATOR));
+        }
+
+        String policySetReferences = resource.getProperty(PDPConstants.POLICY_SET_REFERENCE);
+        if(policySetReferences != null && policySetReferences.trim().length() > 0){
+            dto.setPolicySetIdReferences(policySetReferences.split(PDPConstants.ATTRIBUTE_SEPARATOR));
+        }
+
+        dto.setPolicyEditor(resource.getProperty(PDPConstants.POLICY_EDITOR_TYPE));
+
+        return dto;
     }
 
 
@@ -321,75 +269,50 @@ public class PAPPolicyStoreReader {
     public PolicyDTO readMetaDataPolicyDTO(String policyId) throws EntitlementException {
         Resource resource = null;
         PolicyDTO dto = null;
-        boolean policyEditable = false;
-        boolean policyCanDelete = false;
-        try {
-            resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
-            if (resource == null) {
-                return null;
-            }
-            String userName = CarbonContext.getCurrentContext().getUsername();
-            int tenantId = CarbonContext.getCurrentContext().getTenantId();
-            RealmService realmService = EntitlementServiceComponent.getRealmservice();
-            if(realmService != null){
-                policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                resource.getPath(), "write");
-                policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                resource.getPath(), "delete");
-            }
-            dto = new PolicyDTO();
-            dto.setPolicyId(policyId);
-            dto.setPolicyEditable(policyEditable);
-            dto.setPolicyCanDelete(policyCanDelete);
-            if ("true".equals(resource.getProperty(PDPConstants.ACTIVE_POLICY))) {
-                dto.setActive(true);
-            }
-            if ("true".equals(resource.getProperty(PDPConstants.PROMOTED_POLICY))) {
-                dto.setPromote(true);
-            }
 
-            String policyOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
-            if(policyOrder != null){
-                dto.setPolicyOrder(Integer.parseInt(policyOrder));
-            } else {
-                dto.setPolicyOrder(0);
-            }
-
-            dto.setPolicyType(resource.getProperty(PDPConstants.POLICY_TYPE));
-
-            String policyReferences = resource.getProperty(PDPConstants.POLICY_REFERENCE);
-            if(policyReferences != null && policyReferences.trim().length() > 0){
-                dto.setPolicyIdReferences(policyReferences.split(PDPConstants.ATTRIBUTE_SEPARATOR));
-            }
-
-            String policySetReferences = resource.getProperty(PDPConstants.POLICY_SET_REFERENCE);
-            if(policySetReferences != null && policySetReferences.trim().length() > 0){
-                dto.setPolicySetIdReferences(policySetReferences.split(PDPConstants.ATTRIBUTE_SEPARATOR));
-            }
-
-            dto.setPolicyEditor(resource.getProperty(PDPConstants.POLICY_EDITOR_TYPE));
-            String basicPolicyEditorMetaDataAmount = resource.getProperty(PDPConstants.
-                    BASIC_POLICY_EDITOR_META_DATA_AMOUNT);
-            if(basicPolicyEditorMetaDataAmount != null){
-                int amount = Integer.parseInt(basicPolicyEditorMetaDataAmount);
-                String[] basicPolicyEditorMetaData = new String[amount];
-                for(int i = 0; i < amount; i++){
-                    basicPolicyEditorMetaData[i] = resource.
-                            getProperty(PDPConstants.BASIC_POLICY_EDITOR_META_DATA + i);
-                }
-                dto.setPolicyEditorData(basicPolicyEditorMetaData);
-            }
-            PolicyAttributeBuilder policyAttributeBuilder = new PolicyAttributeBuilder();
-            dto.setAttributeDTOs(policyAttributeBuilder.
-                    getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
-            return dto;
-        } catch (UserStoreException e) {
-            log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
-            throw new EntitlementException("Error while loading entitlement policy " + policyId +
-                    " from PAP policy store");
+        resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
+        if (resource == null) {
+            return null;
         }
+        dto = new PolicyDTO();
+        dto.setPolicyId(policyId);
+        dto.setActive(Boolean.parseBoolean(resource.getProperty(PDPConstants.ACTIVE_POLICY)));
+        String policyOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
+        if(policyOrder != null){
+            dto.setPolicyOrder(Integer.parseInt(policyOrder));
+        } else {
+            dto.setPolicyOrder(0);
+        }
+
+        dto.setPolicyType(resource.getProperty(PDPConstants.POLICY_TYPE));
+
+        String policyReferences = resource.getProperty(PDPConstants.POLICY_REFERENCE);
+        if(policyReferences != null && policyReferences.trim().length() > 0){
+            dto.setPolicyIdReferences(policyReferences.split(PDPConstants.ATTRIBUTE_SEPARATOR));
+        }
+
+        String policySetReferences = resource.getProperty(PDPConstants.POLICY_SET_REFERENCE);
+        if(policySetReferences != null && policySetReferences.trim().length() > 0){
+            dto.setPolicySetIdReferences(policySetReferences.split(PDPConstants.ATTRIBUTE_SEPARATOR));
+        }
+
+        dto.setPolicyEditor(resource.getProperty(PDPConstants.POLICY_EDITOR_TYPE));
+        String basicPolicyEditorMetaDataAmount = resource.getProperty(PDPConstants.
+                BASIC_POLICY_EDITOR_META_DATA_AMOUNT);
+        if(basicPolicyEditorMetaDataAmount != null){
+            int amount = Integer.parseInt(basicPolicyEditorMetaDataAmount);
+            String[] basicPolicyEditorMetaData = new String[amount];
+            for(int i = 0; i < amount; i++){
+                basicPolicyEditorMetaData[i] = resource.
+                        getProperty(PDPConstants.BASIC_POLICY_EDITOR_META_DATA + i);
+            }
+            dto.setPolicyEditorData(basicPolicyEditorMetaData);
+        }
+        PolicyAttributeBuilder policyAttributeBuilder = new PolicyAttributeBuilder();
+        dto.setAttributeDTOs(policyAttributeBuilder.
+                getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
+        return dto;
+
     }
 
     /**
@@ -403,34 +326,14 @@ public class PAPPolicyStoreReader {
         String policyId = null;
         AbstractPolicy absPolicy = null;
         PolicyDTO dto = null;
-        boolean policyEditable = false;
-        boolean policyCanDelete = false;
         try {
-            String userName = CarbonContext.getCurrentContext().getUsername();
-            RealmService realmService = EntitlementServiceComponent.getRealmservice();
-            if(realmService != null){
-                policyEditable = CarbonContext.getCurrentContext().getUserRealm().getAuthorizationManager().
-                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                resource.getPath(),"write" );
-                policyCanDelete = CarbonContext.getCurrentContext().getUserRealm().getAuthorizationManager().
-                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                resource.getPath(),"delete" );
-            }
             policy = new String((byte[]) resource.getContent(), Charset.forName("UTF-8"));
             absPolicy = PolicyReader.getInstance(null).getPolicy(policy);
             policyId = absPolicy.getId().toASCIIString();
             dto = new PolicyDTO();
             dto.setPolicyId(policyId);
             dto.setPolicy(policy);
-            dto.setPolicyEditable(policyEditable);
-            dto.setPolicyCanDelete(policyCanDelete);
-            if ("true".equals(resource.getProperty(PDPConstants.ACTIVE_POLICY))) {
-                dto.setActive(true);
-            }
-            if ("true".equals(resource.getProperty(PDPConstants.PROMOTED_POLICY))) {
-                dto.setPromote(true);
-            }
-
+            dto.setActive(Boolean.parseBoolean(resource.getProperty(PDPConstants.ACTIVE_POLICY)));
             String policyOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
             if(policyOrder != null){
                 dto.setPolicyOrder(Integer.parseInt(policyOrder));
@@ -439,7 +342,6 @@ public class PAPPolicyStoreReader {
             }
             
             dto.setPolicyType(resource.getProperty(PDPConstants.POLICY_TYPE));
-
             String policyReferences = resource.getProperty(PDPConstants.POLICY_REFERENCE);
             if(policyReferences != null && policyReferences.trim().length() > 0){
                 dto.setPolicyIdReferences(policyReferences.split(PDPConstants.ATTRIBUTE_SEPARATOR));
@@ -468,10 +370,6 @@ public class PAPPolicyStoreReader {
                     getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
             return dto;
         } catch (RegistryException e) {
-            log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
-            throw new EntitlementException("Error while loading entitlement policy " + policyId +
-                    " from PAP policy store");
-        } catch (UserStoreException e) {
             log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
             throw new EntitlementException("Error while loading entitlement policy " + policyId +
                     " from PAP policy store");

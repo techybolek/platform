@@ -166,15 +166,6 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
         }
     }
 
-    @Override
-    public void update(PolicyDTO policyDTO) throws EntitlementException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void delete(PolicyDTO policyDTO) throws EntitlementException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
 
     private String createBody(String policy){
 
@@ -185,5 +176,30 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
                 "            <xsd1:promote>true</xsd1:promote>" +
                 "          </xsd:policyDTO>" +
                 "      </xsd:addPolicy>";
+    }
+
+    @Override
+    public void order(PolicyDTO policyDTO) throws EntitlementException {
+
+    }
+
+    @Override
+    public void disable(PolicyDTO policyDTO) throws EntitlementException {
+
+    }
+
+    @Override
+    public void enable(PolicyDTO policyDTO) throws EntitlementException {
+
+    }
+
+    @Override
+    public void update(PolicyDTO policyDTO) throws EntitlementException {
+
+    }
+
+    @Override
+    public void delete(PolicyDTO policyDTO) throws EntitlementException {
+
     }
 }

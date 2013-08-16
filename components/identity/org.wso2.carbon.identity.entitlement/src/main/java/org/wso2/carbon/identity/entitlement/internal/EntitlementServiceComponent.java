@@ -36,8 +36,6 @@ import org.wso2.carbon.base.ServerConfigurationException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
-import org.wso2.carbon.identity.entitlement.cache.*;
-import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
 import org.wso2.carbon.identity.entitlement.thrift.EntitlementService;
@@ -95,16 +93,6 @@ public class EntitlementServiceComponent {
             builder.setBundleContext(ctxt.getBundleContext());
             builder.buildEntitlementConfig(entitlementConfig);
 
-            //init caches as we are using one cache for all tenant
-
-            DecisionCache.getInstance();
-            SimpleDecisionCache.getInstance();
-            DecisionClearingCache.getInstance();
-            PolicySearchCache.getInstance();
-            PIPAttributeCache.getInstance();
-            PIPAbstractAttributeCache.getInstance();
-            EntitlementPolicyClearingCache.getInstance();
-            
             // Start loading schema.
             new Thread(new SchemaBuilder(entitlementConfig)).start();
 

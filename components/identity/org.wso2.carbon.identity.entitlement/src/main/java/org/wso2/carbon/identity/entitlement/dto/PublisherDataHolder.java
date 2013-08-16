@@ -46,7 +46,6 @@ public class PublisherDataHolder {
     }
 
     public PublisherDataHolder(Resource resource) {
-
         List<PublisherPropertyDTO> propertyDTOs = new ArrayList<PublisherPropertyDTO>();
         List<StatusHolder> statusHolders = new ArrayList<StatusHolder>();
         if(resource != null && resource.getProperties() != null){
@@ -120,7 +119,6 @@ public class PublisherDataHolder {
                 propertyDTOs.add(dto);
             }
         }
-
         this.propertyDTOs = propertyDTOs.toArray(new PublisherPropertyDTO[propertyDTOs.size()]);
         this.statusHolders = statusHolders.toArray(new StatusHolder[statusHolders.size()]);
     }

@@ -63,11 +63,13 @@ public class PolicyPublishExecutor implements Runnable {
     private int tenantId;
     
     private String userName;
+    
+    private int order;
 
     private static Log log = LogFactory.getLog(PolicyPublishExecutor.class);
 
-    public PolicyPublishExecutor(String[] policyIds, String version, String action, String[] subscriberIds,
-                                PolicyPublisher publisher,
+    public PolicyPublishExecutor(String[] policyIds, String version, String action, int order,
+                                String[] subscriberIds, PolicyPublisher publisher,
                                 boolean toPDP, String verificationCode) {
 
         this.policyIds = policyIds;
@@ -79,6 +81,7 @@ public class PolicyPublishExecutor implements Runnable {
         this.version = version;
         this.publisher = publisher;
         this.toPDP = toPDP;
+        this.order = order;
         this.verificationCode = verificationCode;
     }
 
@@ -192,7 +195,7 @@ public class PolicyPublishExecutor implements Runnable {
                 }
 
                 try {
-                    policyPublisherModule.publish(policyDTO, action);
+                    policyPublisherModule.publish(policyDTO, action, order);
                     subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
                             policyId, version, subscriberId, action));
                     policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,

@@ -41,12 +41,12 @@ public class PIPAttributeCache {
     /**
      * the logger we'll use for all messages
      */
-    private static Log log = LogFactory.getLog(EntitlementPolicyClearingCache.class);
+    private static Log log = LogFactory.getLog(EntitlementPolicyInvalidationCache.class);
 
     /**
-     * Gets a new instance of EntitlementPolicyClearingCache.
+     * Gets a new instance of EntitlementPolicyInvalidationCache.
      *
-     * @return A new instance of EntitlementPolicyClearingCache.
+     * @return A new instance of EntitlementPolicyInvalidationCache.
      */
     public static PIPAttributeCache getInstance() {
 

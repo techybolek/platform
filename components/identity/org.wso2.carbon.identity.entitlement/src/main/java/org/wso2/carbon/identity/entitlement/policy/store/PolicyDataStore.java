@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.entitlement.policy.store;
 
 import org.wso2.balana.combine.PolicyCombiningAlgorithm;
 import org.wso2.carbon.identity.entitlement.EntitlementException;
+import org.wso2.carbon.identity.entitlement.dto.PolicyStoreDTO;
 
 import java.util.Properties;
 
@@ -65,4 +66,25 @@ public interface PolicyDataStore {
      * @return policy combining algorithm names as <code>Array</code> of <code>String</code>
      */
     public String[] getAllGlobalPolicyAlgorithmNames();
+
+    /**
+     * Gets policy data for given policy id
+     *
+     * @param policyId policy id as <code>String</code>
+     * @return  policy data such as order and so on <code>PolicyStoreDTO</code>
+     */
+    public PolicyStoreDTO getPolicyData(String policyId);
+
+    /**
+     * Set policy data for give policy id
+     *
+     * @param policyId  policy id as <code>String</code>
+     * @param policyDataDTO policy data such as order and so on <code>PolicyStoreDTO</code>
+     * @throws EntitlementException if it is failed
+     */
+    public void setPolicyData(String policyId, PolicyStoreDTO policyDataDTO) throws EntitlementException;
+    
+    
+    public void removePolicyData(String policyId)  throws EntitlementException;
+
 }

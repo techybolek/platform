@@ -21,8 +21,8 @@ package org.wso2.carbon.identity.entitlement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.identity.entitlement.cache.DecisionClearingCache;
-import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
+import org.wso2.carbon.identity.entitlement.cache.DecisionInvalidationCache;
+import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyInvalidationCache;
 import org.wso2.carbon.identity.entitlement.dto.PDPDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.PIPFinderDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.PolicyFinderDataHolder;
@@ -48,7 +48,7 @@ public class EntitlementAdminService extends AbstractAdmin {
      * @throws EntitlementException throws
      */
     public void clearDecisionCache() throws EntitlementException {
-        EntitlementEngine.getInstance().clearDecisionCache(true);
+        DecisionInvalidationCache.getInstance().invalidateCache();
         if (log.isDebugEnabled()) {
             log.debug("Decision Caching is cleared by using admin service");
         }
@@ -310,9 +310,8 @@ public class EntitlementAdminService extends AbstractAdmin {
                         EntitlementEngine.getInstance().getCarbonPolicyFinder().init();
                         // need to re init all policy finder modules in the cluster.
                         // therefore calling invalidation cache
-                        DecisionClearingCache.getInstance().invalidateCache();
-                        EntitlementPolicyClearingCache.getInstance().invalidateCache();
-                        EntitlementPolicyClearingCache.getInstance().addToCache(1);
+                        DecisionInvalidationCache.getInstance().invalidateCache();
+                        EntitlementPolicyInvalidationCache.getInstance().invalidateCache();
                     } catch (Exception e) {
                         throw new EntitlementException("Error while refreshing attribute finder - " +
                                                     policyFinder);
@@ -540,8 +539,7 @@ public class EntitlementAdminService extends AbstractAdmin {
         EntitlementAdminEngine.getInstance().
                         getPolicyDataStore().setGlobalPolicyAlgorithm(policyCombiningAlgorithm);
         // clear cache
-        DecisionClearingCache.getInstance().invalidateCache();
-        EntitlementPolicyClearingCache.getInstance().invalidateCache();
+        DecisionInvalidationCache.getInstance().invalidateCache();
+        EntitlementPolicyInvalidationCache.getInstance().invalidateCache();
     }
-
 }

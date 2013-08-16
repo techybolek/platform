@@ -18,8 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.cache;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.caching.impl.CachingConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.policy.search.SearchResult;
@@ -29,41 +28,15 @@ import org.wso2.carbon.identity.entitlement.policy.search.SearchResult;
  */
 public class PolicySearchCache extends EntitlementBaseCache<IdentityCacheKey,SearchResult>{
 
-    private static PolicySearchCache policySearchCache = null;
-    private static final Object lock = new Object();  
-
-    private PolicySearchCache() {
-    	super(PDPConstants.POLICY_SEARCH_CACHE);
+    public PolicySearchCache(int timeOut) {
+    	super(CachingConstants.LOCAL_CACHE_PREFIX + PDPConstants.POLICY_SEARCH_CACHE, timeOut);
     }
 
-    /**
-     * the logger we'll use for all messages
-     */
-    private static Log log = LogFactory.getLog(PolicySearchCache.class);
-
-    /**
-     * Gets a new instance of EntitlementPolicyClearingCache.
-     *
-     * @return A new instance of EntitlementPolicyClearingCache.
-     */
-    public static PolicySearchCache getInstance() {
-        if(policySearchCache == null){
-            synchronized (lock){
-                if(policySearchCache == null){
-                    policySearchCache = new PolicySearchCache();
-                }
-            }
-        }
-        return policySearchCache;
-    }
 
     public void addToCache(String key, SearchResult result){
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        policySearchCache.addToCache(cacheKey, result);
-        if (log.isDebugEnabled()) {
-            log.debug("Cache entry is added");
-        }
+        addToCache(cacheKey, result);
     }
 
     public SearchResult getFromCache(String key){
@@ -71,23 +44,15 @@ public class PolicySearchCache extends EntitlementBaseCache<IdentityCacheKey,Sea
         SearchResult searchResult = null;
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        Object entry = policySearchCache.getValueFromCache(cacheKey);
+        Object entry = getValueFromCache(cacheKey);
         if(entry != null){
             searchResult = (SearchResult) entry;
-            if (log.isDebugEnabled()) {
-                log.debug("Cache entry is found");
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Cache entry is not found");
-            }
         }
 
         return searchResult;
     }
 
-    public void invalidateCache(){
-        policySearchCache.clear();
+    public void clearCache(){
+        clear();
     }
-
 }

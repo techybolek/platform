@@ -47,14 +47,8 @@ public class EntitlementService extends AbstractAdmin implements XACMLHandler {
 
         String response;
 		try {
-			if (log.isDebugEnabled()) {
-				log.debug("XACML Request  :  " + request);
-			}
 			EntitlementEngine entitlementEngine = EntitlementEngine.getInstance();
 			response = entitlementEngine.evaluate(request);
-            if(log.isDebugEnabled()){
-                log.debug("XACML Response  :  " + response);
-            }
 			return response;
 		} catch (Exception e) {
 			log.error("Error occurred while evaluating XACML request", e);
@@ -140,8 +134,7 @@ public class EntitlementService extends AbstractAdmin implements XACMLHandler {
                     "Invalid input data - either the user name or role name should be non-null");
         }
 
-        EntitlementEngine engine = EntitlementEngine.getInstance();
-        PolicySearch policySearch = new PolicySearch(engine);
+        PolicySearch policySearch = EntitlementEngine.getInstance().getPolicySearch();
         return policySearch.getEntitledAttributes(subjectName, resourceName, subjectId, action,
                                                                     enableChildSearch);
     }
@@ -160,10 +153,7 @@ public class EntitlementService extends AbstractAdmin implements XACMLHandler {
      */
     public EntitledResultSetDTO getAllEntitlements(String identifier, AttributeDTO[] givenAttributes)
                                                                         throws EntitlementException {
-
-        EntitlementEngine engine = EntitlementEngine.getInstance();
-
-        PolicySearch policySearch = new PolicySearch(engine);
+        PolicySearch policySearch = EntitlementEngine.getInstance().getPolicySearch();
         return policySearch.getEntitledAttributes(identifier, givenAttributes);
     }
 

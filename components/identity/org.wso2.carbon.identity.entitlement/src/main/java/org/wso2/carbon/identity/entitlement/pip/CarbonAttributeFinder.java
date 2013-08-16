@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.cache.DecisionInvalidationCache;
 import org.wso2.carbon.identity.entitlement.cache.PIPAttributeCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 
@@ -293,7 +294,7 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 				log.debug("Attribute value cache is cleared for tenant " + tenantId);
 			}
             // clear decision cache
-            EntitlementEngine.getInstance().clearDecisionCache(false);
+            DecisionInvalidationCache.getInstance().invalidateCache();
 		}
 	}
 

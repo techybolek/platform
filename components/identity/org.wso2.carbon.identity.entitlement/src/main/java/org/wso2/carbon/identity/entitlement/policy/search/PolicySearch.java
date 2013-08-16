@@ -44,14 +44,11 @@ public class PolicySearch {
 
     private List<PolicyFinderModule> finderModules = null;
 
-    private EntitlementEngine engine;
-
-    private int pdpDecisionCachingInterval;
+    private boolean cachingEnable;
 
     private PolicySearchCache policySearchCache = null;
 
-    public PolicySearch(EntitlementEngine engine) {
-
+    public PolicySearch(boolean cachingEnable, int cachingInterval) {
         // get registered finder modules
 		Map<PolicyFinderModule, Properties> finderModules = EntitlementServiceComponent.
                                                 getEntitlementConfig().getPolicyFinderModules();
@@ -60,9 +57,11 @@ public class PolicySearch {
             this.finderModules = new ArrayList<PolicyFinderModule>(finderModules.keySet());
         }
 
-        this.engine = engine;
-        this.pdpDecisionCachingInterval = engine.getPdpDecisionCachingInterval();
-        this.policySearchCache = PolicySearchCache.getInstance();
+        this.cachingEnable = cachingEnable;
+        
+        // Note that PolicySearchCache also uses EntitlementEngine.getInstance().getPdpDecisionCacheEnable()
+        // to set cache timeout.
+        this.policySearchCache = new PolicySearchCache(cachingInterval);
     }
 
     /**
@@ -82,20 +81,23 @@ public class PolicySearch {
                                                                         throws EntitlementException {
         String cacheKey = "";
 
-        if(pdpDecisionCachingInterval > 0){
+        if(cachingEnable){
             cacheKey = (subjectId != null  ? subjectId : "")  + (subjectName != null  ? subjectName : "") +
                                     (resourceName != null  ? resourceName : "") +
                                     (action != null ? action : "") + enableChildSearch;
             SearchResult searchResult  = policySearchCache.getFromCache(cacheKey);
 
-            if (searchResult != null
-                    && (searchResult.getCachedTime() + (long) pdpDecisionCachingInterval > Calendar
-                            .getInstance().getTimeInMillis())) {
+            if (searchResult != null) {
                 if (log.isDebugEnabled()) {
                     int tenantId = CarbonContext.getCurrentContext().getTenantId();
                     log.debug("PDP Search Cache Hit for tenant " + tenantId);
                 }
                 return searchResult.getResultSetDTO();
+            } else {
+                if (log.isDebugEnabled()) {
+                    int tenantId = CarbonContext.getCurrentContext().getTenantId();
+                    log.debug("PDP Search Cache Miss for tenant " + tenantId);
+                }
             }
         }
 
@@ -272,9 +274,8 @@ public class PolicySearch {
         resultSetDTO.setEntitledAttributesDTOs(resultSet.
                         toArray(new EntitledAttributesDTO[resultSet.size()]));
 
-        if (pdpDecisionCachingInterval > 0) {
+        if (cachingEnable) {
             SearchResult result = new SearchResult();
-            result.setCachedTime(Calendar.getInstance().getTimeInMillis());
             result.setResultSetDTO(resultSetDTO);
             policySearchCache.addToCache(cacheKey, result);
             if (log.isDebugEnabled()) {
@@ -298,7 +299,7 @@ public class PolicySearch {
 
         String cacheKey = "";
 
-        if(pdpDecisionCachingInterval > 0){
+        if(cachingEnable){
             int hashCode = 0;
             for(AttributeDTO dto : givenAttributes){
                 hashCode = hashCode + (31 * dto.hashCode());
@@ -308,14 +309,15 @@ public class PolicySearch {
 
             SearchResult searchResult  = policySearchCache.getFromCache(cacheKey);
 
-            if (searchResult != null
-                    && (searchResult.getCachedTime() + (long) pdpDecisionCachingInterval > Calendar
-                            .getInstance().getTimeInMillis())) {
+            if (searchResult != null) {
                 if (log.isDebugEnabled()) {
-                    int tenantId = CarbonContext.getCurrentContext().getTenantId();
-                    log.debug("PDP Search Cache Hit for tenant " + tenantId);
+                    log.debug("PDP Search Cache Hit");
                 }
                 return searchResult.getResultSetDTO();
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("PDP Search Cache Miss");
+                }
             }
         }
 
@@ -346,9 +348,8 @@ public class PolicySearch {
                                     toArray(new EntitledAttributesDTO[resultAttributes.size()]));
 
 
-        if (pdpDecisionCachingInterval > 0) {
+        if (cachingEnable) {
             SearchResult searchResult = new SearchResult();
-            searchResult.setCachedTime(Calendar.getInstance().getTimeInMillis());
             searchResult.setResultSetDTO(result);
             policySearchCache.addToCache(cacheKey, searchResult);
             if (log.isDebugEnabled()) {
@@ -513,7 +514,7 @@ public class PolicySearch {
         ResponseCtx responseCtx;
         AbstractRequestCtx requestCtx = EntitlementUtil.createRequestContext(requestAttributes);
 
-        responseCtx = engine.evaluateByContext(requestCtx);
+        responseCtx = EntitlementEngine.getInstance().evaluateByContext(requestCtx);
 
         if (responseCtx != null) {
             Set<AbstractResult> results = responseCtx.getResults();

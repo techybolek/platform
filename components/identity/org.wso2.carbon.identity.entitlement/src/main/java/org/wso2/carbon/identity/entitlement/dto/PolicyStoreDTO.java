@@ -32,6 +32,8 @@ public class PolicyStoreDTO {
 
     private int policyOrder;
 
+    private boolean active;
+
     private AttributeDTO[] attributeDTOs = new AttributeDTO[0];
 
     public String getPolicyId() {
@@ -64,5 +66,13 @@ public class PolicyStoreDTO {
 
     public void setAttributeDTOs(AttributeDTO[] attributeDTOs) {
         this.attributeDTOs = Arrays.copyOf(attributeDTOs, attributeDTOs.length);
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

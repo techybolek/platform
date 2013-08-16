@@ -19,89 +19,43 @@
 
 package org.wso2.carbon.identity.entitlement.cache;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.caching.impl.CachingConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.PDPConstants;
-import org.wso2.carbon.identity.entitlement.pdp.PolicyDecision;
 
 
 /**
  * Decision cache
  */
-public class DecisionCache extends EntitlementBaseCache<IdentityCacheKey, PolicyDecision>{
+public class DecisionCache extends EntitlementBaseCache<IdentityCacheKey, String>{
 
-    private static DecisionCache decisionCache = null;
-    private static final Object lock = new Object();
-
-    private DecisionCache() {
-    	super(PDPConstants.PDP_DECISION_CACHE);
+    public DecisionCache(int timeOut) {
+    	super(CachingConstants.LOCAL_CACHE_PREFIX + PDPConstants.PDP_DECISION_CACHE, timeOut);
     }
 
-    /**
-     * the logger we'll use for all messages
-     */
-    private static Log log = LogFactory.getLog(DecisionCache.class);
-
-    /**
-     * Gets a new instance of EntitlementPolicyClearingCache.
-     *
-     * @return A new instance of EntitlementPolicyClearingCache.
-     */
-    public static DecisionCache getInstance() {
-        if(decisionCache == null){
-            synchronized (lock){
-                if(decisionCache == null){
-                    decisionCache = new DecisionCache();
-                }
-            }
-        }
-        return decisionCache;
-    }
-
-    public void addToCache(String key, PolicyDecision decision){
+    public void addToCache(String key, String decision){
 
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        decisionCache.addToCache(cacheKey, decision);
-        if (log.isDebugEnabled()) {
-            log.debug("Cache entry is added");
-        }
+        addToCache(cacheKey, decision);
     }
 
-    public PolicyDecision getFromCache(String key){
+    public String getFromCache(String key){
 
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
         
         
-        Object entry = decisionCache.getValueFromCache(cacheKey);
+        Object entry = getValueFromCache(cacheKey);
         if(entry != null){
-            if (log.isDebugEnabled()) {
-                log.debug("Cache entry is found");
-            }
-            return (PolicyDecision) entry;
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Cache entry is not found");
-            }
+            return (String) entry;
         }
 
         return null;
     }
 
-    public void removeFromCache(String key){
-
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        decisionCache.clearCacheEntry(cacheKey);
-        if (log.isDebugEnabled()) {
-            log.debug("Cache entry is removed");
-        }
-    }
-
     public void clearCache(){
-        decisionCache.clear();
+        clear();
     }
 
 }

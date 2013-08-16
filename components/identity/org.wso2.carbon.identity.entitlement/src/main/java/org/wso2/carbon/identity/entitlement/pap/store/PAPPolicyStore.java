@@ -152,12 +152,8 @@ public class PAPPolicyStore {
 
         String path = null;
         Resource resource = null;
-        AuthorizationManager authorizationManager = null;
-        boolean newResource = false;
         boolean newPolicy = false;
-        OMElement omElement = null;        
-        RealmService realmService = EntitlementServiceComponent.getRealmservice();
-        String userName = ((UserRegistry)registry).getUserName();
+        OMElement omElement = null;
 
         if (log.isDebugEnabled()) {
             log.debug("Creating or updating entitlement policy");
@@ -171,97 +167,46 @@ public class PAPPolicyStore {
 
         try {
             path = policyPath + policyId;
-            int tenantId = ((UserRegistry)registry).getTenantId();
-            if(realmService != null){
-                authorizationManager = realmService.
-                        getTenantUserRealm(tenantId).getAuthorizationManager();
-                if(authorizationManager != null){
-                    if(authorizationManager.isUserAuthorized(userName,
-                                                          PDPConstants.AUTHORIZATION_PERMISSION,
-                                                          "ui.execute" )){
-                        authorizationManager.authorizeUser(userName,
-                                                           RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                           policyPath,
-                                                           "write");
-                    } else {
-                        log.error("User is not authorize to create or update entitlement policy");
-                        throw new EntitlementException("User is not authorize to create or update entitlement policy");
-                    }
-                } else {
-                    log.error("Error while creating or updating entitlement policy: " +
-                              "Authorization Manager can not be null");
-                    throw new EntitlementException("Error while creating or updating entitlement policy");
-                }
-            } else {
-                log.error("Error while creating or updating entitlement policy: " +
-                          "Realm Service can not be null");
-                throw new EntitlementException("Error while creating or updating entitlement policy");
-            }
 
             if (registry.resourceExists(path)) {
                 resource = registry.get(path);
             } else {
                 resource = registry.newResource();
-                newResource = true;
             }
 
-//            Collection policyCollection;
-//            if(registry.resourceExists(policyPath)){
-//                policyCollection = (Collection) registry.get(policyPath);
-//            } else {
-//                policyCollection = registry.newCollection();
-//            }
+            Collection policyCollection;
+            if(registry.resourceExists(policyPath)){
+                policyCollection = (Collection) registry.get(policyPath);
+            } else {
+                policyCollection = registry.newCollection();
+            }
 
-            if(policy.getNeighborId() != null && policy.getNeighborId().trim().length() > 0){
-                String neighborPath = policyPath + policy.getNeighborId();
-                if (registry.resourceExists(neighborPath)) {
-                    Resource neighborPolicy = registry.get(neighborPath);
-                    String neighborPolicyOrder = neighborPolicy.
-                            getProperty(PDPConstants.POLICY_ORDER);
-                    if(neighborPolicyOrder != null){
-                        policy.setPolicyOrder(Integer.parseInt(neighborPolicyOrder));
-                    }
-                } else {
-                    if(log.isWarnEnabled()){
-                        log.warn("Invalid policy Id as the neighbor policy id");
-                    }
+
+
+            if(policy.getPolicyOrder() > 0){
+                String noOfPolicies = policyCollection.getProperty(PDPConstants.MAX_POLICY_ORDER);
+                if(noOfPolicies != null &&  Integer.parseInt(noOfPolicies) < policy.getPolicyOrder()){
+                    policyCollection.setProperty(PDPConstants.MAX_POLICY_ORDER,
+                                                 Integer.toString(policy.getPolicyOrder()));
+                    registry.put(policyPath, policyCollection);
                 }
-            }
-
-//            if(policy.getPolicyOrder() > 0){
-//                String noOfPolicies = policyCollection.getProperty(PDPConstants.MAX_POLICY_ORDER);
-//                if(noOfPolicies != null &&  Integer.parseInt(noOfPolicies) < policy.getPolicyOrder()){
-//                    policyCollection.setProperty(PDPConstants.MAX_POLICY_ORDER,
-//                                                 Integer.toString(policy.getPolicyOrder()));
-//                    registry.put(policyPath, policyCollection);
-//                } else {
-//                    reOrderPolicy(policyCollection,policy.getPolicyOrder());
-//                }
-//                resource.setProperty(PDPConstants.POLICY_ORDER,
-//                                     Integer.toString(policy.getPolicyOrder()));
-//            } else {
-//                String previousOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
-//                if(previousOrder == null){
-//                    if(policyCollection != null){
-//                        int policyOrder = 1;
-//                        String noOfPolicies = policyCollection.getProperty(PDPConstants.MAX_POLICY_ORDER);
-//                        if(noOfPolicies != null){
-//                            policyOrder = policyOrder + Integer.parseInt(noOfPolicies);
-//                        }
-//                        policyCollection.setProperty(PDPConstants.MAX_POLICY_ORDER,
-//                                                     Integer.toString(policyOrder));
-//                        resource.setProperty(PDPConstants.POLICY_ORDER, Integer.toString(policyOrder));
-//                    }
-//                    registry.put(policyPath, policyCollection);
-//                }
-//            }
-
-            // Cleat authorization after re-ordering of policies
-            if(!newResource){
-                authorizationManager.clearUserAuthorization(userName,
-                                                           RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                           policyPath,
-                                                           "write");                
+                resource.setProperty(PDPConstants.POLICY_ORDER,
+                                     Integer.toString(policy.getPolicyOrder()));
+            } else {
+                String previousOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
+                if(previousOrder == null){
+                    if(policyCollection != null){
+                        int policyOrder = 1;
+                        String noOfPolicies = policyCollection.getProperty(PDPConstants.MAX_POLICY_ORDER);
+                        if(noOfPolicies != null){
+                            policyOrder = policyOrder + Integer.parseInt(noOfPolicies);
+                        }
+                        policyCollection.setProperty(PDPConstants.MAX_POLICY_ORDER,
+                                                     Integer.toString(policyOrder));
+                        resource.setProperty(PDPConstants.POLICY_ORDER, Integer.toString(policyOrder));
+                    }
+                    registry.put(policyPath, policyCollection);
+                }
             }
 
             if(policy.getPolicy() != null && policy.getPolicy().trim().length() > 0){
@@ -363,64 +308,13 @@ public class PAPPolicyStore {
 
             registry.put(path, resource);
 
-            authorizationManager.clearUserAuthorization(userName,
-                                                       RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                       policyPath,
-                                                       "write");
-            authorizationManager.authorizeUser(userName,
-                                               RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                               path , "write");
-            authorizationManager.authorizeUser(userName,
-                                               RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                               path , "delete");
         } catch (RegistryException e) {
             log.error("Error while adding or updating entitlement policy " + policyId+
                     " in policy store", e);
             throw new EntitlementException("Error while adding or updating entitlement policy in policy store");
-        } catch (UserStoreException e) {
-            log.error("Error while adding or updating entitlement policy " + policyId
-                    + " in policy store ", e);
-            throw new EntitlementException("Error while adding or updating entitlement policy in policy store");
         }
     }
 
-    /**
-     * Re-orders the policy property values called policyOrder in all policies
-     * when new policy is added or updated
-     * @param collection Collection that contains all policies
-     * @param orderNo new order number
-     * @throws org.wso2.carbon.identity.entitlement.EntitlementException throws
-     */
-    private void reOrderPolicy(Collection collection, int orderNo)
-            throws EntitlementException {
-
-        try {
-            String[] resources = collection.getChildren();
-            for(int i = 0; i < resources.length; i++){
-                Resource resource = registry.get(resources[i]);
-                String policyOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
-                if(policyOrder != null){
-                    int currentOrder = Integer.parseInt(policyOrder);
-                    if(orderNo <= currentOrder){
-                        currentOrder = currentOrder + 1;
-                        resource.setProperty(PDPConstants.POLICY_ORDER,
-                                             Integer.toString(currentOrder));
-                        registry.put(resources[i], resource);
-                        String maxPolicyOrder = collection.getProperty(PDPConstants.MAX_POLICY_ORDER);
-                        if(maxPolicyOrder != null &&  Integer.parseInt(maxPolicyOrder) < currentOrder){
-                            collection.setProperty(PDPConstants.MAX_POLICY_ORDER,
-                                                         Integer.toString(currentOrder));
-                            registry.put(IdentityRegistryResources.ENTITLEMENT, collection);
-                        }
-                    }
-                }
-            }
-        } catch (RegistryException e) {
-            log.error("Error while re-ordering entitlement policy in PAP policy store", e);
-            throw new EntitlementException("Error while re-ordering entitlement policy in PAP policy store", e);
-        }
-
-    }
 
     /**
      *

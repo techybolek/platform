@@ -85,7 +85,6 @@ public class EntitlementAdminEngine {
 
         this.entitlementDataFinder = new EntitlementDataFinder();
         this.policyPublisher = new PolicyPublisher();
-        this.policyStoreManager = new PolicyStoreManager();
         this.papPolicyStoreManager = new PAPPolicyStoreManager();
         Map<PolicyVersionManager, Properties> versionManagers  = EntitlementServiceComponent.
                 getEntitlementConfig().getPolicyVersionModule();
@@ -108,7 +107,7 @@ public class EntitlementAdminEngine {
                 getEntitlementConfig().getPapStatusDataHandlers();
         papStatusDataHandlers = statusDataHandlers.keySet();
         this.policyPublisher.setPapStatusDataHandlers(papStatusDataHandlers);
-
+        this.policyStoreManager = new PolicyStoreManager(policyDataStore);
     }
 
     /**

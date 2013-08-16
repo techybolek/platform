@@ -126,8 +126,8 @@ public class PolicyPublisher{
      * @param verificationCode verificationCode as String
      * @throws EntitlementException throws if can not be created PolicyPublishExecutor instant
      */
-    public void publishPolicy(String[] policyIds, String version, String action, String[] subscriberIds,
-                                            String verificationCode) throws EntitlementException {
+    public void publishPolicy(String[] policyIds, String version, String action, int order,
+                      String[] subscriberIds, String verificationCode) throws EntitlementException {
 
         boolean toPDP = false;
         
@@ -135,7 +135,7 @@ public class PolicyPublisher{
             toPDP = true;
         }
 
-        PolicyPublishExecutor executor = new PolicyPublishExecutor(policyIds, version, action,
+        PolicyPublishExecutor executor = new PolicyPublishExecutor(policyIds, version, action, order,
                 subscriberIds, this, toPDP, verificationCode);
         executor.setTenantDomain(CarbonContext.getCurrentContext().getTenantDomain());
         executor.setTenantId(CarbonContext.getCurrentContext().getTenantId());
@@ -254,9 +254,9 @@ public class PolicyPublisher{
                 List<String> list = new ArrayList<String>();
                 if(collection.getChildCount() > 0){
                     for(String path : collection.getChildren()){
-                        String id = registry.get(path).getProperty(SUBSCRIBER_ID);
-                        if(id != null){
-                            list.add(id);
+                        Resource childResource = registry.get(path);
+                        if(childResource != null && childResource.getProperty(SUBSCRIBER_ID) != null){
+                            list.add( childResource.getProperty(SUBSCRIBER_ID));
                         }
                     }
                 }

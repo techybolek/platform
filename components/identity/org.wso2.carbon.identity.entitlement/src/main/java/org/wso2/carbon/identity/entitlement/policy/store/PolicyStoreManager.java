@@ -29,6 +29,8 @@ import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
 import org.wso2.carbon.identity.entitlement.policy.version.DefaultPolicyVersionManager;
 import org.wso2.carbon.identity.entitlement.policy.version.PolicyVersionManager;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -40,11 +42,12 @@ import java.util.Properties;
  */
 public class PolicyStoreManager {
 
-    private PolicyStoreManageModule policyStoreStore =  null;
+    private PolicyStoreManageModule policyStoreStore = null;
+    private PolicyDataStore policyDataStore = null;
 
     private static Log log = LogFactory.getLog(PolicyStoreManager.class);
 
-    public PolicyStoreManager() {
+    public PolicyStoreManager(PolicyDataStore policyDataStore) {
         // get policy collection
         Map<PolicyStoreManageModule, Properties> policyCollections = EntitlementServiceComponent.
                                                 getEntitlementConfig().getPolicyStore();
@@ -53,6 +56,7 @@ public class PolicyStoreManager {
         } else {
             policyStoreStore = new RegistryPolicyStoreManageModule();
         }
+        this.policyDataStore = policyDataStore;
     }
 
     public void addPolicy(PolicyDTO policyDTO) throws EntitlementException {
@@ -70,12 +74,50 @@ public class PolicyStoreManager {
         PolicyStoreDTO dto = new PolicyStoreDTO();
         dto.setPolicyId(policyDTO.getPolicyId());
         dto.setPolicy(policyDTO.getPolicy());
+        dto.setActive(policyDTO.isActive());
         dto.setPolicyOrder(policyDTO.getPolicyOrder());
         dto.setAttributeDTOs(policyDTO.getAttributeDTOs());
         policyStoreStore.updatePolicy(dto);
+        policyDataStore.setPolicyData(policyDTO.getPolicyId(), dto);
     }
 
     public void removePolicy(PolicyDTO policyDTO) throws EntitlementException {
         policyStoreStore.deletePolicy(policyDTO.getPolicyId());
+        policyDataStore.removePolicyData(policyDTO.getPolicyId());
     }
+
+    public PolicyDTO getPolicy(String policyId){
+        
+        PolicyDTO policyDTO = new PolicyDTO();
+        policyDTO.setPolicyId(policyId);
+        String policy = policyStoreStore.getPolicy(policyId);
+        PolicyStoreDTO storeDTO = policyDataStore.getPolicyData(policyId);
+        if(policy != null){
+            policyDTO.setPolicy(policy);
+            policyDTO.setActive(storeDTO.isActive());
+            policyDTO.setPolicyOrder(storeDTO.getPolicyOrder());
+        }
+        return policyDTO;        
+    }
+
+    public String[] getPolicyIds(){
+        return policyStoreStore.getPolicyIdentifiers();
+    }
+    
+    public PolicyDTO[] getLightPolicies(){
+
+        List<PolicyDTO> policyDTOs = new ArrayList<PolicyDTO>();
+        String[] policies = policyStoreStore.getPolicyIdentifiers();
+        if(policies != null){
+            for(String policy : policies){
+                PolicyDTO policyDTO = new PolicyDTO();
+                policyDTO.setPolicyId(policy);
+                PolicyStoreDTO storeDTO = policyDataStore.getPolicyData(policy);
+                policyDTO.setActive(storeDTO.isActive());
+                policyDTO.setPolicyOrder(storeDTO.getPolicyOrder());
+                policyDTOs.add(policyDTO);
+            }            
+        }
+        return policyDTOs.toArray(new PolicyDTO[policyDTOs.size()]);
+    }    
 }

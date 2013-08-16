@@ -402,7 +402,7 @@ public class EntitlementUtil {
                         "An Entitlement Policy with the given ID already exists");
             }
 
-            policyDTO.setPromote(promote);
+            policyDTO.setPromote(true);
             policyAdmin.addOrUpdatePolicy(policyDTO);
 
             PAPPolicyStoreReader reader = new PAPPolicyStoreReader(policyStore);

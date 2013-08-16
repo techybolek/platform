@@ -120,8 +120,6 @@ public class PolicyAttributeBuilder {
                 }
                 attributeElementNo ++;
             }
-        } else {
-            return null;
         }
 
         return attributeDTOs.toArray(new AttributeDTO[attributeDTOs.size()]);

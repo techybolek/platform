@@ -19,13 +19,11 @@ package org.wso2.carbon.identity.entitlement.pdp;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.wso2.balana.Balana;
 import org.wso2.balana.ctx.RequestCtxFactory;
@@ -39,7 +37,8 @@ import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.cache.DecisionCache;
-import org.wso2.carbon.identity.entitlement.cache.DecisionClearingCache;
+import org.wso2.carbon.identity.entitlement.cache.DecisionInvalidationCache;
+import org.wso2.carbon.identity.entitlement.cache.EntitlementEngineCache;
 import org.wso2.carbon.identity.entitlement.cache.SimpleDecisionCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyFinder;
@@ -57,6 +56,7 @@ import org.wso2.balana.ctx.ResponseCtx;
 import org.wso2.balana.finder.impl.CurrentEnvModule;
 import org.wso2.balana.finder.impl.SelectorModule;
 import org.wso2.carbon.identity.entitlement.pip.CarbonResourceFinder;
+import org.wso2.carbon.identity.entitlement.policy.search.PolicySearch;
 import org.wso2.carbon.utils.CarbonUtils;
 
 public class EntitlementEngine {
@@ -65,19 +65,20 @@ public class EntitlementEngine {
 	private CarbonAttributeFinder carbonAttributeFinder;
     private CarbonResourceFinder carbonResourceFinder;
     private PolicyFinder carbonPolicyFinder;
+    private PolicySearch policySearch;
 	private PDP pdp;
     private PDP pdpTest;
     private Balana balana;
 	private int tenantId;
-	private static final Object lock = new Object();    
-	private int pdpDecisionCachingInterval = 60000;
-	private static ConcurrentHashMap<String, EntitlementEngine> entitlementEngines = new ConcurrentHashMap<String, EntitlementEngine>();
+	private static final Object lock = new Object();
+	private boolean pdpDecisionCacheEnable;
+	private static EntitlementEngineCache entitlementEngines = EntitlementEngineCache.getInstance();
 
 	private DecisionCache decisionCache = null;
 
     private SimpleDecisionCache simpleDecisionCache = null;
 
-	private DecisionClearingCache decisionClearingCache = null;
+	private DecisionInvalidationCache decisionInvalidationCache = null;
 
 	private static Log log = LogFactory.getLog(EntitlementEngine.class);
 
@@ -90,14 +91,14 @@ public class EntitlementEngine {
 	public static EntitlementEngine getInstance() {
 
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        if (!entitlementEngines.containsKey(Integer.toString(tenantId))) {
+        if (!entitlementEngines.contains(tenantId)) {
             synchronized (lock){
-                if (!entitlementEngines.containsKey(Integer.toString(tenantId))) {
-                    entitlementEngines.put(Integer.toString(tenantId), new EntitlementEngine(tenantId));
+                if (!entitlementEngines.contains(tenantId)) {
+                    entitlementEngines.put(tenantId, new EntitlementEngine(tenantId));
                 }
             }
         }
-        return entitlementEngines.get(Integer.toString(tenantId));
+        return entitlementEngines.get(tenantId);
 	}
 
 	private EntitlementEngine(int tenantId) {
@@ -131,23 +132,29 @@ public class EntitlementEngine {
 
 		this.tenantId = tenantId;
 
-        //init caches
-        decisionClearingCache = DecisionClearingCache.getInstance();
-        decisionCache = DecisionCache.getInstance();
-        simpleDecisionCache = SimpleDecisionCache.getInstance();
-
         Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
-		String cacheEnable = properties.getProperty(PDPConstants.DECISION_CACHING);
-		if (cacheEnable != null && "true".equals(cacheEnable.trim())) {
+        pdpDecisionCacheEnable = Boolean.parseBoolean(properties.getProperty(PDPConstants.DECISION_CACHING));
+
+        int pdpDecisionCachingInterval = -1;
+		if (pdpDecisionCacheEnable) {
 			String cacheInterval = properties.getProperty(PDPConstants.DECISION_CACHING_INTERVAL);
 			if (cacheInterval != null) {
-				pdpDecisionCachingInterval = Integer.parseInt(cacheInterval.trim());
+                try{
+                    pdpDecisionCachingInterval = Integer.parseInt(cacheInterval.trim());
+                } catch (Exception e){
+                    //ignore
+                }
 			}
-		} else {
-			pdpDecisionCachingInterval = -1;
 		}
-        // adding init value to cache
-        decisionClearingCache.addToCache(1);
+
+        //init caches
+        decisionInvalidationCache = DecisionInvalidationCache.getInstance();
+        decisionCache = new DecisionCache(pdpDecisionCachingInterval);
+        simpleDecisionCache = new SimpleDecisionCache(pdpDecisionCachingInterval);
+
+        // policy search
+
+        policySearch = new PolicySearch(pdpDecisionCacheEnable, pdpDecisionCachingInterval);
 
         // Finally, initialize
         if(isPAP){
@@ -283,16 +290,15 @@ public class EntitlementEngine {
     public String evaluate(String subject, String resource, String action, String environment)
             throws Exception {
 
-        if(log.isDebugEnabled()){
-            log.debug("XACML Request : " + EntitlementUtil.
-                    createSimpleXACMLRequest(subject, resource, action));
-        }
-
         String response;
         String request =  (subject != null  ? subject : "")  + (resource != null  ? resource : "") +
                             (action != null  ? action : "") + (environment != null  ? environment : "");
 
         if ((response = getFromCache(request, true)) != null) {
+            if(log.isDebugEnabled()){
+                log.debug("XACML Request : " + EntitlementUtil.
+                        createSimpleXACMLRequest(subject, resource, action));
+            }
             if(log.isDebugEnabled()){
                 log.debug("XACML Response : " + response);
             }
@@ -362,19 +368,13 @@ public class EntitlementEngine {
      */
     private String getFromCache(String  request, boolean simpleCache) {
 
-		if (pdpDecisionCachingInterval > 0) {
+		if (pdpDecisionCacheEnable) {
 
-            PolicyDecision decision;
+            String decision;
 
-			int hashCode = decisionClearingCache.getFromCache();
-
-            if (hashCode == 0) {
-                clearDecisionCache(false);
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalidation cache message is received. " +
-                                            "Decision Cache is cleared for tenant " + tenantId);
-                }
-                return null;
+            if (decisionInvalidationCache.isInvalidate()) {
+                decisionCache.clearCache();
+                simpleDecisionCache.clearCache();
             }
 
             if(simpleCache){
@@ -382,29 +382,11 @@ public class EntitlementEngine {
             } else {
                 decision = decisionCache.getFromCache(request);
             }
-
-			if (decision != null
-					&& (decision.getCachedTime() + (long) pdpDecisionCachingInterval > Calendar
-							.getInstance().getTimeInMillis())) {
-				if (log.isDebugEnabled()) {
-					log.debug("PDP Decision Cache Hit for tenant " + tenantId);
-				}
-				return decision.getResponse();
-			} else {
-				if (log.isDebugEnabled()) {
-					log.debug("PDP Decision Cache Miss for tenant " + tenantId);
-				}
-                if(simpleCache){
-                    simpleDecisionCache.removeFromCache(request);
-                } else {
-				    decisionCache.removeFromCache(request);
-                }
-
-				return null;
-			}
+            return decision;
 		}
+
 		if (log.isDebugEnabled()) {
-			log.debug("PDP Decision Caching Disabled");
+			log.debug("PDP Decision Caching is disabled");
 		}
 		return null;
 	}
@@ -416,42 +398,17 @@ public class EntitlementEngine {
      * @param simpleCache whether using simple cache or not
      */
 	private void addToCache(String request, String response, boolean simpleCache) {
-		if (pdpDecisionCachingInterval > 0) {
-			PolicyDecision decision = new PolicyDecision();
-			decision.setCachedTime(Calendar.getInstance().getTimeInMillis());
-			decision.setResponse(response);
+		if (pdpDecisionCacheEnable) {
             if(simpleCache){
-                simpleDecisionCache.addToCache(request, decision);
+                simpleDecisionCache.addToCache(request, response);
             } else {
-			    decisionCache.addToCache(request, decision);
+			    decisionCache.addToCache(request, response);
             }
-
-			if (log.isDebugEnabled()) {
-				log.debug("PDP Decision Cache Updated for tenantId " + tenantId);
-			}
 		} else {
 			if (log.isDebugEnabled()) {
-				log.debug("PDP Decision Caching Disabled");
+				log.debug("PDP Decision Caching is disabled");
 			}
 		}
-	}
-
-	/**
-	 * Clears the decision cache.
-     * @param updateAllNodes whether to propagate the clearing of the cache to other nodes
-     */
-	public void clearDecisionCache(boolean updateAllNodes) {
-
-		decisionCache.clearCache();
-        simpleDecisionCache.clearCache();
-        decisionClearingCache.addToCache(1);
-
-        if(updateAllNodes){
-            decisionClearingCache.invalidateCache();
-            if (log.isDebugEnabled()) {
-                log.debug("Invalidation decision cache of is called for tenant " + tenantId);
-            }
-        }
 	}
 
     /**
@@ -489,7 +446,13 @@ public class EntitlementEngine {
         balana.getPdpConfig().getResourceFinder().setModules(resourceModuleList);
     }
 
-    public int getPdpDecisionCachingInterval() {
-        return pdpDecisionCachingInterval;
+    /**
+     * Returns instance of policy search
+     *
+     * @return   <code>PolicySearch</code>
+     */
+    public PolicySearch getPolicySearch() {
+        return policySearch;
     }
+
 }

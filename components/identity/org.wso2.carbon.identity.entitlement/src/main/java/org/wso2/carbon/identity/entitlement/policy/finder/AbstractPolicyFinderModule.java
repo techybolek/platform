@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.identity.entitlement.policy.finder;
 
-import org.wso2.carbon.identity.entitlement.cache.DecisionClearingCache;
-import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
+import org.wso2.carbon.identity.entitlement.cache.DecisionInvalidationCache;
+import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyInvalidationCache;
 import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
 
 import java.util.*;
@@ -35,8 +35,8 @@ public abstract class AbstractPolicyFinderModule implements PolicyFinderModule {
      * This method must be called by the module when its policies are updated
      */
     public static void invalidateCache() {
-        DecisionClearingCache.getInstance().invalidateCache();
-        EntitlementPolicyClearingCache.getInstance().invalidateCache();
+        DecisionInvalidationCache.getInstance().invalidateCache();
+        EntitlementPolicyInvalidationCache.getInstance().invalidateCache();
     }
 
     @Override

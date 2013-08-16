@@ -162,40 +162,49 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * @param policyTypeFilter policy type to filter
 	 * @param policySearchString policy search String
 	 * @param pageNumber page number
-	 * @return paginated and filtered policy set
+	 * @param isPDPPolicy whether this is a PDP policy or PAP policy
+     * @return paginated and filtered policy set
 	 * @throws org.wso2.carbon.identity.entitlement.EntitlementException throws
 	 */
 	public PaginatedPolicySetDTO getAllPolicies(String policyTypeFilter, String policySearchString,
-			int pageNumber) throws EntitlementException {
+			int pageNumber, boolean isPDPPolicy) throws EntitlementException {
 
 		List<PolicyDTO> policyDTOList = new ArrayList<PolicyDTO>();
-		PolicyDTO[] policyDTOs = EntitlementAdminEngine.getInstance().
-                                                getPapPolicyStoreManager().getAllLightPolicyDTOs();
+		PolicyDTO[] policyDTOs = null;
 
+        if(isPDPPolicy){
+            policyDTOs = EntitlementAdminEngine.
+                    getInstance().getPolicyStoreManager().getLightPolicies();
+        } else {
+            policyDTOs = EntitlementAdminEngine.getInstance().
+                    getPapPolicyStoreManager().getAllLightPolicyDTOs();
+        }
 		for (PolicyDTO policyDTO : policyDTOs) {
 			boolean useAttributeFiler = false;
 			// Filter out policies based on policy type
-			if (!policyTypeFilter.equals("ALL")
+			if (!policyTypeFilter.equals(EntitlementConstants.PolicyType.POLICY_ALL)
 					&& (!policyTypeFilter.equals(policyDTO.getPolicyType()) &&
-                    !("Active".equals(policyTypeFilter) && policyDTO.isActive()) &&
-                    !("Promoted".equals(policyTypeFilter) && 
-                            policyDTO.isPromote()))) {
+                    !(EntitlementConstants.PolicyType.POLICY_ENABLED.equals(policyTypeFilter) && policyDTO.isActive()) &&
+                    !(EntitlementConstants.PolicyType.POLICY_DISABLED.equals(policyTypeFilter) && !policyDTO.isActive()))) {
 				continue;
 			}
 
             if(policySearchString != null && policySearchString.trim().length() > 0){
+                
                 // Filter out policies based on attribute value
                 PolicyDTO metaDataPolicyDTO = EntitlementAdminEngine.getInstance().
                         getPapPolicyStoreManager().getMetaDataPolicy(policyDTO.getPolicyId());
                 AttributeDTO[] attributeDTOs = metaDataPolicyDTO.getAttributeDTOs();
-                for (AttributeDTO attributeDTO : attributeDTOs) {
-                    if (policySearchString.equals(attributeDTO.getAttributeValue())) {
-                        useAttributeFiler = true;
-                        break;
+                if(attributeDTOs != null){
+                    for (AttributeDTO attributeDTO : attributeDTOs) {
+                        if (policySearchString.equals(attributeDTO.getAttributeValue())) {
+                            useAttributeFiler = true;
+                            break;
+                        }
                     }
                 }
 
-                if (!useAttributeFiler) {
+                if (!useAttributeFiler) {   // TODO with regexp
                     // Filter out policies based on policy Search String
                     if ( policySearchString.trim().length() > 0) {
                         if (!policyDTO.getPolicyId().toLowerCase().contains(policySearchString.toLowerCase())) {
@@ -216,24 +225,29 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * Gets policy for given policy id
 	 * 
 	 * @param policyId policy id
-	 * @return returns policy
-	 * @throws org.wso2.carbon.identity.entitlement.EntitlementException throws
+	 * @param isPDPPolicy whether policy is PDP policy or PAP policy
+     * @return returns policy
+	 * @throws EntitlementException throws
 	 */
-	public PolicyDTO getPolicy(String policyId) throws EntitlementException {
+	public PolicyDTO getPolicy(String policyId, boolean isPDPPolicy) throws EntitlementException {
 
         PolicyDTO policyDTO = null;
 
-        try{
+        if(isPDPPolicy){
             policyDTO = EntitlementAdminEngine.getInstance().
-                                getPapPolicyStoreManager().getPolicy(policyId);
-        } catch (EntitlementException e){
-            policyDTO = new PolicyDTO();
-            policyDTO.setPolicy(policyId);
-            handleStatus(EntitlementConstants.StatusTypes.GET_POLICY, policyDTO, false, e.getMessage());
-            throw e;
+                    getPolicyStoreManager().getPolicy(policyId);
+        } else {
+            try{
+                policyDTO = EntitlementAdminEngine.getInstance().
+                        getPapPolicyStoreManager().getPolicy(policyId);
+            } catch (EntitlementException e){
+                policyDTO = new PolicyDTO();
+                policyDTO.setPolicy(policyId);
+                handleStatus(EntitlementConstants.StatusTypes.GET_POLICY, policyDTO, false, e.getMessage());
+                throw e;
+            }
+            handleStatus(EntitlementConstants.StatusTypes.GET_POLICY, policyDTO, true, null);
         }
-
-        handleStatus(EntitlementConstants.StatusTypes.GET_POLICY, policyDTO, true, null);
 
         return policyDTO;
 	}
@@ -279,34 +293,23 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 
 	}
 
-	/**
-	 * Gets light weight policy DTO with attribute Meta data for given policy id
-	 *
-	 * @param policyId policy id
-	 * @return returns policy
-	 * @throws org.wso2.carbon.identity.entitlement.EntitlementException throws   // TODO
-	 */
-//	public PolicyDTO getMetaDataPolicy(String policyId) throws EntitlementException {
-//		PAPPolicyStoreReader policyReader = null;
-//        EntitlementEngine.getInstance();
-//		policyReader = new PAPPolicyStoreReader(new PAPPolicyStore());
-//		return policyReader.readMetaDataPolicyDTO(policyId);
-//	}
 
 	/**
 	 * Removes policy for given policy object
-	 * 
-	 * @param policyId policy id
+	 *
 	 * @throws EntitlementException throws
 	 */
-	public void removePolicy(String policyId) throws EntitlementException {
+	public void removePolicy(String policyId, boolean dePromote) throws EntitlementException {
 
+        if(policyId == null){
+            throw new EntitlementException("Entitlement PolicyId can not be null.");        
+        }
 		PAPPolicyStoreManager policyAdmin = EntitlementAdminEngine.getInstance().getPapPolicyStoreManager();
         PolicyDTO oldPolicy = null;
 
         try{
             try{
-                oldPolicy = getPolicy(policyId);
+                oldPolicy = getPolicy(policyId, false);
             } catch (Exception e){
                 // exception is ignore. as unwanted details are throws
             }
@@ -322,6 +325,12 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
             throw e;
         }
         handleStatus(EntitlementConstants.StatusTypes.DELETE_POLICY, oldPolicy, true, null);
+
+        
+        if(dePromote){
+            publishToPDP(new String[] {policyId}, null,
+                    EntitlementConstants.PolicyPublish.ACTION_DELETE);            
+        }
 	}
 
 	/**
@@ -358,7 +367,6 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
      * @throws EntitlementException throws, if fails
      */
     public String[] getSubscriberIds(String searchString) throws EntitlementException {
-
         PolicyPublisher publisher = EntitlementAdminEngine.getInstance().getPolicyPublisher();
         String[] ids = publisher.retrieveSubscriberIds();
         if(ids != null){
@@ -415,7 +423,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
      * @throws EntitlementException throws, if fails
      */
     public void publishPolicies(String[] policyIds, String version,
-                                String action, String[] subscriberIds) throws EntitlementException {
+                    String action, int order, String[] subscriberIds) throws EntitlementException {
 
         PolicyPublisher publisher = EntitlementAdminEngine.getInstance().getPolicyPublisher();
         if(policyIds == null || policyIds.length < 1){
@@ -433,7 +441,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
             throw new EntitlementException("There are no subscribers to publish");
         }
 
-        publisher.publishPolicy(policyIds, version, action, subscriberIds, null);
+        publisher.publishPolicy(policyIds, version, action, order, subscriberIds, null);
     }
 
     /**
@@ -445,7 +453,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
     public void publish(String verificationCode)  throws EntitlementException {
 
         PolicyPublisher publisher = EntitlementAdminEngine.getInstance().getPolicyPublisher();
-        publisher.publishPolicy(null, null, null, null, verificationCode);
+        publisher.publishPolicy(null, null, null, 0, null, verificationCode);
         
     }
 
@@ -454,11 +462,25 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
      * @param policyIds
      * @throws EntitlementException
      */
-    public void publishToPDP(String[] policyIds, String version, String action) throws EntitlementException {
+    private void publishToPDP(String[] policyIds, String version,
+                                                    String action) throws EntitlementException {
 
         PolicyPublisher publisher = EntitlementAdminEngine.getInstance().getPolicyPublisher();
         String[] subscribers = new String[]{EntitlementConstants.PDP_SUBSCRIBER_ID};
-        publisher.publishPolicy(policyIds, version, action, subscribers, null);
+        publisher.publishPolicy(policyIds, version, action, 0, subscribers, null);
+    }
+
+    /**
+     *
+     * @param policyIds
+     * @throws EntitlementException
+     */
+    public void publishToPDP(String[] policyIds, String version, String action,
+                              int order) throws EntitlementException {
+
+        PolicyPublisher publisher = EntitlementAdminEngine.getInstance().getPolicyPublisher();
+        String[] subscribers = new String[]{EntitlementConstants.PDP_SUBSCRIBER_ID};
+        publisher.publishPolicy(policyIds, version, action, order, subscribers, null);
     }
 
     /**
@@ -557,6 +579,38 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
         
     }
 
+    public void orderPolicy(String policyId, int newOrder) throws EntitlementException {
+
+        PolicyDTO policyDTO = new PolicyDTO();
+        policyDTO.setPolicyId(policyId);
+        policyDTO.setPolicyOrder(newOrder);
+        EntitlementAdminEngine.getInstance().getPapPolicyStoreManager().addOrUpdatePolicy(policyDTO);
+        publishToPDP(new String[] {policyDTO.getPolicyId()}, null,
+                EntitlementConstants.PolicyPublish.ACTION_ORDER, newOrder);
+    }
+
+    public void enableDisablePolicy(String policyId, boolean enable) throws EntitlementException {
+
+        PolicyDTO policyDTO = new PolicyDTO();
+        policyDTO.setPolicyId(policyId);
+        policyDTO.setActive(enable);
+        EntitlementAdminEngine.getInstance().getPapPolicyStoreManager().addOrUpdatePolicy(policyDTO);
+
+        if(enable){
+            publishToPDP(new String[] {policyDTO.getPolicyId()}, null,
+                    EntitlementConstants.PolicyPublish.ACTION_ENABLE);
+        } else {
+            publishToPDP(new String[] {policyDTO.getPolicyId()}, null,
+                    EntitlementConstants.PolicyPublish.ACTION_DISABLE);
+        }
+    }
+
+    public void dePromotePolicy(String policyId) throws EntitlementException {
+
+        publishToPDP(new String[] {policyId}, null,
+                EntitlementConstants.PolicyPublish.ACTION_DELETE);
+
+    }
 
     /**
      * This method persists a XACML policy
@@ -578,16 +632,15 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
         if(isAdd){
             operation = EntitlementConstants.StatusTypes.ADD_POLICY;
         }
+        if(policyDTO == null ){
+            throw new EntitlementException("Entitlement Policy can not be null.");
+        }
+
+        if(isAdd && policyDTO.getPolicy() == null){
+            throw new EntitlementException("Entitlement Policy can not be null.");
+        }
 
         try{
-            if(policyDTO == null ){
-                throw new EntitlementException("Entitlement Policy can not be null.");
-            }
-
-            if(isAdd && policyDTO.getPolicy() == null){
-                throw new EntitlementException("Entitlement Policy can not be null.");
-            }
-
             policy = policyDTO.getPolicy();
             if(policy != null){
                 policyDTO.setPolicy(policy.replaceAll(">\\s+<", "><"));
@@ -604,7 +657,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 
                     if(isAdd){
                         try{
-                            if (getPolicy(policyId) != null) {
+                            if (getPolicy(policyId, false) != null) {
                                 throw new EntitlementException(
                                         "An Entitlement Policy with the given Id already exists");
                             }
@@ -621,7 +674,6 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
                 } catch (EntitlementException e){
                     log.error("Policy versioning is not supported", e);
                 }
-
             }
             policyAdmin.addOrUpdatePolicy(policyDTO);
         } catch (EntitlementException e){
@@ -631,14 +683,15 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 
         handleStatus(operation, policyDTO, true, null);
 
+
         // publish policy to PDP directly
         if(policyDTO.isPromote()){
             if(isAdd){
                 publishToPDP(new String[] {policyDTO.getPolicyId()}, null,
-                        EntitlementConstants.PolicyPublish.ACTION_CREATE);
+                        EntitlementConstants.PolicyPublish.ACTION_CREATE, policyDTO.getPolicyOrder());
             } else {
                 publishToPDP(new String[] {policyDTO.getPolicyId()}, null,
-                        EntitlementConstants.PolicyPublish.ACTION_UPDATE);
+                        EntitlementConstants.PolicyPublish.ACTION_UPDATE, policyDTO.getPolicyOrder());
             }
         }
     }

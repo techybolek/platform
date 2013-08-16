@@ -38,15 +38,9 @@ public class PolicyDTO {
 
     private String[] policyEditorData = new String[0];
 
-    private boolean policyEditable;
-
-    private boolean policyCanDelete;
-
     private int policyOrder;
 
     private String version;
-
-    private String neighborId;    
 
     private AttributeDTO[] attributeDTOs = new AttributeDTO[0];
 
@@ -114,36 +108,12 @@ public class PolicyDTO {
         this.attributeDTOs = Arrays.copyOf(attributeDTOs, attributeDTOs.length);
     }
 
-    public boolean isPolicyEditable() {
-        return policyEditable;
-    }
-
-    public void setPolicyEditable(boolean policyEditable) {
-        this.policyEditable = policyEditable;
-    }
-
-    public boolean isPolicyCanDelete() {
-        return policyCanDelete;
-    }
-
-    public void setPolicyCanDelete(boolean policyCanDelete) {
-        this.policyCanDelete = policyCanDelete;
-    }
-
     public int getPolicyOrder() {
         return policyOrder;
     }
 
     public void setPolicyOrder(int policyOrder) {
         this.policyOrder = policyOrder;
-    }
-
-    public String getNeighborId() {
-        return neighborId;
-    }
-
-    public void setNeighborId(String neighborId) {
-        this.neighborId = neighborId;
     }
 
     public String[] getPolicySetIdReferences() {
@@ -162,14 +132,6 @@ public class PolicyDTO {
         this.policyIdReferences = Arrays.copyOf(policyIdReferences, policyIdReferences.length);
     }
 
-    public boolean isPromote() {
-        return promote;
-    }
-
-    public void setPromote(boolean promote) {
-        this.promote = promote;
-    }
-
     public String getVersion() {
         return version;
     }
@@ -185,6 +147,14 @@ public class PolicyDTO {
 
     public void setPolicyStatusHolders(StatusHolder[] policyStatusHolders) {
         this.policyStatusHolders = Arrays.copyOf(policyStatusHolders, policyStatusHolders.length);
+    }
+
+    public boolean isPromote() {
+        return promote;
+    }
+
+    public void setPromote(boolean promote) {
+        this.promote = promote;
     }
 
     public void addPolicyStatusHolder(List<StatusHolder> publishStatusHolders)  {

@@ -44,9 +44,9 @@ public class PIPAbstractAttributeCache {
     private static Log log = LogFactory.getLog(PIPAbstractAttributeCache.class);
 
     /**
-     * Gets a new instance of EntitlementPolicyClearingCache.
+     * Gets a new instance of EntitlementPolicyInvalidationCache.
      *
-     * @return A new instance of EntitlementPolicyClearingCache.
+     * @return A new instance of EntitlementPolicyInvalidationCache.
      */
     public static PIPAbstractAttributeCache getInstance() {
         if(pipAttributeCache == null){
