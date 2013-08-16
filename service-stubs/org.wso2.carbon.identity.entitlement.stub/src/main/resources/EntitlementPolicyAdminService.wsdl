@@ -1,28 +1,28 @@
 
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://entitlement.identity.carbon.wso2.org" xmlns:ax2268="http://entitlement.identity.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax2270="http://dto.entitlement.identity.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://entitlement.identity.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://entitlement.identity.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax2272="http://entitlement.identity.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:ax2274="http://dto.entitlement.identity.carbon.wso2.org/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://entitlement.identity.carbon.wso2.org">
     <wsdl:documentation>EntitlementPolicyAdminService</wsdl:documentation>
     <wsdl:types>
-        <xs:schema xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2271="http://dto.entitlement.identity.carbon.wso2.org/xsd" xmlns:ax2269="http://entitlement.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+        <xs:schema xmlns:ax2273="http://entitlement.identity.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2275="http://dto.entitlement.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
             <xs:import namespace="http://entitlement.identity.carbon.wso2.org/xsd"></xs:import>
             <xs:import namespace="http://dto.entitlement.identity.carbon.wso2.org/xsd"></xs:import>
             <xs:element name="EntitlementPolicyAdminServiceEntitlementException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="EntitlementException" nillable="true" type="ax2268:EntitlementException"></xs:element>
+                        <xs:element minOccurs="0" name="EntitlementException" nillable="true" type="ax2272:EntitlementException"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="updateSubscriber">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="holder" nillable="true" type="ax2270:PublisherDataHolder"></xs:element>
+                        <xs:element minOccurs="0" name="holder" nillable="true" type="ax2274:PublisherDataHolder"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="updatePolicy">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="policyDTO" nillable="true" type="ax2270:PolicyDTO"></xs:element>
+                        <xs:element minOccurs="0" name="policyDTO" nillable="true" type="ax2274:PolicyDTO"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -38,6 +38,7 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="policyId" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="dePromote" type="xs:boolean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -47,6 +48,7 @@
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="policyIds" nillable="true" type="xs:string"></xs:element>
                         <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
                         <xs:element minOccurs="0" name="action" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="order" type="xs:int"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -56,6 +58,7 @@
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="policyIds" nillable="true" type="xs:string"></xs:element>
                         <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
                         <xs:element minOccurs="0" name="action" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="order" type="xs:int"></xs:element>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="subscriberIds" nillable="true" type="xs:string"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
@@ -64,6 +67,14 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="verificationCode" nillable="true" type="xs:string"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="orderPolicy">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="policyId" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="newOrder" type="xs:int"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -98,7 +109,7 @@
             <xs:element name="getSubscriberResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2270:PublisherDataHolder"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2274:PublisherDataHolder"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -116,7 +127,7 @@
             <xs:element name="getStatusDataResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2270:PaginatedStatusHolder"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2274:PaginatedStatusHolder"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -128,7 +139,7 @@
             <xs:element name="getPublisherModuleDataResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2270:PublisherDataHolder"></xs:element>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2274:PublisherDataHolder"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -157,7 +168,7 @@
             <xs:element name="getPolicyByVersionResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2270:PolicyDTO"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2274:PolicyDTO"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -165,13 +176,14 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="policyId" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="isPDPPolicy" type="xs:boolean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getPolicyResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2270:PolicyDTO"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2274:PolicyDTO"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -185,7 +197,7 @@
             <xs:element name="getLightPolicyResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2270:PolicyDTO"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2274:PolicyDTO"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -197,7 +209,7 @@
             <xs:element name="getEntitlementDataModulesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2270:EntitlementFinderDataHolder"></xs:element>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2274:EntitlementFinderDataHolder"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -215,7 +227,7 @@
             <xs:element name="getEntitlementDataResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2270:EntitlementTreeNodeDTO"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2274:EntitlementTreeNodeDTO"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -239,13 +251,22 @@
                         <xs:element minOccurs="0" name="policyTypeFilter" nillable="true" type="xs:string"></xs:element>
                         <xs:element minOccurs="0" name="policySearchString" nillable="true" type="xs:string"></xs:element>
                         <xs:element minOccurs="0" name="pageNumber" type="xs:int"></xs:element>
+                        <xs:element minOccurs="0" name="isPDPPolicy" type="xs:boolean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getAllPoliciesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2270:PaginatedPolicySetDTO"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2274:PaginatedPolicySetDTO"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="enableDisablePolicy">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="policyId" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="enable" type="xs:boolean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -256,24 +277,31 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="dePromotePolicy">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="policyId" nillable="true" type="xs:string"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="addSubscriber">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="holder" nillable="true" type="ax2270:PublisherDataHolder"></xs:element>
+                        <xs:element minOccurs="0" name="holder" nillable="true" type="ax2274:PublisherDataHolder"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="addPolicy">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="policyDTO" nillable="true" type="ax2270:PolicyDTO"></xs:element>
+                        <xs:element minOccurs="0" name="policyDTO" nillable="true" type="ax2274:PolicyDTO"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="addPolicies">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="policies" nillable="true" type="ax2270:PolicyDTO"></xs:element>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="policies" nillable="true" type="ax2274:PolicyDTO"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -281,10 +309,10 @@
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.entitlement.identity.carbon.wso2.org/xsd">
             <xs:complexType name="PublisherDataHolder">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="latestStatus" nillable="true" type="ax2270:StatusHolder"></xs:element>
+                    <xs:element minOccurs="0" name="latestStatus" nillable="true" type="ax2274:StatusHolder"></xs:element>
                     <xs:element minOccurs="0" name="moduleName" nillable="true" type="xs:string"></xs:element>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="propertyDTOs" nillable="true" type="ax2270:PublisherPropertyDTO"></xs:element>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="statusHolders" nillable="true" type="ax2270:StatusHolder"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="propertyDTOs" nillable="true" type="ax2274:PublisherPropertyDTO"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="statusHolders" nillable="true" type="ax2274:StatusHolder"></xs:element>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="StatusHolder">
@@ -314,18 +342,15 @@
             <xs:complexType name="PolicyDTO">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="active" type="xs:boolean"></xs:element>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="attributeDTOs" nillable="true" type="ax2270:AttributeDTO"></xs:element>
-                    <xs:element minOccurs="0" name="neighborId" nillable="true" type="xs:string"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="attributeDTOs" nillable="true" type="ax2274:AttributeDTO"></xs:element>
                     <xs:element minOccurs="0" name="policy" nillable="true" type="xs:string"></xs:element>
-                    <xs:element minOccurs="0" name="policyCanDelete" type="xs:boolean"></xs:element>
-                    <xs:element minOccurs="0" name="policyEditable" type="xs:boolean"></xs:element>
                     <xs:element minOccurs="0" name="policyEditor" nillable="true" type="xs:string"></xs:element>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="policyEditorData" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="policyId" nillable="true" type="xs:string"></xs:element>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="policyIdReferences" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="policyOrder" type="xs:int"></xs:element>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="policySetIdReferences" nillable="true" type="xs:string"></xs:element>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="policyStatusHolders" nillable="true" type="ax2270:StatusHolder"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="policyStatusHolders" nillable="true" type="ax2274:StatusHolder"></xs:element>
                     <xs:element minOccurs="0" name="policyType" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="promote" type="xs:boolean"></xs:element>
                     <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
@@ -342,7 +367,7 @@
             <xs:complexType name="PaginatedStatusHolder">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="numberOfPages" type="xs:int"></xs:element>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="statusHolders" nillable="true" type="ax2270:StatusHolder"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="statusHolders" nillable="true" type="ax2274:StatusHolder"></xs:element>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="EntitlementFinderDataHolder">
@@ -359,14 +384,14 @@
             </xs:complexType>
             <xs:complexType name="EntitlementTreeNodeDTO">
                 <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="childNodes" nillable="true" type="ax2270:EntitlementTreeNodeDTO"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="childNodes" nillable="true" type="ax2274:EntitlementTreeNodeDTO"></xs:element>
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"></xs:element>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="PaginatedPolicySetDTO">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="numberOfPages" type="xs:int"></xs:element>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="policySet" nillable="true" type="ax2270:PolicyDTO"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="policySet" nillable="true" type="ax2274:PolicyDTO"></xs:element>
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>
@@ -402,8 +427,14 @@
     <wsdl:message name="getSubscriberIdsResponse">
         <wsdl:part name="parameters" element="ns1:getSubscriberIdsResponse"></wsdl:part>
     </wsdl:message>
+    <wsdl:message name="enableDisablePolicyRequest">
+        <wsdl:part name="parameters" element="ns1:enableDisablePolicy"></wsdl:part>
+    </wsdl:message>
     <wsdl:message name="addPolicyRequest">
         <wsdl:part name="parameters" element="ns1:addPolicy"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="dePromotePolicyRequest">
+        <wsdl:part name="parameters" element="ns1:dePromotePolicy"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="getAllPolicyIdsRequest">
         <wsdl:part name="parameters" element="ns1:getAllPolicyIds"></wsdl:part>
@@ -425,6 +456,9 @@
     </wsdl:message>
     <wsdl:message name="addPoliciesRequest">
         <wsdl:part name="parameters" element="ns1:addPolicies"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="orderPolicyRequest">
+        <wsdl:part name="parameters" element="ns1:orderPolicy"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="getPolicyVersionsRequest">
         <wsdl:part name="parameters" element="ns1:getPolicyVersions"></wsdl:part>
@@ -511,9 +545,17 @@
             <wsdl:output message="tns:getSubscriberIdsResponse" wsaw:Action="urn:getSubscriberIdsResponse"></wsdl:output>
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceEntitlementException" name="EntitlementPolicyAdminServiceEntitlementException" wsaw:Action="urn:getSubscriberIdsEntitlementPolicyAdminServiceEntitlementException"></wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="enableDisablePolicy">
+            <wsdl:input message="tns:enableDisablePolicyRequest" wsaw:Action="urn:enableDisablePolicy"></wsdl:input>
+            <wsdl:fault message="tns:EntitlementPolicyAdminServiceEntitlementException" name="EntitlementPolicyAdminServiceEntitlementException" wsaw:Action="urn:enableDisablePolicyEntitlementPolicyAdminServiceEntitlementException"></wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="addPolicy">
             <wsdl:input message="tns:addPolicyRequest" wsaw:Action="urn:addPolicy"></wsdl:input>
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceEntitlementException" name="EntitlementPolicyAdminServiceEntitlementException" wsaw:Action="urn:addPolicyEntitlementPolicyAdminServiceEntitlementException"></wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="dePromotePolicy">
+            <wsdl:input message="tns:dePromotePolicyRequest" wsaw:Action="urn:dePromotePolicy"></wsdl:input>
+            <wsdl:fault message="tns:EntitlementPolicyAdminServiceEntitlementException" name="EntitlementPolicyAdminServiceEntitlementException" wsaw:Action="urn:dePromotePolicyEntitlementPolicyAdminServiceEntitlementException"></wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getAllPolicyIds">
             <wsdl:input message="tns:getAllPolicyIdsRequest" wsaw:Action="urn:getAllPolicyIds"></wsdl:input>
@@ -533,6 +575,10 @@
         <wsdl:operation name="addPolicies">
             <wsdl:input message="tns:addPoliciesRequest" wsaw:Action="urn:addPolicies"></wsdl:input>
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceEntitlementException" name="EntitlementPolicyAdminServiceEntitlementException" wsaw:Action="urn:addPoliciesEntitlementPolicyAdminServiceEntitlementException"></wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="orderPolicy">
+            <wsdl:input message="tns:orderPolicyRequest" wsaw:Action="urn:orderPolicy"></wsdl:input>
+            <wsdl:fault message="tns:EntitlementPolicyAdminServiceEntitlementException" name="EntitlementPolicyAdminServiceEntitlementException" wsaw:Action="urn:orderPolicyEntitlementPolicyAdminServiceEntitlementException"></wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getPolicyVersions">
             <wsdl:input message="tns:getPolicyVersionsRequest" wsaw:Action="urn:getPolicyVersions"></wsdl:input>
@@ -646,6 +692,24 @@
                 <soap:fault use="literal" name="EntitlementPolicyAdminServiceEntitlementException"></soap:fault>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="enableDisablePolicy">
+            <soap:operation soapAction="urn:enableDisablePolicy" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:fault name="EntitlementPolicyAdminServiceEntitlementException">
+                <soap:fault use="literal" name="EntitlementPolicyAdminServiceEntitlementException"></soap:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="addPolicy">
+            <soap:operation soapAction="urn:addPolicy" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:fault name="EntitlementPolicyAdminServiceEntitlementException">
+                <soap:fault use="literal" name="EntitlementPolicyAdminServiceEntitlementException"></soap:fault>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="getAllPolicyIds">
             <soap:operation soapAction="urn:getAllPolicyIds" style="document"></soap:operation>
             <wsdl:input>
@@ -658,8 +722,8 @@
                 <soap:fault use="literal" name="EntitlementPolicyAdminServiceEntitlementException"></soap:fault>
             </wsdl:fault>
         </wsdl:operation>
-        <wsdl:operation name="addPolicy">
-            <soap:operation soapAction="urn:addPolicy" style="document"></soap:operation>
+        <wsdl:operation name="dePromotePolicy">
+            <soap:operation soapAction="urn:dePromotePolicy" style="document"></soap:operation>
             <wsdl:input>
                 <soap:body use="literal"></soap:body>
             </wsdl:input>
@@ -693,6 +757,15 @@
         </wsdl:operation>
         <wsdl:operation name="addPolicies">
             <soap:operation soapAction="urn:addPolicies" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:fault name="EntitlementPolicyAdminServiceEntitlementException">
+                <soap:fault use="literal" name="EntitlementPolicyAdminServiceEntitlementException"></soap:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="orderPolicy">
+            <soap:operation soapAction="urn:orderPolicy" style="document"></soap:operation>
             <wsdl:input>
                 <soap:body use="literal"></soap:body>
             </wsdl:input>
@@ -892,6 +965,24 @@
                 <soap12:fault use="literal" name="EntitlementPolicyAdminServiceEntitlementException"></soap12:fault>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="enableDisablePolicy">
+            <soap12:operation soapAction="urn:enableDisablePolicy" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:fault name="EntitlementPolicyAdminServiceEntitlementException">
+                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceEntitlementException"></soap12:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="addPolicy">
+            <soap12:operation soapAction="urn:addPolicy" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:fault name="EntitlementPolicyAdminServiceEntitlementException">
+                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceEntitlementException"></soap12:fault>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="getAllPolicyIds">
             <soap12:operation soapAction="urn:getAllPolicyIds" style="document"></soap12:operation>
             <wsdl:input>
@@ -904,8 +995,8 @@
                 <soap12:fault use="literal" name="EntitlementPolicyAdminServiceEntitlementException"></soap12:fault>
             </wsdl:fault>
         </wsdl:operation>
-        <wsdl:operation name="addPolicy">
-            <soap12:operation soapAction="urn:addPolicy" style="document"></soap12:operation>
+        <wsdl:operation name="dePromotePolicy">
+            <soap12:operation soapAction="urn:dePromotePolicy" style="document"></soap12:operation>
             <wsdl:input>
                 <soap12:body use="literal"></soap12:body>
             </wsdl:input>
@@ -939,6 +1030,15 @@
         </wsdl:operation>
         <wsdl:operation name="addPolicies">
             <soap12:operation soapAction="urn:addPolicies" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:fault name="EntitlementPolicyAdminServiceEntitlementException">
+                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceEntitlementException"></soap12:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="orderPolicy">
+            <soap12:operation soapAction="urn:orderPolicy" style="document"></soap12:operation>
             <wsdl:input>
                 <soap12:body use="literal"></soap12:body>
             </wsdl:input>
@@ -1126,6 +1226,18 @@
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="enableDisablePolicy">
+            <http:operation location="enableDisablePolicy"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="addPolicy">
+            <http:operation location="addPolicy"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+        </wsdl:operation>
         <wsdl:operation name="getAllPolicyIds">
             <http:operation location="getAllPolicyIds"></http:operation>
             <wsdl:input>
@@ -1135,8 +1247,8 @@
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="addPolicy">
-            <http:operation location="addPolicy"></http:operation>
+        <wsdl:operation name="dePromotePolicy">
+            <http:operation location="dePromotePolicy"></http:operation>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
@@ -1161,6 +1273,12 @@
         </wsdl:operation>
         <wsdl:operation name="addPolicies">
             <http:operation location="addPolicies"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="orderPolicy">
+            <http:operation location="orderPolicy"></http:operation>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
@@ -1273,13 +1391,13 @@
     </wsdl:binding>
     <wsdl:service name="EntitlementPolicyAdminService">
         <wsdl:port name="EntitlementPolicyAdminServiceHttpsSoap11Endpoint" binding="tns:EntitlementPolicyAdminServiceSoap11Binding">
-            <soap:address location="https://localhost:9444/services/EntitlementPolicyAdminService.EntitlementPolicyAdminServiceHttpsSoap11Endpoint/"></soap:address>
+            <soap:address location="https://localhost:9443/services/EntitlementPolicyAdminService.EntitlementPolicyAdminServiceHttpsSoap11Endpoint/"></soap:address>
         </wsdl:port>
         <wsdl:port name="EntitlementPolicyAdminServiceHttpsSoap12Endpoint" binding="tns:EntitlementPolicyAdminServiceSoap12Binding">
-            <soap12:address location="https://localhost:9444/services/EntitlementPolicyAdminService.EntitlementPolicyAdminServiceHttpsSoap12Endpoint/"></soap12:address>
+            <soap12:address location="https://localhost:9443/services/EntitlementPolicyAdminService.EntitlementPolicyAdminServiceHttpsSoap12Endpoint/"></soap12:address>
         </wsdl:port>
         <wsdl:port name="EntitlementPolicyAdminServiceHttpsEndpoint" binding="tns:EntitlementPolicyAdminServiceHttpBinding">
-            <http:address location="https://localhost:9444/services/EntitlementPolicyAdminService.EntitlementPolicyAdminServiceHttpsEndpoint/"></http:address>
+            <http:address location="https://localhost:9443/services/EntitlementPolicyAdminService.EntitlementPolicyAdminServiceHttpsEndpoint/"></http:address>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
