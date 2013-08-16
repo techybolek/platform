@@ -20,7 +20,7 @@
     <property name="moduleName" value="LogModule-1.0.0.mar"/>
     <property name="build.dir" value="build"/>
     <property name="classes" value="${build.dir}/classes"/>
-    <property name="lib" value="${build.dir}/lib"/>
+    <property name="lib" value="${wso2appserver.home}/repository/components/plugins"/>
     <property name="axis2modules" value="${build.dir}/axis2modules"/>
 
 
@@ -35,20 +35,10 @@
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${classes}"/>
         <mkdir dir="${axis2modules}"/>
-        <mkdir dir="${lib}"/>
-
-        <copy toDir="${lib}">
-            <fileset dir="${wso2appserver.home}/repository/components/plugins/">
-		<include name="axis2_1.6.1.wso2v9.jar" /> 
-		<include name="org.wso2.carbon.logging_4.1.0.jar"/>   
-		<include name="neethi_2.0.4.wso2v4.jar"/>
-		<include name="axiom_1.2.11.wso2v4.jar" />
-            </fileset>  
-        </copy> 
     </target>
 
     <target name="compile-all" depends="init" >
-        <javac destdir="${classes}" debug="true" srcdir="src">
+        <javac includeantruntime="false" destdir="${classes}" debug="true" srcdir="src">
             <classpath refid="compile.classpath"/>
         </javac>
 	<copy file="./src/main/resources/META-INF/module.xml" todir="${classes}/META-INF"/>
