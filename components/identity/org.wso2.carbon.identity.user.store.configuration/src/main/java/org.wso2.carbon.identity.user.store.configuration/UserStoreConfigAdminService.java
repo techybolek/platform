@@ -33,6 +33,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreConfigConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
+import org.wso2.carbon.user.core.config.XMLProcessorUtils;
 import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
 import org.wso2.carbon.user.core.tracker.UserStoreManagerRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -59,6 +60,7 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
     public static final String DESCRIPTION = "Description";
     public static final String USERSTORES = "userstores";
     private static final String deploymentDirectory = CarbonUtils.getCarbonRepository() + USERSTORES;
+    XMLProcessorUtils xmlProcessorUtils = new XMLProcessorUtils();
 
     /**
      * Get details of current secondary user store configurations
@@ -159,44 +161,18 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
      * @throws ParserConfigurationException
      */
     public void addUserStore(UserStoreDTO userStoreDTO, Boolean isAdd) throws UserStoreException {
-        File userStoreConfigFile = null;
         String domainName = userStoreDTO.getDomainId();
-        String fileName = domainName.replace(".", "_");
-
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-
-        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
-            File userStore = new File(deploymentDirectory);
-            if (!userStore.exists()) {
-                if (new File(deploymentDirectory).mkdir()) {
-                    //folder 'userstores' created
-                } else {
-                    log.error("Error at creating 'userstores' directory to store configurations for super tenant");
-                }
-            }
-            userStoreConfigFile = new File(deploymentDirectory + File.separator + fileName + ".xml");
-        } else {
-            String tenantFilePath = CarbonUtils.getCarbonTenantsDirPath();
-            tenantFilePath = tenantFilePath + File.separator + tenantId + File.separator + USERSTORES;
-            File userStore = new File(tenantFilePath);
-            if (!userStore.exists()) {
-                if (new File(tenantFilePath).mkdir()) {
-                    //folder 'userstores' created
-                } else {
-                    log.error("Error at creating 'userstores' directory to store configurations for tenant:" + tenantId);
-                }
-            }
-            userStoreConfigFile = new File(tenantFilePath + File.separator + fileName + ".xml");
+        if(!xmlProcessorUtils.isValidDomain(domainName,isAdd)){
+            throw new UserStoreException("Invalid domain name submitted.");
         }
-
+        File userStoreConfigFile = createConfigurationFile(domainName);
         // This part makes this method to used for editing as well
         if (userStoreConfigFile.exists()) {
+            //throw
             userStoreConfigFile.delete();
         }
 
         StreamResult result = new StreamResult(userStoreConfigFile);
-
-
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 
         try {
@@ -480,5 +456,36 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
         }
         log.error("Logged user '" + loggeduser + "', not the authorized admin user '" + admin + "'.");
         return false;
+    }
+
+    private File createConfigurationFile(String domainName){
+        String fileName = domainName.replace(".", "_");
+        File userStoreConfigFile=null;
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            File userStore = new File(deploymentDirectory);
+            if (!userStore.exists()) {
+                if (new File(deploymentDirectory).mkdir()) {
+                    //folder 'userstores' created
+                } else {
+                    log.error("Error at creating 'userstores' directory to store configurations for super tenant");
+                }
+            }
+            userStoreConfigFile = new File(deploymentDirectory + File.separator + fileName + ".xml");
+        } else {
+            String tenantFilePath = CarbonUtils.getCarbonTenantsDirPath();
+            tenantFilePath = tenantFilePath + File.separator + tenantId + File.separator + USERSTORES;
+            File userStore = new File(tenantFilePath);
+            if (!userStore.exists()) {
+                if (new File(tenantFilePath).mkdir()) {
+                    //folder 'userstores' created
+                } else {
+                    log.error("Error at creating 'userstores' directory to store configurations for tenant:" + tenantId);
+                }
+            }
+            userStoreConfigFile = new File(tenantFilePath + File.separator + fileName + ".xml");
+        }
+        return userStoreConfigFile;
     }
 }
