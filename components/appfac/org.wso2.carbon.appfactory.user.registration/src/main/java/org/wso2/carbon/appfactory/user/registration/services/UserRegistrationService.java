@@ -128,7 +128,7 @@ public class UserRegistrationService extends AbstractAdmin {
         try {
             UserStoreManager userStoreManager = realm.getUserStoreManager();
 
-            String[] defaultRoleNames = Util.getConfiguration().getProperties("PlatformRoles.DefaultUserRole");
+            String[] defaultRoleNames = Util.getConfiguration().getProperties("TenantRoles.DefaultUserRole");
             for (String defaultRoleName : defaultRoleNames) {
                 userStoreManager.updateRoleListOfUser(userName, null, new String[]{defaultRoleName});
             }
