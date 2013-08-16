@@ -25,9 +25,7 @@ function loadTiers(row) {
 
 
 
-$(document).ready(function() {
-	loadInSequences();
-	loadOutSequences();
+$(document).ready(function() {	
 	
     var target = document.getElementById("tier");
 
@@ -282,6 +280,8 @@ function loadOutSequences() {
 function toggleSequence(checkbox){
 	if($(checkbox).is(":checked")){
 		$(checkbox).parent().next().show();
+		loadInSequences();
+		loadOutSequences();
 	}else{
 		$(checkbox).parent().next().hide();
 	}
