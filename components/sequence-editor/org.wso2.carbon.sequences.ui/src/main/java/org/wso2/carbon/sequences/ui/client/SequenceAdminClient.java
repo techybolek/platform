@@ -145,7 +145,7 @@ public class SequenceAdminClient implements EditorUIClient {
     private OMElement getSequence(String sequenceName) throws SequenceEditorException {
         OMElement element = null;
         try {
-            element = sequenceAdminStub.getSequence(sequenceName).getFirstElement();
+            element = ((OMElement)(sequenceAdminStub.getSequence(sequenceName))).getFirstElement();
         } catch (Exception e) {
             handleException("Couldn't retrieve the sequence element with name '"
                     + sequenceName + "'", e);
@@ -197,7 +197,7 @@ public class SequenceAdminClient implements EditorUIClient {
     public OMElement getDynamicSequence(String key) throws SequenceEditorException {
         OMElement dynamicSequence = null;
         try {
-            dynamicSequence = sequenceAdminStub.getDynamicSequence(key);
+            dynamicSequence = (OMElement)sequenceAdminStub.getDynamicSequence(key);
         } catch (Exception e) {
             handleException("Couldn't get dynamic sequence with key '" + key + "'", e);
         }
