@@ -150,11 +150,14 @@ public class ProxyServiceSerializer {
         
 
         String wsdlKey = service.getWSDLKey();
+        String wsdlEndpoint = service.getPublishWSDLEndpoint();
         URI wsdlUri = service.getWsdlURI();
         Object inLineWSDL = service.getInLineWSDL();
-        if (wsdlKey != null || wsdlUri != null || inLineWSDL != null) {
+        if (wsdlKey != null || wsdlUri != null || inLineWSDL != null || wsdlEndpoint != null) {
             OMElement wsdl = fac.createOMElement("publishWSDL", synNS);
-            if (wsdlKey != null) {
+            if (wsdlEndpoint != null) {
+                wsdl.addAttribute(fac.createOMAttribute("endpoint", nullNS, wsdlEndpoint));
+            } else if (wsdlKey != null) {
                 wsdl.addAttribute(fac.createOMAttribute(
                         "key", nullNS, wsdlKey));
             } else if (inLineWSDL != null) {

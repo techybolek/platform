@@ -224,10 +224,14 @@ public class ProxyServiceFactory {
         OMElement wsdl = elem.getFirstChildWithName(
                 new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, "publishWSDL"));
         if (wsdl != null) {
-            OMAttribute wsdlkey = wsdl.getAttribute(
+            OMAttribute wsdlEndpoint = wsdl.getAttribute(
+                    new QName(XMLConfigConstants.NULL_NAMESPACE, "endpoint"));
+            OMAttribute wsdlKey = wsdl.getAttribute(
                     new QName(XMLConfigConstants.NULL_NAMESPACE, "key"));
-            if (wsdlkey != null) {
-                proxy.setWSDLKey(wsdlkey.getAttributeValue());
+            if (wsdlEndpoint != null) {
+                proxy.setPublishWSDLEndpoint(wsdlEndpoint.getAttributeValue());
+            } else if (wsdlKey != null) {
+                proxy.setWSDLKey(wsdlKey.getAttributeValue());
             } else {
                 OMAttribute wsdlURI = wsdl.getAttribute(
                         new QName(XMLConfigConstants.NULL_NAMESPACE, "uri"));

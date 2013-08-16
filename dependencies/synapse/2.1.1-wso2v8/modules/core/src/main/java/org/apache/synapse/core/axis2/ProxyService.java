@@ -40,7 +40,9 @@ import org.apache.synapse.aspects.AspectConfiguration;
 import org.apache.synapse.config.SynapseConfigUtils;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.SynapseEnvironment;
+import org.apache.synapse.endpoints.AddressEndpoint;
 import org.apache.synapse.endpoints.Endpoint;
+import org.apache.synapse.endpoints.WSDLEndpoint;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.util.PolicyInfo;
 import org.apache.synapse.util.resolver.CustomWSDLLocator;
@@ -69,7 +71,7 @@ import java.util.*;
  *       <outSequence>...</outSequence>
  *       <faultSequence>...</faultSequence>
  *    </target>?
- *    <publishWSDL uri=".." key="string">
+ *    <publishWSDL uri=".." key="string" endpoint="string">
  *       <wsdl:definition>...</wsdl:definition>?
  *       <wsdl20:description>...</wsdl20:description>?
  *       <resource location="..." key="..."/>*
@@ -161,6 +163,14 @@ public class ProxyService implements AspectConfigurable, SynapseArtifact {
      * A ResourceMap object allowing to locate artifacts (WSDL and XSD) imported
      * by the service WSDL to be located in the registry.
      */
+
+    /**
+     * Endpoint which used to resolve WSDL url
+     * If address endpoint pointed, url+"?wsdl" will be use as WSDL url
+     * If wsdl endpoint,  wsdl url of endpoint will be use to fetch wsdl
+     */
+    private String publishWSDLEndpoint;
+
     private ResourceMap resourceMap;
     /**
      * Policies to be set to the service, this can include service level, operation level,
@@ -242,8 +252,9 @@ public class ProxyService implements AspectConfigurable, SynapseArtifact {
         // get the wsdlElement as an OMElement
         if (trace()) {
             trace.info("Loading the WSDL : " +
+                (publishWSDLEndpoint != null ? " endpoint = " + publishWSDLEndpoint :
                 (wsdlKey != null ? " key = " + wsdlKey :
-                (wsdlURI != null ? " URI = " + wsdlURI : " <Inlined>")));
+                (wsdlURI != null ? " URI = " + wsdlURI : " <Inlined>"))));
         }
 
         InputStream wsdlInputStream = null;
@@ -317,6 +328,73 @@ public class ProxyService implements AspectConfigurable, SynapseArtifact {
                     }
 
                     handleException("Error reading from wsdl URI", e);
+                }
+            }
+        } else if (publishWSDLEndpoint != null) {
+            try {
+                URL url = null;
+                Endpoint ep = synCfg.getEndpoint(publishWSDLEndpoint);
+                if (ep == null) {
+                    handleException("Unable to resolve WSDL url. " + publishWSDLEndpoint + " is null");
+                }
+
+                if (ep instanceof AddressEndpoint) {
+                    url = new URL(((AddressEndpoint) (ep)).getDefinition().getAddress() + "?wsdl");
+                } else if (ep instanceof WSDLEndpoint) {
+                    url = new URL(((WSDLEndpoint) (ep)).getWsdlURI());
+                } else {
+                    handleException("Unable to resolve WSDL url. " + publishWSDLEndpoint +
+                            " is not a AddressEndpoint or WSDLEndpoint");
+                }
+                publishWSDL = url.toString();
+
+                OMNode node = SynapseConfigUtils.getOMElementFromURL(publishWSDL, synapseHome);
+                if (node instanceof OMElement) {
+                    wsdlElement = (OMElement) node;
+                }
+                wsdlFound = true;
+            } catch (MalformedURLException e) {
+                handleException("Malformed URI for wsdl", e);
+            } catch (IOException e) {
+                //handleException("Error reading from wsdl URI", e);
+
+                boolean enablePublishWSDLSafeMode = false;
+                Map proxyParameters= this.getParameterMap();
+                if (!proxyParameters.isEmpty()) {
+                    if (proxyParameters.containsKey("enablePublishWSDLSafeMode")) {
+                        enablePublishWSDLSafeMode =
+                                Boolean.parseBoolean(
+                                        proxyParameters.get("enablePublishWSDLSafeMode").
+                                                toString().toLowerCase());
+                    } else {
+                        if (trace()) {
+                            trace.info("WSDL was unable to load for: " + publishWSDL);
+                            trace.info("Please add <syn:parameter name=\"enableURISafeMode\">true" +
+                                    "</syn:parameter> to proxy service.");
+                        }
+                        handleException("Error reading from wsdl URI " + publishWSDL, e);
+                    }
+                }
+
+                if (enablePublishWSDLSafeMode) {
+                    // this is if the wsdl cannot be loaded... create a dummy service and an operation for which
+                    // our SynapseDispatcher will properly dispatch to
+
+                    //!!!Need to add a reload function... And display that the wsdl/service is offline!!!
+                    if (trace()) {
+                        trace.info("WSDL was unable to load for: " + publishWSDL);
+                        trace.info("enableURISafeMode: true");
+                    }
+
+                    log.warn("Unable to load the WSDL for : " + name, e);
+                    return null;
+                } else {
+                    if (trace()) {
+                        trace.info("WSDL was unable to load for: " + publishWSDL);
+                        trace.info("enableURISafeMode: false");
+                    }
+
+                    handleException("Error reading from wsdl URI " + publishWSDL, e);
                 }
             }
         } else {
@@ -1103,5 +1181,13 @@ public class ProxyService implements AspectConfigurable, SynapseArtifact {
         StringBuilder sb = new StringBuilder();
         sb.append("[ Proxy Service [ Name : ").append(name).append(" ] ]");
         return sb.toString();
+    }
+
+    public String getPublishWSDLEndpoint() {
+        return publishWSDLEndpoint;
+    }
+
+    public void setPublishWSDLEndpoint(String publishWSDLEndpoint) {
+        this.publishWSDLEndpoint = publishWSDLEndpoint;
     }
 }
