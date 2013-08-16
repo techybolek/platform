@@ -102,26 +102,43 @@ public class RegistryConfigLoader {
             }
             Iterator indexers = indexingConfig.getFirstChildWithName(new QName("indexers")).
                     getChildrenWithName(new QName("indexer"));
+            String currentProfile = System.getProperty("profile", "default");
             while (indexers.hasNext()) {
                 OMElement indexerEl = (OMElement) indexers.next();
-                String clazz = indexerEl.getAttribute(new QName("class")).getAttributeValue();
-                try {
-                    Object indexerObj = this.getClass().getClassLoader().loadClass(clazz).newInstance();
-                    if (!(indexerObj instanceof Indexer)) {
-                        throw new RegistryException(clazz + " has not implemented Indexer interface");
+                boolean isValidConfigurationForProfile = false;
+                String profileStr = indexerEl.getAttributeValue(new QName("profiles"));
+                if (profileStr != null) {
+                    String[] profiles = profileStr.split(",");
+                    for (String profile : profiles) {
+                        if (profile.trim().equals(currentProfile)) {
+                            isValidConfigurationForProfile = true;
+                        }
                     }
-                    String mediaPattern = indexerEl.getAttribute(
-                            new QName("mediaTypeRegEx")).getAttributeValue();
-                    indexerMap.put(mediaPattern, (Indexer) indexerObj);
-                } catch (InstantiationException e) {
-                    log.error(clazz + " cannot be instantiated.", e);
-                } catch (IllegalAccessException e) {
-                    log.error(clazz + " constructor cannot be accessed", e);
-                } catch (ClassNotFoundException e) {
-                    log.error(clazz + " is not found in classpath. Please check whether the class " +
-                            "is exported in your OSGI bundle.", e);
-                } catch (RegistryException e) {
-                    log.error(e.getMessage(), e);
+                } else {
+                    //when no profile is defined
+                    isValidConfigurationForProfile = true;
+                }
+
+                if(isValidConfigurationForProfile){
+                    String clazz = indexerEl.getAttribute(new QName("class")).getAttributeValue();
+                    try {
+                        Object indexerObj = this.getClass().getClassLoader().loadClass(clazz).newInstance();
+                        if (!(indexerObj instanceof Indexer)) {
+                            throw new RegistryException(clazz + " has not implemented Indexer interface");
+                        }
+                        String mediaPattern = indexerEl.getAttribute(
+                                new QName("mediaTypeRegEx")).getAttributeValue();
+                        indexerMap.put(mediaPattern, (Indexer) indexerObj);
+                    } catch (InstantiationException e) {
+                        log.error(clazz + " cannot be instantiated.", e);
+                    } catch (IllegalAccessException e) {
+                        log.error(clazz + " constructor cannot be accessed", e);
+                    } catch (ClassNotFoundException e) {
+                        log.error(clazz + " is not found in classpath. Please check whether the class " +
+                                "is exported in your OSGI bundle.", e);
+                    } catch (RegistryException e) {
+                        log.error(e.getMessage(), e);
+                    }
                 }
             }
         } catch (FileNotFoundException e) {
@@ -135,6 +152,7 @@ public class RegistryConfigLoader {
         } catch (CarbonException e) {
             log.error("An error occurred during system variable replacement", e);
         }
+
     }
 
     public long getIndexingFreqInSecs() {
