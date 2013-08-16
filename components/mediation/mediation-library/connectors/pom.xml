@@ -32,10 +32,10 @@
     <url>http://wso2.org</url>
     <modules>
         <module>org.wso2.carbon.connector.core</module>
-	<module>org.wso2.carbon.connector.twitter</module>
+	<!--<module>org.wso2.carbon.connector.twitter</module>
  	<module>org.wso2.carbon.connector.jira</module>
 	<module>org.wso2.carbon.connector.salesforce</module>
-	<module>org.wso2.carbon.connector.twilio</module>
+	<module>org.wso2.carbon.connector.twilio</module> -->
 
     </modules>
 
