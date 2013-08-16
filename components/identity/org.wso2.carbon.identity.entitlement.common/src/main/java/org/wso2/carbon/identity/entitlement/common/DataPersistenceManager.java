@@ -19,6 +19,8 @@ package org.wso2.carbon.identity.entitlement.common;
 
 import org.wso2.carbon.identity.entitlement.common.dto.PolicyEditorDataHolder;
 
+import java.util.Map;
+
 /**
  * 
  */
@@ -30,20 +32,21 @@ public interface DataPersistenceManager {
      * @return  PolicyEditorDataHolder
      * @throws PolicyEditorException throws
      */
-    public PolicyEditorDataHolder buildDataHolder()  throws PolicyEditorException;
+    public Map<String, PolicyEditorDataHolder> buildDataHolder()  throws PolicyEditorException;
 
     /**
      * Persist policy editor data in to  persistence storage
      *
+     * @param policyEditorType policy editor type
      * @param xmlConfig String
      * @throws PolicyEditorException throws
      */
-    public void persistConfig(String xmlConfig) throws PolicyEditorException;
+    public void persistConfig(String policyEditorType, String xmlConfig) throws PolicyEditorException;
 
     /**
-     * Get policy editor data in to  persistence storage
+     * Get policy editor data from persistence storage
      *
      * @return String
      */
-    public String getConfig();
+    public Map<String, String> getConfig();
 }

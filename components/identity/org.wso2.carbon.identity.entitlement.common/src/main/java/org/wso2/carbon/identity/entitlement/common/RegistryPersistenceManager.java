@@ -25,6 +25,8 @@ import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.api.Registry;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -32,39 +34,87 @@ import java.nio.charset.Charset;
 public class RegistryPersistenceManager extends InMemoryPersistenceManager{
 
     @Override
-    public void persistConfig(String xmlConfig) throws PolicyEditorException {
+    public void persistConfig(String policyEditorType, String xmlConfig) throws PolicyEditorException {
 
-        super.persistConfig(xmlConfig);
+        super.persistConfig(policyEditorType, xmlConfig);
 
         Registry registry = CarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_GOVERNANCE);
-        try{
+        try {
             Resource resource = registry.newResource();
             resource.setContent(xmlConfig);
-            registry.put(EntitlementConstants.ENTITLEMENT_POLICY_EDITOR_CONFIG_FILE_REGISTRY_PATH,
-                    resource);
+            String path = null;
+            if(EntitlementConstants.PolicyEditor.BASIC.equals(policyEditorType)){
+                path =  EntitlementConstants.ENTITLEMENT_POLICY_BASIC_EDITOR_CONFIG_FILE_REGISTRY_PATH;
+            } else if(EntitlementConstants.PolicyEditor.STANDARD.equals(policyEditorType)){
+                path =  EntitlementConstants.ENTITLEMENT_POLICY_STANDARD_EDITOR_CONFIG_FILE_REGISTRY_PATH;
+            } else if(EntitlementConstants.PolicyEditor.RBAC.equals(policyEditorType)){
+                path =  EntitlementConstants.ENTITLEMENT_POLICY_RBAC_EDITOR_CONFIG_FILE_REGISTRY_PATH;
+            } else {
+                //default
+                path =  EntitlementConstants.ENTITLEMENT_POLICY_BASIC_EDITOR_CONFIG_FILE_REGISTRY_PATH;
+            }
+            registry.put(path, resource);
         } catch (RegistryException e) {
             throw new PolicyEditorException("Error while persisting policy editor config");
         }
     }
 
     @Override
-    public String getConfig() {
-        String config = super.getConfig();
-        if(config == null){
+    public Map<String, String> getConfig() {
+        Map<String, String> config = super.getConfig();               
+        if(config == null || config.size() == 0){
+            config = new HashMap<String, String>(); 
             Registry registry = CarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_GOVERNANCE);
+            String configString = null;
             try{
                 Resource resource = registry.
-                        get(EntitlementConstants.ENTITLEMENT_POLICY_EDITOR_CONFIG_FILE_REGISTRY_PATH);
+                        get(EntitlementConstants.ENTITLEMENT_POLICY_BASIC_EDITOR_CONFIG_FILE_REGISTRY_PATH);
                 if(resource != null && resource.getContent() != null){
-                    config =  new String((byte[]) resource.getContent(), Charset.forName("UTF-8"));
-                }
-            } catch (RegistryException e) {
-                // ignore and load default config
-            }
-        }
+                    configString =  new String((byte[]) resource.getContent(), Charset.forName("UTF-8"));
 
-        if(config == null || config.trim().length() == 0){
-            config = getDefaultConfig();
+                }
+            } catch (Exception e){
+                //ignore
+            }
+
+            if(configString == null){
+                configString = getDefaultConfig();
+            }
+            config.put(EntitlementConstants.PolicyEditor.BASIC, configString);
+
+            configString = null;
+            try{
+                Resource resource = registry.
+                        get(EntitlementConstants.ENTITLEMENT_POLICY_STANDARD_EDITOR_CONFIG_FILE_REGISTRY_PATH);
+                if(resource != null && resource.getContent() != null){
+                    configString =  new String((byte[]) resource.getContent(), Charset.forName("UTF-8"));
+                    config.put(EntitlementConstants.PolicyEditor.STANDARD, configString);
+                }
+            } catch (Exception e){
+                //ignore
+            }
+            if(configString == null){
+                configString = getDefaultConfig();
+            }
+            config.put(EntitlementConstants.PolicyEditor.STANDARD, configString);
+
+            configString = null;
+            try{
+                Resource resource = registry.
+                        get(EntitlementConstants.ENTITLEMENT_POLICY_RBAC_EDITOR_CONFIG_FILE_REGISTRY_PATH);
+                if(resource != null && resource.getContent() != null){
+                    configString =  new String((byte[]) resource.getContent(), Charset.forName("UTF-8"));
+                    config.put(EntitlementConstants.PolicyEditor.RBAC, configString);
+                } else {
+                    config.put(EntitlementConstants.PolicyEditor.RBAC, getDefaultConfig());
+                }
+            } catch (Exception e){
+                //ignore
+            }
+            if(configString == null){
+                configString = getDefaultConfig();
+            }
+            config.put(EntitlementConstants.PolicyEditor.RBAC, configString);
         }
         return config;
     }

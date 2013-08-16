@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.common.dto.PolicyEditorDataHolder;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -37,7 +39,7 @@ public class PolicyEditorEngine {
     private static ConcurrentHashMap<String, PolicyEditorEngine> policyEditorEngine =
                                                 new ConcurrentHashMap<String, PolicyEditorEngine>();
 
-    private PolicyEditorDataHolder dataHolder;
+    private Map<String, PolicyEditorDataHolder> dataHolder = new HashMap<String, PolicyEditorDataHolder>();
     
     private DataPersistenceManager manager;
     
@@ -72,22 +74,26 @@ public class PolicyEditorEngine {
         }
     }
 
-    public PolicyEditorDataHolder getPolicyEditorData(){
+    public PolicyEditorDataHolder getPolicyEditorData(String policyEditorType){
 
-        if(dataHolder == null){
-            dataHolder = new PolicyEditorDataHolder();
+        if(dataHolder != null){
+            return dataHolder.get(policyEditorType);
         }
-        return dataHolder;
+        return null;
     }
 
-    public void persistConfig(String xmlConfig) throws PolicyEditorException{
+    public void persistConfig(String policyEditorType, String xmlConfig) throws PolicyEditorException{
 
-        manager.persistConfig(xmlConfig);
+        manager.persistConfig(policyEditorType, xmlConfig);
         dataHolder = manager.buildDataHolder();
     }
 
-    public String getConfig(){
+    public String getConfig(String policyEditorType){
 
-        return manager.getConfig();
+        Map<String, String> configs = manager.getConfig();
+        if(configs != null){
+            return configs.get(policyEditorType);
+        }
+        return null;
     }
 }

@@ -33,6 +33,12 @@ public class Utils {
                 Arrays.asList(PolicyConstants.RuleCombiningAlog.algorithms).contains(algorithmUri);
     }
 
+    public static boolean isValidCategory(String category){
+
+        return category != null &&
+                Arrays.asList(EntitlementConstants.PolicyEditor.BASIC_CATEGORIES).contains(category);
+    }
+
     public static boolean isValidFunction(String functionUri){
 
         return functionUri != null &&

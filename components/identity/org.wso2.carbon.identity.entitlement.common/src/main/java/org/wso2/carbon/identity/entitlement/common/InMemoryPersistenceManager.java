@@ -29,7 +29,9 @@ import org.wso2.carbon.identity.entitlement.common.dto.PolicyEditorDataHolder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,17 +39,28 @@ import java.util.Set;
  */
 public class InMemoryPersistenceManager implements DataPersistenceManager{
     
-    private String xmlConfig = null;
+    private Map<String,String> xmlConfig = new HashMap<String, String>();
 
     private static Log log = LogFactory.getLog(InMemoryPersistenceManager.class);
 
     @Override
-    public PolicyEditorDataHolder buildDataHolder() throws PolicyEditorException {
-        this.xmlConfig = getConfig();
-        return buildDataHolder(this.xmlConfig);
+    public Map<String, PolicyEditorDataHolder> buildDataHolder() throws PolicyEditorException {
+        xmlConfig = this.getConfig();
+        Map<String, PolicyEditorDataHolder>  holders = new HashMap<String, PolicyEditorDataHolder>();
+        for(String type : EntitlementConstants.PolicyEditor.EDITOR_TYPES){
+            PolicyEditorDataHolder holder = buildDataHolder(type, xmlConfig.get(type));
+            if(holder != null){
+                holders.put(type, holder);
+            }
+        }
+        return holders;
     }
 
-    private PolicyEditorDataHolder buildDataHolder(String xmlConfig)  throws PolicyEditorException{
+    private PolicyEditorDataHolder buildDataHolder(String type, String xmlConfig)  throws PolicyEditorException{
+
+        if(xmlConfig == null){
+            return null;
+        }
 
         PolicyEditorDataHolder holder = new PolicyEditorDataHolder();
         ByteArrayInputStream inputStream;
@@ -77,7 +90,7 @@ public class InMemoryPersistenceManager implements DataPersistenceManager{
         for(int i = 0; i < nodeList.getLength(); i++){
             Node node = nodeList.item(i);
             if(node.getNodeName().equals("categories")){
-                parseCategories(node, holder);
+                parseCategories(type, node, holder);
             } else if(node.getNodeName().equals("ruleCombiningAlgorithm")){
                 parseRuleAlgorithm(node, holder);
             } else if(node.getNodeName().equals("attributeIds")){
@@ -101,18 +114,18 @@ public class InMemoryPersistenceManager implements DataPersistenceManager{
     }
 
     @Override
-    public void persistConfig(String xmlConfig) throws PolicyEditorException {
+    public void persistConfig(String policyEditorType, String xmlConfig) throws PolicyEditorException {
         // to verify
-        buildDataHolder(xmlConfig);
-        this.xmlConfig = xmlConfig;
+        buildDataHolder(policyEditorType, xmlConfig);
+        this.xmlConfig.put(policyEditorType, xmlConfig);
     }
 
     @Override
-    public String getConfig() {
+    public Map<String, String> getConfig() {
         return xmlConfig;
     }
 
-    private void parseCategories(Node root, PolicyEditorDataHolder holder){
+    private void parseCategories(String type, Node root, PolicyEditorDataHolder holder) throws PolicyEditorException {
 
         NodeList nodeList = root.getChildNodes();
         for(int i = 0; i < nodeList.getLength(); i++){
@@ -129,6 +142,14 @@ public class InMemoryPersistenceManager implements DataPersistenceManager{
                     Node child = childList.item(j);
                     if("name".equals(child.getNodeName())){
                         name = child.getTextContent();
+                        if(EntitlementConstants.PolicyEditor.BASIC.equals(type)){
+                            if(!Utils.isValidCategory(name)){
+                                throw new PolicyEditorException("Invalid Category : " + name
+                                + "  Basic policy editor supports only for Subject, " +
+                                        "Resource, Action and Environment category names. " +
+                                        "But you can change the URI of them");
+                            }
+                        }
                     } else if("uri".equals(child.getNodeName())){
                         uri = child.getTextContent();
                     } else if("supportedAttributeIds".equals(child.getNodeName())){

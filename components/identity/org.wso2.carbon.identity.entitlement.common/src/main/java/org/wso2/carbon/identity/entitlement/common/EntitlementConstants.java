@@ -28,8 +28,12 @@ public class EntitlementConstants {
     public static final String ENTITLEMENT_POLICY_EDITOR_REGISTRY_PATH =
             ENTITLEMENT_REGISTRY_PATH + "/policyEditor";
 
-    public static final String ENTITLEMENT_POLICY_EDITOR_CONFIG_FILE_REGISTRY_PATH =
-            ENTITLEMENT_REGISTRY_PATH + "/policyEditor/config.xml";
+    public static final String ENTITLEMENT_POLICY_BASIC_EDITOR_CONFIG_FILE_REGISTRY_PATH =
+            ENTITLEMENT_REGISTRY_PATH + "/policyEditor/config/basic/config.xml";
+    public static final String ENTITLEMENT_POLICY_STANDARD_EDITOR_CONFIG_FILE_REGISTRY_PATH =
+            ENTITLEMENT_REGISTRY_PATH + "/policyEditor/config/standard/config.xml";
+    public static final String ENTITLEMENT_POLICY_RBAC_EDITOR_CONFIG_FILE_REGISTRY_PATH =
+            ENTITLEMENT_REGISTRY_PATH + "/policyEditor/config/rbac/config.xml";
 
     public static final String PDP_SUBSCRIBER_ID = "PDP Subscriber";
 
@@ -43,7 +47,9 @@ public class EntitlementConstants {
 
         public static final String ACTION_ENABLE = "ENABLE";
 
-        public static final String ACTION_PROMOTE = "PROMOTE";
+        public static final String ACTION_DISABLE = "DISABLE";
+
+        public static final String ACTION_ORDER = "ORDER";
     }
 
     public static final class StatusTypes {
@@ -71,6 +77,39 @@ public class EntitlementConstants {
         public static final String ABOUT_POLICY = "POLICY";
 
         public static final String ABOUT_SUBSCRIBER = "SUBSCRIBER";
+
+    }
+
+    public static final class PolicyEditor {
+
+        public static final String BASIC = "BASIC";
+
+        public static final String STANDARD = "STANDARD";
+
+        public static final String RBAC = "RBAC";
+        
+        public static final String[] EDITOR_TYPES = new String[] {BASIC, STANDARD, RBAC};
+
+        public static final String BASIC_CATEGORY_SUBJECT = "Subject";
+
+        public static final String BASIC_CATEGORY_ACTION = "Action";
+
+        public static final String BASIC_CATEGORY_ENVIRONMENT = "Environment";
+
+        public static final String BASIC_CATEGORY_RESOURCE = "Resource";
+
+        public static final String[] BASIC_CATEGORIES = new String[] {BASIC_CATEGORY_SUBJECT,
+                BASIC_CATEGORY_RESOURCE, BASIC_CATEGORY_ACTION, BASIC_CATEGORY_ENVIRONMENT};
+
+    }
+
+    public static final class PolicyType {
+
+        public static final String POLICY_ENABLED = "PDP_ENABLED";
+
+        public static final String POLICY_DISABLED = "PDP_DISABLED";
+
+        public static final String POLICY_ALL = "ALL";
 
     }
 }
