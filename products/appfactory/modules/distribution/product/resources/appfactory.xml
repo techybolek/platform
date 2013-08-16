@@ -34,20 +34,20 @@
         </Role>
     </ApplicationRoles>
 
-    <PlatformRoles>
+    <TenantRoles>
         <DefaultUserRole name="appFactoryUsers">
             <Permission>/permission/admin/appfactory/application/create,/permission/admin/login,/permission/admin/manage/api/subscribe,/permission/admin/manage/api/create,/permission/admin/manage/api/publish</Permission>
         </DefaultUserRole>
         <Role name="admin">
             <Permission>CreateApplication/CreateApplication:invoke-service</Permission>
         </Role>
-        <Role name="ceo">
+        <Role name="cxo">
              <Permission>/permission/admin/login,/permission/admin/appfactory/manage,/permission/admin/appfactory/repository/readwrite,/permission/admin/appfactory/usermgt/invite,/permission/admin/appfactory/configuration/db,/permission/admin/appfactory/configuration/apimanager,/permission/admin/appfactory/build,/permission/admin/appfactory/deploy/development,/permission/admin/appfactory/deploy/testing,/permission/admin/appfactory/deploy/production,/permission/admin/appfactory/governance/promote,/permission/admin/appfactory/governance/demote,/permission/admin/appfactory/governance/retire,/permission/admin/appfactory/repository/branch,/permission/admin/appfactory/stage/development,/permission/admin/appfactory/stage/testing,/permission/admin/appfactory/stage/production,/permission/admin/appfactory/deploy,/permission/admin/appfactory/ceo/dashboard</Permission>
         </Role>
        <!-- <Role name="projectManager">
             <Permission>/permission/admin/appfactory/application/create,/permission/admin/login,/permission/admin/appfactory/manage,/permission/admin/appfactory/repository/readwrite,/permission/admin/appfactory/usermgt/invite,/permission/admin/appfactory/configuration/db,/permission/admin/appfactory/configuration/apimanager,/permission/admin/appfactory/build,/permission/admin/appfactory/deploy/development,/permission/admin/appfactory/deploy/testing,/permission/admin/appfactory/deploy/production,/permission/admin/appfactory/governance/promote,/permission/admin/appfactory/governance/demote,/permission/admin/appfactory/governance/retire,/permission/admin/appfactory/repository/branch,/permission/admin/appfactory/stage/development,/permission/admin/appfactory/stage/testing,/permission/admin/appfactory/stage/production,/permission/admin/appfactory/deploy,/permission/admin/appfactory/ceo/dashboard</Permission>
         </Role>-->
-    </PlatformRoles>
+    </TenantRoles>
 
     <!--SSO relying party configuration.-->
     <SSORelyingParty>

@@ -124,7 +124,7 @@
             </Permission>
         </Role>
     </ApplicationRoles>
-    <PlatformRoles>
+    <TenantRoles>
         <DefaultUserRole name="appFactoryUsers">
             <Permission>
                 /permission/admin/appfactory/application/create,
@@ -142,7 +142,7 @@
 		/permission/admin/appfactory/ceo/dashboard
 	    </Permission>
         </Role>
-        <Role name="ceo">
+        <Role name="cxo">
             <Permission>
                 /permission/admin/login,
                 /permission/admin/appfactory/,
@@ -162,7 +162,7 @@
 	</Permission>
         </Role>
 
-    </PlatformRoles>
+    </TenantRoles>
 
     <!--SSO relying party configuration.-->
     <SSORelyingParty>
