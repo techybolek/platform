@@ -432,6 +432,12 @@ public class SecurityConfigAdmin {
                 service.removeParameter(pathParam);
             }
 
+            //removing security scenarioID parameter from axis service
+            Parameter scenarioIDParam = service.getParameter(SecurityConstants.SCENARIO_ID_PARAM_NAME);
+            if (scenarioIDParam != null) {
+                service.removeParameter(scenarioIDParam);
+            }
+
             // unlock transports
             Policy policy = this.loadPolicy(scenarioId, policyPath);
             if (isHttpsTransportOnly(policy)) {
@@ -683,7 +689,7 @@ public class SecurityConfigAdmin {
         }
     }
 
-    public void applySecurity(String serviceName, String scenrioId, String policyPath,
+    public void applySecurity(String serviceName, String scenarioId, String policyPath,
                               String[] trustedStores, String privateStore,
                               String[] userGroups) throws SecurityConfigException {
         // TODO: If this method is too time consuming, it is better to not start
@@ -703,7 +709,7 @@ public class SecurityConfigAdmin {
                 Arrays.sort(userGroups);
                 if (Arrays.binarySearch(userGroups, CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME) > -1) {
                     log
-                            .error("Security breach. A user is attempting to enable annonymous for UT access");
+                            .error("Security breach. A user is attempting to enable anonymous for UT access");
                     throw new SecurityConfigException("Invalid data provided"); // obscure error message
                 }
             }
@@ -729,10 +735,10 @@ public class SecurityConfigAdmin {
             }
 
             boolean isRahasEngaged = false;
-            applyPolicy(service, scenrioId, policyPath, trustedStores, privateStore);
-            isRahasEngaged = engageModules(scenrioId, serviceName, service);
-            disableRESTCalls(serviceName, scenrioId);
-            persistData(service, scenrioId, privateStore, trustedStores, userGroups, isRahasEngaged);
+            applyPolicy(service, scenarioId, policyPath, trustedStores, privateStore);
+            isRahasEngaged = engageModules(scenarioId, serviceName, service);
+            disableRESTCalls(serviceName, scenarioId);
+            persistData(service, scenarioId, privateStore, trustedStores, userGroups, isRahasEngaged);
             if (!transactionStarted) {
                 serviceGroupFilePM.commitTransaction(serviceGroupId);
             }
@@ -741,7 +747,7 @@ public class SecurityConfigAdmin {
             }
             // finally update the ghost file if GD is used..
             if (service.getFileName() != null) {
-                updateSecScenarioInGhostFile(service.getFileName().getPath(), serviceName, scenrioId);
+                updateSecScenarioInGhostFile(service.getFileName().getPath(), serviceName, scenarioId);
             }
             
             this.getPOXCache().remove(serviceName);
@@ -749,7 +755,19 @@ public class SecurityConfigAdmin {
             if(cache != null){
             	cache.remove(serviceName);
             }
-            
+
+            //Adding the security scenario ID parameter to the axisService
+            //This parameter can be used to get the applied security scenario
+            //without reading the service meta data file.
+            try {
+                Parameter param = new Parameter();
+                param.setName(SecurityConstants.SCENARIO_ID_PARAM_NAME);
+                param.setValue(scenarioId);
+                service.addParameter(param);
+            } catch (AxisFault axisFault) {
+                log.error("Error while adding Scenario ID parameter",axisFault);
+            }
+
         } catch (RegistryException e) {
             log.error(e.getMessage(), e);
             serviceGroupFilePM.rollbackTransaction(serviceGroupId);

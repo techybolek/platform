@@ -137,9 +137,29 @@ public class POXSecurityHandler implements Handler {
         }
 
         try {
-            SecurityConfigAdmin securityAdmin = new SecurityConfigAdmin(msgCtx.getConfigurationContext().getAxisConfiguration());
-            SecurityScenarioData data = securityAdmin.getCurrentScenario(service.getName());
-            if (data != null && data.getScenarioId().equals(SecurityConstants.USERNAME_TOKEN_SCENARIO_ID)) {
+            String scenarioID = null;
+            try{
+                scenarioID = (String)service.getParameter(SecurityConstants.SCENARIO_ID_PARAM_NAME).getValue();
+            }catch (Exception e){}//ignore
+
+            if(scenarioID == null){
+                SecurityConfigAdmin securityAdmin = new SecurityConfigAdmin(msgCtx.
+                                                      getConfigurationContext().getAxisConfiguration());
+                SecurityScenarioData data = securityAdmin.getCurrentScenario(service.getName());
+                if(data != null){
+                    scenarioID = data.getScenarioId();
+                    try {
+                        Parameter param = new Parameter();
+                        param.setName(SecurityConstants.SCENARIO_ID_PARAM_NAME);
+                        param.setValue(scenarioID);
+                        service.addParameter(param);
+                    } catch (AxisFault axisFault) {
+                        log.error("Error while adding Scenario ID parameter",axisFault);
+                    }
+                }
+            }
+
+            if (scenarioID != null && scenarioID.equals(SecurityConstants.USERNAME_TOKEN_SCENARIO_ID)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Processing POX security");
                 }

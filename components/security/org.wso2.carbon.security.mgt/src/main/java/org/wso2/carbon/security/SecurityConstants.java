@@ -112,4 +112,7 @@ public class SecurityConstants {
     public static final int DEFAULT_ITEMS_PER_PAGE = 50;
     public static final int ITEMS_PER_PAGE = 10;
     public static final int CACHING_PAGE_SIZE = 5;
+
+    //AxisService parameter names
+    public static final String SCENARIO_ID_PARAM_NAME = "ScenarioID";
 }
