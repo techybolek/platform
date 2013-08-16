@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="jira_project" type="synapse/template">
+
+	<subArtifacts>
+		<artifact name="getProject">
+			<file>getProject.xml</file>
+			<description>Get Jira Project information.</description>
+		</artifact>
+		<artifact name="getAvatarForProject">
+			<file>getAvatarForProject.xml</file>
+			<description>Get Avatar information of the given project.
+			</description>
+		</artifact>
+		<artifact name="getAvatarsForProject">
+			<file>getAvatarsforProject.xml</file>
+			<description>returns all avatars which are visible for the currently
+				logged in user. The avatars are grouped into system and custom.
+			</description>
+		</artifact>
+		<artifact name="deleteAvatarForProject">
+			<file>deleteAvatarForProject.xml</file>
+			<description>Deletes avatar
+			</description>
+		</artifact>
+
+		<artifact name="getComponentsOfProject">
+			<file>getComponentsOfProject.xml</file>
+			<description>Contains a full representation of a the specified
+				project's components.
+			</description>
+		</artifact>
+		<artifact name="getStatusesOfProject">
+			<file>getStatusesOfProject.xml</file>
+			<description>Get all issue types with valid status values for a
+				project.
+			</description>
+		</artifact>
+		<artifact name="getVersionsOfProject">
+			<file>getVersionsOfProject.xml</file>
+			<description>Contains a full representation of a the specified
+				project's versions.
+			</description>
+		</artifact>
+		<artifact name="getRolesOfProject">
+			<file>getRolesOfProject.xml</file>
+			<description>Contains a list of roles in this project with links to
+				full details.
+			</description>
+		</artifact>
+		<artifact name="getRolesByIdOfProject">
+			<file>getRolesByIdOfProject.xml</file>
+			<description>Details on a given project role.
+			</description>
+		</artifact>
+		<artifact name="getUserAssignableProjects">
+			<file>getUserAssignableProjects.xml</file>
+			<description>Returns a list of users that match the search string and
+				can be assigned issues for all the given projects. This resource
+				cannot be accessed anonymously.
+			</description>
+		</artifact>
+	</subArtifacts>
+</artifact>

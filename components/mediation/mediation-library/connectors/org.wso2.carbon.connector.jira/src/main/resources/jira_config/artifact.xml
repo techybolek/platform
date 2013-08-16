@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="jira_config" type="synapse/template">
+
+	<subArtifacts>
+		<artifact name="config">
+			<file>config.xml</file>
+			<description>configure jira connector</description>
+		</artifact>
+	</subArtifacts>
+</artifact>

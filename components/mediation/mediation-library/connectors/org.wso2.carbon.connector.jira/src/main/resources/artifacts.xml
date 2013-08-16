@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifacts>
+	<artifact name="jira_6.0" package="org.wso2.carbon.connectors">
+		<dependency artifact="jira_config" />
+		<dependency artifact="jira_issue" />
+		<dependency artifact="jira_project" />
+		<dependency artifact="jira_search" />
+		<dependency artifact="jira_user" />
+		<description>Jira 6.0 cloud connector</description>
+	</artifact>
+</artifacts>

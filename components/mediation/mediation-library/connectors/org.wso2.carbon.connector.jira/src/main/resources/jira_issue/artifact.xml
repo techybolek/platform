@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="jira_issue" type="synapse/template">
+
+	<subArtifacts>
+		<artifact name="createIssue">
+			<file>createIssue.xml</file>
+			<description>creates jira issue</description>
+		</artifact>
+		<artifact name="getIssue">
+			<file>getIssue.xml</file>
+			<description>get jira issue</description>
+		</artifact>
+		<artifact name="updateIssue">
+			<file>updateIssue.xml</file>
+			<description>update jira issue</description>
+		</artifact>
+		<artifact name="updateIssueAssignee">
+			<file>updateIssueAssignee.xml</file>
+			<description>update jira issue assinee</description>
+		</artifact>
+		<artifact name="getIssuesForUser">
+			<file>getIssuesForUser.xml</file>
+			<description>get jira for the requested user</description>
+		</artifact>
+		<artifact name="getTransitions">
+			<file>getTransitions.xml</file>
+			<description>get transitions for the requested jira</description>
+		</artifact>
+		<artifact name="deleteComment">
+			<file>deleteComment.xml</file>
+			<description>delete comment of the given jira issue</description>
+		</artifact>
+		<artifact name="getComments">
+			<file>getComments.xml</file>
+			<description>get jira issue commnents</description>
+		</artifact>
+		<artifact name="postComment">
+			<file>postComment.xml</file>
+			<description>Posting jira issue comment</description>
+		</artifact>
+		<artifact name="updateComment">
+			<file>updateComment.xml</file>
+			<description>updating jira issue comment</description>
+		</artifact>
+		<artifact name="getVotesForIssue">
+			<file>getVotesForIssue.xml</file>
+			<description>get vote for the requested jira</description>
+		</artifact>
+	</subArtifacts>
+</artifact>

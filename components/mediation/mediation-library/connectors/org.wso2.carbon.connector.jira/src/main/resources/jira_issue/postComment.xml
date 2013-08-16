@@ -1,0 +1,19 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="postComment">
+
+	<parameter name="issueIdOrKey" description="a String containing the issue id." />
+
+	<sequence>
+		<property name="uri.var.issueId" expression="$func:issueIdOrKey" />
+		<property name="messageType" value="application/json" scope="axis2" />
+		<property name="Accept-Encoding" action="remove" scope="transport" />
+
+		<send continuation="true">
+			<endpoint>
+				<http method="POST"
+					uri-template="{uri.var.jira.url}/rest/api/2/issue/{uri.var.issueId}/comment" />
+			</endpoint>
+		</send>
+
+	</sequence>
+
+</template>

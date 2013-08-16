@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="jira_user" type="synapse/template">
+
+	<subArtifacts>
+		<artifact name="getUser">
+			<file>getUser.xml</file>
+			<description>Get Jira user information</description>
+		</artifact>
+	</subArtifacts>
+</artifact>
