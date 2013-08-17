@@ -490,7 +490,15 @@
     <li><a href="#tabs-2"><fmt:message key="dynamic.sequencs"/></a></li>
 </ul>
 <div id="tabs-1">
-    <p><fmt:message key="sequences.defined.text"/></p>
+    <p><fmt:message key="sequences.defined.text"/>
+    <%
+        if ( sequenceAdminClient!=null) {
+    %>
+     <%=" :- " + sequenceAdminClient.getSequencesCount()%>
+     <%
+      }
+      %>
+    </p>
     <br/>
     <form action="list_sequences.jsp" name="searchForm">
         <table style="border:0; !important">
