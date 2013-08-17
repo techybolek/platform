@@ -238,24 +238,6 @@
             <fileMode>755</fileMode>
         </fileSet>
 
-	<!--Zookeeper related configuration files-->
-	<fileSet>
- 	    <directory>bam-resources/conf</directory>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/security</outputDirectory>
-            <includes>
-                <include>**/jaas.conf</include>
-            </includes>
-            <fileMode>755</fileMode>
-        </fileSet>
-	<fileSet>
- 	    <directory>bam-resources/conf</directory>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
-            <includes>
-                <include>**/zoo.cfg</include>
-            </includes>
-            <fileMode>755</fileMode>
-        </fileSet>
-
 	<!--bam toolbox -->
 	<fileSet>
  	    <directory>bam-resources/bam-toolbox</directory>
@@ -518,12 +500,6 @@
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/datasources</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
-        </file>
-
-	<!-- Including coordination-client-config.xml file -->
-	<file>
-            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/etc/coordination-client-config.xml</source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
         </file>
 
 	<!-- Setting jamm javaagent in bam -->

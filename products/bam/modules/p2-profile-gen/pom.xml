@@ -230,12 +230,6 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.ntask.feature:${carbon.platform.version}
                                 </featureArtifactDef>
-                                <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.coordination.core.feature:${carbon.platform.version}
-                                </featureArtifactDef>
-                                <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.coordination.server.feature:${carbon.platform.version}
-                                </featureArtifactDef>
                                 <!-- end ntask features -->
 
                                 <!-- reporting features -->
@@ -572,14 +566,6 @@
                                 <!-- ntask features -->
                                 <feature>
                                     <id>org.wso2.carbon.ntask.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.coordination.core.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.coordination.server.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
                                 <!-- end ntask features -->
