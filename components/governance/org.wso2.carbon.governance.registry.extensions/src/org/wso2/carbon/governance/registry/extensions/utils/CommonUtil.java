@@ -18,6 +18,8 @@ package org.wso2.carbon.governance.registry.extensions.utils;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
@@ -42,6 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class CommonUtil {
+    private static final Log log = LogFactory.getLog(CommonUtil.class);
 
     public static String[] getAllLifeCycleStates(Registry registry, String lifeCycleName) throws RegistryException {
         boolean isLiteral = true;
@@ -179,25 +182,32 @@ public class CommonUtil {
                 CurrentSession.setTenantId(currentTenantId);
             }
             try {
-                if(!systemRegistry.resourceExists(GovernanceConstants.RXT_CONFIGS_PATH)) {
-                    Collection collection =  systemRegistry.newCollection();
-                    systemRegistry.put(GovernanceConstants.RXT_CONFIGS_PATH,collection);
+                String rxtConfigRelativePath = RegistryUtils.getRelativePathToOriginal(GovernanceConstants.RXT_CONFIGS_PATH,
+                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+
+                if (!systemRegistry.resourceExists(rxtConfigRelativePath)) {
+                    Collection collection = systemRegistry.newCollection();
+                    systemRegistry.put(rxtConfigRelativePath, collection);
                 }
 
-                  Resource rxtCollection = systemRegistry.get(GovernanceConstants.RXT_CONFIGS_PATH);
-                  String rxtName = resourcePath.substring(resourcePath.lastIndexOf("/")+1).split("\\.")[0];
-                  String propertyaName = "registry." + rxtName;
-                    if(rxtCollection.getProperty(propertyaName) == null) {
-                        rxtCollection.setProperty(propertyaName,"true");
-                        systemRegistry.put(GovernanceConstants.RXT_CONFIGS_PATH,rxtCollection);
-
-                        String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
+                Resource rxtCollection = systemRegistry.get(rxtConfigRelativePath);
+                String rxtName = resourcePath.substring(resourcePath.lastIndexOf("/") + 1).split("\\.")[0];
+                String rxt = null;
+                if (!systemRegistry.resourceExists(resourcePath)) {
+                    String propertyName = "registry." + rxtName;
+                    if (rxtCollection.getProperty(propertyName) == null) {
+                        rxtCollection.setProperty(propertyName, "true");
+                        rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
                         Resource resource = systemRegistry.newResource();
                         resource.setContent(rxt.getBytes());
                         resource.setMediaType(CommonConstants.RXT_MEDIA_TYPE);
                         systemRegistry.put(resourcePath, resource);
                     }
-
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("RXT " + rxt + "already added ");
+                    }
+                }
 
             } catch (IOException e) {
                 String msg = "Failed to read rxt files";
