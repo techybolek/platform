@@ -252,12 +252,7 @@
             <source>src/conf/custom-datasources.xml</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/datasources</outputDirectory>
         </file>
-	<!-- Including coordination-client-config.xml file -->
-	<file>
-            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/etc/coordination-client-config.xml</source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
-        </file>
-         <!-- Including logging-config.xml file -->
+        <!-- Including logging-config.xml file -->
         <file>
             <source>../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/etc/logging-config.xml</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
