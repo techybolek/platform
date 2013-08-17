@@ -1330,15 +1330,19 @@ public final class APIUtil {
 			String resourcePath =
 			                      GovernanceConstants.RXT_CONFIGS_PATH +
 			                              RegistryConstants.PATH_SEPARATOR + rxtPath;
+
+            //This is  "registry" is a governance registry instance, therefore calculate the relative path to governance.
+            String govRelativePath =   RegistryUtils.getRelativePathToOriginal(resourcePath,
+                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
 			try {
-				if (registry.resourceExists(resourcePath)) {
+				if (registry.resourceExists(govRelativePath)) {
 					continue;
 				}
 				String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
 				Resource resource = registry.newResource();
 				resource.setContent(rxt.getBytes());
 				resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
-				registry.put(resourcePath, resource);
+				registry.put(govRelativePath, resource);
 			} catch (IOException e) {
 				String msg = "Failed to read rxt files";
 				throw new APIManagementException(msg, e);
