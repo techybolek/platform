@@ -6,7 +6,7 @@ Introduction:
 
 This sample demonstrates the capabilities and power of MTOM. MTOM Web Service accepts a 
 fileName and DataHandler. This DataHandler contains the binary content which will eventually save to a 
-temporary location to the given fileName. 
+temporary location to the given fileName. This sample will save files under CARBON_HOME/tmp/mtom/<fileName>.
 
 Prerequisites
 =============
