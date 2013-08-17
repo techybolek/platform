@@ -155,12 +155,6 @@
                                     org.wso2.carbon:org.wso2.carbon.lb.common.feature:${carbon.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.coordination.server.feature:${carbon.version}
-                                </featureArtifactDef>
-                                <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.coordination.core.feature:${carbon.version}
-                                </featureArtifactDef>
-                                <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.registry.core.feature:${carbon.version}
                                 </featureArtifactDef>
 		                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.server.feature:${carbon.version}</featureArtifactDef>
@@ -258,14 +252,6 @@
                                 </feature-->
                                 <feature>
                                     <id>org.wso2.carbon.ntask.core.feature.group</id>
-                                    <version>${carbon.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.coordination.server.feature.group</id>
-                                    <version>${carbon.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.coordination.core.feature.group</id>
                                     <version>${carbon.version}</version>
                                 </feature>
                                 <feature>
