@@ -540,7 +540,7 @@ function resetVars() {
     <%
         if (client!=null) {
     %>
-        <%=" - " + client.getEndpointCount()%>
+        <%=" :- " + client.getEndpointCount()%>
     <%
         }
     %>
