@@ -34,7 +34,7 @@ public class DecisionInvalidationCache extends EntitlementBaseCache<IdentityCach
     private int myHashCode;
 
     private DecisionInvalidationCache() {
-    	super(PDPConstants.PDP_DECISION_CLEARING_CACHE);
+    	super(PDPConstants.PDP_DECISION_INVALIDATION_CACHE);
     }
 
     /**
@@ -58,11 +58,12 @@ public class DecisionInvalidationCache extends EntitlementBaseCache<IdentityCach
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
 
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
-        myHashCode ++;
-        IdentityCacheEntry cacheEntry = new IdentityCacheEntry(myHashCode);
+        int valueToCache = myHashCode + 1;
+        IdentityCacheEntry cacheEntry = new IdentityCacheEntry(valueToCache);
         addToCache(cacheKey, cacheEntry);
         if(log.isDebugEnabled()){
             log.debug("My Hash code of Decision cache is : " + myHashCode);
+            log.debug("Adding Shared Hash of Decision cache : " + valueToCache);
         }
     }
 

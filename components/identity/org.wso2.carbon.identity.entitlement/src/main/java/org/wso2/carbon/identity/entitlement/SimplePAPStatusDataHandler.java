@@ -17,28 +17,55 @@
  */
 package org.wso2.carbon.identity.entitlement;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.common.EntitlementConstants;
-import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
-import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
+import org.wso2.carbon.identity.entitlement.dto.PublisherPropertyDTO;
 import org.wso2.carbon.identity.entitlement.dto.StatusHolder;
-import org.wso2.carbon.identity.entitlement.pap.EntitlementAdminEngine;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreManager;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
-import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisher;
+import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *    TODO
  */
 public class SimplePAPStatusDataHandler implements PAPStatusDataHandler{
 
+    private static Log log = LogFactory.getLog(SimplePAPStatusDataHandler.class);
+
+    private int DEFAULT_MAX_RECODES  = 5;
+
+    private static final String ENTITLEMENT_POLICY_STATUS = "/repository/identity/entitlement/status/policy/";
+
+    private static final String ENTITLEMENT_PUBLISHER_STATUS = "/repository/identity/entitlement/status/publisher/";
+
+    private static final int SEARCH_BY_USER = 0;
+    
+    private static final int SEARCH_BY_POLICY = 1;
+    
+    private int maxRecodes;
+    
     @Override
     public void init(Properties properties) {
-
+        String maxRecodesString = (String)properties.get("maxRecodesToPersist");
+        if(maxRecodesString != null){
+            try {
+                maxRecodes = Integer.parseInt(maxRecodesString);
+            } catch (Exception e){
+                //ignore
+            }
+        }
+        if(maxRecodes == 0){
+            maxRecodes = DEFAULT_MAX_RECODES;
+        }
     }
 
     @Override
@@ -46,13 +73,11 @@ public class SimplePAPStatusDataHandler implements PAPStatusDataHandler{
                                                                     throws EntitlementException {
 
         if(EntitlementConstants.Status.ABOUT_POLICY.equals(about)){
-            PAPPolicyStore policyStore = new PAPPolicyStore();
-            policyStore.persistStatus(key, statusHolder);
+            String path = ENTITLEMENT_POLICY_STATUS + key;
+            persistStatus(path, statusHolder, false);
         } else {
-            PolicyPublisher publisher =  EntitlementAdminEngine.getInstance().getPolicyPublisher();
-            PublisherDataHolder holder =  publisher.retrieveSubscriber(key);
-            holder.addStatusHolders(statusHolder);
-            publisher.persistSubscriber(holder, true);
+            String path = ENTITLEMENT_PUBLISHER_STATUS + key;
+            persistStatus(path, statusHolder, false);
         }
     }
 
@@ -68,13 +93,20 @@ public class SimplePAPStatusDataHandler implements PAPStatusDataHandler{
     @Override
     public StatusHolder[] getStatusData(String about, String key, String type, String searchString)
                                                                     throws EntitlementException {
-        
+
         if(EntitlementConstants.Status.ABOUT_POLICY.equals(about)){
-            PAPPolicyStoreReader reader = new PAPPolicyStoreReader(new PAPPolicyStore());
-            List<StatusHolder> holders = reader.readStatus(key);
+            String path = ENTITLEMENT_POLICY_STATUS + key;
+            List<StatusHolder> holders = readStatus(path, EntitlementConstants.Status.ABOUT_POLICY);
             List<StatusHolder> filteredHolders = new ArrayList<StatusHolder>();
             if(holders != null){
+                searchString = searchString.replace("*", ".*");
+                Pattern pattern = Pattern.compile(searchString, Pattern.CASE_INSENSITIVE);
                 for(StatusHolder holder : holders){
+                    String id = holder.getUser();
+                    Matcher matcher = pattern.matcher(id);
+                    if(!matcher.matches()){
+                        continue;
+                    }
                     if(type != null && type.equals(holder.getType())){
                         filteredHolders.add(holder);
                     } else if(type == null){
@@ -84,9 +116,166 @@ public class SimplePAPStatusDataHandler implements PAPStatusDataHandler{
             }
             return filteredHolders.toArray(new StatusHolder[filteredHolders.size()]);
         } else {
-            PolicyPublisher publisher =  EntitlementAdminEngine.getInstance().getPolicyPublisher();
-            PublisherDataHolder holder =  publisher.retrieveSubscriber(key);
-            return holder.getStatusHolders();
+            List<StatusHolder> filteredHolders = new ArrayList<StatusHolder>();
+            String path = ENTITLEMENT_PUBLISHER_STATUS + key;
+            List<StatusHolder> holders = readStatus(path, EntitlementConstants.Status.ABOUT_SUBSCRIBER);
+            if(holders != null){
+                searchString = searchString.replace("*", ".*");
+                Pattern pattern = Pattern.compile(searchString, Pattern.CASE_INSENSITIVE);
+                for(StatusHolder holder : holders){
+                    String id = holder.getTarget();
+                    Matcher matcher = pattern.matcher(id);
+                    if(!matcher.matches()){
+                        continue;
+                    }
+                    filteredHolders.add(holder);
+                }
+            }
+            return filteredHolders.toArray(new StatusHolder[filteredHolders.size()]);
         }
     }
+
+    private void  persistStatus(String path, List<StatusHolder> statusHolders, boolean isNew)
+            throws EntitlementException {
+
+        Resource resource = null;
+        Registry registry = null;
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
+        try{
+            registry = EntitlementServiceComponent.getRegistryService().
+                    getGovernanceSystemRegistry(tenantId);
+            if(registry.resourceExists(path) && !isNew){
+                resource =  registry.get(path);
+            } else {
+                resource = registry.newResource();
+            }
+
+            if(resource != null && statusHolders != null && statusHolders.size() > 0){
+                resource.setVersionableChange(false);
+                populateStatusProperties(statusHolders.toArray(new StatusHolder[statusHolders.size()]), resource);
+                registry.put(path, resource);
+            }
+        } catch (RegistryException e) {
+            log.error(e);
+            throw new EntitlementException("Error while persisting policy status", e);
+        }
+
+    }
+
+    public List<StatusHolder> readStatus(String path, String about) throws EntitlementException {
+
+        Resource resource = null;
+        Registry registry = null;
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        try{
+            registry = EntitlementServiceComponent.getRegistryService().
+                    getGovernanceSystemRegistry(tenantId);
+            if(registry.resourceExists(path) ){
+                resource =  registry.get(path);
+            }
+        } catch (RegistryException e) {
+            log.error(e);
+            throw new EntitlementException("Error while persisting policy status", e);
+        }
+
+        List<StatusHolder> statusHolders = new ArrayList<StatusHolder>();
+        if(resource != null && resource.getProperties() != null){
+            Properties properties = resource.getProperties();
+            for(Map.Entry<Object, Object> entry : properties.entrySet()){
+                PublisherPropertyDTO dto = new PublisherPropertyDTO();
+                dto.setId((String)entry.getKey());
+                Object value = entry.getValue();
+                if(value instanceof ArrayList){
+                    List list = (ArrayList) entry.getValue();
+                    if(list != null && list.size() > 0 && list.get(0) != null){
+                        StatusHolder statusHolder = new StatusHolder(about);
+                        if(list.size() > 0  && list.get(0) != null){
+                            statusHolder.setType((String)list.get(0));
+                        }
+                        if(list.size() > 1  && list.get(1) != null){
+                            statusHolder.setTimeInstance((String)list.get(1));
+                        }
+                        if(list.size() > 2  && list.get(2) != null){
+                            String user  = (String)list.get(2);
+                            statusHolder.setUser(user);
+                        }
+                        if(list.size() > 3  && list.get(3) != null){
+                            statusHolder.setKey((String)list.get(3));
+                        }
+                        if(list.size() > 4  && list.get(4) != null){
+                            statusHolder.setSuccess(Boolean.parseBoolean((String)list.get(4)));
+                        }
+                        if(list.size() > 5  && list.get(5) != null){
+                            statusHolder.setMessage((String)list.get(5));
+                        }
+                        if(list.size() > 6  && list.get(6) != null){
+                            statusHolder.setTarget((String) list.get(6));
+                        }
+                        if(list.size() > 7  && list.get(7) != null){
+                            statusHolder.setTargetAction((String) list.get(7));
+                        }
+                        if(list.size() > 8  && list.get(8) != null){
+                            statusHolder.setVersion((String) list.get(8));
+                        }
+                        statusHolders.add(statusHolder);
+                    }
+                }
+            }
+        }
+        if(statusHolders.size() > maxRecodes){
+            StatusHolder[] array = statusHolders.toArray(new StatusHolder[statusHolders.size()]);
+            java.util.Arrays.sort(array, new StatusHolderComparator());
+            statusHolders = new ArrayList<StatusHolder>();
+            for(int i = 0; i < maxRecodes; i++){
+                statusHolders.add(array[i]);
+            }
+            persistStatus(path, statusHolders, true);
+        }
+        
+        return statusHolders;
+    }
+    
+    
+    /**
+     *
+     * @param statusHolders
+     * @param resource
+     */
+    private void populateStatusProperties(StatusHolder[] statusHolders, Resource resource){
+        if(statusHolders != null){
+            for(StatusHolder statusHolder : statusHolders){
+                if(statusHolder != null){
+                    List<String>  list = new ArrayList<String>();
+                    list.add(statusHolder.getType());
+                    list.add(statusHolder.getTimeInstance());
+                    list.add(statusHolder.getUser());
+                    list.add(statusHolder.getKey());
+                    list.add(Boolean.toString(statusHolder.isSuccess()));
+                    if(statusHolder.getMessage() != null){
+                        list.add(statusHolder.getMessage());
+                    } else {
+                        list.add("");
+                    }
+                    if(statusHolder.getTarget() != null){
+                        list.add(statusHolder.getTarget());
+                    } else {
+                        list.add("");
+                    }
+                    if(statusHolder.getTargetAction() != null){
+                        list.add(statusHolder.getTargetAction());
+                    } else {
+                        list.add("");
+                    }
+                    if(statusHolder.getVersion() != null){
+                        list.add(statusHolder.getVersion());
+                    } else {
+                        list.add("");
+                    }
+                    resource.setProperty(UUID.randomUUID().toString(), list);
+                }
+            }
+        }
+    }
+    
 }

@@ -141,7 +141,7 @@ public class PDPConstants {
 
 	public static final String PDP_SIMPLE_DECISION_CACHE = "PDP_SIMPLE_DECISION_CACHE";
 
-	public static final String PDP_DECISION_CLEARING_CACHE = "PDP_DECISION_INVALIDATION_CACHE";
+	public static final String PDP_DECISION_INVALIDATION_CACHE = "PDP_DECISION_INVALIDATION_CACHE";
 
 	public static final String POLICY_SEARCH_CACHE = "POLICY_SEARCH_CACHE";
 
@@ -151,7 +151,7 @@ public class PDPConstants {
 
 	public static final String PIP_ABSTRACT_ATTRIBUTE_CACHE = "PIP_ABSTRACT_ATTRIBUTE_CACHE";
 
-	public static final String ENTITLEMENT_POLICY_CACHE = "ENTITLEMENT_POLICY_CACHE";
+	public static final String ENTITLEMENT_POLICY_INVALIDATION_CACHE = "ENTITLEMENT_POLICY_INVALIDATION_CACHE";
 
 	public static final int DEFAULT_ITEMS_PER_PAGE = 50;
 
@@ -216,6 +216,9 @@ public class PDPConstants {
 
     public static final String ENTITLEMENT_POLICY_DATA =
                                             "/repository/identity/entitlement/policy/data/";
+
+    public static final String ENTITLEMENT_POLICY_PAP = "/repository/identity/entitlement/policy/pap/";
+
     // entitlement.properties file configurations
 
     public static final String ON_DEMAND_POLICY_LOADING = "PDP.OnDemangPolicyLoading.Enable";
@@ -233,7 +236,7 @@ public class PDPConstants {
 
     public static final String ATTRIBUTE_CACHING = "PDP.AttributeCaching.Enable";
 
-    public static final String ATTRIBUTE_CACHING_INTERVAL = "PDP.DecisionCaching.CachingInterval";
+    public static final String ATTRIBUTE_CACHING_INTERVAL = "PDP.AttributeCaching.CachingInterval";
 
     public static final String RESOURCE_CACHING = "PDP.ResourceCaching.Enable";
 

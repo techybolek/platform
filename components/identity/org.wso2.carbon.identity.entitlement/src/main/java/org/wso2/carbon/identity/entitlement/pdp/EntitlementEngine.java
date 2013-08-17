@@ -78,8 +78,6 @@ public class EntitlementEngine {
 
     private SimpleDecisionCache simpleDecisionCache = null;
 
-	private DecisionInvalidationCache decisionInvalidationCache = null;
-
 	private static Log log = LogFactory.getLog(EntitlementEngine.class);
 
 	/**
@@ -148,7 +146,6 @@ public class EntitlementEngine {
 		}
 
         //init caches
-        decisionInvalidationCache = DecisionInvalidationCache.getInstance();
         decisionCache = new DecisionCache(pdpDecisionCachingInterval);
         simpleDecisionCache = new SimpleDecisionCache(pdpDecisionCachingInterval);
 
@@ -372,7 +369,7 @@ public class EntitlementEngine {
 
             String decision;
 
-            if (decisionInvalidationCache.isInvalidate()) {
+            if (DecisionInvalidationCache.getInstance().isInvalidate()) {
                 decisionCache.clearCache();
                 simpleDecisionCache.clearCache();
             }

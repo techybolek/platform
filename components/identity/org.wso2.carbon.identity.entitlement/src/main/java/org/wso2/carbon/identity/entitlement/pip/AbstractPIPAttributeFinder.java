@@ -174,7 +174,17 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
 	public boolean overrideDefaultCache() {
         Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
         if ("true".equals(properties.getProperty(PDPConstants.ATTRIBUTE_CACHING))) {
-            abstractAttributeFinderCache = PIPAbstractAttributeCache.getInstance();
+
+            int attributeCachingInterval = -1;
+            String cacheInterval = properties.getProperty(PDPConstants.ATTRIBUTE_CACHING_INTERVAL);
+            if (cacheInterval != null) {
+                try{
+                    attributeCachingInterval = Integer.parseInt(cacheInterval.trim());
+                } catch (Exception e){
+                    //ignore
+                }
+            }
+            abstractAttributeFinderCache = new PIPAbstractAttributeCache(attributeCachingInterval);
             isAbstractAttributeCachingEnabled = true;
             return true;
         } else {
@@ -185,7 +195,7 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
 	@Override
 	public void clearCache() {
         if(abstractAttributeFinderCache != null){
-            abstractAttributeFinderCache.clearCache(tenantId);
+            abstractAttributeFinderCache.clearCache();
         }
 	}
 

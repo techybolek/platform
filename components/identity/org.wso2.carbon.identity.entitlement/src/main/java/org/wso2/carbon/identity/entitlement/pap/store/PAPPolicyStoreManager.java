@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.core.IdentityRegistryResources;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.registry.core.Resource;
 
@@ -38,7 +39,7 @@ public class PAPPolicyStoreManager {
     }
 
     public void addOrUpdatePolicy(PolicyDTO policy) throws EntitlementException {
-        store.addOrUpdatePolicy(policy, IdentityRegistryResources.ENTITLEMENT);
+        store.addOrUpdatePolicy(policy, PDPConstants.ENTITLEMENT_POLICY_PAP);
     }
 
     public void removePolicy(PolicyDTO policy) throws EntitlementException {

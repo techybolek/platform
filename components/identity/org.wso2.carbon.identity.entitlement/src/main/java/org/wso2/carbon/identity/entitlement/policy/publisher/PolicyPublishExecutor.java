@@ -134,9 +134,7 @@ public class PolicyPublishExecutor implements Runnable {
                                     ((AbstractPolicyPublisherModule)policyPublisherModule).init(holder);
                                 } catch (Exception e) {
                                     subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                                        "More than one Policy", version, subscriberId, action,false, e.getMessage()));
-                                    policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                                        "More than one Policy", version, subscriberId, action,false, e.getMessage()));
+                                            subscriberId, version, "More than one Policy", action,false, e.getMessage()));
                                     continue;
                                 }
                             }
@@ -148,10 +146,7 @@ public class PolicyPublishExecutor implements Runnable {
 
             if(policyPublisherModule == null){
                 subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                    "More than one Policy", version, subscriberId, action, false,
-                        "No policy publish module is defined for subscriber : " + subscriberId));
-                policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                    "More than one Policy", version, subscriberId, action, false,
+                    subscriberId, version, "More than one Policy", action, false,
                         "No policy publish module is defined for subscriber : " + subscriberId));
                 continue;
             }
@@ -186,7 +181,7 @@ public class PolicyPublishExecutor implements Runnable {
 
                 if(policyDTO == null){
                     subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                            policyId, version, subscriberId, action, false,
+                            subscriberId, version, policyId, action, false,
                             "Can not found policy under policy id : " + policyId));
                     policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
                             policyId, version, subscriberId, action, false,
@@ -197,12 +192,12 @@ public class PolicyPublishExecutor implements Runnable {
                 try {
                     policyPublisherModule.publish(policyDTO, action, order);
                     subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                            policyId, version, subscriberId, action));
+                            subscriberId, version, policyId, action));
                     policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
                             policyId, version, subscriberId, action));
                 } catch (Exception e) {
                     subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                            policyId, version, subscriberId, action, false, e.getMessage()));
+                            subscriberId, version, policyId, action, false, e.getMessage()));
                     policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
                             policyId, version, subscriberId, action, false, e.getMessage()));
                 }
@@ -224,11 +219,6 @@ public class PolicyPublishExecutor implements Runnable {
                     // ignore
                     log.error("Error while calling post publishers" , e);
                 }
-            }
-
-            holder.addStatusHolders(subscriberHolders);
-            if(subscriberHolders.size() > 0){
-                holder.setLatestStatus(subscriberHolders.get(0));
             }
         }
         

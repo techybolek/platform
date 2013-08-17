@@ -326,7 +326,6 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
         }
         handleStatus(EntitlementConstants.StatusTypes.DELETE_POLICY, oldPolicy, true, null);
 
-        
         if(dePromote){
             publishToPDP(new String[] {policyId}, null,
                     EntitlementConstants.PolicyPublish.ACTION_DELETE);            
@@ -368,7 +367,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
      */
     public String[] getSubscriberIds(String searchString) throws EntitlementException {
         PolicyPublisher publisher = EntitlementAdminEngine.getInstance().getPolicyPublisher();
-        String[] ids = publisher.retrieveSubscriberIds();
+        String[] ids = publisher.retrieveSubscriberIds(searchString);
         if(ids != null){
             return ids;
         } else {
@@ -430,7 +429,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
             policyIds = EntitlementAdminEngine.getInstance().getPapPolicyStoreManager().getPolicyIds();
         }
         if(subscriberIds == null || subscriberIds.length < 1){
-            subscriberIds = publisher.retrieveSubscriberIds();
+            subscriberIds = publisher.retrieveSubscriberIds("*");
         }
 
         if(policyIds == null || policyIds.length  < 1){
@@ -766,6 +765,45 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 
         for (int i = startIndex, j = 0; i < endIndex && i < statusHolders.length; i++, j++) {
             returnedHolders[j] = statusHolders[i];
+        }
+
+        paginatedStatusHolder.setStatusHolders(returnedHolders);
+        paginatedStatusHolder.setNumberOfPages(numberOfPages);
+
+        return paginatedStatusHolder;
+    }
+
+
+    /**
+     * This method is used internally to do the pagination purposes.
+     *
+     * @param pageNumber page Number
+     * @param ids <code>String</code>
+     * @return PaginatedStringDTO object containing the number of pages and the set of policies
+     *         that reside in the given page.
+     */
+    private PaginatedStringDTO doPagingString(int pageNumber, String[] ids) {
+
+        PaginatedStringDTO paginatedStatusHolder = new PaginatedStringDTO();
+        if (ids.length == 0) {
+            paginatedStatusHolder.setStatusHolders(new String[0]);
+            return paginatedStatusHolder;
+        }
+        String itemsPerPage = ServerConfiguration.getInstance().getFirstProperty("ItemsPerPage");
+        int itemsPerPageInt = PDPConstants.DEFAULT_ITEMS_PER_PAGE;
+        if (itemsPerPage != null) {
+            itemsPerPageInt = Integer.parseInt(itemsPerPage);
+        }
+        int numberOfPages = (int) Math.ceil((double) ids.length / itemsPerPageInt);
+        if (pageNumber > numberOfPages - 1) {
+            pageNumber = numberOfPages - 1;
+        }
+        int startIndex = pageNumber * itemsPerPageInt;
+        int endIndex = (pageNumber + 1) * itemsPerPageInt;
+        String[] returnedHolders = new String[itemsPerPageInt];
+
+        for (int i = startIndex, j = 0; i < endIndex && i < ids.length; i++, j++) {
+            returnedHolders[j] = ids[i];
         }
 
         paginatedStatusHolder.setStatusHolders(returnedHolders);

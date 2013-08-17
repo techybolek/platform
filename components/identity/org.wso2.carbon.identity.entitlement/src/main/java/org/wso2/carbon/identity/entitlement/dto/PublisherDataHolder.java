@@ -34,10 +34,6 @@ public class PublisherDataHolder {
 
     private PublisherPropertyDTO[] propertyDTOs = new PublisherPropertyDTO[0];
 
-    private StatusHolder[] statusHolders = new StatusHolder[0];
-
-    private StatusHolder latestStatus;
-
     public PublisherDataHolder() {
     }
 
@@ -47,7 +43,6 @@ public class PublisherDataHolder {
 
     public PublisherDataHolder(Resource resource) {
         List<PublisherPropertyDTO> propertyDTOs = new ArrayList<PublisherPropertyDTO>();
-        List<StatusHolder> statusHolders = new ArrayList<StatusHolder>();
         if(resource != null && resource.getProperties() != null){
             Properties properties = resource.getProperties();
             for(Map.Entry<Object, Object> entry : properties.entrySet()){
@@ -57,39 +52,6 @@ public class PublisherDataHolder {
                 if(value instanceof ArrayList){
                     List list = (ArrayList) entry.getValue();
                     if(list != null && list.size() > 0 && list.get(0) != null){
-                        if(((String)entry.getKey()).startsWith(StatusHolder.STATUS_HOLDER_NAME)){
-                            StatusHolder statusHolder = new StatusHolder(EntitlementConstants.Status.ABOUT_SUBSCRIBER);
-                            if(list.size() > 0  && list.get(0) != null){
-                                statusHolder.setType((String)list.get(0));
-                            }
-                            if(list.size() > 1  && list.get(1) != null){
-                                statusHolder.setTimeInstance((String)list.get(1));
-                            }
-                            if(list.size() > 2  && list.get(2) != null){
-                                statusHolder.setUser((String)list.get(2));
-                            }
-                            if(list.size() > 3  && list.get(3) != null){
-                                statusHolder.setKey((String)list.get(3));
-                            }
-                            if(list.size() > 4  && list.get(4) != null){
-                                statusHolder.setSuccess(Boolean.parseBoolean((String)list.get(4)));
-                            }
-                            if(list.size() > 5  && list.get(5) != null){
-                                statusHolder.setMessage((String)list.get(5));
-                            }
-                            if(list.size() > 6  && list.get(6) != null){
-                                statusHolder.setTarget((String)list.get(6));
-                            }
-                            if(list.size() > 7  && list.get(7) != null){
-                                statusHolder.setTargetAction((String)list.get(7));
-                            }
-                            if(list.size() > 8  && list.get(8) != null){
-                                statusHolder.setVersion((String)list.get(8));
-                            }
-                            statusHolders.add(statusHolder);
-                            continue;
-                        }
-
                         dto.setValue((String)list.get(0));
 
                         if(list.size() > 1  && list.get(1) != null){
@@ -120,7 +82,6 @@ public class PublisherDataHolder {
             }
         }
         this.propertyDTOs = propertyDTOs.toArray(new PublisherPropertyDTO[propertyDTOs.size()]);
-        this.statusHolders = statusHolders.toArray(new StatusHolder[statusHolders.size()]);
     }
 
     public String getModuleName() {
@@ -137,23 +98,5 @@ public class PublisherDataHolder {
 
     public void setPropertyDTOs(PublisherPropertyDTO[] propertyDTOs) {
         this.propertyDTOs = Arrays.copyOf(propertyDTOs, propertyDTOs.length);
-    }
-
-    public StatusHolder getLatestStatus() {
-        return latestStatus;
-    }
-
-    public void setLatestStatus(StatusHolder latestStatus) {
-        this.latestStatus = latestStatus;
-    }
-
-    public StatusHolder[] getStatusHolders() {
-        return Arrays.copyOf(statusHolders, statusHolders.length);
-    }
-
-    public void addStatusHolders(List<StatusHolder> statusHolders) {
-        List<StatusHolder> list = new ArrayList<StatusHolder>(Arrays.asList(this.statusHolders));
-        list.addAll(statusHolders);
-        this.statusHolders = list.toArray(new StatusHolder[list.size()]);
     }
 }

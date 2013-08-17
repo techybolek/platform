@@ -39,6 +39,8 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is policy publisher. There can be different modules that have been plugged with this.
@@ -243,7 +245,7 @@ public class PolicyPublisher{
         throw new EntitlementException("No Subscriber is defined for given Id");
     }
 
-    public String[] retrieveSubscriberIds() throws EntitlementException {
+    public String[] retrieveSubscriberIds(String searchString) throws EntitlementException {
 
         try{
             if(registry.resourceExists(PDPConstants.ENTITLEMENT_POLICY_PUBLISHER +
@@ -253,7 +255,14 @@ public class PolicyPublisher{
                 Collection collection = (Collection) resource;
                 List<String> list = new ArrayList<String>();
                 if(collection.getChildCount() > 0){
+                    searchString = searchString.replace("*", ".*");
+                    Pattern pattern = Pattern.compile(searchString, Pattern.CASE_INSENSITIVE);
                     for(String path : collection.getChildren()){
+                        String id = path.substring(path.lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
+                        Matcher matcher = pattern.matcher(id);
+                        if(!matcher.matches()){
+                            continue;
+                        }
                         Resource childResource = registry.get(path);
                         if(childResource != null && childResource.getProperty(SUBSCRIBER_ID) != null){
                             list.add( childResource.getProperty(SUBSCRIBER_ID));
@@ -289,42 +298,6 @@ public class PolicyPublisher{
                 resource.setProperty(dto.getId(), list);
             }
         }
-
-        StatusHolder[] statusHolders = holder.getStatusHolders();
-        if(statusHolders != null){
-            for(StatusHolder statusHolder : statusHolders){
-                if(statusHolder != null){
-                    List<String>  list = new ArrayList<String>();
-                    list.add(statusHolder.getType());
-                    list.add(statusHolder.getTimeInstance());
-                    list.add(statusHolder.getUser());
-                    list.add(statusHolder.getKey());
-                    list.add(Boolean.toString(statusHolder.isSuccess()));
-                    if(statusHolder.getMessage() != null){
-                        list.add(statusHolder.getMessage());
-                    } else {
-                        list.add("");
-                    }
-                    if(statusHolder.getTarget() != null){
-                        list.add(statusHolder.getTarget());
-                    } else {
-                        list.add("");
-                    }
-                    if(statusHolder.getTargetAction() != null){
-                        list.add(statusHolder.getTargetAction());
-                    } else {
-                        list.add("");
-                    }
-                    if(statusHolder.getVersion() != null){
-                        list.add(statusHolder.getVersion());
-                    } else {
-                        list.add("");
-                    }
-                    resource.setProperty(StatusHolder.STATUS_HOLDER_NAME +  UUID.randomUUID(), list);
-                }
-            }
-        }
-
         resource.setProperty(PublisherDataHolder.MODULE_NAME, holder.getModuleName());
     }
 

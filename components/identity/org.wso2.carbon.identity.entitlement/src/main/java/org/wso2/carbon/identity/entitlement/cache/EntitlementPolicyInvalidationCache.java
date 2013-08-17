@@ -34,7 +34,7 @@ public class EntitlementPolicyInvalidationCache extends EntitlementBaseCache<Ide
     private int myHashCode;
 
     private EntitlementPolicyInvalidationCache() {
-    	super(PDPConstants.ENTITLEMENT_POLICY_CACHE);
+    	super(PDPConstants.ENTITLEMENT_POLICY_INVALIDATION_CACHE);
     }
 
 	/**
@@ -58,11 +58,12 @@ public class EntitlementPolicyInvalidationCache extends EntitlementBaseCache<Ide
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
 
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
-        myHashCode ++;
-        IdentityCacheEntry cacheEntry = new IdentityCacheEntry(myHashCode);
+        int valueToCache = myHashCode + 1;
+        IdentityCacheEntry cacheEntry = new IdentityCacheEntry(valueToCache);
         addToCache(cacheKey, cacheEntry);
         if(log.isDebugEnabled()){
             log.debug("My Hash code of Policy cache is : " + myHashCode);
+            log.debug("Adding Shared Hash of Policy cache : " + valueToCache);
         }
     }
 
@@ -81,6 +82,9 @@ public class EntitlementPolicyInvalidationCache extends EntitlementBaseCache<Ide
             }
             if(hashCode > myHashCode){
                 myHashCode = hashCode;
+                if(Integer.MAX_VALUE == myHashCode){
+                    myHashCode = 0;
+                }
                 return true;
             }
         }

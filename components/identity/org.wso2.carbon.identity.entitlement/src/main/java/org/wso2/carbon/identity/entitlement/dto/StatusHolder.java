@@ -83,7 +83,7 @@ public class StatusHolder {
         this.target = target;
         this.targetAction = targetAction;
         this.success = success;
-        this.timeInstance = (new Date()).toString();
+        this.timeInstance = Long.toString(System.currentTimeMillis());
     }
 
     public StatusHolder(String type, String key, String version, String target, String targetAction) {
@@ -94,7 +94,7 @@ public class StatusHolder {
         this.targetAction = targetAction;
         this.user = CarbonContext.getCurrentContext().getUsername();
         this.success = true;
-        this.timeInstance = (new Date()).toString();
+        this.timeInstance = Long.toString(System.currentTimeMillis());
     }
 
     public StatusHolder(String type) {

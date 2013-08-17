@@ -46,7 +46,6 @@ import org.wso2.balana.attr.AttributeValue;
 import org.wso2.balana.attr.BagAttribute;
 import org.wso2.balana.cond.EvaluationResult;
 import org.wso2.balana.finder.AttributeFinderModule;
-import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
 
 import javax.xml.transform.TransformerException;
 
@@ -79,8 +78,16 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 				.getDesignators();
         Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
 		if ("true".equals(properties.getProperty(PDPConstants.ATTRIBUTE_CACHING))) {
-            attributeFinderCache = PIPAttributeCache.getInstance();
-            attributeFinderCache.clearCache(tenantId);
+            int attributeCachingInterval = -1;
+            String cacheInterval = properties.getProperty(PDPConstants.ATTRIBUTE_CACHING_INTERVAL);
+            if (cacheInterval != null) {
+                try{
+                    attributeCachingInterval = Integer.parseInt(cacheInterval.trim());
+                } catch (Exception e){
+                    //ignore
+                }
+            }
+            attributeFinderCache = new PIPAttributeCache(attributeCachingInterval);
 		}
         // clear decision cache
         if(designators != null && !designators.isEmpty()){
@@ -132,12 +139,6 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 
 
 		if (finders == null || finders.size() == 0) {
-//          there is a API for refresh attribute finder so remove this              
-//			try {
-//				refreshAttributeFindersForNewAttributeId();
-//			} catch (Exception e) {
-//				log.warn("Error while refreshing attribute finders");
-//			}
 			finders = attrFinders.get(attributeId.toString());
 			if (finders == null || finders.size() == 0) {
 				log.info("No attribute designators defined for the attribute "
@@ -174,20 +175,13 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 				}
 
 				if (attrs == null) {
-					if (log.isDebugEnabled()) {
-						log.debug("Carbon Attribute Cache Miss");
-					}
 					attrs = pipAttributeFinder.getAttributeValues(attributeType, attributeId, category,
                                                                     issuer, context);
 					if (attributeFinderCache != null && key != null
 							                    && !pipAttributeFinder.overrideDefaultCache()) {
 						attributeFinderCache.addToCache(tenantId, key, attrs);
 					}
-				} else {
-					if (log.isDebugEnabled()) {
-						log.debug("Carbon Attribute Cache Hit");
-					}                    
-                }
+				}
 
 				if (attrs != null) {
 					for (Iterator iterAttr = attrs.iterator(); iterAttr.hasNext();) {
@@ -270,29 +264,13 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
         }
 	}
     
-	/**
-	 * Disables attribute Cache
-	 */
-	public void disableAttributeCache() {
-		attributeFinderCache = null;
-	}
-
-	/**
-	 * Enables attribute cache
-	 */
-	public void enableAttributeCache() {
-		attributeFinderCache = PIPAttributeCache.getInstance();
-	}
 
 	/**
 	 * Clears attribute cache
 	 */
 	public void clearAttributeCache() {
 		if (attributeFinderCache != null) {
-			attributeFinderCache.clearCache(tenantId);                                         
-			if (log.isDebugEnabled()) {
-				log.debug("Attribute value cache is cleared for tenant " + tenantId);
-			}
+			attributeFinderCache.clearCache();
             // clear decision cache
             DecisionInvalidationCache.getInstance().invalidateCache();
 		}

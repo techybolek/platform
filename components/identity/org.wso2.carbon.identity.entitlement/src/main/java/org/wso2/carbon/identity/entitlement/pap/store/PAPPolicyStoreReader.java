@@ -67,7 +67,7 @@ public class PAPPolicyStoreReader {
      */
     public synchronized AbstractPolicy readPolicy(String policyId, PolicyFinder finder)
                                                                         throws EntitlementException {
-        Resource resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
+        Resource resource = store.getPolicy(policyId, PDPConstants.ENTITLEMENT_POLICY_PAP);
         if(resource != null){
             try {
                 String policy = new String((byte[]) resource.getContent(),  Charset.forName("UTF-8"));
@@ -114,7 +114,7 @@ public class PAPPolicyStoreReader {
         Resource resource = null;
         PolicyDTO dto = null;
         try {
-            resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
+            resource = store.getPolicy(policyId, PDPConstants.ENTITLEMENT_POLICY_PAP);
             if (resource == null) {
                 log.error("Policy does not exist in the system with id " + policyId);
                 throw new EntitlementException("Policy does not exist in the system with id " + policyId);
@@ -176,7 +176,7 @@ public class PAPPolicyStoreReader {
 
         Resource resource = null;
         PolicyDTO dto = null;
-        resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
+        resource = store.getPolicy(policyId, PDPConstants.ENTITLEMENT_POLICY_PAP);
         if (resource == null) {
             return null;
         }
@@ -207,57 +207,6 @@ public class PAPPolicyStoreReader {
     }
 
 
-    public List<StatusHolder> readStatus(String policyId) throws EntitlementException {
-
-        Resource resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
-        List<StatusHolder> statusHolders = new ArrayList<StatusHolder>();
-        if(resource != null && resource.getProperties() != null){
-            Properties properties = resource.getProperties();
-            for(Map.Entry<Object, Object> entry : properties.entrySet()){
-                PublisherPropertyDTO dto = new PublisherPropertyDTO();
-                dto.setId((String)entry.getKey());
-                Object value = entry.getValue();
-                if(value instanceof ArrayList){
-                    List list = (ArrayList) entry.getValue();
-                    if(list != null && list.size() > 0 && list.get(0) != null){
-                        if(((String)entry.getKey()).startsWith(StatusHolder.STATUS_HOLDER_NAME)){
-                            StatusHolder statusHolder = new StatusHolder(EntitlementConstants.Status.ABOUT_POLICY);
-                            if(list.size() > 0  && list.get(0) != null){
-                                statusHolder.setType((String)list.get(0));
-                            }
-                            if(list.size() > 1  && list.get(1) != null){
-                                statusHolder.setTimeInstance((String)list.get(1));
-                            }
-                            if(list.size() > 2  && list.get(2) != null){
-                                statusHolder.setUser((String)list.get(2));
-                            }
-                            if(list.size() > 3  && list.get(3) != null){
-                                statusHolder.setKey((String)list.get(3));
-                            }
-                            if(list.size() > 4  && list.get(4) != null){
-                                statusHolder.setSuccess(Boolean.parseBoolean((String)list.get(4)));
-                            }
-                            if(list.size() > 5  && list.get(5) != null){
-                                statusHolder.setMessage((String)list.get(5));
-                            }
-                            if(list.size() > 6  && list.get(6) != null){
-                                statusHolder.setTarget((String) list.get(6));
-                            }
-                            if(list.size() > 7  && list.get(7) != null){
-                                statusHolder.setTargetAction((String) list.get(7));
-                            }
-                            if(list.size() > 8  && list.get(8) != null){
-                                statusHolder.setVersion((String) list.get(8));
-                            }
-                            statusHolders.add(statusHolder);
-                        }
-                    }
-                }
-            }
-        }
-
-        return statusHolders;
-    }
 
 
     /**
@@ -270,7 +219,7 @@ public class PAPPolicyStoreReader {
         Resource resource = null;
         PolicyDTO dto = null;
 
-        resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
+        resource = store.getPolicy(policyId, PDPConstants.ENTITLEMENT_POLICY_PAP);
         if (resource == null) {
             return null;
         }

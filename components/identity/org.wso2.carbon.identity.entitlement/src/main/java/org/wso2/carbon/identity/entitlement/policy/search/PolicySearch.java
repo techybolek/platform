@@ -25,6 +25,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.cache.DecisionInvalidationCache;
 import org.wso2.carbon.identity.entitlement.cache.PolicySearchCache;
 import org.wso2.carbon.identity.entitlement.dto.*;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
@@ -82,22 +83,18 @@ public class PolicySearch {
         String cacheKey = "";
 
         if(cachingEnable){
+
+            if(DecisionInvalidationCache.getInstance().isInvalidate()){
+                policySearchCache.clearCache();
+            }
+
             cacheKey = (subjectId != null  ? subjectId : "")  + (subjectName != null  ? subjectName : "") +
                                     (resourceName != null  ? resourceName : "") +
                                     (action != null ? action : "") + enableChildSearch;
             SearchResult searchResult  = policySearchCache.getFromCache(cacheKey);
 
             if (searchResult != null) {
-                if (log.isDebugEnabled()) {
-                    int tenantId = CarbonContext.getCurrentContext().getTenantId();
-                    log.debug("PDP Search Cache Hit for tenant " + tenantId);
-                }
                 return searchResult.getResultSetDTO();
-            } else {
-                if (log.isDebugEnabled()) {
-                    int tenantId = CarbonContext.getCurrentContext().getTenantId();
-                    log.debug("PDP Search Cache Miss for tenant " + tenantId);
-                }
             }
         }
 
@@ -300,6 +297,11 @@ public class PolicySearch {
         String cacheKey = "";
 
         if(cachingEnable){
+
+            if(DecisionInvalidationCache.getInstance().isInvalidate()){
+                policySearchCache.clearCache();
+            }
+
             int hashCode = 0;
             for(AttributeDTO dto : givenAttributes){
                 hashCode = hashCode + (31 * dto.hashCode());

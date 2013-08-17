@@ -81,7 +81,7 @@ public class PAPPolicyStore {
         }
 
         try {
-            path = IdentityRegistryResources.ENTITLEMENT;
+            path = PDPConstants.ENTITLEMENT_POLICY_PAP;
 
             if (!registry.resourceExists(path)) {
                 if (log.isDebugEnabled()) {
@@ -350,66 +350,9 @@ public class PAPPolicyStore {
      */
     public Collection getPolicyCollection() throws RegistryException {
 
-        if(registry.resourceExists(IdentityRegistryResources.ENTITLEMENT)){
-            return  (Collection) registry.get(IdentityRegistryResources.ENTITLEMENT);
+        if(registry.resourceExists(PDPConstants.ENTITLEMENT_POLICY_PAP)){
+            return  (Collection) registry.get(PDPConstants.ENTITLEMENT_POLICY_PAP);
         }
         return null;
     }
-
-    public void  persistStatus(String policyId, List<StatusHolder> statusHolders)
-                                                                    throws EntitlementException {
-        Resource resource = getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
-        if(resource != null && statusHolders != null && statusHolders.size() > 0){
-            populateStatusProperties(statusHolders.toArray(new StatusHolder[statusHolders.size()]), resource);
-            try {
-                registry.put(IdentityRegistryResources.ENTITLEMENT + policyId, resource);
-            } catch (RegistryException e) {
-                log.error(e);
-                throw new EntitlementException("Error while persisting policy status", e);
-            }
-        }
-        
-    }
-    
-    /**
-     *
-     * @param statusHolders
-     * @param resource
-     */
-    private void populateStatusProperties(StatusHolder[] statusHolders, Resource resource){
-        if(statusHolders != null){
-            for(StatusHolder statusHolder : statusHolders){
-                if(statusHolder != null){
-                    List<String>  list = new ArrayList<String>();
-                    list.add(statusHolder.getType());
-                    list.add(statusHolder.getTimeInstance());
-                    list.add(statusHolder.getUser());
-                    list.add(statusHolder.getKey());
-                    list.add(Boolean.toString(statusHolder.isSuccess()));
-                    if(statusHolder.getMessage() != null){
-                        list.add(statusHolder.getMessage());
-                    } else {
-                        list.add("");
-                    }
-                    if(statusHolder.getTarget() != null){
-                        list.add(statusHolder.getTarget());
-                    } else {
-                        list.add("");
-                    }
-                    if(statusHolder.getTargetAction() != null){
-                        list.add(statusHolder.getTargetAction());
-                    } else {
-                        list.add("");
-                    }
-                    if(statusHolder.getVersion() != null){
-                        list.add(statusHolder.getVersion());
-                    } else {
-                        list.add("");
-                    }
-                    resource.setProperty(StatusHolder.STATUS_HOLDER_NAME + UUID.randomUUID(), list);
-                }
-            }
-        }
-    }
-
 }
