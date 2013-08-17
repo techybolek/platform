@@ -363,7 +363,17 @@
             </tbody>
         </table>
     </form>
-
+    <br/>
+    <p><fmt:message key="api.synapse.text"/>
+        <%
+            if (client!=null) {
+        %>
+        <%=" :- " + client.getAPICount()%>
+        <%
+            }
+        %>
+    </p>
+    <br/>
 <form action="delete_service_groups.jsp" name="servicesForm" method="post">
     <input type="hidden" name="pageNumber" value="<%= pageNumber%>"/>
     <carbon:paginator pageNumber="<%=pageNumber%>"
