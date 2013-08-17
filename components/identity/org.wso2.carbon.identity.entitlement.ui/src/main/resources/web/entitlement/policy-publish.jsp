@@ -40,7 +40,7 @@
     boolean isPaginated = Boolean.parseBoolean(request.getParameter("isPaginated"));
     String subscriberSearchString = request.getParameter("subscriberSearchString");
     if (subscriberSearchString == null) {
-        subscriberSearchString = "";
+        subscriberSearchString = "*";
     } else {
         subscriberSearchString = subscriberSearchString.trim();
     }
@@ -148,6 +148,11 @@
     function viewSubscriber(subscriber) {
         location.href = "add-subscriber.jsp?view=true&subscriberId=" + subscriber;
     }
+
+    function viewSubscriberStatus(subscriber) {
+        location.href = "show-subscriber-status.jsp?subscriberId=" + subscriber;
+    }
+
 
     function deleteSubscriber(subscriber) {
         location.href = "policy-publish.jsp?delete=" + subscriber;
@@ -352,15 +357,19 @@
                 </td>
                 <td><%=subscriber%></td>
                 <td>
-                    <a onclick="viewSubscriber('<%=subscriber%>');return false;"
-                       href="#" style="background-image: url(images/edit.gif);"
-                       class="icon-link">
-                        <fmt:message key='view'/></a>
-
                     <a onclick="editSubscriber('<%=subscriber%>');return false;"
                        href="#" style="background-image: url(images/edit.gif);"
                        class="icon-link">
                         <fmt:message key='edit'/></a>
+                    <a onclick="viewSubscriber('<%=subscriber%>');return false;"
+                       href="#" style="background-image: url(images/view.gif);"
+                       class="icon-link">
+                        <fmt:message key='view'/></a>
+                    <a onclick="viewSubscriberStatus('<%=subscriber%>');return false;"
+                       href="#" style="background-image: url(images/view.gif);"
+                       class="icon-link">
+                        <fmt:message key='view.status'/></a>
+
                 </td>
             </tr>
             <%

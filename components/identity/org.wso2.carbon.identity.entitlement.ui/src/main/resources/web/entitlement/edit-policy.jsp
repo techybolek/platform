@@ -33,6 +33,7 @@
     EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
     String policyId = request.getParameter("policyid");
     PolicyDTO policyDTO = client.getPolicy(policyId, false);
+    String[] policyEditorData = policyDTO.getPolicyEditorData();
 
     try {
         if(EntitlementPolicyConstants.POLICY_SET_ELEMENT.equals(policyDTO.getPolicyType())){
@@ -45,8 +46,6 @@
             forwardTo="create-policy-set.jsp";
         } else {
             if(EntitlementPolicyConstants.BASIC_POLICY_EDITOR.equals(policyDTO.getPolicyEditor())){
-
-                String[] policyEditorData = policyDTO.getPolicyEditorData();
                 BasicPolicyDTO basicPolicyDTO = PolicyEditorUtil.createBasicPolicyDTO(policyEditorData);
 
                 entitlementPolicyBean.setPolicyName(basicPolicyDTO.getPolicyId());
@@ -60,48 +59,53 @@
 
             } else if(EntitlementPolicyConstants.STANDARD_POLICY_EDITOR.equals(policyDTO.getPolicyEditor())){
 
-                try{
-//                    TargetDTO targetDTO = new TargetDTO();
-//                    List<RuleDTO> ruleDTOs = new ArrayList<RuleDTO>();
-//                    List<ObligationDTO> obligationDTOs = new ArrayList<ObligationDTO>();
-//
-//                    for(RuleElementDTO ruleElementDTO : ruleElementDTOs){
-//                        RuleDTO ruleDTO = new RuleDTO();
-//                        ruleDTO.setRuleId(ruleElementDTO.getRuleId());
-//                        ruleDTO.setRuleEffect(ruleElementDTO.getRuleEffect());
-//                        ruleDTO.setRuleDescription(ruleElementDTO.getRuleDescription());
-//                        ruleDTOs.add(ruleDTO);
-//                    }
-//
-//                    PolicyCreatorUtil.processTargetPolicyEditorData(targetDTO, policyEditorData);
-//                    PolicyCreatorUtil.processRulePolicyEditorData(ruleDTOs, policyEditorData);
-//                    PolicyCreatorUtil.processObligationPolicyEditorData(obligationDTOs, policyEditorData);
-//
-//                    entitlementPolicyBean.setTargetDTO(targetDTO);
-//                    entitlementPolicyBean.setRuleDTOs(ruleDTOs);
-//                    entitlementPolicyBean.setObligationDTOs(obligationDTOs);
-//                    entitlementPolicyBean.setEditPolicy(true);
-                    forwardTo="policy-editor.jsp";
-                } catch (Exception e) {
-                    forwardTo="policy-view.jsp?policyid=" + policyId;
+                TargetDTO targetDTO = new TargetDTO();
+                List<RuleDTO> ruleDTOs = new ArrayList<RuleDTO>();
+                List<ObligationDTO> obligationDTOs = new ArrayList<ObligationDTO>();
+
+                List<RuleElementDTO> ruleElementDTOs = PolicyEditorUtil.
+                                                createRuleElementDTOs(policyDTO.getPolicy());
+                PolicyElementDTO elementDTO = PolicyEditorUtil.createPolicyElementDTO(policyDTO.getPolicy());
+
+                for(RuleElementDTO ruleElementDTO : ruleElementDTOs){
+                    RuleDTO ruleDTO = new RuleDTO();
+                    ruleDTO.setRuleId(ruleElementDTO.getRuleId());
+                    ruleDTO.setRuleEffect(ruleElementDTO.getRuleEffect());
+                    ruleDTO.setRuleDescription(ruleElementDTO.getRuleDescription());
+                    ruleDTOs.add(ruleDTO);
                 }
+
+                PolicyEditorUtil.processTargetPolicyEditorData(targetDTO, policyEditorData);
+                PolicyEditorUtil.processRulePolicyEditorData(ruleDTOs, policyEditorData);
+                PolicyEditorUtil.processObligationPolicyEditorData(obligationDTOs, policyEditorData);
+
+                entitlementPolicyBean.setPolicyName(elementDTO.getPolicyName());
+                entitlementPolicyBean.setAlgorithmName(elementDTO.getRuleCombiningAlgorithms());
+                entitlementPolicyBean.setPolicyDescription(elementDTO.getPolicyDescription());
+
+                entitlementPolicyBean.setTargetDTO(targetDTO);
+                entitlementPolicyBean.setRuleDTOs(ruleDTOs);
+                entitlementPolicyBean.setObligationDTOs(obligationDTOs);
+                entitlementPolicyBean.setEditPolicy(true);
+                forwardTo="policy-editor.jsp";
+
             } else if (EntitlementPolicyConstants.SOA_POLICY_EDITOR.equals(policyDTO.getPolicyEditor())) {
-//                SimplePolicyEditorDTO editorDTO = PolicyEditorUtil.createBasicPolicyEditorDTO(policyEditorData);
-//                entitlementPolicyBean.setSimplePolicyEditorDTO(editorDTO);
+                SimplePolicyEditorDTO editorDTO = PolicyEditorUtil.createSimplePolicyEditorDTO(policyEditorData);
+                entitlementPolicyBean.setSimplePolicyEditorDTO(editorDTO);
                 entitlementPolicyBean.setEditPolicy(true);
                 forwardTo="simple-policy-editor.jsp";
             } else {
+                session.setAttribute("policy", policyDTO.getPolicy());
                 forwardTo="policy-view.jsp?policyid=" + policyId;
             }
         }
     } catch (Exception e) {
+        session.setAttribute("policy", policyDTO.getPolicy());
         forwardTo="policy-view.jsp?policyid=" + policyId;    
     }
 %>
 
 <%@page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient"%>
-<%@page import="java.util.ResourceBundle"%>
-<%@page import="org.wso2.carbon.identity.entitlement.ui.util.PolicyCreatorUtil" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
@@ -109,6 +113,8 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.util.PolicyEditorUtil" %>
 <%@ page import="org.wso2.balana.utils.policy.dto.BasicPolicyDTO" %>
+<%@ page import="org.wso2.balana.utils.policy.dto.PolicyElementDTO" %>
+<%@ page import="org.wso2.balana.utils.policy.dto.RuleElementDTO" %>
 
 <script
 	type="text/javascript">

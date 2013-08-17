@@ -31,6 +31,7 @@
 <%@ page import="org.wso2.balana.utils.policy.dto.BasicRuleDTO" %>
 <%@ page import="org.wso2.balana.utils.policy.dto.BasicTargetDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.util.PolicyEditorUtil" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.EntitlementConstants" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
 <jsp:setProperty name="entitlementPolicyBean" property="*" />
@@ -63,59 +64,61 @@
     String algorithmName = entitlementPolicyBean.getAlgorithmName();
     String policyDescription = entitlementPolicyBean.getPolicyDescription();
 
-    String[] policyMetaData = null;
-
-    if(policyName != null && policyName.trim().length() > 0) {
-        basicPolicyDTO.setPolicyId(policyName);
-        basicPolicyDTO.setRuleAlgorithm(algorithmName);
-        basicPolicyDTO.setDescription(policyDescription);
-    }
-    basicPolicyDTO.setBasicRuleDTOs(basicRuleDTOs);
-    basicPolicyDTO.setTargetDTO(basicTargetDTO);
+    String[] policyEditorData = null;
 
     try {
 
-        if(basicRuleDTOs != null && basicTargetDTO != null){
+        if(policyName != null && policyName.trim().length() > 0) {
 
-            policyMetaData = PolicyEditorUtil.generateBasicPolicyEditorData(basicPolicyDTO, ruleElementOrder);
-            policy = policyCreator.createBasicPolicy(basicPolicyDTO);
-        }
+            basicPolicyDTO.setPolicyId(policyName);
+            basicPolicyDTO.setRuleAlgorithm(algorithmName);
+            basicPolicyDTO.setDescription(policyDescription);
+            basicPolicyDTO.setBasicRuleDTOs(basicRuleDTOs);
+            basicPolicyDTO.setTargetDTO(basicTargetDTO);
 
-        EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
-                serverURL, configContext);
-
-        if(entitlementPolicyBean.isEditPolicy()){
-            try{
-                policyDTO = client.getPolicy(policyName, false);
-            } catch (Exception e){
-                //ignore
+            if(basicRuleDTOs != null && basicTargetDTO != null){
+                policyEditorData = PolicyEditorUtil.generateBasicPolicyEditorData(basicPolicyDTO, ruleElementOrder);
+                policy = policyCreator.createBasicPolicy(basicPolicyDTO);
             }
 
-            if(policyDTO == null){
+            EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
+                    serverURL, configContext);
+
+            String message = null;
+            if(entitlementPolicyBean.isEditPolicy()){
+                try{
+                    policyDTO = client.getPolicy(policyName, false);
+                } catch (Exception e){
+                    //ignore
+                }
+
+                if(policyDTO == null){
+                    policyDTO = new PolicyDTO();
+                }
+
+                policyDTO.setPolicy(policy);
+                policyDTO.setPolicyEditor(EntitlementConstants.PolicyEditor.BASIC);
+                if(policyEditorData != null){
+                    policyDTO.setPolicyEditorData(policyEditorData);
+                }
+                client.updatePolicy(policyDTO);
+                message = resourceBundle.getString("updated.successfully");
+            } else {
                 policyDTO = new PolicyDTO();
+                policyDTO.setPolicyId(policyName);
+                policyDTO.setPolicy(policy);
+                policyDTO.setPolicyEditor(EntitlementConstants.PolicyEditor.BASIC);
+                if(policyEditorData != null){
+                    policyDTO.setPolicyEditorData(policyEditorData);
+                }
+                client.addPolicy(policyDTO);
             }
 
-            policyDTO.setPolicy(policy);
-            policyDTO.setPolicyEditor(EntitlementPolicyConstants.BASIC_POLICY_EDITOR);
-            if(policyMetaData != null){
-                policyDTO.setPolicyEditorData(policyMetaData);
-            }
-            client.updatePolicy(policyDTO);
-        } else {
-            policyDTO = new PolicyDTO();
-            policyDTO.setPolicyId(policyName);
-            policyDTO.setPolicy(policy);
-            policyDTO.setPolicyEditor(EntitlementPolicyConstants.BASIC_POLICY_EDITOR);
-            if(policyMetaData != null){
-                policyDTO.setPolicyEditorData(policyMetaData);
-            }
-            client.addPolicy(policyDTO);
+            entitlementPolicyBean.cleanEntitlementPolicyBean();
+
+            CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
+            forwardTo = "index.jsp?";
         }
-
-        entitlementPolicyBean.cleanEntitlementPolicyBean();
-        String message = resourceBundle.getString("ent.policy.added.successfully");
-        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
-        forwardTo = "index.jsp?";
     } catch (PolicyEditorException e) {
         String message = resourceBundle.getString("error.while.creating.policy");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);

@@ -74,7 +74,7 @@
     int numberOfPages = 0;
     String subscriberSearchString = request.getParameter("subscriberSearchString");
     if (subscriberSearchString == null) {
-        subscriberSearchString = "";
+        subscriberSearchString = "*";
     } else {
         subscriberSearchString = subscriberSearchString.trim();
     }

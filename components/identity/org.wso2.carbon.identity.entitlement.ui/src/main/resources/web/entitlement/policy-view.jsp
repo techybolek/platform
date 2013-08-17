@@ -50,8 +50,8 @@
 		EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(
 				cookie, serverURL, configContext);
 		policyId = request.getParameter("policyid");
-
-        if(policyId != null && policyId.trim().length() > 0){
+        policy = (String) session.getAttribute("policy");
+        if(policy == null && policyId != null && policyId.trim().length() > 0){
             PolicyDTO dto = client.getPolicy(policyId,false);
             if(dto != null){
                 policy = dto.getPolicy();
@@ -61,6 +61,7 @@
 		if (policy != null) {
 			policy = policy.trim().replaceAll("><", ">\n<");
 		}
+        session.removeAttribute("policy");
 	} catch (Exception e) {
         String message = MessageFormat.format(resourceBundle.
                 getString("error.while.retreiving.policies"), e.getMessage());

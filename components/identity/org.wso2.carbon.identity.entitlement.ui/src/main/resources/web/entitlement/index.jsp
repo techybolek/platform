@@ -562,7 +562,7 @@
                         <fmt:message key='try.this'/></a>
                     <a title="<fmt:message key='view'/>"
                        onclick="viewStatus('<%=policies[i].getPolicyId()%>');return false;"
-                       href="#" style="background-image: url(images/view.png);" class="icon-link">
+                       href="#" style="background-image: url(images/view.gif);" class="icon-link">
                         <fmt:message key='view.status'/></a>
                 </td>
             </tr>

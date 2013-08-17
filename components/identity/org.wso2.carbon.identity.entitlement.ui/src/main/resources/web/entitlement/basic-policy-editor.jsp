@@ -386,7 +386,7 @@
 
 <script type="text/javascript">
 
-    var regString = /^[a-zA-Z0-9._-]{3,10}$/;    // TODO make this configurable
+    var regString = /^[a-zA-Z0-9._-]{3,20}$/;    // TODO make this configurable
 
     function preSubmit(){
 
@@ -397,7 +397,6 @@
         }
         jQuery('#mainTable > tbody:last').append('<tr><td><input type="hidden" name="ruleElementOrder" id="ruleElementOrder" value="' + ruleElementOrder +'"/></td></tr>') ;
     }
-
 
     function submitForm() {
         if(doValidationPolicyNameOnly()){
@@ -543,6 +542,9 @@
     }
 
     jQuery(document).ready(function() {
+
+
+        jQuery( "#environmentNames" ).datepicker();
 
         <%if(basicRuleDTO == null){%>
         jQuery("#newRuleLinkRow").hide();

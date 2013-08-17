@@ -32,6 +32,7 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementAdminServiceClient" %>
 
 <%
+
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
@@ -221,12 +222,27 @@
         location.href = 'my-pdp.jsp?policyTypeFilter=' + policyTypeFilter ;
     }
 
-    jQuery(document).ready(
-        function(){
-            jQuery('#orderPolicyBtn').hide();
+    function saveOrder() {
+        if (jQuery('#order_view').is(":visible")) {
+            jQuery('#order_view').hide();
+            jQuery('#order_edit').show();
+            jQuery('#order_editBtn').hide();
+            jQuery('#order_saveBtn').show();
+            jQuery('#order_cancelBtn').show();
+        } else {
+            jQuery('#order_view').show();
+            jQuery('#order_edit').hide();
+            jQuery('#order_editBtn').show();
+            jQuery('#order_saveBtn').hide();
+            jQuery('#order_cancelBtn').hide();
         }
-    );
+    }
 
+
+    function updateOrder(policyId, order) {
+        saveOrder();
+        location.href = 'update_order.jsp?policyId=' + policyId + "&order=" + order;
+    }
 </script>
 
 <div id="middle">
@@ -351,9 +367,26 @@
                 </td>
                 
                 <td width="50%">
-                    <a title="<fmt:message key='policy.order'/>"
-                       href="#"  class="icon-link">      <fmt:message key='policy.order'/>
-                        <%=policies[i].getPolicyOrder()%></a>
+                    <div style="width:100%">
+                        <div id="order_view" style="float:left;line-height: 25px;">
+                            <%=policies[i].getPolicyOrder()%>
+                        </div>
+                        <input style="float: left; display: none;"
+                               id="order_edit" value="<%=policies[i].getPolicyOrder()%>">
+                        &nbsp;&nbsp;&nbsp;
+                        <a id="order_editBtn" class="icon-link registryWriteOperation" style="background-image: url(images/edit.gif);
+                        display: block;" onclick="saveOrder()"><fmt:message key="edit"/></a>
+                        <a class="icon-link" style="background-image: url(images/save.gif); display: none;" id="order_saveBtn"
+                           onclick="updateOrder('<%=policies[i].getPolicyId()%>' ,document.getElementById('order_edit').value);">
+                            <fmt:message key="save"/>
+                        </a>
+                        &nbsp;
+                        &nbsp;
+                        <a class="icon-link" style="background-image: url(images/cancel.gif);
+                            display: none;" id="order_cancelBtn" onclick="saveOrder()">
+                                <fmt:message key="cancel"/>
+                        </a>
+                    </div>
                     <% if (policies[i].getActive()) { %>
                     <a title="<fmt:message key='disable.policy'/>"
                      onclick="disable('<%=policies[i].getPolicyId()%>');return false;"

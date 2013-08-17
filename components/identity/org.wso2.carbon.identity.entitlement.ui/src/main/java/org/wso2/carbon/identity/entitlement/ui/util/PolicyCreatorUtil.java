@@ -20,10 +20,7 @@ package org.wso2.carbon.identity.entitlement.ui.util;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.wso2.balana.utils.policy.dto.AttributeElementDTO;
-import org.wso2.balana.utils.policy.dto.AttributesElementDTO;
-import org.wso2.balana.utils.policy.dto.PolicyElementDTO;
-import org.wso2.balana.utils.policy.dto.RequestElementDTO;
+import org.wso2.balana.utils.policy.dto.*;
 import org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants;
 import org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyCreationException;
 import org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants;
@@ -1509,53 +1506,13 @@ public class PolicyCreatorUtil {
         requestElement.setAttributesElementDTOs(dtoList);
         return requestElement;
     }
-//
-    public static PolicyElementDTO createPolicyElementDTO(String policy)
-            throws EntitlementPolicyCreationException {
 
-        PolicyElementDTO policyElementDTO = new PolicyElementDTO();
-        OMElement omElement;
-        try {
-            omElement = AXIOMUtil.stringToOM(policy);
-        } catch (XMLStreamException e) {
-            throw new EntitlementPolicyCreationException("Policy can not be converted to OMElement");
-        }
 
-        if (omElement != null) {
 
-            policyElementDTO.setPolicyName(omElement.
-                    getAttributeValue(new QName(EntitlementPolicyConstants.POLICY_ID)));
-
-            String ruleCombiningAlgorithm = omElement.
-                    getAttributeValue(new QName(EntitlementPolicyConstants.RULE_ALGORITHM));
-
-            try{
-                policyElementDTO.setRuleCombiningAlgorithms(ruleCombiningAlgorithm.
-                        split(PolicyEditorConstants.RULE_ALGORITHM_IDENTIFIER_3)[1]);
-            } catch (Exception ignore){
-                policyElementDTO.setRuleCombiningAlgorithms(ruleCombiningAlgorithm.
-                        split(PolicyEditorConstants.RULE_ALGORITHM_IDENTIFIER_1)[1]);
-                // if this is also fails, can not edit the policy
-            }
-
-            Iterator iterator = omElement.getChildrenWithLocalName(EntitlementPolicyConstants.
-                    DESCRIPTION_ELEMENT);
-
-            if(iterator.hasNext()){
-                OMElement descriptionElement = (OMElement) iterator.next();
-                if(descriptionElement != null && descriptionElement.getText() != null){
-                    policyElementDTO.setPolicyDescription(descriptionElement.getText().trim());
-                }
-            }
-
-        }
-        return policyElementDTO;
-    }
-//
-//    public static List<RuleElementDTO> createRuleElementDTOs(String policy)
+//    public static TargetElementDTO createTargetElementDTOs(String policy)
 //            throws EntitlementPolicyCreationException {
 //
-//        List<RuleElementDTO> ruleElementDTOs = new ArrayList<RuleElementDTO>();
+//        TargetElementDTO targetElementDTO = null;
 //        OMElement omElement;
 //        try {
 //            omElement = AXIOMUtil.stringToOM(policy);
@@ -1564,38 +1521,16 @@ public class PolicyCreatorUtil {
 //        }
 //
 //        if (omElement != null) {
-//            Iterator iterator2 = omElement.getChildrenWithLocalName(EntitlementPolicyConstants.
-//                    RULE_ELEMENT);
-//            while(iterator2.hasNext()){
-//                OMElement ruleElement = (OMElement)iterator2.next();
-//                ruleElementDTOs.add(createRuleDTO(ruleElement));
+//            Iterator iterator = omElement.getChildrenWithLocalName(EntitlementPolicyConstants.
+//                    TARGET_ELEMENT);
+//            while(iterator.hasNext()){
+//                OMElement targetElement = (OMElement)iterator.next();
+//                targetElementDTO = createTargetElementDTO(targetElement, null);
 //            }
 //        }
-//        return ruleElementDTOs;
+//        return targetElementDTO;
 //    }
-//
-////    public static TargetElementDTO createTargetElementDTOs(String policy)
-////            throws EntitlementPolicyCreationException {
-////
-////        TargetElementDTO targetElementDTO = null;
-////        OMElement omElement;
-////        try {
-////            omElement = AXIOMUtil.stringToOM(policy);
-////        } catch (XMLStreamException e) {
-////            throw new EntitlementPolicyCreationException("Policy can not be converted to OMElement");
-////        }
-////
-////        if (omElement != null) {
-////            Iterator iterator = omElement.getChildrenWithLocalName(EntitlementPolicyConstants.
-////                    TARGET_ELEMENT);
-////            while(iterator.hasNext()){
-////                OMElement targetElement = (OMElement)iterator.next();
-////                targetElementDTO = createTargetElementDTO(targetElement, null);
-////            }
-////        }
-////        return targetElementDTO;
-////    }
-//
+
 
 
 
@@ -1682,28 +1617,7 @@ public class PolicyCreatorUtil {
 //        return policySetDTO;
 //    }
 //
-//    public static RuleElementDTO createRuleDTO(OMElement omElement) {
-//        RuleElementDTO ruleElementDTO = new RuleElementDTO();
-//
-//        if (omElement != null) {
-//            ruleElementDTO.setRuleId(omElement.
-//                    getAttributeValue(new QName(EntitlementPolicyConstants.RULE_ID)).trim());
-//            ruleElementDTO.setRuleEffect(omElement.
-//                    getAttributeValue(new QName(EntitlementPolicyConstants.RULE_EFFECT)).trim());
-//
-//            Iterator iterator1 = omElement.
-//                    getChildrenWithLocalName(EntitlementPolicyConstants.DESCRIPTION_ELEMENT);
-//
-//            while(iterator1.hasNext()){
-//                OMElement descriptionElement = (OMElement) iterator1.next();
-//                if(descriptionElement != null && descriptionElement.getText() != null){
-//                    ruleElementDTO.setRuleDescription(descriptionElement.getText().trim());
-//                }
-//            }
-//        }
-//
-//        return ruleElementDTO;
-//    }
+
 //
 //    public static ConditionElementDT0 createConditionElementDT0(OMElement omElement){
 //        ConditionElementDT0 conditionElementDT0 = new ConditionElementDT0();
@@ -1831,75 +1745,75 @@ public class PolicyCreatorUtil {
 //        return applyElementDTO;
 //    }
 //
-////    public static TargetElementDTO createTargetElementDTO(OMElement omElement, String ruleId){
-////
-////        TargetElementDTO targetElementDTO = new TargetElementDTO();
-////        List<SubElementDTO> subElementDTOs = new ArrayList<SubElementDTO>();
-////        int subElementId = 0;
-////
-////        if(omElement != null){
-////            if(omElement.getChildrenWithLocalName(EntitlementPolicyConstants.RESOURCE_ELEMENT + "s").
-////                    hasNext()){
-////                OMElement  element = (OMElement) omElement.getChildrenWithLocalName(
-////                        EntitlementPolicyConstants.RESOURCE_ELEMENT + "s").next();
-////                Iterator iterator1 = element.getChildrenWithLocalName(EntitlementPolicyConstants.
-////                        RESOURCE_ELEMENT);
-////                while(iterator1.hasNext()){
-////                    OMElement resourceElement = (OMElement)iterator1.next();
-////                    subElementDTOs.add(createSubElementDTO(resourceElement, ruleId,
-////                                      EntitlementPolicyConstants.RESOURCE_ELEMENT, subElementId));
-////                    subElementId ++;
-////                }
-////            }
-////
-////            if(omElement.getChildrenWithLocalName(EntitlementPolicyConstants.SUBJECT_ELEMENT + "s").
-////                    hasNext()){
-////                    OMElement  element = (OMElement) omElement.getChildrenWithLocalName(
-////                            EntitlementPolicyConstants.SUBJECT_ELEMENT + "s").next();
-////                Iterator iterator2 = element.getChildrenWithLocalName(EntitlementPolicyConstants.
-////                        SUBJECT_ELEMENT);
-////                while(iterator2.hasNext()){
-////                    OMElement resourceElement = (OMElement)iterator2.next();
-////                    subElementDTOs.add(createSubElementDTO(resourceElement,ruleId,
-////                                      EntitlementPolicyConstants.SUBJECT_ELEMENT, subElementId));
-////                    subElementId ++;
-////                }
-////            }
-////
-////            if(omElement.getChildrenWithLocalName(EntitlementPolicyConstants.ACTION_ELEMENT + "s").
-////                    hasNext()){
-////                OMElement  element = (OMElement) omElement.getChildrenWithLocalName(
-////                        EntitlementPolicyConstants.ACTION_ELEMENT + "s").next();
-////                Iterator iterator3 = element.getChildrenWithLocalName(EntitlementPolicyConstants.
-////                ACTION_ELEMENT);
-////                while(iterator3.hasNext()){
-////                    OMElement resourceElement = (OMElement)iterator3.next();
-////                    subElementDTOs.add(createSubElementDTO(resourceElement,ruleId,
-////                                      EntitlementPolicyConstants.ACTION_ELEMENT, subElementId));
-////                    subElementId ++;
-////                }
-////            }
-////
-////            if(omElement.getChildrenWithLocalName(EntitlementPolicyConstants.SUBJECT_ELEMENT + "s").
-////                    hasNext()){
-////                OMElement  element = (OMElement) omElement.getChildrenWithLocalName(
-////                                EntitlementPolicyConstants.SUBJECT_ELEMENT + "s").next();
-////                Iterator iterator4 = element.getChildrenWithLocalName(EntitlementPolicyConstants.
-////                        ENVIRONMENT_ELEMENT);
-////                while(iterator4.hasNext()){
-////                    OMElement resourceElement = (OMElement)iterator4.next();
-////                    subElementDTOs.add(createSubElementDTO(resourceElement,ruleId,
-////                                      EntitlementPolicyConstants.ENVIRONMENT_ELEMENT, subElementId));
-////                    subElementId ++;
-////                }
-////            }
-////        }
-////
-////        targetElementDTO.setSubElementDTOs(subElementDTOs);
-////        targetElementDTO.setSubElementCount(subElementId);
-////
-////        return targetElementDTO;
-////    }
+//    public static TargetElementDTO createTargetElementDTO(OMElement omElement, String ruleId){
+//
+//        TargetElementDTO targetElementDTO = new TargetElementDTO();
+//        List<SubElementDTO> subElementDTOs = new ArrayList<SubElementDTO>();
+//        int subElementId = 0;
+//
+//        if(omElement != null){
+//            if(omElement.getChildrenWithLocalName(EntitlementPolicyConstants.RESOURCE_ELEMENT + "s").
+//                    hasNext()){
+//                OMElement  element = (OMElement) omElement.getChildrenWithLocalName(
+//                        EntitlementPolicyConstants.RESOURCE_ELEMENT + "s").next();
+//                Iterator iterator1 = element.getChildrenWithLocalName(EntitlementPolicyConstants.
+//                        RESOURCE_ELEMENT);
+//                while(iterator1.hasNext()){
+//                    OMElement resourceElement = (OMElement)iterator1.next();
+//                    subElementDTOs.add(createSubElementDTO(resourceElement, ruleId,
+//                                      EntitlementPolicyConstants.RESOURCE_ELEMENT, subElementId));
+//                    subElementId ++;
+//                }
+//            }
+//
+//            if(omElement.getChildrenWithLocalName(EntitlementPolicyConstants.SUBJECT_ELEMENT + "s").
+//                    hasNext()){
+//                    OMElement  element = (OMElement) omElement.getChildrenWithLocalName(
+//                            EntitlementPolicyConstants.SUBJECT_ELEMENT + "s").next();
+//                Iterator iterator2 = element.getChildrenWithLocalName(EntitlementPolicyConstants.
+//                        SUBJECT_ELEMENT);
+//                while(iterator2.hasNext()){
+//                    OMElement resourceElement = (OMElement)iterator2.next();
+//                    subElementDTOs.add(createSubElementDTO(resourceElement,ruleId,
+//                                      EntitlementPolicyConstants.SUBJECT_ELEMENT, subElementId));
+//                    subElementId ++;
+//                }
+//            }
+//
+//            if(omElement.getChildrenWithLocalName(EntitlementPolicyConstants.ACTION_ELEMENT + "s").
+//                    hasNext()){
+//                OMElement  element = (OMElement) omElement.getChildrenWithLocalName(
+//                        EntitlementPolicyConstants.ACTION_ELEMENT + "s").next();
+//                Iterator iterator3 = element.getChildrenWithLocalName(EntitlementPolicyConstants.
+//                ACTION_ELEMENT);
+//                while(iterator3.hasNext()){
+//                    OMElement resourceElement = (OMElement)iterator3.next();
+//                    subElementDTOs.add(createSubElementDTO(resourceElement,ruleId,
+//                                      EntitlementPolicyConstants.ACTION_ELEMENT, subElementId));
+//                    subElementId ++;
+//                }
+//            }
+//
+//            if(omElement.getChildrenWithLocalName(EntitlementPolicyConstants.SUBJECT_ELEMENT + "s").
+//                    hasNext()){
+//                OMElement  element = (OMElement) omElement.getChildrenWithLocalName(
+//                                EntitlementPolicyConstants.SUBJECT_ELEMENT + "s").next();
+//                Iterator iterator4 = element.getChildrenWithLocalName(EntitlementPolicyConstants.
+//                        ENVIRONMENT_ELEMENT);
+//                while(iterator4.hasNext()){
+//                    OMElement resourceElement = (OMElement)iterator4.next();
+//                    subElementDTOs.add(createSubElementDTO(resourceElement,ruleId,
+//                                      EntitlementPolicyConstants.ENVIRONMENT_ELEMENT, subElementId));
+//                    subElementId ++;
+//                }
+//            }
+//        }
+//
+//        targetElementDTO.setSubElementDTOs(subElementDTOs);
+//        targetElementDTO.setSubElementCount(subElementId);
+//
+//        return targetElementDTO;
+//    }
 //
 //    public static SubElementDTO createSubElementDTO(OMElement omElement, String ruleId,
 //                                                       String subElementName, int subElementId){

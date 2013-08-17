@@ -436,7 +436,7 @@
 
 <script type="text/javascript">
 
-var regString = /^[a-zA-Z0-9._-]{3,10}$/;    // TODO make this configurable
+var regString = /^[a-zA-Z0-9._-]{3,20}$/;    // TODO make this configurable
 
 function submitForm() {
     preSubmit();

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.entitlement.ui.util;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -33,6 +35,8 @@ import org.wso2.carbon.identity.entitlement.common.dto.PolicyEditorDataHolder;
 import org.wso2.carbon.identity.entitlement.ui.*;
 import org.wso2.carbon.identity.entitlement.ui.dto.*;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import java.util.*;
 
 /**
@@ -141,7 +145,7 @@ public class PolicyEditorUtil {
                 basicTargetDTO.setResourceDataType(PolicyConstants.DataType.STRING);
 
                 String function = findFunction(policyEditorDTO.getResourceValue(),
-                                                    basicTargetDTO.getResourceDataType());
+                        basicTargetDTO.getResourceDataType());
                 String value = findAttributeValue(policyEditorDTO.getResourceValue());                
                 basicTargetDTO.setResourceList(value);
                 basicTargetDTO.setFunctionOnResources(function);
@@ -529,55 +533,6 @@ public class PolicyEditorUtil {
         return value.trim();
     }
 
-    /**
-     *  Helper method to create SOA policy
-     *
-     * @param attributeId
-     * @return
-     */
-    private static String findAttributeId(String attributeId){
-
-        if(attributeId == null){
-            return PolicyEditorConstants.ENVIRONMENT_ID_DEFAULT;
-        }
-
-        if(attributeId.equals(PolicyEditorConstants.AttributeId.ENV_DATE)){ 
-            return PolicyEditorConstants.ENVIRONMENT_CURRENT_DATE;
-        } else if (attributeId.equals(PolicyEditorConstants.AttributeId.ENV_TIME)){
-            return PolicyEditorConstants.ENVIRONMENT_CURRENT_TIME;
-        } else if (PolicyEditorConstants.AttributeId.ENV_DATE_TIME.equals(attributeId)){
-            return PolicyEditorConstants.ENVIRONMENT_CURRENT_DATETIME;    
-        }
-
-        return PolicyEditorConstants.ENVIRONMENT_ID_DEFAULT;
-        
-    }
-
-    /**
-     *  Helper method to create SOA policy
-     *
-     * @param attributeId
-     * @return
-     */
-    private static String findDataType(String attributeId){
-
-        if(attributeId == null){
-            return null;
-        }
-
-        if(attributeId.equals(PolicyEditorConstants.AttributeId.ENV_DATE)){
-            return PolicyEditorConstants.DataType.DATE;
-        } else if (attributeId.equals(PolicyEditorConstants.AttributeId.ENV_TIME)){
-            return PolicyEditorConstants.DataType.TIME;
-        } else if (PolicyEditorConstants.AttributeId.ENV_DATE_TIME.equals(attributeId)){
-            return PolicyEditorConstants.DataType.DATE_TIME;
-        } else if (PolicyEditorConstants.AttributeId.ENV_IP.equals(attributeId)){
-            return PolicyEditorConstants.DataType.IP_ADDRESS;
-        }
-
-        return null;
-
-    }
 
 // TODO for what?
 //    public static String createRules(List<SimplePolicyEditorElementDTO> elementDTOs, Document doc)
@@ -2035,7 +1990,10 @@ public class PolicyEditorUtil {
         return metaDataList.toArray(new String[metaDataList.size()]);
     }
 
-    public static SimplePolicyEditorDTO createBasicPolicyEditorDTO(String[] policyEditorData){
+////////////////////////////////////// Simple Policy Editor data ////////////////////////////////////
+
+
+    public static SimplePolicyEditorDTO createSimplePolicyEditorDTO(String[] policyEditorData){
 
         Map<String, String> metaDataMap = new HashMap<String, String>();
         List<SimplePolicyEditorElementDTO> SimplePolicyEditorElementDTOs = new ArrayList<SimplePolicyEditorElementDTO>();
@@ -2096,6 +2054,95 @@ public class PolicyEditorUtil {
         return policyEditorDTO;
     }
 
+//////////////////////////////// Standard policy editor/////////////////////////////////////////////////////
+
+    public static PolicyElementDTO createPolicyElementDTO(String policy)
+            throws EntitlementPolicyCreationException {
+
+        PolicyElementDTO policyElementDTO = new PolicyElementDTO();
+        OMElement omElement;
+        try {
+            omElement = AXIOMUtil.stringToOM(policy);
+        } catch (XMLStreamException e) {
+            throw new EntitlementPolicyCreationException("Policy can not be converted to OMElement");
+        }
+
+        if (omElement != null) {
+
+            policyElementDTO.setPolicyName(omElement.
+                    getAttributeValue(new QName(EntitlementPolicyConstants.POLICY_ID)));
+
+            String ruleCombiningAlgorithm = omElement.
+                    getAttributeValue(new QName(EntitlementPolicyConstants.RULE_ALGORITHM));
+
+            try{
+                policyElementDTO.setRuleCombiningAlgorithms(ruleCombiningAlgorithm.
+                        split(PolicyEditorConstants.RULE_ALGORITHM_IDENTIFIER_3)[1]);
+            } catch (Exception ignore){
+                policyElementDTO.setRuleCombiningAlgorithms(ruleCombiningAlgorithm.
+                        split(PolicyEditorConstants.RULE_ALGORITHM_IDENTIFIER_1)[1]);
+                // if this is also fails, can not edit the policy
+            }
+
+            Iterator iterator = omElement.getChildrenWithLocalName(EntitlementPolicyConstants.
+                    DESCRIPTION_ELEMENT);
+
+            if(iterator.hasNext()){
+                OMElement descriptionElement = (OMElement) iterator.next();
+                if(descriptionElement != null && descriptionElement.getText() != null){
+                    policyElementDTO.setPolicyDescription(descriptionElement.getText().trim());
+                }
+            }
+
+        }
+        return policyElementDTO;
+    }
+
+    public static List<RuleElementDTO> createRuleElementDTOs(String policy)
+            throws EntitlementPolicyCreationException {
+
+        List<RuleElementDTO> ruleElementDTOs = new ArrayList<RuleElementDTO>();
+        OMElement omElement;
+        try {
+            omElement = AXIOMUtil.stringToOM(policy);
+        } catch (XMLStreamException e) {
+            throw new EntitlementPolicyCreationException("Policy can not be converted to OMElement");
+        }
+
+        if (omElement != null) {
+            Iterator iterator2 = omElement.getChildrenWithLocalName(EntitlementPolicyConstants.
+                    RULE_ELEMENT);
+            while(iterator2.hasNext()){
+                OMElement ruleElement = (OMElement)iterator2.next();
+                ruleElementDTOs.add(createRuleDTO(ruleElement));
+            }
+        }
+        return ruleElementDTOs;
+    }
+
+
+    public static RuleElementDTO createRuleDTO(OMElement omElement) {
+        RuleElementDTO ruleElementDTO = new RuleElementDTO();
+
+        if (omElement != null) {
+            ruleElementDTO.setRuleId(omElement.
+                    getAttributeValue(new QName(EntitlementPolicyConstants.RULE_ID)).trim());
+            ruleElementDTO.setRuleEffect(omElement.
+                    getAttributeValue(new QName(EntitlementPolicyConstants.RULE_EFFECT)).trim());
+
+            Iterator iterator1 = omElement.
+                    getChildrenWithLocalName(EntitlementPolicyConstants.DESCRIPTION_ELEMENT);
+
+            while(iterator1.hasNext()){
+                OMElement descriptionElement = (OMElement) iterator1.next();
+                if(descriptionElement != null && descriptionElement.getText() != null){
+                    ruleElementDTO.setRuleDescription(descriptionElement.getText().trim());
+                }
+            }
+        }
+
+        return ruleElementDTO;
+    }
 
 
     public static void processRulePolicyEditorData(List<RuleDTO> rules, String[] policyEditorData){
@@ -2207,7 +2254,8 @@ public class PolicyEditorUtil {
         return rowDTOs;
     }
 
-    //////////////////////////// Basic Policy Editor ///////////////////////////////////////
+///////////////////////////////////////// Basic Policy Editor ///////////////////////////////////////
+
     /**
      * create policy meta data that helps to edit the policy using basic editor
      * @param basicPolicyDTO BasicPolicyDTO

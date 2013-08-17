@@ -137,7 +137,7 @@
 
 <script type="text/javascript">
 
-    var regString = /^[a-zA-Z0-9._-]{3,10}$/;    // TODO make this configurable
+    var regString = /^[a-zA-Z0-9._-]{3,20}$/;    // TODO make this configurable
 
     jQuery(document).ready(function(){
         jQuery('#policyTypeTitle').html("Select a <strong>"+jQuery('#policyApplied').val() + "</strong> to apply policy");
@@ -146,7 +146,7 @@
 
     function doValidationPolicyNameOnly() {
 
-        var value = document.getElementsByName("policyName")[0].value;
+        var value = document.getElementsByName("policyId")[0].value;
         if (value == '') {
             CARBON.showWarningDialog('<fmt:message key="policy.name.is.required"/>');
             return false;

@@ -205,9 +205,9 @@ public class EntitlementPolicyBean {
 	}
 
 	public boolean removeBasicRuleElement(String ruleId) {
-		if (basicRuleDTOs.size() > 0) {
+		if (basicRuleDTOs.size() > 0 && ruleId != null) {
 			for (BasicRuleDTO basicRuleDTO : basicRuleDTOs) {
-				if (basicRuleDTO.getRuleId().equals(ruleId)) {
+				if (ruleId.equals(basicRuleDTO.getRuleId())) {
 					return basicRuleDTOs.remove(basicRuleDTO);
 				}
 			}

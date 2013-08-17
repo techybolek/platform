@@ -55,8 +55,8 @@
         typeFilter = "ALL";
     }
 
-    String policyId = request.getParameter("policyid");
-    String paginationValue = "policyid=" + policyId +"&typeFilter=" + typeFilter +
+    String subscriberId = request.getParameter("subscriberId");
+    String paginationValue = "subscriberId=" + subscriberId +"&typeFilter=" + typeFilter +
             "&statusSearchString=" + statusSearchString;
     StatusHolder[] statusHolders = new StatusHolder[0];
 
@@ -71,8 +71,8 @@
         if("ALL".equals(type)){
             type = null;
         }
-        PaginatedStatusHolder holder = client.getStatusData(EntitlementConstants.Status.ABOUT_POLICY,
-                            policyId,  type, statusSearchString, pageNumberInt);
+        PaginatedStatusHolder holder = client.getStatusData(EntitlementConstants.Status.ABOUT_SUBSCRIBER,
+                subscriberId,  type, statusSearchString, pageNumberInt);
         statusHolders = holder.getStatusHolders();
         numberOfPages = holder.getNumberOfPages();
     } catch (Exception e) {
@@ -92,13 +92,13 @@
     }
 
     function doCancel(){
-        location.href = 'index.jsp';
+        location.href = 'policy-publish.jsp';
     }
 
     function getSelectedType() {
         var comboBox = document.getElementById("typeFilter");
         var typeFilter = comboBox[comboBox.selectedIndex].value;
-        location.href = 'show-policy-status.jsp?typeFilter=' + typeFilter + "&policyid=" +  "<%=policyId%>";
+        location.href = 'show-subscriber-status.jsp?typeFilter=' + typeFilter + "&policyid=" +  "<%=subscriberId%>";
     }
 </script>
 
@@ -106,7 +106,7 @@
 <div id="middle">
     <h2><fmt:message key="policy.status"/></h2>
 <div id="workArea">
-    <form action="show-policy-status.jsp" name="searchForm" method="post">
+    <form action="show-subscriber-status.jsp" name="searchForm" method="post">
         <table style="border:0;
                                                 !important margin-top:10px;margin-bottom:10px;">
             <tr>
@@ -116,40 +116,40 @@
                         <tr style="border:0; !important">
                             <td style="border:0; !important">
                                 <nobr>
-                                    <fmt:message key="policy.status.type"/>
-                                    <select name= "typeFilter" id="typeFilter"  onchange="getSelectedType();">
-                                        <%
-                                            if (typeFilter.equals("ALL")) {
-                                        %>
-                                        <option value="ALL" selected="selected"><fmt:message key="all"/></option>
-                                        <%
-                                        } else {
-                                        %>
-                                        <option value="ALL"><fmt:message key="all"/></option>
-                                        <%
-                                            }
-                                            for (String type : EntitlementConstants.StatusTypes.ALL_TYPES) {
-                                                if (typeFilter.equals(type)) {
-                                        %>
-                                        <option value="<%= type%>" selected="selected"><%= type%>
-                                        </option>
-                                        <%
-                                        } else {
-                                        %>
-                                        <option value="<%= type%>"><%= type%>
-                                        </option>
-                                        <%
-                                                }
-                                            }
-                                        %>
-                                    </select>
-                                    &nbsp;&nbsp;&nbsp;
-                                <fmt:message key="search.status.by.user"/>
+                                    <%--<fmt:message key="policy.status.type"/>--%>
+                                    <%--<select name= "typeFilter" id="typeFilter"  onchange="getSelectedType();">--%>
+                                        <%--<%--%>
+                                            <%--if (typeFilter.equals("ALL")) {--%>
+                                        <%--%>--%>
+                                        <%--<option value="ALL" selected="selected"><fmt:message key="all"/></option>--%>
+                                        <%--<%--%>
+                                        <%--} else {--%>
+                                        <%--%>--%>
+                                        <%--<option value="ALL"><fmt:message key="all"/></option>--%>
+                                        <%--<%--%>
+                                            <%--}--%>
+                                            <%--for (String type : EntitlementConstants.StatusTypes.ALL_TYPES) {--%>
+                                                <%--if (typeFilter.equals(type)) {--%>
+                                        <%--%>--%>
+                                        <%--<option value="<%= type%>" selected="selected"><%= type%>--%>
+                                        <%--</option>--%>
+                                        <%--<%--%>
+                                        <%--} else {--%>
+                                        <%--%>--%>
+                                        <%--<option value="<%= type%>"><%= type%>--%>
+                                        <%--</option>--%>
+                                        <%--<%--%>
+                                                <%--}--%>
+                                            <%--}--%>
+                                        <%--%>--%>
+                                    <%--</select>--%>
+                                    <%--&nbsp;&nbsp;&nbsp;--%>
+                                <fmt:message key="search.status.by.policy"/>
                                 <input type="text" name="statusSearchString"
                                        value="<%= statusSearchString != null? statusSearchString :""%>"/>&nbsp;
                                 </nobr>
-                                <input type="hidden" name="policyid"   id="policyid"
-                                       value="<%=policyId%>"/>
+                                <input type="hidden" name="subscriberId"   id="subscriberId"
+                                       value="<%=subscriberId%>"/>
                             </td>
                             <td style="border:0; !important">
                                 <a class="icon-link" href="#" style="background-image: url(images/search.gif);"
@@ -204,7 +204,7 @@
         <tr>
             <carbon:paginator pageNumber="<%=pageNumberInt%>"
                               numberOfPages="<%=numberOfPages%>"
-                              page="show-policy-status.jsp"
+                              page="show-subscriber-status.jsp"
                               pageNumberParameterName="pageNumber"
                               parameters="<%=paginationValue%>"
                               resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
@@ -213,9 +213,9 @@
 
     </table>
 </div>
-<div class="buttonRow">
-    <a onclick="doCancel()" class="icon-link" style="background-image:none;">
-        <fmt:message key="back.to.policies"/></a><div style="clear:both"></div>
-</div>
+    <div class="buttonRow">
+        <a onclick="doCancel()" class="icon-link" style="background-image:none;">
+            <fmt:message key="back.to.subscribers"/></a><div style="clear:both"></div>
+    </div>
 </div>
 </fmt:bundle>

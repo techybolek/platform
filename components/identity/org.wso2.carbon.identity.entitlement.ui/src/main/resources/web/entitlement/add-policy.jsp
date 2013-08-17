@@ -23,19 +23,27 @@
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.common.EntitlementConstants" %>
-<%@ page import="java.text.MessageFormat" %>
-
-
 <%
     String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
-    String forwardTo = null;
+    String forwardTo;
     String type = request.getParameter("type");
     if(request.getParameter("editorConfig") != null){
         try {
             PolicyEditorEngine.getInstance().persistConfig(type, request.getParameter("editorConfig"));
             String message = resourceBundle.getString("policy.editor.config.update");
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
+            forwardTo = "add-policy.jsp";
+            %>
+            <script type="text/javascript">
+                function forward() {
+                    location.href = "<%=forwardTo%>";
+                }
+            </script>
+            <script type="text/javascript">
+                forward();
+            </script>
+            <%
         } catch (PolicyEditorException e) {
             String message = resourceBundle.
                     getString("policy.editor.config.can.not.update") + e.getMessage();
