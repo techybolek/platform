@@ -43,407 +43,415 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RemoteTaskManager implements TaskManager {
 
-	private static final Log log = LogFactory.getLog(RemoteTaskManager.class);
-	
-	public static final String REMOTE_TASK_SERVER_ADDRESS = "task.server.remote.address"; 
-	
-	public static final String REMOTE_TASK_SERVER_USERNAME = "task.server.remote.username";
-	
-	public static final String REMOTE_TASK_SERVER_PASSWORD = "task.server.remote.password";
-	
-	public static final String TASK_CLIENT_DISPATCH_ADDRESS = "task.client.dispatch.address";
-	
-	public static final String REMOTE_TASK_ID_REPO_PROP = "REMOTE_TASK_ID_REPO_PROP";
-	
-	private TaskRepository taskRepository;
-	
-	private RemoteTaskAdmin remoteTaskAdmin;
-	
-	private static Map<String, Integer> runningTasksMap = new ConcurrentHashMap<String, Integer>();
-	
-	public RemoteTaskManager(TaskRepository taskRepository, RemoteTaskAdmin remoteTaskAdmin) {
-		this.taskRepository = taskRepository;
-		this.remoteTaskAdmin = remoteTaskAdmin;
-	}
-	
-	public RemoteTaskAdmin getRemoteTaskAdmin() {
-		return remoteTaskAdmin;
-	}
-	
-	public TaskRepository getTaskRepository() {
-		return taskRepository;
-	}
-	
-	public String getTenantDomain() {
-		return this.getTaskRepository().getTenantDomain();
-	}
-	
-	public String getTaskType() {
-		return this.getTaskRepository().getTasksType();
-	}
-	
-	@Override
-	public void initStartupTasks() throws TaskException {
-		for (TaskInfo taskInfo : this.getAllTasks()) {
-			try {
-			    this.scheduleTask(taskInfo.getName());
-			} catch (Exception e) {
-				log.error("Error in scheduling task '" + 
-						taskInfo.getName() + "': " + e.getMessage(), e);
-			}
-		}
-	}
+    private static final Log log = LogFactory.getLog(RemoteTaskManager.class);
 
-	private void setRemoteTaskIdForTask(String taskName, String remoteTaskId) throws TaskException {
-		this.getTaskRepository().setTaskMetadataProp(taskName, 
-				REMOTE_TASK_ID_REPO_PROP, remoteTaskId);
-	}
-	
-	@Override
-	public void scheduleTask(String taskName) throws TaskException {
-		String remoteTaskId = RemoteTaskUtils.createRemoteTaskMapping(this.getTenantDomain(),
-				this.getTaskType(), taskName);
-		this.setRemoteTaskIdForTask(taskName, remoteTaskId);
-		TaskInfo taskInfo = this.getTaskRepository().getTask(taskName);
-		try {
-			this.getRemoteTaskAdmin().addRemoteSystemTask(
-					RemoteTaskUtils.convert(
-							taskInfo, this.getTaskType(), remoteTaskId, this.getTenantDomain()),
-							this.getTenantDomain());
-		} catch (Exception e) {
-			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
-		}
-	}
+    public static final String REMOTE_TASK_SERVER_ADDRESS = "task.server.remote.address";
 
-	@Override
-	public void rescheduleTask(String taskName) throws TaskException {
-		this.deleteTask(taskName, false);
-		this.scheduleTask(taskName);
-	}
+    public static final String REMOTE_TASK_SERVER_USERNAME = "task.server.remote.username";
 
-	@Override
-	public boolean deleteTask(String taskName) throws TaskException {
-		return this.deleteTask(taskName, true);
-	}
-	
-	private String getRemoteTaskId(String taskName) throws TaskException {
-		return this.getTaskRepository().getTaskMetadataProp(taskName, 
-				REMOTE_TASK_ID_REPO_PROP);
-	}
-	
-	private boolean deleteTask(String taskName, boolean removeFromRepo) throws TaskException {
-		try {
-			boolean result = this.getRemoteTaskAdmin().deleteRemoteSystemTask(
-					RemoteTaskUtils.remoteTaskNameFromTaskInfo(
-					this.getTaskType(), taskName), this.getTenantDomain());
-			/* remove the remote task id mapping */
-			String remoteTaskId = this.getRemoteTaskId(taskName);
-			if (remoteTaskId != null) {
-				RemoteTaskUtils.removeRemoteTaskMapping(remoteTaskId);
-			}
-			if (removeFromRepo) {
-			    result &= this.getTaskRepository().deleteTask(taskName);
-			}
-			return result;
-		} catch (Exception e) {
-			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
-		}
-	}
+    public static final String REMOTE_TASK_SERVER_PASSWORD = "task.server.remote.password";
 
-	@Override
-	public void pauseTask(String taskName) throws TaskException {
-		try {
-			this.getRemoteTaskAdmin().pauseRemoteSystemTask(
-					RemoteTaskUtils.remoteTaskNameFromTaskInfo(
-					this.getTaskType(), taskName), this.getTenantDomain());
-		} catch (Exception e) {
-			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
-		}
-	}
+    public static final String TASK_CLIENT_DISPATCH_ADDRESS = "task.client.dispatch.address";
 
-	@Override
-	public void resumeTask(String taskName) throws TaskException {
-		try {
-			this.getRemoteTaskAdmin().resumeRemoteSystemTask(
-					RemoteTaskUtils.remoteTaskNameFromTaskInfo(
-					this.getTaskType(), taskName), this.getTenantDomain());
-		} catch (Exception e) {
-			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
-		}
-	}
+    public static final String REMOTE_TASK_ID_REPO_PROP = "REMOTE_TASK_ID_REPO_PROP";
 
-	@Override
-	public void registerTask(TaskInfo taskInfo) throws TaskException {
-		String taskName = taskInfo.getName();
-		/* get the remote task id if the task is already existing, 
-		 * because this id will be overridden when the task is updated */
-		String remoteTaskId = this.getRemoteTaskId(taskName);
-		this.getTaskRepository().addTask(taskInfo);
-		if (remoteTaskId != null) {
-			/* restore the remote task id */
-		    this.setRemoteTaskIdForTask(taskName, remoteTaskId);
-		}
-	}
+    private TaskRepository taskRepository;
 
-	public TaskState getTaskStateRemote(String taskName) throws TaskException {
-		try {
-			DeployedTaskInformation depTaskInfo = this.getRemoteTaskAdmin().getRemoteSystemTask(
-					RemoteTaskUtils.remoteTaskNameFromTaskInfo(
-					this.getTaskType(), taskName), this.getTenantDomain());
-			if (depTaskInfo == null) {
-				return TaskState.NONE;
-			}
-			TaskState ts = TaskState.valueOf(depTaskInfo.getStatus());
-			return ts;
-		} catch (Exception e) {
-			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
-		}
-	}
-	
-	private ClusteringAgent getClusteringAgent() throws TaskException {
-		ConfigurationContextService configCtxService = TasksDSComponent.getConfigurationContextService();
-		if (configCtxService == null) {
-			throw new TaskException("ConfigurationContextService not available " +
-					"for notifying the cluster", Code.UNKNOWN);
-		}
-		ConfigurationContext configCtx = configCtxService.getServerConfigContext();
-		ClusteringAgent agent = configCtx.getAxisConfiguration().getClusteringAgent();
-		if (log.isDebugEnabled()) {
-			log.debug("Clustering Agent: " + agent);
-		}
-		return agent;
-	}
-	
-	private TaskState getTaskStateFromLocalCluster(String taskName) throws TaskException {
-		/* first check local server */
-		if (this.isTaskRunning(taskName)) {
-			return TaskState.BLOCKED;
-		}
-		ClusteringAgent agent = this.getClusteringAgent();
-		if (agent == null) {
-		    return TaskState.UNKNOWN;
-		}
-		TaskStatusMessage msg = new TaskStatusMessage();
-		msg.setTaskName(taskName);
-		msg.setTaskType(this.getTaskType());
-		msg.setTenantDomain(this.getTenantDomain());
-		try {
-			List<ClusteringCommand> result = agent.sendMessage(msg, true);
-			TaskStatusResult status;
-			for (ClusteringCommand entry : result) {
-				status = (TaskStatusResult) entry;
-				if (status.isRunning()) {
-					return TaskState.BLOCKED;
-				}
-			}
-			return TaskState.NORMAL;
-		} catch (ClusteringFault e) {
-			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
-		}
-	}
-	
-	@Override
-	public TaskState getTaskState(String taskName) throws TaskException {
-		TaskState taskState = this.getTaskStateRemote(taskName);
-		if (taskState == TaskState.NORMAL) {
-			taskState = this.getTaskStateFromLocalCluster(taskName);
-		}
-		return taskState;
-	}
+    private RemoteTaskAdmin remoteTaskAdmin;
 
-	@Override
-	public TaskInfo getTask(String taskName) throws TaskException {
-		return this.getTaskRepository().getTask(taskName);
-	}
+    private static Map<String, Integer> runningTasksMap = new ConcurrentHashMap<String, Integer>();
 
-	@Override
-	public List<TaskInfo> getAllTasks() throws TaskException {
-		return this.getTaskRepository().getAllTasks();
-	}
+    public RemoteTaskManager(TaskRepository taskRepository, RemoteTaskAdmin remoteTaskAdmin) {
+        this.taskRepository = taskRepository;
+        this.remoteTaskAdmin = remoteTaskAdmin;
+    }
 
-	@Override
-	public boolean isTaskScheduled(String taskName) throws TaskException {
-		return this.getTaskState(taskName) != TaskState.NONE;
-	}
-	
-	public void runTask(String taskName) throws TaskException {
-		TasksDSComponent.executeTask(new TaskExecution(taskName));
-	}
-	
-	public static void addRunningTask(String runningTaskId) {
-		synchronized (runningTasksMap) {
-			Integer value = runningTasksMap.get(runningTaskId);
-			if (value != null) {
-				value++;
-			} else {
-				value = 1;
-			}
-			runningTasksMap.put(runningTaskId, value);
-		}
-	}
-	
-	public static void removeRunningTask(String runningTaskId) {
-		synchronized (runningTasksMap) {
-			Integer value = runningTasksMap.get(runningTaskId);
-			if (value != null) {
-				value--;
-				if (value <= 0) {
-					runningTasksMap.remove(runningTaskId);
-				} else {
-					runningTasksMap.put(runningTaskId, value);
-				}
-			}
-		}
-	}
-	
-	public static boolean isRunningTaskExist(String runningTaskId) {
-		return runningTasksMap.containsKey(runningTaskId);
-	}
-	
-	public boolean isTaskRunning(String taskName) throws TaskException {
-		return isRunningTaskExist(this.generateRunningTaskId(taskName));
-	}
-	
-	private String generateRunningTaskId(String taskName) {
-		return this.getTenantDomain() + "#" + this.getTaskType() + "#" + taskName;
-	}
-	
-	private class TaskExecution implements Runnable {
+    public RemoteTaskAdmin getRemoteTaskAdmin() {
+        return remoteTaskAdmin;
+    }
 
-		private String taskName;
-		
-		public TaskExecution(String taskName) {
-			this.taskName = taskName;
-		}
-		
-		public String getTaskName() {
-			return taskName;
-		}
-		
-		private boolean isTaskRunningInCluster() throws TaskException {
-			return getTaskStateFromLocalCluster(this.getTaskName()) == TaskState.BLOCKED;
-		}
-		
-		@Override
-		public void run() {
-			String runningTaskId = generateRunningTaskId(this.getTaskName());
-			/* the try/catch/finally ordering is there for a reason, do not mess with it! */
-			try {
-				TaskInfo taskInfo = getTaskRepository().getTask(this.getTaskName());
-				if (taskInfo.getTriggerInfo().isDisallowConcurrentExecution() && 
-						this.isTaskRunningInCluster()) {
-					/* this check is done here instead of outside is because, the repository
-					 * lookup is anyway happens here and it is expensive for it to be done again */
-					return;
-				}
-				try {
-					addRunningTask(runningTaskId);
-				    Task task = (Task) Class.forName(taskInfo.getTaskClass()).newInstance();
-				    task.setProperties(taskInfo.getProperties());
-				    try {
-					    PrivilegedCarbonContext.startTenantFlow();
-					    PrivilegedCarbonContext.getCurrentContext().setTenantDomain(getTenantDomain());
-				        task.init();
-				        task.execute();
-				    } finally {
-					    PrivilegedCarbonContext.endTenantFlow();
-				    }
-				} finally {
-					removeRunningTask(runningTaskId);
-				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-		}
-		
-	}
-	
-	/**
-	 * This class represents the cluster message for retrieving a task status.
-	 */
-	public static class TaskStatusMessage extends ClusteringMessage {
+    public TaskRepository getTaskRepository() {
+        return taskRepository;
+    }
 
-		private static final long serialVersionUID = 8904018070655665868L;
+    public String getTenantDomain() {
+        return this.getTaskRepository().getTenantDomain();
+    }
 
-		private String tenantDomain;
-		
-		private String taskType;
-		
-		private String taskName;
-		
-		private TaskStatusResult result;
-		
-		public String getTenantDomain() {
-			return tenantDomain;
-		}
+    public String getTaskType() {
+        return this.getTaskRepository().getTasksType();
+    }
 
-		public void setTenantDomain(String tenantDomain) {
-			this.tenantDomain = tenantDomain;
-		}
+    @Override
+    public void initStartupTasks() throws TaskException {
+        for (TaskInfo taskInfo : this.getAllTasks()) {
+            try {
+                this.scheduleTask(taskInfo.getName());
+            } catch (Exception e) {
+                log.error("Error in scheduling task '" + taskInfo.getName() 
+                        + "': " + e.getMessage(), e);
+            }
+        }
+    }
 
-		public String getTaskType() {
-			return taskType;
-		}
+    private void setRemoteTaskIdForTask(String taskName, String remoteTaskId) throws TaskException {
+        this.getTaskRepository().setTaskMetadataProp(taskName, REMOTE_TASK_ID_REPO_PROP,
+                remoteTaskId);
+    }
 
-		public void setTaskType(String taskType) {
-			this.taskType = taskType;
-		}
+    @Override
+    public void scheduleTask(String taskName) throws TaskException {
+        String remoteTaskId = RemoteTaskUtils.createRemoteTaskMapping(this.getTenantDomain(),
+                this.getTaskType(), taskName);
+        this.setRemoteTaskIdForTask(taskName, remoteTaskId);
+        TaskInfo taskInfo = this.getTaskRepository().getTask(taskName);
+        try {
+            this.getRemoteTaskAdmin().addRemoteSystemTask(
+                    RemoteTaskUtils.convert(taskInfo, this.getTaskType(), remoteTaskId,
+                            this.getTenantDomain()), this.getTenantDomain());
+        } catch (Exception e) {
+            throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
+        }
+    }
 
-		public String getTaskName() {
-			return taskName;
-		}
+    @Override
+    public void rescheduleTask(String taskName) throws TaskException {
+        this.deleteTask(taskName, false);
+        this.scheduleTask(taskName);
+    }
 
-		public void setTaskName(String taskName) {
-			this.taskName = taskName;
-		}
+    @Override
+    public boolean deleteTask(String taskName) throws TaskException {
+        return this.deleteTask(taskName, true);
+    }
 
-		@Override
-		public ClusteringCommand getResponse() {
-			return this.result;
-		}
+    private String getRemoteTaskId(String taskName) throws TaskException {
+        return this.getTaskRepository().getTaskMetadataProp(taskName, REMOTE_TASK_ID_REPO_PROP);
+    }
 
-		@Override
-		public void execute(ConfigurationContext ctx) throws ClusteringFault {
-			try {
-				PrivilegedCarbonContext.startTenantFlow();
-				PrivilegedCarbonContext.getCurrentContext().setTenantDomain(this.getTenantDomain());
-				TaskManager tm = TasksDSComponent.getTaskService().getTaskManager(
-						this.getTaskType());
-				if (tm instanceof RemoteTaskManager) {
-					this.result = new TaskStatusResult();
-					this.result.setRunning(((RemoteTaskManager) tm).isTaskRunning(
-							this.getTaskName()));
-				}
-			} catch (Exception e) {
-				throw new ClusteringFault(e.getMessage(), e);
-			} finally {
-				PrivilegedCarbonContext.endTenantFlow();
-			}
-		}
-		
-	}
-	
-	/**
-	 * This class represents a clustering message result for task statuses.
-	 */
-	public static class TaskStatusResult extends ClusteringCommand {
+    private boolean deleteTask(String taskName, boolean removeFromRepo) throws TaskException {
+        try {
+            boolean result = this.getRemoteTaskAdmin().deleteRemoteSystemTask(
+                    RemoteTaskUtils.remoteTaskNameFromTaskInfo(this.getTaskType(), taskName),
+                    this.getTenantDomain());
+            /* remove the remote task id mapping */
+            String remoteTaskId = this.getRemoteTaskId(taskName);
+            if (remoteTaskId != null) {
+                RemoteTaskUtils.removeRemoteTaskMapping(remoteTaskId);
+            }
+            if (removeFromRepo) {
+                result &= this.getTaskRepository().deleteTask(taskName);
+            }
+            return result;
+        } catch (Exception e) {
+            throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
+        }
+    }
 
-		private static final long serialVersionUID = 4982249263193601405L;
-		
-		private boolean running;
-		
-		public boolean isRunning() {
-			return running;
-		}
+    @Override
+    public void pauseTask(String taskName) throws TaskException {
+        try {
+            this.getRemoteTaskAdmin().pauseRemoteSystemTask(
+                    RemoteTaskUtils.remoteTaskNameFromTaskInfo(this.getTaskType(), taskName),
+                    this.getTenantDomain());
+        } catch (Exception e) {
+            throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
+        }
+    }
 
-		public void setRunning(boolean running) {
-			this.running = running;
-		}
+    @Override
+    public void resumeTask(String taskName) throws TaskException {
+        try {
+            this.getRemoteTaskAdmin().resumeRemoteSystemTask(
+                    RemoteTaskUtils.remoteTaskNameFromTaskInfo(this.getTaskType(), taskName),
+                    this.getTenantDomain());
+        } catch (Exception e) {
+            throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
+        }
+    }
 
-		@Override
-		public void execute(ConfigurationContext ctx) throws ClusteringFault {			
-		}
-		
-	}
+    @Override
+    public void registerTask(TaskInfo taskInfo) throws TaskException {
+        String taskName = taskInfo.getName();
+        /*
+         * get the remote task id if the task is already existing, because this
+         * id will be overridden when the task is updated
+         */
+        String remoteTaskId = this.getRemoteTaskId(taskName);
+        this.getTaskRepository().addTask(taskInfo);
+        if (remoteTaskId != null) {
+            /* restore the remote task id */
+            this.setRemoteTaskIdForTask(taskName, remoteTaskId);
+        }
+    }
+
+    public TaskState getTaskStateRemote(String taskName) throws TaskException {
+        try {
+            DeployedTaskInformation depTaskInfo = this.getRemoteTaskAdmin().getRemoteSystemTask(
+                    RemoteTaskUtils.remoteTaskNameFromTaskInfo(this.getTaskType(), taskName),
+                    this.getTenantDomain());
+            if (depTaskInfo == null) {
+                return TaskState.NONE;
+            }
+            TaskState ts = TaskState.valueOf(depTaskInfo.getStatus());
+            return ts;
+        } catch (Exception e) {
+            throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
+        }
+    }
+
+    private ClusteringAgent getClusteringAgent() throws TaskException {
+        ConfigurationContextService configCtxService = TasksDSComponent
+                .getConfigurationContextService();
+        if (configCtxService == null) {
+            throw new TaskException("ConfigurationContextService not available "
+                    + "for notifying the cluster", Code.UNKNOWN);
+        }
+        ConfigurationContext configCtx = configCtxService.getServerConfigContext();
+        ClusteringAgent agent = configCtx.getAxisConfiguration().getClusteringAgent();
+        if (log.isDebugEnabled()) {
+            log.debug("Clustering Agent: " + agent);
+        }
+        return agent;
+    }
+
+    private TaskState getTaskStateFromLocalCluster(String taskName) throws TaskException {
+        /* first check local server */
+        if (this.isTaskRunning(taskName)) {
+            return TaskState.BLOCKED;
+        }
+        ClusteringAgent agent = this.getClusteringAgent();
+        if (agent == null) {
+            return TaskState.UNKNOWN;
+        }
+        TaskStatusMessage msg = new TaskStatusMessage();
+        msg.setTaskName(taskName);
+        msg.setTaskType(this.getTaskType());
+        msg.setTenantDomain(this.getTenantDomain());
+        try {
+            List<ClusteringCommand> result = agent.sendMessage(msg, true);
+            TaskStatusResult status;
+            for (ClusteringCommand entry : result) {
+                status = (TaskStatusResult) entry;
+                if (status.isRunning()) {
+                    return TaskState.BLOCKED;
+                }
+            }
+            return TaskState.NORMAL;
+        } catch (ClusteringFault e) {
+            throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
+        }
+    }
+
+    @Override
+    public TaskState getTaskState(String taskName) throws TaskException {
+        TaskState taskState = this.getTaskStateRemote(taskName);
+        if (taskState == TaskState.NORMAL) {
+            taskState = this.getTaskStateFromLocalCluster(taskName);
+        }
+        return taskState;
+    }
+
+    @Override
+    public TaskInfo getTask(String taskName) throws TaskException {
+        return this.getTaskRepository().getTask(taskName);
+    }
+
+    @Override
+    public List<TaskInfo> getAllTasks() throws TaskException {
+        return this.getTaskRepository().getAllTasks();
+    }
+
+    @Override
+    public boolean isTaskScheduled(String taskName) throws TaskException {
+        return this.getTaskState(taskName) != TaskState.NONE;
+    }
+
+    public void runTask(String taskName) throws TaskException {
+        TasksDSComponent.executeTask(new TaskExecution(taskName));
+    }
+
+    public static void addRunningTask(String runningTaskId) {
+        synchronized (runningTasksMap) {
+            Integer value = runningTasksMap.get(runningTaskId);
+            if (value != null) {
+                value++;
+            } else {
+                value = 1;
+            }
+            runningTasksMap.put(runningTaskId, value);
+        }
+    }
+
+    public static void removeRunningTask(String runningTaskId) {
+        synchronized (runningTasksMap) {
+            Integer value = runningTasksMap.get(runningTaskId);
+            if (value != null) {
+                value--;
+                if (value <= 0) {
+                    runningTasksMap.remove(runningTaskId);
+                } else {
+                    runningTasksMap.put(runningTaskId, value);
+                }
+            }
+        }
+    }
+
+    public static boolean isRunningTaskExist(String runningTaskId) {
+        return runningTasksMap.containsKey(runningTaskId);
+    }
+
+    public boolean isTaskRunning(String taskName) throws TaskException {
+        return isRunningTaskExist(this.generateRunningTaskId(taskName));
+    }
+
+    private String generateRunningTaskId(String taskName) {
+        return this.getTenantDomain() + "#" + this.getTaskType() + "#" + taskName;
+    }
+
+    private class TaskExecution implements Runnable {
+
+        private String taskName;
+
+        public TaskExecution(String taskName) {
+            this.taskName = taskName;
+        }
+
+        public String getTaskName() {
+            return taskName;
+        }
+
+        private boolean isTaskRunningInCluster() throws TaskException {
+            return getTaskStateFromLocalCluster(this.getTaskName()) == TaskState.BLOCKED;
+        }
+
+        @Override
+        public void run() {
+            String runningTaskId = generateRunningTaskId(this.getTaskName());
+            /*
+             * the try/catch/finally ordering is there for a reason, do not mess
+             * with it!
+             */
+            try {
+                TaskInfo taskInfo = getTaskRepository().getTask(this.getTaskName());
+                if (taskInfo.getTriggerInfo().isDisallowConcurrentExecution()
+                        && this.isTaskRunningInCluster()) {
+                    /*
+                     * this check is done here instead of outside is because,
+                     * the repository lookup is anyway happens here and it is
+                     * expensive for it to be done again
+                     */
+                    return;
+                }
+                try {
+                    addRunningTask(runningTaskId);
+                    Task task = (Task) Class.forName(taskInfo.getTaskClass()).newInstance();
+                    task.setProperties(taskInfo.getProperties());
+                    try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getCurrentContext().setTenantDomain(
+                                getTenantDomain());
+                        task.init();
+                        task.execute();
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+                } finally {
+                    removeRunningTask(runningTaskId);
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+
+    }
+
+    /**
+     * This class represents the cluster message for retrieving a task status.
+     */
+    public static class TaskStatusMessage extends ClusteringMessage {
+
+        private static final long serialVersionUID = 8904018070655665868L;
+
+        private String tenantDomain;
+
+        private String taskType;
+
+        private String taskName;
+
+        private TaskStatusResult result;
+
+        public String getTenantDomain() {
+            return tenantDomain;
+        }
+
+        public void setTenantDomain(String tenantDomain) {
+            this.tenantDomain = tenantDomain;
+        }
+
+        public String getTaskType() {
+            return taskType;
+        }
+
+        public void setTaskType(String taskType) {
+            this.taskType = taskType;
+        }
+
+        public String getTaskName() {
+            return taskName;
+        }
+
+        public void setTaskName(String taskName) {
+            this.taskName = taskName;
+        }
+
+        @Override
+        public ClusteringCommand getResponse() {
+            return this.result;
+        }
+
+        @Override
+        public void execute(ConfigurationContext ctx) throws ClusteringFault {
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getCurrentContext().setTenantDomain(this.getTenantDomain());
+                TaskManager tm = TasksDSComponent.getTaskService().getTaskManager(
+                        this.getTaskType());
+                if (tm instanceof RemoteTaskManager) {
+                    this.result = new TaskStatusResult();
+                    this.result.setRunning(((RemoteTaskManager) tm).isTaskRunning(this
+                            .getTaskName()));
+                }
+            } catch (Exception e) {
+                throw new ClusteringFault(e.getMessage(), e);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
+    /**
+     * This class represents a clustering message result for task statuses.
+     */
+    public static class TaskStatusResult extends ClusteringCommand {
+
+        private static final long serialVersionUID = 4982249263193601405L;
+
+        private boolean running;
+
+        public boolean isRunning() {
+            return running;
+        }
+
+        public void setRunning(boolean running) {
+            this.running = running;
+        }
+
+        @Override
+        public void execute(ConfigurationContext ctx) throws ClusteringFault {
+        }
+
+    }
 
 }

@@ -26,44 +26,44 @@ import org.quartz.spi.ThreadPool;
  */
 public class QuartzCachedThreadPool implements ThreadPool {
 
-	private ExecutorService executor;
+    private ExecutorService executor;
 
-	@Override
-	public int blockForAvailableThreads() {
-		return Integer.MAX_VALUE;
-	}
+    @Override
+    public int blockForAvailableThreads() {
+        return Integer.MAX_VALUE;
+    }
 
-	@Override
-	public int getPoolSize() {
-		return Integer.MAX_VALUE;
-	}
+    @Override
+    public int getPoolSize() {
+        return Integer.MAX_VALUE;
+    }
 
-	@Override
-	public void initialize() throws SchedulerConfigException {
-		this.executor = Executors.newCachedThreadPool();
-	}
+    @Override
+    public void initialize() throws SchedulerConfigException {
+        this.executor = Executors.newCachedThreadPool();
+    }
 
-	@Override
-	public boolean runInThread(Runnable task) {
-		this.executor.submit(task);
-		return true;
-	}
+    @Override
+    public boolean runInThread(Runnable task) {
+        this.executor.submit(task);
+        return true;
+    }
 
-	@Override
-	public void setInstanceId(String instanceId) {
-	}
+    @Override
+    public void setInstanceId(String instanceId) {
+    }
 
-	@Override
-	public void setInstanceName(String instanceName) {
-	}
+    @Override
+    public void setInstanceName(String instanceName) {
+    }
 
-	@Override
-	public void shutdown(boolean waitForJobsToComplete) {
-		if (waitForJobsToComplete) {
-			this.executor.shutdown();
-		} else {
-			this.executor.shutdownNow();
-		}
-	}
+    @Override
+    public void shutdown(boolean waitForJobsToComplete) {
+        if (waitForJobsToComplete) {
+            this.executor.shutdown();
+        } else {
+            this.executor.shutdownNow();
+        }
+    }
 
 }

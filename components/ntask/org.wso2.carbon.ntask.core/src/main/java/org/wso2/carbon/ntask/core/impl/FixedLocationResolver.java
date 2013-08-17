@@ -26,29 +26,28 @@ import org.wso2.carbon.ntask.core.TaskServiceContext;
  * This class represents a TaskLocationResolver implementation, which always returns a fixed location.
  */
 public class FixedLocationResolver implements TaskLocationResolver {
-	
-	public FixedLocationResolver() {
-	}
-	
-	@Override
-	public int getLocation(TaskServiceContext ctx, TaskInfo taskInfo) throws TaskException {
-		String value = taskInfo.getProperties().get(TaskConstants.FIXED_LOCATION_RESOLVER_PARAM);
-		if (value != null) {
-			try {
-			    return Integer.parseInt(value);
-			} catch (Exception e) {
-				throw new TaskException("The task propery '"
-						+ TaskConstants.FIXED_LOCATION_RESOLVER_PARAM
-						+ "' must be an integer in task '" + taskInfo.getName() + "'",
-						Code.CONFIG_ERROR);
-			}
-		} else {
-			throw new TaskException("The task property '"
-					+ TaskConstants.FIXED_LOCATION_RESOLVER_PARAM
-					+ "' is missing which is required for FixedLocationResolver in task '"
-					+ taskInfo.getName() + "'", 
-					Code.CONFIG_ERROR);
-		}
-	}
+
+    public FixedLocationResolver() {
+    }
+
+    @Override
+    public int getLocation(TaskServiceContext ctx, TaskInfo taskInfo) throws TaskException {
+        String value = taskInfo.getProperties().get(TaskConstants.FIXED_LOCATION_RESOLVER_PARAM);
+        if (value != null) {
+            try {
+                return Integer.parseInt(value);
+            } catch (Exception e) {
+                throw new TaskException("The task propery '"
+                        + TaskConstants.FIXED_LOCATION_RESOLVER_PARAM
+                        + "' must be an integer in task '" + taskInfo.getName() + "'",
+                        Code.CONFIG_ERROR);
+            }
+        } else {
+            throw new TaskException("The task property '"
+                    + TaskConstants.FIXED_LOCATION_RESOLVER_PARAM
+                    + "' is missing which is required for FixedLocationResolver in task '"
+                    + taskInfo.getName() + "'", Code.CONFIG_ERROR);
+        }
+    }
 
 }

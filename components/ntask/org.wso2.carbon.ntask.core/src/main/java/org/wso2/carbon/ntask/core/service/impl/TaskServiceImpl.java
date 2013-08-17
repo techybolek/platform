@@ -30,7 +30,6 @@ import org.wso2.carbon.ntask.core.impl.clustered.ClusteredTaskManagerFactory;
 import org.wso2.carbon.ntask.core.impl.remote.RemoteTaskManager;
 import org.wso2.carbon.ntask.core.impl.remote.RemoteTaskManagerFactory;
 import org.wso2.carbon.ntask.core.impl.standalone.StandaloneTaskManagerFactory;
-import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -47,227 +46,239 @@ import java.util.Set;
  */
 public class TaskServiceImpl implements TaskService {
 
-	private static final Log log = LogFactory.getLog(TaskServiceImpl.class);
-	
-	private Set<String> registeredTaskTypes;
-		
-	private boolean serverInit;
-	
-	private TaskManagerFactory taskManagerFactory;
-	
-	private TaskServiceConfiguration taskServerConfiguration;
-	
-	public TaskServiceImpl() throws TaskException {
-		this.registeredTaskTypes = new HashSet<String>();
-		this.taskServerConfiguration = new TaskServiceConfigurationImpl(
-				this.loadTaskServiceXMLConfig());
-		switch (this.getServerConfiguration().getTaskServerMode()) {
-		case CLUSTERED:
-			this.taskManagerFactory = new ClusteredTaskManagerFactory();
-			break;
-		case REMOTE:
-			this.taskManagerFactory = new RemoteTaskManagerFactory();
-		    break;
-		case STANDALONE:
-			this.taskManagerFactory = new StandaloneTaskManagerFactory();
-			break;
-		}
-	}
-	
-	private TaskServiceXMLConfiguration loadTaskServiceXMLConfig() throws TaskException {
-		String path = CarbonUtils.getCarbonConfigDirPath() + File.separator + "etc" + 
-		        File.separator + "tasks-config.xml";
-		File file = new File(path);
-		if (!file.exists()) {
-			return null;
-		}
-		Document doc = TaskUtils.convertToDocument(file);
-		TaskUtils.secureResolveDocument(doc);
-		JAXBContext ctx;
-		try {
-			ctx = JAXBContext.newInstance(TaskServiceXMLConfiguration.class);
-			TaskServiceXMLConfiguration taskConfig = (TaskServiceXMLConfiguration) ctx.
-	        createUnmarshaller().unmarshal(doc);
-	        return taskConfig;
-		} catch (JAXBException e) {
-			throw new TaskException(e.getMessage(), Code.CONFIG_ERROR, e);
-		}
-		
-	}
+    private static final Log log = LogFactory.getLog(TaskServiceImpl.class);
 
-	public boolean isServerInit() {
-		return serverInit;
-	}
+    private Set<String> registeredTaskTypes;
 
-	public TaskManagerFactory getTaskManagerFactory() {
-		return taskManagerFactory;
-	}
-	
-	@Override
-	public Set<String> getRegisteredTaskTypes() {
-		return registeredTaskTypes;
-	}
-	
-	private void initTaskManagersForType(String taskType) throws TaskException {
-		if (log.isDebugEnabled()) {
-			log.debug("Initializing task managers [" + taskType + "]");
-		}
-		List<TaskManager> startupTms = this.getTaskManagerFactory().
-		        getStartupSchedulingTaskManagersForType(taskType);
-		for (TaskManager tm : startupTms) {
-			tm.initStartupTasks();
-		}
-	}
-	
-	@Override
-	public TaskManager getTaskManager(String taskType) throws TaskException {
-		String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain();
-		return this.getTaskManagerFactory().getTaskManager(new TaskManagerId(tenantDomain, taskType));
-	}
-	
-	@Override
-	public List<TaskManager> getAllTenantTaskManagersForType(
-			String taskType) throws TaskException {
-		return this.getTaskManagerFactory().getAllTenantTaskManagersForType(taskType);
-	}
+    private boolean serverInit;
 
-	@Override
-	public synchronized void registerTaskType(String taskType) throws TaskException {
-		this.registeredTaskTypes.add(taskType);
-		/* cluster task communicator should be notified to initialize itself,
-		 * i.e. creating necessary groups */
-		if (this.getServerConfiguration().getTaskServerMode() == TaskServerMode.CLUSTERED) {
-			ClusterGroupCommunicator.getInstance().newTaskTypeAdded(taskType);
-		}
-		/* if server has finished initializing, lets initialize the
-		 * task managers for this type */
-		if (this.isServerInit()) {
-		    this.initTaskManagersForType(taskType);
-		}
-	}
+    private TaskManagerFactory taskManagerFactory;
 
-	@Override
-	public synchronized void serverInitialized() {
-		try {
-			for (String taskType : this.getRegisteredTaskTypes()) {
-				this.initTaskManagersForType(taskType);
-			}
-			this.serverInit = true;
-		} catch (TaskException e) {
-			String msg = "Error initializing task managers: " + e.getMessage();
-			log.error(msg, e);
-			throw new RuntimeException(msg, e);
-		}
-	}
+    private TaskServiceConfiguration taskServerConfiguration;
+    
+    private TaskServerMode effectiveTaskServerMode;
 
-	@Override
-	public TaskServiceConfiguration getServerConfiguration() {
-		return taskServerConfiguration;
-	}
-	
-	private class TaskServiceConfigurationImpl implements TaskServiceConfiguration {
+    public TaskServiceImpl() throws TaskException {
+        this.registeredTaskTypes = new HashSet<String>();
+        this.taskServerConfiguration = new TaskServiceConfigurationImpl(
+                this.loadTaskServiceXMLConfig());
+        switch (this.getServerConfiguration().getTaskServerMode()) {
+        case CLUSTERED:
+            this.taskManagerFactory = new ClusteredTaskManagerFactory();
+            this.effectiveTaskServerMode = TaskServerMode.CLUSTERED;
+            break;
+        case REMOTE:
+            this.taskManagerFactory = new RemoteTaskManagerFactory();
+            this.effectiveTaskServerMode = TaskServerMode.REMOTE;
+            break;
+        case STANDALONE:
+            this.taskManagerFactory = new StandaloneTaskManagerFactory();
+            this.effectiveTaskServerMode = TaskServerMode.STANDALONE;
+            break;
+        case AUTO:
+            if (ClusteredTaskManagerFactory.isClusteringEnabled()) {
+                this.taskManagerFactory = new ClusteredTaskManagerFactory();
+                this.effectiveTaskServerMode = TaskServerMode.CLUSTERED;
+            } else {
+                this.taskManagerFactory = new StandaloneTaskManagerFactory();
+                this.effectiveTaskServerMode = TaskServerMode.STANDALONE;
+            }
+        }
+        log.info("Task service starting in " + this.getEffectiveTaskServerMode() + " mode...");
+    }
 
-		private TaskServerMode taskServerMode;
-		
-		private int taskServerCount = -1;
-		
-		private String taskClientDispatchAddress;
-		
-		private String remoteServerAddress;
-		
-		private String remoteServerUsername;
-		
-		private String remoteServerPassword;
+    private TaskServiceXMLConfiguration loadTaskServiceXMLConfig() throws TaskException {
+        String path = CarbonUtils.getCarbonConfigDirPath() + File.separator + "etc"
+                + File.separator + "tasks-config.xml";
+        File file = new File(path);
+        if (!file.exists()) {
+            return null;
+        }
+        Document doc = TaskUtils.convertToDocument(file);
+        TaskUtils.secureResolveDocument(doc);
+        JAXBContext ctx;
+        try {
+            ctx = JAXBContext.newInstance(TaskServiceXMLConfiguration.class);
+            TaskServiceXMLConfiguration taskConfig = (TaskServiceXMLConfiguration) ctx
+                    .createUnmarshaller().unmarshal(doc);
+            return taskConfig;
+        } catch (JAXBException e) {
+            throw new TaskException(e.getMessage(), Code.CONFIG_ERROR, e);
+        }
 
-		public TaskServiceConfigurationImpl(TaskServiceXMLConfiguration taskXMLConfig) {
-			this.processXMLConfig(taskXMLConfig);
-			this.processSystemProps();
-		}
-		
-		private void processXMLConfig(TaskServiceXMLConfiguration taskXMLConfig) {
-			if (taskXMLConfig == null) {
-				return;
-			}
-			this.taskClientDispatchAddress = taskXMLConfig.getTaskClientDispatchAddress();
-			this.remoteServerAddress = taskXMLConfig.getRemoteServerAddress();
-			this.remoteServerUsername = taskXMLConfig.getRemoteServerUsername();
-			this.remoteServerPassword = taskXMLConfig.getRemoteServerPassword();
-			this.taskServerMode = taskXMLConfig.getTaskServerMode();
-			this.taskServerCount = taskXMLConfig.getTaskServerCount();
-		}
-		
-		private void processSystemProps() {
-			this.taskClientDispatchAddress = returnSystemPropValueIfValid(
-					this.taskClientDispatchAddress,
-					RemoteTaskManager.TASK_CLIENT_DISPATCH_ADDRESS);
-			this.remoteServerAddress = returnSystemPropValueIfValid(
-					this.remoteServerAddress,
-					RemoteTaskManager.REMOTE_TASK_SERVER_ADDRESS);
-			this.remoteServerUsername = returnSystemPropValueIfValid(
-					this.remoteServerUsername,
-					RemoteTaskManager.REMOTE_TASK_SERVER_USERNAME);
-			this.remoteServerPassword = returnSystemPropValueIfValid(
-					this.remoteServerPassword,
-					RemoteTaskManager.REMOTE_TASK_SERVER_PASSWORD);
-			if (this.taskServerMode == null) {
-				if (this.getRemoteServerAddress() != null) {
-					this.taskServerMode = TaskServerMode.REMOTE;
-				} else if (TasksDSComponent.getCoordinationService().isEnabled()) {
-					this.taskServerMode = TaskServerMode.CLUSTERED;
-				} else {
-					this.taskServerMode = TaskServerMode.STANDALONE;
-				}
-			}
-			if (this.taskServerCount == -1) {
-			    String taskServerCountStr = System.getProperty(
-					    ClusterGroupCommunicator.TASK_SERVER_COUNT_SYS_PROP);
-			    if (taskServerCountStr != null) {
-				    this.taskServerCount = Integer.parseInt(taskServerCountStr);
-			    } else {
-				    this.taskServerCount = -1;
-			    }
-			}
-		}
-		
-		private String returnSystemPropValueIfValid(String originalValue, String sysPropName) {
-			String sysPropValue = System.getProperty(sysPropName);
-			if (sysPropValue != null) {
-				return sysPropValue;
-			} else {
-				return originalValue;
-			}
-		}
-		
-		@Override
-		public String getTaskClientDispatchAddress() {
-			return taskClientDispatchAddress;
-		}
-		
-		@Override
-		public TaskServerMode getTaskServerMode() {
-			return taskServerMode;
-		}
+    }
 
-		@Override
-		public String getRemoteServerAddress() {
-			return remoteServerAddress;
-		}
+    @Override
+    public boolean isServerInit() {
+        return serverInit;
+    }
 
-		@Override
-		public String getRemoteServerUsername() {
-			return remoteServerUsername;
-		}
+    public TaskManagerFactory getTaskManagerFactory() {
+        return taskManagerFactory;
+    }
 
-		@Override
-		public String getRemoteServerPassword() {
-			return remoteServerPassword;
-		}
+    @Override
+    public Set<String> getRegisteredTaskTypes() {
+        return registeredTaskTypes;
+    }
 
-		@Override
-		public int getTaskServerCount() {
-			return taskServerCount;
-		}
-		
-	}
-	
+    private void initTaskManagersForType(String taskType) throws TaskException {
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing task managers [" + taskType + "]");
+        }
+        List<TaskManager> startupTms = this.getTaskManagerFactory()
+                .getStartupSchedulingTaskManagersForType(taskType);
+        for (TaskManager tm : startupTms) {
+            tm.initStartupTasks();
+        }
+    }
+
+    @Override
+    public TaskManager getTaskManager(String taskType) throws TaskException {
+        String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain();
+        return this.getTaskManagerFactory().getTaskManager(
+                new TaskManagerId(tenantDomain, taskType));
+    }
+
+    @Override
+    public List<TaskManager> getAllTenantTaskManagersForType(String taskType) throws TaskException {
+        return this.getTaskManagerFactory().getAllTenantTaskManagersForType(taskType);
+    }
+
+    @Override
+    public synchronized void registerTaskType(String taskType) throws TaskException {
+        this.registeredTaskTypes.add(taskType);
+        /* if server has finished initializing, lets initialize the
+         * task managers for this type */
+        if (this.isServerInit()) {
+            this.initTaskManagersForType(taskType);
+        }
+    }
+
+    @Override
+    public synchronized void serverInitialized() {
+        try {
+            for (String taskType : this.getRegisteredTaskTypes()) {
+                this.initTaskManagersForType(taskType);
+            }
+            this.serverInit = true;
+        } catch (TaskException e) {
+            String msg = "Error initializing task managers: " + e.getMessage();
+            log.error(msg, e);
+            throw new RuntimeException(msg, e);
+        }
+    }
+
+    @Override
+    public TaskServiceConfiguration getServerConfiguration() {
+        return taskServerConfiguration;
+    }
+
+    private class TaskServiceConfigurationImpl implements TaskServiceConfiguration {
+
+        private TaskServerMode taskServerMode;
+
+        private int taskServerCount = -1;
+
+        private String taskClientDispatchAddress;
+
+        private String remoteServerAddress;
+
+        private String remoteServerUsername;
+
+        private String remoteServerPassword;
+
+        public TaskServiceConfigurationImpl(TaskServiceXMLConfiguration taskXMLConfig) {
+            this.processXMLConfig(taskXMLConfig);
+            this.processSystemProps();
+        }
+
+        private void processXMLConfig(TaskServiceXMLConfiguration taskXMLConfig) {
+            if (taskXMLConfig == null) {
+                return;
+            }
+            this.taskClientDispatchAddress = taskXMLConfig.getTaskClientDispatchAddress();
+            this.remoteServerAddress = taskXMLConfig.getRemoteServerAddress();
+            this.remoteServerUsername = taskXMLConfig.getRemoteServerUsername();
+            this.remoteServerPassword = taskXMLConfig.getRemoteServerPassword();
+            this.taskServerMode = taskXMLConfig.getTaskServerMode();
+            this.taskServerCount = taskXMLConfig.getTaskServerCount();
+        }
+
+        private void processSystemProps() {
+            this.taskClientDispatchAddress = returnSystemPropValueIfValid(
+                    this.taskClientDispatchAddress, RemoteTaskManager.TASK_CLIENT_DISPATCH_ADDRESS);
+            this.remoteServerAddress = returnSystemPropValueIfValid(this.remoteServerAddress,
+                    RemoteTaskManager.REMOTE_TASK_SERVER_ADDRESS);
+            this.remoteServerUsername = returnSystemPropValueIfValid(this.remoteServerUsername,
+                    RemoteTaskManager.REMOTE_TASK_SERVER_USERNAME);
+            this.remoteServerPassword = returnSystemPropValueIfValid(this.remoteServerPassword,
+                    RemoteTaskManager.REMOTE_TASK_SERVER_PASSWORD);
+            if (this.taskServerMode == null) {
+                this.taskServerMode = TaskServerMode.AUTO;
+                
+            }
+            if (this.taskServerCount == -1) {
+                String taskServerCountStr = System.getProperty(
+                        ClusterGroupCommunicator.TASK_SERVER_COUNT_SYS_PROP);
+                if (taskServerCountStr != null) {
+                    this.taskServerCount = Integer.parseInt(taskServerCountStr);
+                } else {
+                    this.taskServerCount = -1;
+                }
+            }
+        }
+
+        private String returnSystemPropValueIfValid(String originalValue, String sysPropName) {
+            String sysPropValue = System.getProperty(sysPropName);
+            if (sysPropValue != null) {
+                return sysPropValue;
+            } else {
+                return originalValue;
+            }
+        }
+
+        @Override
+        public String getTaskClientDispatchAddress() {
+            return taskClientDispatchAddress;
+        }
+
+        @Override
+        public TaskServerMode getTaskServerMode() {
+            return taskServerMode;
+        }
+
+        @Override
+        public String getRemoteServerAddress() {
+            return remoteServerAddress;
+        }
+
+        @Override
+        public String getRemoteServerUsername() {
+            return remoteServerUsername;
+        }
+
+        @Override
+        public String getRemoteServerPassword() {
+            return remoteServerPassword;
+        }
+
+        @Override
+        public int getTaskServerCount() {
+            return taskServerCount;
+        }
+
+    }
+
+    public TaskServerMode getEffectiveTaskServerMode() {
+        return effectiveTaskServerMode;
+    }
+
+    @Override
+    public void runAfterRegistrationActions() throws TaskException {
+        if (this.getEffectiveTaskServerMode() == TaskServerMode.CLUSTERED) {
+            ClusterGroupCommunicator.getInstance().checkServers();
+        }
+    }
+
 }

@@ -29,238 +29,244 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class represents a task job definition. 
+ * This class represents a task job definition.
  */
-@XmlRootElement (name = "taskInfo")
+@XmlRootElement(name = "taskInfo")
 public class TaskInfo implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
 
-	public static final String TENANT_DOMAIN_PROP = "__TENANT_DOMAIN_PROP__";
-	
-	private String name;
-	
-	private String taskClass;
-		
-	private Map<String, String> properties;
-	
-	private String locationResolverClass;
-	
-	private TriggerInfo triggerInfo;
-	
-	@Deprecated
-	public TaskInfo() {
-		this.locationResolverClass = RandomTaskLocationResolver.class.getName();
-	}
-	
-	/**
-	 * TaskInfo constructor, uses the RandomTaskLocationResolver class to resolve the task location,
-	 * which is simply picking a random server for the task.
-	 * @param name The name of the task
-	 * @param taskClass The task implementation class
-	 * @param properties The properties that will be passed into the task implementation at runtime
-	 * @param triggerInfo Task trigger information
-	 */
-	public TaskInfo(String name, String taskClass, Map<String, String> properties,
-			TriggerInfo triggerInfo) {
-		this(name, taskClass, properties, RandomTaskLocationResolver.class.getName(), triggerInfo);
-	}
-	
-	/**
-	 * TaskInfo constructor with explicit location value.
-	 * @param name The name of the task
-	 * @param taskClass The task implementation class
-	 * @param properties The properties that will be passed into the task implementation at runtime
-	 * @param location The server location, the task will be run on. The location is
-	 * a 0 based index, where the final location of the server will be calculated by getting
-	 * the modulus of the total server count, so the location value can grow arbitrary. 
-	 * @param triggerInfo
-	 */
-	public TaskInfo(String name, String taskClass, Map<String, String> properties, int location,
-			TriggerInfo triggerInfo) {
-		this(name, taskClass, properties, FixedLocationResolver.class.getName(), triggerInfo);
-		this.getProperties().put(TaskConstants.FIXED_LOCATION_RESOLVER_PARAM, 
-				String.valueOf(location));
-	}
-	
-	/**
-	 * TaskInfo constructor with custom TaskLocationResolver.
-	 * @param name The name of the task
-	 * @param taskClass The task implementation class
-	 * @param properties The properties that will be passed into the task implementation at runtime
-	 * @param locationResolverClass The TaskLocationResolver implementation, which is used to
-	 * resolve the server location of the task at schedule time. 
-	 * @param triggerInfo
-	 */
-	public TaskInfo(String name, String taskClass, Map<String, String> properties,
-			String locationResolverClass, TriggerInfo triggerInfo) {
-		this.name = name;
-		this.taskClass = taskClass;
-		this.properties = new HashMap<String, String>();
-		if (properties != null) {
-			this.properties.putAll(properties);
-		}
-		this.locationResolverClass = locationResolverClass;
-		this.triggerInfo = triggerInfo;
-		if (this.getTriggerInfo() == null) {
-			throw new NullPointerException("Trigger information cannot be null");
-		}
-	}
+    private static final long serialVersionUID = 1L;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public static final String TENANT_DOMAIN_PROP = "__TENANT_DOMAIN_PROP__";
 
-	public void setTaskClass(String taskClass) {
-		this.taskClass = taskClass;
-	}
+    private String name;
 
-	public void setProperties(Map<String, String> properties) {
-		this.properties = properties;
-	}
+    private String taskClass;
 
-	public void setTriggerInfo(TriggerInfo triggerInfo) {
-		this.triggerInfo = triggerInfo;
-	}
+    private Map<String, String> properties;
 
-	@XmlElement (name = "triggerInfo")
-	public TriggerInfo getTriggerInfo() {
-		return triggerInfo;
-	}
-	
-	@XmlElement (name = "name")
-	public String getName() {
-		return name;
-	}
+    private String locationResolverClass;
 
-	@XmlElement (name = "taskClass")
-	public String getTaskClass() {
-		return taskClass;
-	}
-	
-	@XmlElement (name = "locationResolverClass")
-	public String getLocationResolverClass() {
-		return locationResolverClass;
-	}
-	
-	public void setLocationResolverClass(String locationResolverClass) {
-		this.locationResolverClass = locationResolverClass;
-	}
+    private TriggerInfo triggerInfo;
 
-	@XmlElementWrapper (name = "properties")
-	public Map<String, String> getProperties() {
-		return properties;
-	}
-	
-	@Override
-	public int hashCode() {
-		return this.getName().hashCode();
-	}
-	
-	@Override
-	public boolean equals(Object rhs) {
-		return this.hashCode() == rhs.hashCode();
-	}
-	
-	/**
-	 * This class represents task trigger information.
-	 */
-	@XmlRootElement (name = "triggerInfo")
-	public static class TriggerInfo implements Serializable {
+    @Deprecated
+    public TaskInfo() {
+        this.locationResolverClass = RandomTaskLocationResolver.class.getName();
+    }
 
-		private static final long serialVersionUID = 1L;
+    /**
+     * TaskInfo constructor, uses the RandomTaskLocationResolver class to
+     * resolve the task location, which is simply picking a random server for
+     * the task.
+     * 
+     * @param name The name of the task
+     * @param taskClass The task implementation class
+     * @param properties The properties that will be passed into the task implementation at runtime
+     * @param triggerInfo Task trigger information
+     */
+    public TaskInfo(String name, String taskClass, Map<String, String> properties,
+            TriggerInfo triggerInfo) {
+        this(name, taskClass, properties, RandomTaskLocationResolver.class.getName(), triggerInfo);
+    }
 
-		private Date startTime;
-		
-		private Date endTime;
-		
-		private int intervalMillis;		
-		
-		private int repeatCount;
-		
-		private String cronExpression;
-		
-		private TaskMisfirePolicy misfirePolicy = TaskMisfirePolicy.DEFAULT;
-		
-		private boolean disallowConcurrentExecution;
-		
-		public TriggerInfo() {
-		}
-		
-		public TriggerInfo (Date startTime, Date endTime, int intervalMillis, int repeatCount) {
-			this.startTime = startTime;
-			this.endTime = endTime;
-			this.intervalMillis = intervalMillis;
-			this.repeatCount = repeatCount;
-		}
-		
-		public TriggerInfo(String cronExpression) {
-			this.cronExpression = cronExpression;
-		}
+    /**
+     * TaskInfo constructor with explicit location value.
+     * 
+     * @param name The name of the task
+     * @param taskClass The task implementation class
+     * @param properties The properties that will be passed into the task implementation at runtime
+     * @param location
+     *            The server location, the task will be run on. The location is
+     *            a 0 based index, where the final location of the server will
+     *            be calculated by getting the modulus of the total server
+     *            count, so the location value can grow arbitrary.
+     * @param triggerInfo Task trigger information
+     */
+    public TaskInfo(String name, String taskClass, Map<String, String> properties, int location,
+            TriggerInfo triggerInfo) {
+        this(name, taskClass, properties, FixedLocationResolver.class.getName(), triggerInfo);
+        this.getProperties().put(TaskConstants.FIXED_LOCATION_RESOLVER_PARAM,
+                String.valueOf(location));
+    }
 
-		public void setDisallowConcurrentExecution(boolean disallowConcurrentExecution) {
-			this.disallowConcurrentExecution = disallowConcurrentExecution;
-		}
+    /**
+     * TaskInfo constructor with custom TaskLocationResolver.
+     * 
+     * @param name The name of the task
+     * @param taskClass The task implementation class
+     * @param properties The properties that will be passed into the task implementation at runtime
+     * @param locationResolverClass The TaskLocationResolver implementation, which is used to
+     *            resolve the server location of the task at schedule time.
+     * @param triggerInfo Task trigger information
+     */
+    public TaskInfo(String name, String taskClass, Map<String, String> properties,
+            String locationResolverClass, TriggerInfo triggerInfo) {
+        this.name = name;
+        this.taskClass = taskClass;
+        this.properties = new HashMap<String, String>();
+        if (properties != null) {
+            this.properties.putAll(properties);
+        }
+        this.locationResolverClass = locationResolverClass;
+        this.triggerInfo = triggerInfo;
+        if (this.getTriggerInfo() == null) {
+            throw new NullPointerException("Trigger information cannot be null");
+        }
+    }
 
-		public void setMisfirePolicy(TaskMisfirePolicy misfirePolicy) {
-			this.misfirePolicy = misfirePolicy;
-		}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-		public void setStartTime(Date startTime) {
-			this.startTime = startTime;
-		}
+    public void setTaskClass(String taskClass) {
+        this.taskClass = taskClass;
+    }
 
-		public void setEndTime(Date endTime) {
-			this.endTime = endTime;
-		}
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
 
-		public void setIntervalMillis(int intervalMillis) {
-			this.intervalMillis = intervalMillis;
-		}
+    public void setTriggerInfo(TriggerInfo triggerInfo) {
+        this.triggerInfo = triggerInfo;
+    }
 
-		public void setRepeatCount(int repeatCount) {
-			this.repeatCount = repeatCount;
-		}
+    @XmlElement(name = "triggerInfo")
+    public TriggerInfo getTriggerInfo() {
+        return triggerInfo;
+    }
 
-		public void setCronExpression(String cronExpression) {
-			this.cronExpression = cronExpression;
-		}
-		
-		@XmlElement (name = "disallowConcurrentExecution")
-		public boolean isDisallowConcurrentExecution() {
-			return disallowConcurrentExecution;
-		}
-		
-		@XmlElement (name = "misfirePolicy")
-		public TaskMisfirePolicy getMisfirePolicy() {
-			return misfirePolicy;
-		}
-		
-		@XmlElement (name = "cronExpression")
-		public String getCronExpression() {
-			return cronExpression;
-		}
+    @XmlElement(name = "name")
+    public String getName() {
+        return name;
+    }
 
-		@XmlElement (name = "startTime")
-		public Date getStartTime() {
-			return startTime;
-		}
-		
-		@XmlElement (name = "endTime")
-		public Date getEndTime() {
-			return endTime;
-		}
+    @XmlElement(name = "taskClass")
+    public String getTaskClass() {
+        return taskClass;
+    }
 
-		@XmlElement (name = "intervalMillis")
-		public int getIntervalMillis() {
-			return intervalMillis;
-		}
+    @XmlElement(name = "locationResolverClass")
+    public String getLocationResolverClass() {
+        return locationResolverClass;
+    }
 
-		@XmlElement (name = "repeatCount")
-		public int getRepeatCount() {
-			return repeatCount;
-		}
-		
-	}
-	
+    public void setLocationResolverClass(String locationResolverClass) {
+        this.locationResolverClass = locationResolverClass;
+    }
+
+    @XmlElementWrapper(name = "properties")
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getName().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object rhs) {
+        return this.hashCode() == rhs.hashCode();
+    }
+
+    /**
+     * This class represents task trigger information.
+     */
+    @XmlRootElement(name = "triggerInfo")
+    public static class TriggerInfo implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        private Date startTime;
+
+        private Date endTime;
+
+        private int intervalMillis;
+
+        private int repeatCount;
+
+        private String cronExpression;
+
+        private TaskMisfirePolicy misfirePolicy = TaskMisfirePolicy.DEFAULT;
+
+        private boolean disallowConcurrentExecution;
+
+        public TriggerInfo() {
+        }
+
+        public TriggerInfo(Date startTime, Date endTime, int intervalMillis, int repeatCount) {
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.intervalMillis = intervalMillis;
+            this.repeatCount = repeatCount;
+        }
+
+        public TriggerInfo(String cronExpression) {
+            this.cronExpression = cronExpression;
+        }
+
+        public void setDisallowConcurrentExecution(boolean disallowConcurrentExecution) {
+            this.disallowConcurrentExecution = disallowConcurrentExecution;
+        }
+
+        public void setMisfirePolicy(TaskMisfirePolicy misfirePolicy) {
+            this.misfirePolicy = misfirePolicy;
+        }
+
+        public void setStartTime(Date startTime) {
+            this.startTime = startTime;
+        }
+
+        public void setEndTime(Date endTime) {
+            this.endTime = endTime;
+        }
+
+        public void setIntervalMillis(int intervalMillis) {
+            this.intervalMillis = intervalMillis;
+        }
+
+        public void setRepeatCount(int repeatCount) {
+            this.repeatCount = repeatCount;
+        }
+
+        public void setCronExpression(String cronExpression) {
+            this.cronExpression = cronExpression;
+        }
+
+        @XmlElement(name = "disallowConcurrentExecution")
+        public boolean isDisallowConcurrentExecution() {
+            return disallowConcurrentExecution;
+        }
+
+        @XmlElement(name = "misfirePolicy")
+        public TaskMisfirePolicy getMisfirePolicy() {
+            return misfirePolicy;
+        }
+
+        @XmlElement(name = "cronExpression")
+        public String getCronExpression() {
+            return cronExpression;
+        }
+
+        @XmlElement(name = "startTime")
+        public Date getStartTime() {
+            return startTime;
+        }
+
+        @XmlElement(name = "endTime")
+        public Date getEndTime() {
+            return endTime;
+        }
+
+        @XmlElement(name = "intervalMillis")
+        public int getIntervalMillis() {
+            return intervalMillis;
+        }
+
+        @XmlElement(name = "repeatCount")
+        public int getRepeatCount() {
+            return repeatCount;
+        }
+
+    }
+
 }

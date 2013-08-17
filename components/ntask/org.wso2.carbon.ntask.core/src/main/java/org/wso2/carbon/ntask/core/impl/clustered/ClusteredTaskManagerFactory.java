@@ -16,22 +16,36 @@
 package org.wso2.carbon.ntask.core.impl.clustered;
 
 import org.wso2.carbon.ntask.common.TaskException;
+import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.TaskManagerId;
 import org.wso2.carbon.ntask.core.TaskRepository;
 import org.wso2.carbon.ntask.core.impl.RegistryBasedTaskRepository;
 import org.wso2.carbon.ntask.core.impl.standalone.StandaloneTaskManagerFactory;
+import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
 
 /**
  * This represents the clustered task manager factory class.
  */
 public class ClusteredTaskManagerFactory extends StandaloneTaskManagerFactory {
 
-	@Override
-	protected TaskManager createTaskManager(TaskManagerId tmId) throws TaskException {
-		TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantDomain(),
-				tmId.getTaskType());
-		return new ClusteredTaskManager(taskRepo);
-	}
-	
+    public ClusteredTaskManagerFactory() throws TaskException {
+        if (!isClusteringEnabled()) {
+            throw new TaskException("Clustering is not initialized to use Clustered Task Managers",
+                    Code.CONFIG_ERROR);
+        }
+    }
+    
+    @Override
+    protected TaskManager createTaskManager(TaskManagerId tmId) throws TaskException {
+        TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantDomain(),
+                tmId.getTaskType());
+        return new ClusteredTaskManager(taskRepo);
+    }
+    
+    public static boolean isClusteringEnabled() {
+        return TasksDSComponent.getConfigurationContextService().
+                getServerConfigContext().getAxisConfiguration().getClusteringAgent() != null;
+    }
+
 }

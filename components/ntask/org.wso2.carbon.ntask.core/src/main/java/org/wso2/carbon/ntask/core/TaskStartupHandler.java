@@ -24,19 +24,19 @@ import org.wso2.carbon.ntask.core.service.TaskService;
  */
 public class TaskStartupHandler implements ServerStartupHandler {
 
-	private TaskService taskService;
-	
-	public TaskStartupHandler(TaskService taskService) {
-		this.taskService = taskService;
-	}
-	
-	public TaskService getTaskService() {
-		return taskService;
-	}
+    private TaskService taskService;
 
-	@Override
-	public void invoke() {
-		this.getTaskService().serverInitialized();
-	}
+    public TaskStartupHandler(TaskService taskService) {
+        this.taskService = taskService;
+    }
+
+    public TaskService getTaskService() {
+        return taskService;
+    }
+
+    @Override
+    public void invoke() {
+        this.getTaskService().serverInitialized();
+    }
 
 }

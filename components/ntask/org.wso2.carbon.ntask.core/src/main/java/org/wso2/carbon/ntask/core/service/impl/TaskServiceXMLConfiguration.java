@@ -23,72 +23,72 @@ import org.wso2.carbon.ntask.core.service.TaskService.TaskServerMode;
 /**
  * This represents the task service XML based configuration.
  */
-@XmlRootElement (name = "tasks-configuration")
+@XmlRootElement(name = "tasks-configuration")
 public class TaskServiceXMLConfiguration {
 
-	private TaskServerMode taskServerMode;
-	
-	private int taskServerCount;
-	
-	private String taskClientDispatchAddress;
-	
-	private String remoteServerAddress;
-	
-	private String remoteServerUsername;
-	
-	private String remoteServerPassword;
+    private TaskServerMode taskServerMode;
 
-	public TaskServerMode getTaskServerMode() {
-		return taskServerMode;
-	}
+    private int taskServerCount;
 
-	public void setTaskServerMode(TaskServerMode taskServerMode) {
-		this.taskServerMode = taskServerMode;
-	}
+    private String taskClientDispatchAddress;
 
-	@XmlElement (defaultValue = "-1")
-	public int getTaskServerCount() {
-		return taskServerCount;
-	}
+    private String remoteServerAddress;
 
-	public void setTaskServerCount(int taskServerCount) {
-		this.taskServerCount = taskServerCount;
-	}
+    private String remoteServerUsername;
 
-	@XmlElement (nillable = true)
-	public String getTaskClientDispatchAddress() {
-		return taskClientDispatchAddress;
-	}
+    private String remoteServerPassword;
 
-	public void setTaskClientDispatchAddress(String taskClientDispatchAddress) {
-		this.taskClientDispatchAddress = taskClientDispatchAddress;
-	}
+    public TaskServerMode getTaskServerMode() {
+        return taskServerMode;
+    }
 
-	@XmlElement (nillable = true)
-	public String getRemoteServerAddress() {
-		return remoteServerAddress;
-	}
+    public void setTaskServerMode(TaskServerMode taskServerMode) {
+        this.taskServerMode = taskServerMode;
+    }
 
-	public void setRemoteServerAddress(String remoteServerAddress) {
-		this.remoteServerAddress = remoteServerAddress;
-	}
+    @XmlElement(defaultValue = "-1")
+    public int getTaskServerCount() {
+        return taskServerCount;
+    }
 
-	@XmlElement (nillable = true)
-	public String getRemoteServerUsername() {
-		return remoteServerUsername;
-	}
+    public void setTaskServerCount(int taskServerCount) {
+        this.taskServerCount = taskServerCount;
+    }
 
-	public void setRemoteServerUsername(String remoteServerUsername) {
-		this.remoteServerUsername = remoteServerUsername;
-	}
+    @XmlElement(nillable = true)
+    public String getTaskClientDispatchAddress() {
+        return taskClientDispatchAddress;
+    }
 
-	@XmlElement (nillable = true)
-	public String getRemoteServerPassword() {
-		return remoteServerPassword;
-	}
+    public void setTaskClientDispatchAddress(String taskClientDispatchAddress) {
+        this.taskClientDispatchAddress = taskClientDispatchAddress;
+    }
 
-	public void setRemoteServerPassword(String remoteServerPassword) {
-		this.remoteServerPassword = remoteServerPassword;
-	}
-	
+    @XmlElement(nillable = true)
+    public String getRemoteServerAddress() {
+        return remoteServerAddress;
+    }
+
+    public void setRemoteServerAddress(String remoteServerAddress) {
+        this.remoteServerAddress = remoteServerAddress;
+    }
+
+    @XmlElement(nillable = true)
+    public String getRemoteServerUsername() {
+        return remoteServerUsername;
+    }
+
+    public void setRemoteServerUsername(String remoteServerUsername) {
+        this.remoteServerUsername = remoteServerUsername;
+    }
+
+    @XmlElement(nillable = true)
+    public String getRemoteServerPassword() {
+        return remoteServerPassword;
+    }
+
+    public void setRemoteServerPassword(String remoteServerPassword) {
+        this.remoteServerPassword = remoteServerPassword;
+    }
+
 }

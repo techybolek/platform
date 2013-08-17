@@ -17,317 +17,199 @@ package org.wso2.carbon.ntask.core.impl.clustered;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.coordination.common.CoordinationException;
-import org.wso2.carbon.coordination.common.CoordinationException.ExceptionCode;
-import org.wso2.carbon.coordination.core.sync.Group;
-import org.wso2.carbon.coordination.core.sync.GroupEventListener;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.TaskManager;
+import org.wso2.carbon.ntask.core.impl.clustered.rpc.TaskCall;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
 import org.wso2.carbon.ntask.core.service.TaskService;
 
-import java.io.*;
-import java.util.HashMap;
+import com.hazelcast.core.DistributedTask;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Member;
+import com.hazelcast.core.MembershipEvent;
+import com.hazelcast.core.MembershipListener;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 /**
- * This class represents the cluster group communicator used by clustered task managers.
+ * This class represents the cluster group communicator used by clustered task
+ * managers.
  */
-public class ClusterGroupCommunicator {
+public class ClusterGroupCommunicator implements MembershipListener {
 
-	public static final String TASK_SERVER_COUNT_SYS_PROP = "task.server.count";
-	
-	public static final String CARBON_TASK_GROUP_BASE = "__CARBON_TASK_GROUP_";
-	
-	public static final String CARBON_TASK_SERVER_STARTUP_GROUP = CARBON_TASK_GROUP_BASE + "__SERVER_STARTUP_GROUP__";
-	
-	private static final Log log = LogFactory.getLog(ClusterGroupCommunicator.class);
-	
-	private static ClusterGroupCommunicator instance;
-	
-	private Map<String, ClusterGroup> clusterGroupMap;
-	
-	private TaskService taskService;
-	
-	public static ClusterGroupCommunicator getInstance() throws TaskException {
-		if (instance == null) {
-			synchronized (ClusterGroupCommunicator.class) {
-				if (instance == null) {
-					instance = new ClusterGroupCommunicator(TasksDSComponent.getTaskService());
-				}
-			}
-		}
-		return instance;
-	}
-	
-	private ClusterGroupCommunicator(TaskService taskService) throws TaskException {
-		this.taskService = taskService;
-		this.clusterGroupMap = new HashMap<String, ClusterGroupCommunicator.ClusterGroup>();
-	}
-	
-	public void checkServers() throws CoordinationException {
-		int serverCount = this.getTaskService().getServerConfiguration().getTaskServerCount();
-		if (serverCount != -1) {
-			log.info("Waiting for " + serverCount + " task servers...");
-			Group group = TasksDSComponent.getCoordinationService().createGroup(
-					CARBON_TASK_SERVER_STARTUP_GROUP);
-			group.waitForMemberCount(serverCount);
-			log.info("All task servers activated.");
-		}		
-	}
-	
-	public void newTaskTypeAdded(String taskType) throws TaskException {
-		this.clusterGroupMap.put(taskType, new ClusterGroup(taskType));
-	}
-	
-	public TaskService getTaskService() {
-		return taskService;
-	}
-	
-	public ClusterGroup getClusterGroup(String taskType) {
-		return clusterGroupMap.get(taskType);
-	}
-	
-	public String getLeaderId(String taskType) throws CoordinationException {
-		return this.getClusterGroup(taskType).getLeaderId();
-	}
-	
-	public List<String> getMemberIds(String taskType) throws CoordinationException {
-		return this.getClusterGroup(taskType).getMemberIds();
-	}
-	
-	public String getMemberId(String taskType) throws CoordinationException {
-		return this.getClusterGroup(taskType).getMemberId();
-	}
-	
-	public boolean isLeader(String taskType) throws TaskException {
-		return this.getClusterGroup(taskType).isLeader();
-	}
-	
-	public byte[] sendReceive(String tenantDomain, String taskType, String memberId,
-			String messageHeader, byte[] payload) throws Exception {
-		return this.getClusterGroup(taskType).sendReceive(
-				tenantDomain, memberId, messageHeader, payload);
-	}
-	
-	public class ClusterGroup implements GroupEventListener {
-		
-		private String taskType;
-		
-		private Group group;
-		
-                private boolean leader;
-				
-		public ClusterGroup(String taskType) throws TaskException {
-			this.taskType = taskType;
-			initClusterGroup(this.getTaskType());
-			this.group.setGroupEventListener(this);
-			try {
-			    this.leader = this.getGroup().getLeaderId().equals(this.getGroup().getMemberId());
-			} catch (CoordinationException e) {
-				throw new TaskException("Error in creating cluster group: " +
-			            e.getMessage(), Code.UNKNOWN, e);
-			}
-		}
+    private static final String TASK_SERVER_STARTUP_COUNTER = "__TASK_SERVER_STARTUP_COUNTER__";
 
-                private void initClusterGroup(String taskType) {
-                        try {
-                                this.group = TasksDSComponent.getCoordinationService().createGroup(
-                                        CARBON_TASK_GROUP_BASE + this.getTaskType());
-                        } catch (CoordinationException e) {
-                                log.error("Error while creating the group : " + taskType);
-                        }
+    private static final int MISSING_TASKS_ON_ERROR_RETRY_COUNT = 3;
+
+    private static final String CARBON_TASKS_MEMBER_ID_QUEUE = "__CARBON_TASKS_MEMBER_ID_QUEUE__";
+
+    public static final String TASK_SERVER_COUNT_SYS_PROP = "task.server.count";
+
+    private static final Log log = LogFactory.getLog(ClusterGroupCommunicator.class);
+
+    private static ClusterGroupCommunicator instance;
+
+    private TaskService taskService;
+
+    private HazelcastInstance hazelcast;
+
+    private Map<String, Member> membersMap = new ConcurrentHashMap<String, Member>();
+
+    private Queue<String> membersQueue;
+
+    public static ClusterGroupCommunicator getInstance() throws TaskException {
+        if (instance == null) {
+            synchronized (ClusterGroupCommunicator.class) {
+                if (instance == null) {
+                    instance = new ClusterGroupCommunicator();
                 }
-		
-		public List<String> getMemberIds() throws CoordinationException {
-			return this.getGroup().getMemberIds();
-		}
-		
-		public String getMemberId() throws CoordinationException {
-			return this.getGroup().getMemberId();
-		}
-		
-		public String getLeaderId() throws CoordinationException {
-			return this.getGroup().getLeaderId();
-		}
-		
-		public Group getGroup() {
-			return group;
-		}
-
-		public byte[] sendReceive(String tenantDomain, String memberId,
-				String messageHeader, byte[] payload) throws Exception {
-			OperationRequest req = new OperationRequest(tenantDomain, messageHeader, payload);
-			byte[] result = this.getGroup().sendReceive(memberId, objectToBytes(req));
-			OperationResponse res = (OperationResponse) bytesToObject(result);
-			return res.getPayload();
-		}
-		
-		@Override
-		public void onLeaderChange(String leaderId) {
-			if (log.isDebugEnabled()) {
-				log.info("Task server leader changed [" + this.getTaskType() + "]: " + leaderId);
-			}
-			this.leader = leaderId.equals(this.getGroup().getMemberId());
-		}
-		
-		public boolean isLeader() {
-			return leader;
-		}
-		
-		public String getTaskType() {
-			return taskType;
-		}
-		
-		@Override
-		public void onGroupMessage(byte[] buff) {
-		}
-
-		@Override
-		public void onMemberArrival(String mid) {
-			if (log.isDebugEnabled()) {
-				log.debug("Task member arrived: " + mid);
-			}
-		}
-		
-		private void scheduleAllMissingTasks() throws TaskException {
-			for (TaskManager tm : getTaskService().getAllTenantTaskManagersForType(this.getTaskType())) {
-				if (tm instanceof ClusteredTaskManager) {
-					((ClusteredTaskManager) tm).scheduleMissingTasks();
-				}
-			}
-		}
-
-		@Override
-		public void onMemberDeparture(String mid) {
-			if (log.isDebugEnabled()) {
-				log.debug("Task member departed: " + mid);
-			}
-			try {
-				if (this.isLeader()) {
-					log.info("Task member departed [" + this.getTaskType() + "], rescheduling missing tasks...");
-					this.scheduleAllMissingTasks();
-				}
-			} catch (TaskException e) {
-				log.error("Error in scheduling missing tasks: " + e.getMessage(), e);
-			}
-		}
-
-		@Override
-		public byte[] onPeerMessage(byte[] buff) throws CoordinationException {
-			try {
-			    OperationRequest req = (OperationRequest) bytesToObject(buff);
-			    try {
-			    	PrivilegedCarbonContext.startTenantFlow();
-			    	PrivilegedCarbonContext.getCurrentContext().setTenantDomain(req.getTenantDomain(),true);
-			    	TaskManager tm = getTaskService().getTaskManager(this.getTaskType());
-			    	if (tm instanceof ClusteredTaskManager) {
-			    		OperationResponse res = ((ClusteredTaskManager) tm).onOperationRequest(req);
-			    		return objectToBytes(res);
-			    	} else {
-			    		throw new CoordinationException(
-			    				"Invalid task manager type, expected 'clustered' type, got: " + tm, 
-			    				ExceptionCode.GENERIC_ERROR);
-			    	}
-			    } finally {
-			    	PrivilegedCarbonContext.endTenantFlow();
-			    }
-			} catch (Exception e) {
-				throw new CoordinationException(e.getMessage(), ExceptionCode.GENERIC_ERROR, e);
-			}
-		}
-
-                @Override
-                public void onExpired() {
-                        try {
-                                this.deleteLocalTasks();
-                        } catch (TaskException e) {
-                                log.error("Error in deleting local tasks on session expire: " + e.getMessage(), e);
-                        }
-                }
-
-                @Override
-                public void onConnect() {
-                        try {
-                                initClusterGroup(this.getTaskType());
-                        } catch (Exception e) {
-                                log.error("Error in deleting local tasks on session expire: " + e.getMessage(), e);
-                        }
-                }
-
-                private void deleteLocalTasks() throws TaskException {
-                        for (TaskManager tm : getTaskService().getAllTenantTaskManagersForType(this.getTaskType())) {
-                                if (tm instanceof ClusteredTaskManager) {
-                                        ((ClusteredTaskManager) tm).deleteLocalTasks();
-                                }
-                        }
-                }
-
+            }
         }
+        return instance;
+    }
 
-	public static byte[] objectToBytes(Object obj) throws Exception {
-		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-		ObjectOutputStream objOut = new ObjectOutputStream(byteOut);
-		objOut.writeObject(obj);
-		objOut.close();
-		return byteOut.toByteArray();
-	}
-	
-	public static Object bytesToObject(byte[] data) throws Exception {
-		ByteArrayInputStream byteIn = new ByteArrayInputStream(data);
-		ObjectInputStream objIn = new ObjectInputStream(byteIn);
-		Object obj = objIn.readObject();
-		objIn.close();
-		return obj;
-	}
-	
-	public static class OperationRequest implements Serializable {
-		
-		private static final long serialVersionUID = 1L;
+    private ClusterGroupCommunicator() throws TaskException {
+        this.taskService = TasksDSComponent.getTaskService();
+        this.hazelcast = TasksDSComponent.getHazelcastInstance();
+        if (this.getHazelcast() == null) {
+            throw new TaskException("ClusterGroupCommunicator cannot initialize, " +
+            		"Hazelcast is not initialized", Code.CONFIG_ERROR);
+        }
+        this.getHazelcast().getCluster().addMembershipListener(this);
+        for (Member member : this.getHazelcast().getCluster().getMembers()) {
+            this.membersMap.put(this.getIdFromMember(member), member);
+        }
+        /* create a distributed queue to track the leader */
+        this.membersQueue = this.getHazelcast().getQueue(CARBON_TASKS_MEMBER_ID_QUEUE);
+        this.membersQueue.add(this.getMemberId());
+        /* increment the task server count */
+        this.getHazelcast().getAtomicNumber(TASK_SERVER_STARTUP_COUNTER).incrementAndGet();
+    }
 
-		private String tenantDomain;
-				
-		private String opName;
-		
-		private byte[] payload;
-		
-		public OperationRequest(String tenantDomain, String opName, byte[] payload) {
-			this.tenantDomain = tenantDomain;
-			this.opName = opName;
-			this.payload = payload;
-		}
+    private String getIdFromMember(Member member) {
+        return member.getUuid();
+    }
 
-		public String getTenantDomain() {
-			return tenantDomain;
-		}
+    private Member getMemberFromId(String id) {
+        return membersMap.get(id);
+    }
 
-		public String getOpName() {
-			return opName;
-		}
+    public void checkServers() throws TaskException {
+        int serverCount = this.getTaskService().getServerConfiguration().getTaskServerCount();
+        if (serverCount != -1) {
+            log.info("Waiting for " + serverCount + " task executor nodes...");
+            try {
+                /* with this approach, lets say the server count is 3, and after all 3 server comes up, 
+                 * and tasks scheduled, if two nodes go away, and one comes up, it will be allowed to start,
+                 * even though there aren't 3 live nodes, which would be the correct approach, if the whole
+                 * cluster goes down, then, you need again for all 3 of them to come up */
+                while (this.getHazelcast().getAtomicNumber(TASK_SERVER_STARTUP_COUNTER).get() < serverCount) {
+                    Thread.sleep(1000);
+                }
+            } catch (Exception e) {
+                throw new TaskException("Error in waiting for task executor nodes: " + e.getMessage(), 
+                        Code.UNKNOWN, e);
+            }
+            log.info("All task servers activated.");
+        }
+    }
 
-		public byte[] getPayload() {
-			return payload;
-		}
+    public TaskService getTaskService() {
+        return taskService;
+    }
 
-	}
-	
-	public static class OperationResponse implements Serializable {
-				
-		private static final long serialVersionUID = 1L;
-		
-		private byte[] payload;
-		
-		public OperationResponse(byte[] payload) {
-			this.payload = payload;
-		}
+    public HazelcastInstance getHazelcast() {
+        return hazelcast;
+    }
 
-		public byte[] getPayload() {
-			return payload;
-		}
+    public String getLeaderId() throws TaskException {
+        return null;
+    }
 
-	}
+    public List<String> getMemberIds() throws TaskException {
+        /* refresh the member id map here also, will be needed for failure situations
+         * where multiple servers go down once, and when a notification for only a single
+         * member departure comes, but actually when we get all the members, many may have left */
+        for (Member member : this.getHazelcast().getCluster().getMembers()) {
+            this.membersMap.put(this.getIdFromMember(member), member);
+        }
+        return new ArrayList<String>(this.membersMap.keySet());
+    }
+
+    public String getMemberId() {
+        return this.getIdFromMember(this.getHazelcast().getCluster().getLocalMember());
+    }
+
+    public boolean isLeader() {
+        return this.getMemberId().equals(this.membersQueue.peek());
+    }
+
+    public <V> V sendReceive(String memberId, TaskCall<V> taskCall) throws TaskException {
+        ExecutorService es = this.getHazelcast().getExecutorService();
+        DistributedTask<V> task = new DistributedTask<V>(taskCall, this.getMemberFromId(memberId));
+        es.execute(task);
+        try {
+            return task.get();
+        } catch (Exception e) {
+            throw new TaskException("Error in cluster message send-receive: " + e.getMessage(),
+                    Code.UNKNOWN, e);
+        }
+    }
+
+    @Override
+    public void memberAdded(MembershipEvent event) {
+        Member member = event.getMember();
+        this.membersMap.put(this.getIdFromMember(member), member);
+    }
+
+    private void scheduleAllMissingTasks() throws TaskException {
+        for (String taskType : this.getTaskService().getRegisteredTaskTypes()) {
+            for (TaskManager tm : getTaskService().getAllTenantTaskManagersForType(taskType)) {
+                if (tm instanceof ClusteredTaskManager) {
+                    this.scheduleMissingTasksWithRetryOnError((ClusteredTaskManager) tm);
+                }
+            }
+        }
+    }
+
+    private void scheduleMissingTasksWithRetryOnError(ClusteredTaskManager tm) {
+        int count = MISSING_TASKS_ON_ERROR_RETRY_COUNT;
+        while (count > 0) {
+            try {
+                tm.scheduleMissingTasks();
+                break;
+            } catch (TaskException e) {
+                log.error("Encountered error(s) in scheduling missing tasks ["
+                        + tm.getTaskType() + "][" + tm.getTenantDomain() + "]:- \n" + 
+                        e.getMessage() + "\n" + ((count > 1) ? "Retrying [" + 
+                        ((MISSING_TASKS_ON_ERROR_RETRY_COUNT - count) + 1) + "]..." : "Giving up."));
+            }
+            count--;
+        }
+    }
+
+    @Override
+    public void memberRemoved(MembershipEvent event) {
+        String id = this.getIdFromMember(event.getMember());
+        this.membersMap.remove(id);
+        this.membersQueue.remove(id);
+        if (this.isLeader()) {
+            try {
+                if (this.isLeader()) {
+                    log.info("Task member departed [" + event.getMember().toString()
+                            + "], rescheduling missing tasks...");
+                    this.scheduleAllMissingTasks();
+                }
+            } catch (TaskException e) {
+                log.error("Error in scheduling missing tasks: " + e.getMessage(), e);
+            }
+        }
+    }
 
 }

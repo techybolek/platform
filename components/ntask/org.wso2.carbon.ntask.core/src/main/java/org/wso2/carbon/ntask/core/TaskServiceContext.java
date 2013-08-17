@@ -24,29 +24,29 @@ import java.util.List;
  */
 public class TaskServiceContext {
 
-	private TaskRepository taskRepo;
-	
-	private int serverCount;
-	
-	public TaskServiceContext(TaskRepository taskRepo, int serverCount) {
-		this.taskRepo = taskRepo;
-		this.serverCount = serverCount;
-	}
-	
-	public String getTenantDomain() {
-		return this.taskRepo.getTenantDomain();
-	}
-	
-	public String getTaskType() {
-		return this.taskRepo.getTasksType();
-	}
-	
-	public List<TaskInfo> getTasks() throws TaskException {
-		return this.taskRepo.getAllTasks();
-	}
-	
-	public int getServerCount() {
-		return serverCount;
-	}
-	
+    private TaskRepository taskRepo;
+
+    private int serverCount;
+
+    public TaskServiceContext(TaskRepository taskRepo, int serverCount) {
+        this.taskRepo = taskRepo;
+        this.serverCount = serverCount;
+    }
+
+    public String getTenantDomain() {
+        return this.taskRepo.getTenantDomain();
+    }
+
+    public String getTaskType() {
+        return this.taskRepo.getTasksType();
+    }
+
+    public List<TaskInfo> getTasks() throws TaskException {
+        return this.taskRepo.getAllTasks();
+    }
+
+    public int getServerCount() {
+        return serverCount;
+    }
+
 }

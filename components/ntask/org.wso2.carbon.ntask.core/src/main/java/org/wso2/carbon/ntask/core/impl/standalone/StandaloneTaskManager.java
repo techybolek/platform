@@ -29,65 +29,65 @@ import java.util.List;
  */
 public class StandaloneTaskManager extends AbstractQuartzTaskManager {
 
-	public StandaloneTaskManager(TaskRepository taskRepository) throws TaskException {
-		super(taskRepository);
-	}
+    public StandaloneTaskManager(TaskRepository taskRepository) throws TaskException {
+        super(taskRepository);
+    }
 
-	@Override
-	public void initStartupTasks() throws TaskException {
-		this.scheduleAllTasks();
-	}
+    @Override
+    public void initStartupTasks() throws TaskException {
+        this.scheduleAllTasks();
+    }
 
-	@Override
-	public void scheduleTask(String taskName) throws TaskException {
-		this.scheduleLocalTask(taskName);
-	}
+    @Override
+    public void scheduleTask(String taskName) throws TaskException {
+        this.scheduleLocalTask(taskName);
+    }
 
-	@Override
-	public boolean deleteTask(String taskName) throws TaskException {
-		return this.deleteLocalTask(taskName, true);
-	}
+    @Override
+    public boolean deleteTask(String taskName) throws TaskException {
+        return this.deleteLocalTask(taskName, true);
+    }
 
-	@Override
-	public void pauseTask(String taskName) throws TaskException {
-		this.pauseLocalTask(taskName);
-		TaskUtils.setTaskPaused(this.getTaskRepository(), taskName, true);
-	}
+    @Override
+    public void pauseTask(String taskName) throws TaskException {
+        this.pauseLocalTask(taskName);
+        TaskUtils.setTaskPaused(this.getTaskRepository(), taskName, true);
+    }
 
-	@Override
-	public void registerTask(TaskInfo taskInfo) throws TaskException {
-		this.registerLocalTask(taskInfo);
-	}
+    @Override
+    public void registerTask(TaskInfo taskInfo) throws TaskException {
+        this.registerLocalTask(taskInfo);
+    }
 
-	@Override
-	public TaskState getTaskState(String taskName) throws TaskException {
-		return this.getLocalTaskState(taskName);
-	}
+    @Override
+    public TaskState getTaskState(String taskName) throws TaskException {
+        return this.getLocalTaskState(taskName);
+    }
 
-	@Override
-	public TaskInfo getTask(String taskName) throws TaskException {
-		return this.getTaskRepository().getTask(taskName);
-	}
+    @Override
+    public TaskInfo getTask(String taskName) throws TaskException {
+        return this.getTaskRepository().getTask(taskName);
+    }
 
-	@Override
-	public List<TaskInfo> getAllTasks() throws TaskException {
-		return this.getTaskRepository().getAllTasks();
-	}
+    @Override
+    public List<TaskInfo> getAllTasks() throws TaskException {
+        return this.getTaskRepository().getAllTasks();
+    }
 
-	@Override
-	public void rescheduleTask(String taskName) throws TaskException {
-		this.rescheduleLocalTask(taskName);
-	}
+    @Override
+    public void rescheduleTask(String taskName) throws TaskException {
+        this.rescheduleLocalTask(taskName);
+    }
 
-	@Override
-	public void resumeTask(String taskName) throws TaskException {
-		this.resumeLocalTask(taskName);
-		TaskUtils.setTaskPaused(this.getTaskRepository(), taskName, false);
-	}
+    @Override
+    public void resumeTask(String taskName) throws TaskException {
+        this.resumeLocalTask(taskName);
+        TaskUtils.setTaskPaused(this.getTaskRepository(), taskName, false);
+    }
 
-	@Override
-	public boolean isTaskScheduled(String taskName) throws TaskException {
-		return this.isLocalTaskScheduled(taskName);
-	}
+    @Override
+    public boolean isTaskScheduled(String taskName) throws TaskException {
+        return this.isLocalTaskScheduled(taskName);
+    }
 
 }

@@ -31,7 +31,6 @@ import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.TaskRepository;
 import org.wso2.carbon.ntask.core.TaskUtils;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
-import org.wso2.carbon.ntask.core.service.impl.TaskServiceImpl;
 
 import java.util.*;
 
@@ -43,17 +42,6 @@ import java.util.*;
 public abstract class AbstractQuartzTaskManager implements TaskManager {
 
     private static final Log log = LogFactory.getLog(AbstractQuartzTaskManager.class);
-
-    /* This holds the information  about the tasks which was trying to schedule
-       before the server initialize properly
-     */
-    private static ArrayList<StartupPendingTask> startupPendingTasks = new ArrayList<StartupPendingTask>();
-
-    /*
-    This flag states whether taskManager is has scheduled all the tasks
-    in the repository for the pariticular task type
-     */
-    private boolean initilazedRegisteredTasks = false;
 
     private TaskRepository taskRepository;
 
@@ -137,11 +125,16 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         }
     }
 
-    protected synchronized boolean deleteLocalTask(String taskName, boolean removeRegistration) throws TaskException {
+    protected synchronized boolean deleteLocalTask(String taskName, 
+            boolean removeRegistration) throws TaskException {
         String taskGroup = this.getTenantTaskGroup();
         boolean result = false;
         try {
             result = this.getScheduler().deleteJob(new JobKey(taskName, taskGroup));
+            if (result) {
+                log.info("Task deleted: [" + this.getTenantDomain() +
+                        "][" + this.getTaskType() + "][" + taskName + "]");
+            }
         } catch (SchedulerException e) {
             throw new TaskException("Error in deleting task with name: " + taskName,
                     Code.UNKNOWN, e);
@@ -189,14 +182,6 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
                 log.error("Error in scheduling task: " + e.getMessage(), e);
             }
         }
-        initilazedRegisteredTasks = true;
-        /*
-        continue scheduling pending tasks which was tried to schdule
-        before the taskManager get initialized.
-         */
-        for (StartupPendingTask aPendingTask : startupPendingTasks) {
-            scheduleLocalTask(aPendingTask.taskName, aPendingTask.paused);
-        }
     }
 
     protected synchronized void scheduleLocalTask(String taskName) throws TaskException {
@@ -206,37 +191,33 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
 
     protected synchronized void scheduleLocalTask(String taskName,
                                                   boolean paused) throws TaskException {
-        if (((TaskServiceImpl) TasksDSComponent.getTaskService()).isServerInit()
-                || initilazedRegisteredTasks) {
-            TaskInfo taskInfo = this.getTaskRepository().getTask(taskName);
-            String taskGroup = this.getTenantTaskGroup();
-            if (taskInfo == null) {
-                throw new TaskException("Non-existing task for scheduling with name: " + taskName,
-                        Code.NO_TASK_EXISTS);
-            }
-            if (this.containsLocalTask(taskName, taskGroup)) {
-                throw new TaskException("The task with name: " + taskName + ", already started.",
-                        Code.TASK_ALREADY_STARTED);
-            }
-            Class<? extends Job> jobClass = taskInfo.getTriggerInfo().isDisallowConcurrentExecution() ?
-                    NonConcurrentTaskQuartzJobAdapter.class : TaskQuartzJobAdapter.class;
-            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(taskName, taskGroup).usingJobData(
-                    this.getJobDataMapFromTaskInfo(taskInfo)).build();
-            Trigger trigger = this.getTriggerFromInfo(taskName, taskGroup, taskInfo.getTriggerInfo());
-            try {
-                this.getScheduler().scheduleJob(job, trigger);
-                if (paused) {
-                    this.getScheduler().pauseJob(job.getKey());
-                }
-                log.info("Task scheduled: [" + this.getTenantDomain() +
-                        "][" + this.getTaskType() + "][" + taskName + "]");
-            } catch (SchedulerException e) {
-                throw new TaskException("Error in scheduling task with name: " + taskName,
-                        Code.UNKNOWN, e);
-            }
-        } else {
-            startupPendingTasks.add(new StartupPendingTask(taskName, paused));
+        
+        TaskInfo taskInfo = this.getTaskRepository().getTask(taskName);
+        String taskGroup = this.getTenantTaskGroup();
+        if (taskInfo == null) {
+            throw new TaskException("Non-existing task for scheduling with name: " + taskName,
+                    Code.NO_TASK_EXISTS);
         }
+        if (this.containsLocalTask(taskName, taskGroup)) {
+            /* to make the scheduleLocalTask operation idempotent */
+            return;
+        }
+        Class<? extends Job> jobClass = taskInfo.getTriggerInfo().isDisallowConcurrentExecution() ?
+                NonConcurrentTaskQuartzJobAdapter.class : TaskQuartzJobAdapter.class;
+        JobDetail job = JobBuilder.newJob(jobClass).withIdentity(taskName, taskGroup).usingJobData(
+                this.getJobDataMapFromTaskInfo(taskInfo)).build();
+        Trigger trigger = this.getTriggerFromInfo(taskName, taskGroup, taskInfo.getTriggerInfo());
+        try {
+            this.getScheduler().scheduleJob(job, trigger);
+            if (paused) {
+                this.getScheduler().pauseJob(job.getKey());
+            }
+            log.info("Task scheduled: [" + this.getTenantDomain() +
+                    "][" + this.getTaskType() + "][" + taskName + "]" + (paused ? "[Paused]" : ""));
+        } catch (SchedulerException e) {
+            throw new TaskException("Error in scheduling task with name: " + taskName,
+                    Code.UNKNOWN, e);
+        }    
     }
 
     private Trigger getTriggerFromInfo(String taskName, String taskGroup,
@@ -403,18 +384,9 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         }
     }
 
-    private class StartupPendingTask {
-
-        private String taskName;
-        private boolean paused;
-
-        private StartupPendingTask(String taskName, boolean paused) {
-            this.taskName = taskName;
-            this.paused = paused;
-        }
-
-    }
-
+    /**
+     * Task trigger listener to check when a task is finished.
+     */
     public class TaskTriggerListener implements TriggerListener {
 
         private String name;
@@ -444,14 +416,16 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         }
 
         @Override
-        public void triggerComplete(Trigger trigger, JobExecutionContext jobExecutionContext, Trigger.CompletedExecutionInstruction completedExecutionInstruction) {
+        public void triggerComplete(Trigger trigger, JobExecutionContext jobExecutionContext, 
+                Trigger.CompletedExecutionInstruction completedExecutionInstruction) {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getCurrentContext().setTenantDomain(getTenantDomain(), true);
             if(trigger.getNextFireTime() == null) {
                 try {
                     TaskUtils.setTaskFinished(getTaskRepository(), trigger.getJobKey().getName(), true);
                 } catch (TaskException e) {
-                    log.error("Error in Finishing Task: " + trigger.getJobKey().getName());
+                    log.error("Error in Finishing Task [" + trigger.getJobKey().getName() + 
+                            "]: " + e.getMessage(), e);
                 }
             }
             PrivilegedCarbonContext.endTenantFlow();

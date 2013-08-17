@@ -24,10 +24,10 @@ import org.wso2.carbon.ntask.common.TaskException;
  */
 public interface TaskManagerFactory {
 
-	TaskManager getTaskManager(TaskManagerId tmId) throws TaskException;
-	
-	List<TaskManager> getStartupSchedulingTaskManagersForType(String taskType) throws TaskException;
-	
-	List<TaskManager> getAllTenantTaskManagersForType(String taskType) throws TaskException;
-	
+    TaskManager getTaskManager(TaskManagerId tmId) throws TaskException;
+
+    List<TaskManager> getStartupSchedulingTaskManagersForType(String taskType) throws TaskException;
+
+    List<TaskManager> getAllTenantTaskManagersForType(String taskType) throws TaskException;
+
 }

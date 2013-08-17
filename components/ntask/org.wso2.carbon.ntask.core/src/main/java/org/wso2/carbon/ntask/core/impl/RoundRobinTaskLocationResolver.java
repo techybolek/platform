@@ -30,30 +30,31 @@ import java.util.List;
  */
 public class RoundRobinTaskLocationResolver implements TaskLocationResolver {
 
-	@Override
-	public int getLocation(TaskServiceContext ctx, TaskInfo taskInfo) throws TaskException {
-		List<TaskInfo> tasks = ctx.getTasks();
-		List<String> names = new ArrayList<String>();
-		for (TaskInfo task : tasks) {
-			names.add(task.getName());
-		}
-		Collections.sort(names);
-		int n = names.size();
-		for (int i = 0; i < n; i++) {
-			if (taskInfo.getName().equals(names.get(i))) {
-				int tenantTaskTypeOffset = (ctx.getTenantDomain() + ":" + ctx.getTaskType()).hashCode();
-				int result = i + tenantTaskTypeOffset;
-				if (result < 0) {
-					if (result == Integer.MIN_VALUE) {
-						result = Integer.MAX_VALUE;
-					} else {
-					    result = -result;
-					}
-				}
-				return result;
-			}
-		}
-		return 0;
-	}
+    @Override
+    public int getLocation(TaskServiceContext ctx, TaskInfo taskInfo) throws TaskException {
+        List<TaskInfo> tasks = ctx.getTasks();
+        List<String> names = new ArrayList<String>();
+        for (TaskInfo task : tasks) {
+            names.add(task.getName());
+        }
+        Collections.sort(names);
+        int n = names.size();
+        for (int i = 0; i < n; i++) {
+            if (taskInfo.getName().equals(names.get(i))) {
+                int tenantTaskTypeOffset = (ctx.getTenantDomain() + ":" + ctx.getTaskType())
+                        .hashCode();
+                int result = i + tenantTaskTypeOffset;
+                if (result < 0) {
+                    if (result == Integer.MIN_VALUE) {
+                        result = Integer.MAX_VALUE;
+                    } else {
+                        result = -result;
+                    }
+                }
+                return result;
+            }
+        }
+        return 0;
+    }
 
 }

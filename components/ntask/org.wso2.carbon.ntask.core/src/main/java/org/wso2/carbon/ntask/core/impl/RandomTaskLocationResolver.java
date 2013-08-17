@@ -28,10 +28,9 @@ import org.wso2.carbon.ntask.core.TaskServiceContext;
  */
 public class RandomTaskLocationResolver implements TaskLocationResolver {
 
-	@Override
-	public int getLocation(TaskServiceContext ctx, TaskInfo taskInfo)
-			throws TaskException {
-		return ((int) (Math.random() * ctx.getServerCount()) % ctx.getServerCount());
-	}
+    @Override
+    public int getLocation(TaskServiceContext ctx, TaskInfo taskInfo) throws TaskException {
+        return ((int) (Math.random() * ctx.getServerCount()) % ctx.getServerCount());
+    }
 
 }

@@ -37,53 +37,56 @@ import java.util.List;
  */
 public class RemoteTaskManagerFactory implements TaskManagerFactory {
 
-	private static RemoteTaskAdminStub remoteTaskAdmin;
-	
-	@Override
-	public TaskManager getTaskManager(TaskManagerId tmId) throws TaskException {
-		TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantDomain(),
-				tmId.getTaskType());
-		return new RemoteTaskManager(taskRepo, getRemoteTaskAdmin());
-	}
+    private static RemoteTaskAdminStub remoteTaskAdmin;
 
-	@Override
-	public List<TaskManager> getStartupSchedulingTaskManagersForType(String taskType)
-			throws TaskException {
-		return new ArrayList<TaskManager>();
-	}
+    @Override
+    public TaskManager getTaskManager(TaskManagerId tmId) throws TaskException {
+        TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantDomain(),
+                tmId.getTaskType());
+        return new RemoteTaskManager(taskRepo, getRemoteTaskAdmin());
+    }
 
-	@Override
-	public List<TaskManager> getAllTenantTaskManagersForType(String taskType)
-			throws TaskException {
-		return null;
-	}
-	
-	private static RemoteTaskAdmin getRemoteTaskAdmin() throws TaskException {
-		if (remoteTaskAdmin == null) {
-			synchronized (RemoteTaskManagerFactory.class) {
-				if (remoteTaskAdmin == null) {
-					TaskServiceConfiguration serverConfig = TasksDSComponent.getTaskService().getServerConfiguration();
-					String username = serverConfig.getRemoteServerUsername();
-					String password = serverConfig.getRemoteServerPassword();
-					String taskServerAddress = serverConfig.getRemoteServerAddress();
-					try {
-						remoteTaskAdmin = new RemoteTaskAdminStub(taskServerAddress + 
-								"/services/RemoteTaskAdmin");
-					} catch (AxisFault e) {
-						throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
-					}
-					HttpTransportProperties.Authenticator auth = new HttpTransportProperties.
-					            Authenticator();
-					auth.setUsername(username);
-					auth.setPassword(password);
-					auth.setPreemptiveAuthentication(true);
-			        remoteTaskAdmin._getServiceClient().getOptions().setProperty(
-			        		org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
-					remoteTaskAdmin._getServiceClient().getOptions().setCallTransportCleanup(true);
-				}
-			}
-		}
-		return remoteTaskAdmin;
-	}
+    @Override
+    public List<TaskManager> getStartupSchedulingTaskManagersForType(String taskType)
+            throws TaskException {
+        return new ArrayList<TaskManager>();
+    }
+
+    @Override
+    public List<TaskManager> getAllTenantTaskManagersForType(String taskType) throws TaskException {
+        return null;
+    }
+
+    private static RemoteTaskAdmin getRemoteTaskAdmin() throws TaskException {
+        if (remoteTaskAdmin == null) {
+            synchronized (RemoteTaskManagerFactory.class) {
+                if (remoteTaskAdmin == null) {
+                    TaskServiceConfiguration serverConfig = TasksDSComponent.getTaskService()
+                            .getServerConfiguration();
+                    String username = serverConfig.getRemoteServerUsername();
+                    String password = serverConfig.getRemoteServerPassword();
+                    String taskServerAddress = serverConfig.getRemoteServerAddress();
+                    try {
+                        remoteTaskAdmin = new RemoteTaskAdminStub(taskServerAddress
+                                + "/services/RemoteTaskAdmin");
+                    } catch (AxisFault e) {
+                        throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
+                    }
+                    HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
+                    auth.setUsername(username);
+                    auth.setPassword(password);
+                    auth.setPreemptiveAuthentication(true);
+                    remoteTaskAdmin
+                            ._getServiceClient()
+                            .getOptions()
+                            .setProperty(
+                                    org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
+                                    auth);
+                    remoteTaskAdmin._getServiceClient().getOptions().setCallTransportCleanup(true);
+                }
+            }
+        }
+        return remoteTaskAdmin;
+    }
 
 }

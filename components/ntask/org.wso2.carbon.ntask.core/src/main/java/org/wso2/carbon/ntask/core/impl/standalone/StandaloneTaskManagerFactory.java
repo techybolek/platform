@@ -30,41 +30,40 @@ import java.util.List;
  */
 public class StandaloneTaskManagerFactory implements TaskManagerFactory {
 
-	@Override
-	public TaskManager getTaskManager(TaskManagerId tmId) throws TaskException {
-		/* the best effort is made to not to cache the task managers, since the tenant loading/unloading/
-		 * relocation would make the stored cache managers invalid, and won't be gc'ed */
-		return this.createTaskManager(tmId);
-	}
-	
-	protected TaskManager createTaskManager(TaskManagerId tmId) throws TaskException {
-		TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantDomain(),
-				tmId.getTaskType());
-		return new StandaloneTaskManager(taskRepo);
-	}
+    @Override
+    public TaskManager getTaskManager(TaskManagerId tmId) throws TaskException {
+        /* the best effort is made to not to cache the task managers, since the tenant loading/unloading/
+         * relocation would make the stored cache managers invalid, and won't be gc'ed */
+        return this.createTaskManager(tmId);
+    }
 
-	@Override
-	public List<TaskManager> getStartupSchedulingTaskManagersForType(
-			String taskType) throws TaskException {
-		List<TaskManagerId> tmIds = RegistryBasedTaskRepository.getAllTenantTaskManagersForType(
-				taskType);
-		List<TaskManager> result = new ArrayList<TaskManager>();
-		for (TaskManagerId tmId : tmIds) {
-			result.add(this.createTaskManager(tmId));
-		}
-		return result;
-	}
+    protected TaskManager createTaskManager(TaskManagerId tmId) throws TaskException {
+        TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantDomain(),
+                tmId.getTaskType());
+        return new StandaloneTaskManager(taskRepo);
+    }
 
-	@Override
-	public List<TaskManager> getAllTenantTaskManagersForType(String taskType)
-			throws TaskException {
-		List<TaskManagerId> tmIds = RegistryBasedTaskRepository.getAllTenantTaskManagersForType(
-				taskType);
-		List<TaskManager> result = new ArrayList<TaskManager>();
-		for (TaskManagerId tmId : tmIds) {
-			result.add(this.createTaskManager(tmId));
-		}
-		return result;
-	}
+    @Override
+    public List<TaskManager> getStartupSchedulingTaskManagersForType(String taskType)
+            throws TaskException {
+        List<TaskManagerId> tmIds = RegistryBasedTaskRepository
+                .getAllTenantTaskManagersForType(taskType);
+        List<TaskManager> result = new ArrayList<TaskManager>();
+        for (TaskManagerId tmId : tmIds) {
+            result.add(this.createTaskManager(tmId));
+        }
+        return result;
+    }
+
+    @Override
+    public List<TaskManager> getAllTenantTaskManagersForType(String taskType) throws TaskException {
+        List<TaskManagerId> tmIds = RegistryBasedTaskRepository
+                .getAllTenantTaskManagersForType(taskType);
+        List<TaskManager> result = new ArrayList<TaskManager>();
+        for (TaskManagerId tmId : tmIds) {
+            result.add(this.createTaskManager(tmId));
+        }
+        return result;
+    }
 
 }

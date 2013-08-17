@@ -18,25 +18,28 @@ package org.wso2.carbon.ntask.core;
 import java.util.Map;
 
 /**
- * Task interface to be implemented by all tasks.  
+ * Task interface to be implemented by all tasks.
  */
 public interface Task {
 
-	/**
-	 * This method is called initially to set the task properties.
-	 * @param properties The task properties
-	 */
-	public void setProperties(Map<String, String> properties);
-	
-	/**
-	 * This method is called once after properties are set in the task,
-	 * and right before the task is executed.
-	 */
-	public void init();
-	
-	/**
-	 * This method will be called when the task is started, the task logic should go here.
-	 */
-	public void execute();
+    /**
+     * This method is called initially to set the task properties.
+     * 
+     * @param properties
+     *            The task properties
+     */
+    public void setProperties(Map<String, String> properties);
+
+    /**
+     * This method is called once after properties are set in the task, and
+     * right before the task is executed.
+     */
+    public void init();
+
+    /**
+     * This method will be called when the task is started, the task logic
+     * should go here.
+     */
+    public void execute();
 
 }

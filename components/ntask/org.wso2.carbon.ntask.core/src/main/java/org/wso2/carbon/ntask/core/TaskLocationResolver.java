@@ -18,18 +18,20 @@ package org.wso2.carbon.ntask.core;
 import org.wso2.carbon.ntask.common.TaskException;
 
 /**
- * This interface represents the contract that must be implemented to retrieve the location that a
- * given task should be scheduled.
+ * This interface represents the contract that must be implemented to retrieve
+ * the location that a given task should be scheduled.
  */
 public interface TaskLocationResolver {
 
-	/**
-	 * Returns the location the given task should be scheduled in.
-	 * @param ctx The task context, which contains environmental information on other tasks etc..
-	 * @param taskInfo The task information of the task to be scheduled
-	 * @return The location of the task to be scheduled
-	 * @throws TaskException
-	 */
-	public int getLocation(TaskServiceContext ctx, TaskInfo taskInfo) throws TaskException;
-	
+    /**
+     * Returns the location the given task should be scheduled in.
+     * 
+     * @param ctx The task context, which contains environmental information on
+     *            other tasks etc..
+     * @param taskInfo The task information of the task to be scheduled
+     * @return The location of the task to be scheduled
+     * @throws TaskException
+     */
+    public int getLocation(TaskServiceContext ctx, TaskInfo taskInfo) throws TaskException;
+
 }

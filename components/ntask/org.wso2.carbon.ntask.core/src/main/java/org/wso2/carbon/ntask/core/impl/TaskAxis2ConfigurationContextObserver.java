@@ -22,16 +22,17 @@ import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
  * This class represents an configuration context observer, used to load the tasks, when a new
  * tenant arrives.
  */
-public class TaskAxis2ConfigurationContextObserver extends AbstractAxis2ConfigurationContextObserver {
-	
-	private TaskService taskService;
-	
-	public TaskAxis2ConfigurationContextObserver(TaskService taskService) {
-		this.taskService = taskService;
-	}
-	
-	public TaskService getTaskService() {
-		return taskService;
-	}
-	
+public class TaskAxis2ConfigurationContextObserver extends
+        AbstractAxis2ConfigurationContextObserver {
+
+    private TaskService taskService;
+
+    public TaskAxis2ConfigurationContextObserver(TaskService taskService) {
+        this.taskService = taskService;
+    }
+
+    public TaskService getTaskService() {
+        return taskService;
+    }
+
 }

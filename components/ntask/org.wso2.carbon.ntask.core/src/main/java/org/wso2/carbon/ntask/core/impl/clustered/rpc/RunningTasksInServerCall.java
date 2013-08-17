@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,30 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wso2.carbon.ntask.core;
+package org.wso2.carbon.ntask.core.impl.clustered.rpc;
 
-import java.util.Map;
+import java.util.List;
+
+import org.wso2.carbon.ntask.core.TaskInfo;
+import org.wso2.carbon.ntask.core.impl.clustered.ClusteredTaskManager;
 
 /**
- * This represents an abstract class implementation of a Task.
- * 
- * @see Task
+ * Running tasks in server RPC call implementation.
  */
-public abstract class AbstractTask implements Task {
+public class RunningTasksInServerCall extends TaskCall<List<TaskInfo>> {
 
-    private Map<String, String> properties;
-
-    @Override
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
+    private static final long serialVersionUID = 1L;
 
     @Override
-    public void init() {
-    }
-
-    public Map<String, String> getProperties() {
-        return properties;
+    public List<TaskInfo> doWork(ClusteredTaskManager tm) throws Exception {
+        return tm.getFinalRunningTasksInServer();
     }
 
 }

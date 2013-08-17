@@ -26,68 +26,77 @@ import org.wso2.carbon.ntask.core.TaskManager;
  */
 public interface TaskService {
 
-	/**
-	 * Returns a task manager for the current tenant's task type. 
-	 * @param taskType The type of the tasks, e.g. DSS, ESB, MS
-	 * @return The created / looked-up task manager
-	 * @throws TaskException	 
-	 */
-	public TaskManager getTaskManager(String taskType) throws TaskException;
-	
-	/**
-	 * Returns all the tenant task managers for a specific task type
-	 * @param taskType The task type
-	 * @return The list of task managers
-	 * @throws TaskException
-	 */
-	public List<TaskManager> getAllTenantTaskManagersForType(String taskType) throws TaskException;
+    /**
+     * Returns a task manager for the current tenant's task type. 
+     * @param taskType The type of the tasks, e.g. DSS, ESB, MS
+     * @return The created / looked-up task manager
+     * @throws TaskException	 
+     */
+    public TaskManager getTaskManager(String taskType) throws TaskException;
 
-	/**
-	 * This method registers a task type in the server,
-	 * this must be done for the task managers for the current tenant
-	 * to be started up immediately.
-	 * @param taskType The task type
-	 * @throws TaskException 
-	 */
-	public void registerTaskType(String taskType) throws TaskException;
-	
-	/**
-	 * Retrieves all the registered task types.
-	 * @return The task types
-	 */
-	public Set<String> getRegisteredTaskTypes();
-	
-	/**
-	 * Notifies the task service implementation that the server is fully initialized.
-	 */
-	public void serverInitialized();
-	
-	/**
-	 * Returns the current task server configuration.
-	 * @return The task server configuration
-	 */
-	public TaskServiceConfiguration getServerConfiguration();
-	
-	public static interface TaskServiceConfiguration {
-		
-		TaskServerMode getTaskServerMode();
-		
-		int getTaskServerCount();
-		
-		String getTaskClientDispatchAddress();
-		
-		String getRemoteServerAddress();
-		
-		String getRemoteServerUsername();
-		
-		String getRemoteServerPassword();
-		
-	}
-	
-	public static enum TaskServerMode {
-		STANDALONE,
-		CLUSTERED,
-		REMOTE
-	}
-	
+    /**
+     * Returns all the tenant task managers for a specific task type
+     * @param taskType The task type
+     * @return The list of task managers
+     * @throws TaskException
+     */
+    public List<TaskManager> getAllTenantTaskManagersForType(String taskType) throws TaskException;
+
+    /**
+     * This method registers a task type in the server,
+     * this must be done for the task managers for the current tenant
+     * to be started up immediately.
+     * @param taskType The task type
+     * @throws TaskException 
+     */
+    public void registerTaskType(String taskType) throws TaskException;
+
+    /**
+     * Retrieves all the registered task types.
+     * @return The task types
+     */
+    public Set<String> getRegisteredTaskTypes();
+
+    /**
+     * Notifies the task service implementation that the server is fully initialized.
+     */
+    public void serverInitialized();
+    
+    /**
+     * Checks whether the task server is full initialized.
+     * @return true if initialized
+     */
+    public boolean isServerInit();
+
+    /**
+     * Returns the current task server configuration.
+     * @return The task server configuration
+     */
+    public TaskServiceConfiguration getServerConfiguration();
+    
+    /**
+     * This is called after the current task service is registered.
+     */
+    public void runAfterRegistrationActions() throws TaskException;
+
+    public static interface TaskServiceConfiguration {
+
+        TaskServerMode getTaskServerMode();
+
+        int getTaskServerCount();
+
+        String getTaskClientDispatchAddress();
+
+        String getRemoteServerAddress();
+
+        String getRemoteServerUsername();
+
+        String getRemoteServerPassword();
+
+    }
+
+    public static enum TaskServerMode {
+        STANDALONE, CLUSTERED, REMOTE, AUTO
+    }
+
 }
