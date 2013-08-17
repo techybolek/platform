@@ -637,11 +637,6 @@
             <outputDirectory>${pom.artifactId}-${build.version}/repository/conf</outputDirectory>
                 <fileMode>644</fileMode>
         </file>	
-	<!-- Including coordination-client-config.xml file -->
-	<file>
-            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/etc/coordination-client-config.xml</source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
-        </file>
         <file>
             <source>../juddi/juddiv3-war/target/juddiv3.war</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps</outputDirectory>
