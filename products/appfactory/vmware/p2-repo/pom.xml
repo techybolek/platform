@@ -68,9 +68,6 @@
                                     org.wso2.carbon:org.wso2.carbon.ntask.feature:${carbon.platform.patch.version.402}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.coordination.feature:${carbon.platform.patch.version.402}
-                                </featureArtifactDef>
-                                <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.unifiedendpoint.server.feature:${carbon.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
@@ -188,7 +185,6 @@
                                   <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.feature:4.0.2</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.databridge.datapublisher.feature:4.0.2</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ntask.feature:4.0.2</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.coordination.core.feature:4.0.2</featureArtifactDef>
                                 <!--<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.bam.feature:${carbon.version}</featureArtifactDef>-->
                                  <!-- registry related features-->
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.feature:4.0.2</featureArtifactDef>
@@ -282,9 +278,6 @@
                                 <!-- Appserver -->
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.ntask.feature:${carbon.platform.patch.version.402}
-                                </featureArtifactDef>
-                                <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.coordination.core.feature:${carbon.platform.patch.version.402}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.logging.mgt.feature:${carbon.platform.patch.version.402}
@@ -693,11 +686,6 @@
 
                     <catFeature>
                         <id>org.wso2.carbon.ntask</id>
-                        <version>${carbon.patch.release.version401}</version>
-                    </catFeature>
-
-                    <catFeature>
-                        <id>org.wso2.carbon.coordination.core</id>
                         <version>${carbon.patch.release.version401}</version>
                     </catFeature>
 
@@ -1382,10 +1370,6 @@
                                             <version>${carbon.patch.release.version401}</version>
                                         </catFeature>
                                         <catFeature>
-                                            <id>org.wso2.carbon.coordination.core</id>
-                                            <version>${carbon.patch.release.version401}</version>
-                                        </catFeature>
-                                        <catFeature>
                                             <id>
                                                 org.wso2.carbon.databridge.datapublisher
                                             </id>
@@ -1903,11 +1887,6 @@
 
                                         <catFeature>
                                             <id>org.wso2.carbon.ntask</id>
-                                            <version>${carbon.patch.release.version401}</version>
-                                        </catFeature>
-
-                                        <catFeature>
-                                            <id>org.wso2.carbon.coordination.core</id>
                                             <version>${carbon.patch.release.version401}</version>
                                         </catFeature>
 
