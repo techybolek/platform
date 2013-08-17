@@ -53,6 +53,9 @@ public class DSTask extends WebServiceCallTask {
 		}
 		String tenantDomain = tenantDomainProp;
 		AxisService axisService = DSTaskUtils.lookupAxisService(tenantDomain, serviceName);
+		if (axisService == null) {
+		    return false;
+		}
     	if (axisService == null || !axisService.isActive()) {
     		return false;
     	}

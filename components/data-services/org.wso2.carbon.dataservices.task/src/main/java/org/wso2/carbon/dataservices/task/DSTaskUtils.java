@@ -118,7 +118,7 @@ public class DSTaskUtils {
     	ConfigurationContext mainConfigCtx = TasksDSComponent.getConfigurationContextService().
 				getServerConfigContext();
 		AxisConfiguration tenantAxisConf;
-		if (tenantDomain == MultitenantConstants.SUPER_TENANT_DOMAIN_NAME) {
+		if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
 			tenantAxisConf = mainConfigCtx.getAxisConfiguration();
 		} else {
 		    tenantAxisConf = TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, 
