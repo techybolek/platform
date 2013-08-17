@@ -128,7 +128,6 @@
                                     <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.admin.mgt.ui.feature:${carbon.version}</featureArtifactDef>
 
                                     <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ntask.feature:${carbon.version}</featureArtifactDef>
-                                    <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.coordination.core.feature:${carbon.version}</featureArtifactDef>
 
                                     <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.attachment.mgt.feature:${carbon.platform.version}</featureArtifactDef>
                                     <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:${stratos.version}</featureArtifactDef>
@@ -324,10 +323,6 @@
                                     </feature>
                                     <feature>
                                         <id>org.wso2.carbon.ntask.feature.group</id>
-                                        <version>${carbon.version}</version>
-                                    </feature>
-                                    <feature>
-                                        <id>org.wso2.carbon.coordination.core.feature.group</id>
                                         <version>${carbon.version}</version>
                                     </feature>
                                     <feature>
