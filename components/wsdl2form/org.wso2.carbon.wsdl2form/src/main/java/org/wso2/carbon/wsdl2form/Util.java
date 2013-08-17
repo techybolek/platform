@@ -245,11 +245,11 @@ public class Util {
             }
             return outFile;
         } catch (IllegalArgumentException e) {
-            String msg = "URL provided is invalid. Please use a valid URL";
+            String msg = "URL provided is invalid. Please use a valid URL - " + url;
             log.error(msg, e);
             throw new AxisFault(msg);
         } catch (MalformedURLException e) {
-            String msg = "URL provided is invalid. Please use a valid URL";
+            String msg = "URL provided is invalid. Please use a valid URL - " + url;
             log.error(msg, e);
             throw new AxisFault(msg);
         } catch (FileNotFoundException e) {
