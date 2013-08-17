@@ -536,7 +536,15 @@ function resetVars() {
     <script type="text/javascript">
         isDefinedSequenceFound = true;
     </script>
-    <p><fmt:message key="endpoints.synapse.text"/></p>
+    <p><fmt:message key="endpoints.synapse.text"/>
+    <%
+        if (client!=null) {
+    %>
+        <%=" - " + client.getEndpointCount()%>
+    <%
+        }
+    %>
+    </p>
     <br/>
     <carbon:paginator pageNumber="<%=endpointPageNumber%>" numberOfPages="<%=numberOfPages%>"
                   page="index.jsp" pageNumberParameterName="pageNumber"
