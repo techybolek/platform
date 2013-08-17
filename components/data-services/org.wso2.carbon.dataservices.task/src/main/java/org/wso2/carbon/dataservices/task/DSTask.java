@@ -88,7 +88,7 @@ public class DSTask extends WebServiceCallTask {
 			super.execute();
 		} else {
 			log.info("Target service '" + this.getProperties().get(
-					DSTaskConstants.DATA_SERVICE_NAME) + "' not initialized yet...");
+					DSTaskConstants.DATA_SERVICE_NAME) + "' is not active.");
 		}
 	}
 	
