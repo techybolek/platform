@@ -82,7 +82,7 @@ $(document).ready(function () {
                         if(tierAttrName!='' && tierAttrValue!=''){
                         $('#tierDesc').val('');
                         $('.tierAttrs').val('');
-                        $('#tierDesc').append("tierAttrName  :    "+tierAttrValue+"<br\/>");
+                        $('#tierDesc').append("<br\/>tierAttrName  :    "+tierAttrValue+);
                         }
                     }
 
