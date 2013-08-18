@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.tenant.build.integration.BuildServerManagementException;
 
 /**
@@ -28,28 +30,37 @@ import org.wso2.carbon.appfactory.tenant.build.integration.BuildServerManagement
  */
 public abstract class BuildServerApp {
 
+	private static Log log = LogFactory.getLog(BuildServerApp.class);
+
 	private String serverType = null;
 
 	private File appFile = null;
 
 	/**
 	 * Constructor takes name and path of the build server app.
-	 * @param name - name of the build server
-	 * @param filePath - path to the build server app
-	 * @throws FileNotFoundException if file not exist.
+	 * 
+	 * @param serverType
+	 *            - name of the build server
+	 * @param filePath
+	 *            - path to the build server app
+	 * @throws FileNotFoundException
+	 *             if file not exist.
 	 */
-	public BuildServerApp(String name, String filePath) throws FileNotFoundException {
+	public BuildServerApp(String serverType, String filePath) throws FileNotFoundException {
 		File file = new File(filePath);
 		if (file.exists()) {
 			this.appFile = file;
-			this.serverType = name;
+			this.serverType = serverType;
 		} else {
-			throw new FileNotFoundException("File does not exist - " + filePath);
+			String msg = "File does not exist - " + filePath;
+			log.fatal(msg);
+			throw new FileNotFoundException(msg);
 		}
 	}
 
 	/**
 	 * Returns the build server app file
+	 * 
 	 * @return build server app file
 	 */
 	public File getFile() {
@@ -58,6 +69,7 @@ public abstract class BuildServerApp {
 
 	/**
 	 * Returns the type of the build server.
+	 * 
 	 * @return build server type eg:- jenkins
 	 */
 	public String getServerType() {
@@ -65,13 +77,15 @@ public abstract class BuildServerApp {
 	}
 
 	/**
-	 * Implementation of this method defines how to modify the build server app based on the given {@code tenant}
+	 * Implementation of this method defines how to modify the build server app
+	 * based on the given {@code tenant}
+	 * 
 	 * @param tenant
 	 * @return path of the modified build server app.
 	 * @throws IOException
 	 * @throws BuildServerManagementException
 	 */
 	public abstract String getModifiedAppPath(String tenant) throws IOException,
-	                                                                BuildServerManagementException;
+	                                                        BuildServerManagementException;
 
 }

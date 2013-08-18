@@ -45,8 +45,8 @@ public class JenkinsBuildSeverApp extends BuildServerApp {
 
 	@Override
 	public String getModifiedAppPath(String tenant) throws IOException,
-	                                                       BuildServerManagementException {
-		File tenantLocation = new File(JenkinsConfig.getIinstance().getTenantsLocation(), tenant);
+	                                               BuildServerManagementException {
+		File tenantLocation = new File(JenkinsConfig.getInstance().getTenantsLocation(), tenant);
 		File tenantTmpLocation = new File(tenantLocation, TMP_FOLDER_NAME);
 		File jenkinsFileLocation = new File(tenantTmpLocation, DEFAULT_JENKINS_APP_NAME);
 
@@ -55,15 +55,17 @@ public class JenkinsBuildSeverApp extends BuildServerApp {
 			          " tenant information " + jenkinsFileLocation.getAbsolutePath());
 		}
 		if (jenkinsFileLocation.exists()) {
-			if (log.isDebugEnabled()) {
-				log.debug("Jenkins web app is already exist at the location " +
-				          jenkinsFileLocation.getAbsolutePath() + ". Deleting existing one");
-			}
-			jenkinsFileLocation.delete();
+			String msg =
+			             "Jenkins web app is already exist at the location " +
+			                     jenkinsFileLocation.getAbsolutePath() + ". For tenant " + tenant;
+			log.error(msg);
+			new BuildServerManagementException(
+			                                   msg,
+			                                   BuildServerManagementException.Code.TENANT_APP_ALREADY_EXISTS);
 		}
 		log.info("Copying Jenkins web app to tenant location " +
 		         tenantTmpLocation.getAbsolutePath());
-		
+
 		FileUtils.copyFile(getFile(), jenkinsFileLocation);
 
 		try {
@@ -75,7 +77,7 @@ public class JenkinsBuildSeverApp extends BuildServerApp {
 			return jenkinsFileLocation.getAbsolutePath();
 
 		} catch (InterruptedException e) {
-			String msg = "Error while updating web application with texnant context.";
+			String msg = "Error while updating web application with tenant context.";
 			log.error(msg, e);
 			throw new BuildServerManagementException(
 			                                         msg,
@@ -85,9 +87,10 @@ public class JenkinsBuildSeverApp extends BuildServerApp {
 	}
 
 	/**
-	 * Updates Jenkins web app by inserting context.xml.
-	 * This context.xml tells the web app where the Jenkins home is.
-	 * Jenkins home needs to be different from tenant to tenant.
+	 * Updates Jenkins web app by inserting context.xml. This context.xml tells
+	 * the web app where the Jenkins home is. Jenkins home needs to be different
+	 * from tenant to tenant.
+	 * 
 	 * @param tmpLocation
 	 * @param tenantHomePath
 	 * @param jenkinsWebApp
@@ -124,7 +127,7 @@ public class JenkinsBuildSeverApp extends BuildServerApp {
 
 		Process p =
 		            Runtime.getRuntime().exec("jar -uf " + jenkinsWebApp + " -C " + tmpLocation +
-		                                      " META-INF" + File.separator + "context.xml");
+		                                              " META-INF" + File.separator + "context.xml");
 		p.waitFor();
 	}
 

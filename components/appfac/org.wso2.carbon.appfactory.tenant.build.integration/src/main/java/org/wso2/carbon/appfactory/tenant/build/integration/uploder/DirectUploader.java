@@ -1,17 +1,17 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * 
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -33,7 +33,7 @@ import org.wso2.carbon.webapp.mgt.WebappUploadData;
 
 /**
  * Uploader using local transport.
- *
+ * 
  */
 public class DirectUploader implements BuildServerUploader {
 
@@ -43,11 +43,11 @@ public class DirectUploader implements BuildServerUploader {
 	private String tenantDomain;
 
 	public DirectUploader(String tenantDomain) throws UserStoreException {
-		this.tenantId = ServiceContainer.getInstance().getTenantManager()
-				.getTenantId(tenantDomain);
+		this.tenantId = ServiceContainer.getInstance().getTenantManager().getTenantId(tenantDomain);
 		if (tenantId < 0) {
-			throw new IllegalArgumentException("Invalid tenant domain - "
-					+ tenantDomain);
+			String msg = "Invalid tenant domain - " + tenantDomain;
+			log.error(msg);
+			throw new IllegalArgumentException(msg);
 		}
 		this.tenantDomain = tenantDomain;
 	}
@@ -65,17 +65,13 @@ public class DirectUploader implements BuildServerUploader {
 		try {
 
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantId(
-					this.tenantId);
-			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(
-					this.tenantDomain);
+			PrivilegedCarbonContext.getCurrentContext().setTenantId(this.tenantId);
+			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(this.tenantDomain);
 
 			WebappAdmin webAppAdmin = new WebappAdmin();
-			webAppAdmin
-					.uploadWebapp(new WebappUploadData[] { getWebAppUploadDataItem(serverApp) });
+			webAppAdmin.uploadWebapp(new WebappUploadData[] { getWebAppUploadDataItem(serverApp) });
 
-			log.info("Build server app sucessfully uploded to tenant space "
-					+ this.tenantDomain);
+			log.info("Build server app successfully uploaded to tenant space " + this.tenantDomain);
 
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -84,8 +80,7 @@ public class DirectUploader implements BuildServerUploader {
 	}
 
 	private static WebappUploadData getWebAppUploadDataItem(File fileToDeploy) {
-		DataHandler dataHandler = new DataHandler(new FileDataSource(
-				fileToDeploy));
+		DataHandler dataHandler = new DataHandler(new FileDataSource(fileToDeploy));
 
 		WebappUploadData webappUploadData = new WebappUploadData();
 		webappUploadData.setDataHandler(dataHandler);
