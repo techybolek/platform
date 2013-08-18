@@ -40,7 +40,7 @@ echo "[Build Server] Copying jenkins war..."
 cp $resorce_dir/packs/jenkins.war $BUILD_SERVER_AS_HOME/repository/resources/
 
 echo "[Build Server] Copying tenant integration component..."
-cp $resorce_dir/lib/jenkins/org.wso2.carbon.appfactory.tenant.build.integration-1.1.0-SNAPSHOT.jar $BUILD_SERVER_AS_HOME/repository/components/dropins
+cp $resorce_dir/lib/jenkins/org.wso2.carbon.appfactory.multitenant.jenkins-1.1.0-SNAPSHOT.jar $BUILD_SERVER_AS_HOME/repository/components/dropins
 
 echo "[Build Server] Copying jenkins runtime..."
 mkdir $BUILD_SERVER_AS_HOME/lib/runtimes/jenkins
