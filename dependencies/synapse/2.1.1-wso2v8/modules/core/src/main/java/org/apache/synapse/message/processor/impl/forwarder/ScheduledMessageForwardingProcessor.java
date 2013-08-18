@@ -18,15 +18,13 @@
  */
 package org.apache.synapse.message.processor.impl.forwarder;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
+import org.apache.synapse.message.processor.MessageProcessorConstants;
 import org.apache.synapse.message.processor.impl.ScheduledMessageProcessor;
 import org.quartz.JobDataMap;
 
 import java.util.Map;
-import java.util.StringTokenizer;
 import org.apache.synapse.message.senders.blocking.BlockingMsgSender;
 
 /**
@@ -34,39 +32,14 @@ import org.apache.synapse.message.senders.blocking.BlockingMsgSender;
  * It will Time to time Redeliver the Messages to a given target.
  */
 public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcessor {
-    private static final Log logger = LogFactory.getLog(ScheduledMessageForwardingProcessor.class.getName());
 
     public static final String BLOCKING_SENDER = "blocking.sender";
 
     private BlockingMsgSender sender = null;
-
     private MessageForwardingProcessorView view;
 
     @Override
     public void init(SynapseEnvironment se) {
-
-        String thisServerName = se.getServerContextInformation().getServerConfigurationInformation()
-                .getServerName();
-        Object pinnedServersObj = this.parameters.get("pinnedServers");
-
-        if (pinnedServersObj != null && pinnedServersObj instanceof String) {
-
-            boolean pinned = false;
-            String pinnedServers = (String) pinnedServersObj;
-            StringTokenizer st = new StringTokenizer(pinnedServers, " ,");
-
-            while (st.hasMoreTokens()) {
-                String token = st.nextToken().trim();
-                if (thisServerName.equals(token)) {
-                    pinned = true;
-                }
-            }
-            if (!pinned) {
-                logger.info("Message processor '" + name + "' pinned on '" + pinnedServers + "' not starting on" +
-                        " this server '" + thisServerName + "'");
-            }
-        }
-
         super.init(se);
 
         try {
@@ -74,6 +47,8 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
         } catch (Exception e) {
             throw new SynapseException(e);
         }
+
+        // register MBean
         org.apache.synapse.commons.jmx.MBeanRegistrar.getInstance().registerMBean(view,
                 "Message Forwarding Processor view", getName());
     }
@@ -83,7 +58,7 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
         JobDataMap jdm = new JobDataMap();
         sender = initMessageSender(parameters);
         jdm.put(BLOCKING_SENDER, sender);
-        jdm.put(PROCESSOR_INSTANCE, this);
+        jdm.put(MessageProcessorConstants.PROCESSOR_INSTANCE, this);
         jdm.put(ForwardingProcessorConstants.TARGET_ENDPOINT, getTargetEndpoint());
 
         return jdm;
@@ -108,7 +83,7 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
 
     /**
      * This method is used by back end of the message processor
-     * @return
+     * @return The associated MBean.
      */
     public MessageForwardingProcessorView getView() {
         return view;

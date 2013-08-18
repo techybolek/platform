@@ -18,16 +18,13 @@
 
 package org.apache.synapse.message.processor.impl.sampler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
+import org.apache.synapse.message.processor.MessageProcessorConstants;
 import org.apache.synapse.message.processor.impl.ScheduledMessageProcessor;
 import org.quartz.JobDataMap;
 
-import java.util.StringTokenizer;
-
 public class SamplingProcessor extends ScheduledMessageProcessor {
-    private static final Log log = LogFactory.getLog(SamplingProcessor.class);
 
     public static final String CONCURRENCY = "concurrency";
     public static final String SEQUENCE = "sequence";
@@ -36,31 +33,14 @@ public class SamplingProcessor extends ScheduledMessageProcessor {
 
     @Override
     public void init(SynapseEnvironment se) {
+        super.init(se);
 
-        String thisServerName = se.getServerContextInformation().getServerConfigurationInformation()
-                .getServerName();
-        Object pinnedServersObj = this.parameters.get("pinnedServers");
-
-        if (pinnedServersObj != null && pinnedServersObj instanceof String) {
-
-            boolean pinned = false;
-            String pinnedServers = (String) pinnedServersObj;
-            StringTokenizer st = new StringTokenizer(pinnedServers, " ,");
-
-            while (st.hasMoreTokens()) {
-                String token = st.nextToken().trim();
-                if (thisServerName.equals(token)) {
-                    pinned = true;
-                }
-            }
-            if (!pinned) {
-                log.info("Message processor '" + name + "' pinned on '" + pinnedServers + "' not starting on" +
-                        " this server '" + thisServerName + "'");
-            }
+        try {
+            view = new SamplingProcessorView(this);
+        } catch (Exception e) {
+            throw new SynapseException(e);
         }
 
-        super.init(se);
-        view = new SamplingProcessorView(this);
         // register MBean
         org.apache.synapse.commons.jmx.MBeanRegistrar.getInstance().registerMBean(view,
                 "Message Sampling Processor view", getName());
@@ -69,7 +49,7 @@ public class SamplingProcessor extends ScheduledMessageProcessor {
     @Override
     protected JobDataMap getJobDataMap() {
         JobDataMap jdm = new JobDataMap();
-        jdm.put(PROCESSOR_INSTANCE, this);
+        jdm.put(MessageProcessorConstants.PROCESSOR_INSTANCE, this);
         return jdm;
     }
 

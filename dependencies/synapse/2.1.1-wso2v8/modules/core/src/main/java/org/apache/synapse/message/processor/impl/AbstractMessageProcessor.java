@@ -51,6 +51,8 @@ public abstract class AbstractMessageProcessor implements MessageProcessor {
 
     protected MessageConsumer messageConsumer;
 
+    /** This attribute is only need for forwarding message processor. However, it here because
+     * then we don't need to implement this in sampling processor with nothing */
     protected String targetEndpoint;
 
     /**message store parameters */
@@ -113,6 +115,10 @@ public abstract class AbstractMessageProcessor implements MessageProcessor {
         if (consumer == null) {
             logger.error("[" + getName() + "] Faulty message consumer.");
             return false;
+        }
+
+        if (messageConsumer != null) {
+            messageConsumer.cleanup();
         }
 
         messageConsumer = consumer;

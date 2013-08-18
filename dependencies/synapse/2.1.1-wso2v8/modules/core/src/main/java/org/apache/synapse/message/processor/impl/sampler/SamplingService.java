@@ -57,18 +57,25 @@ public class SamplingService implements InterruptableJob, Service {
         try {
             init(jobExecutionContext);
 
-            for (int i = 0; i < concurrency; i++) {
+            if (!this.messageProcessor.isDeactivated()) {
+                for (int i = 0; i < concurrency; i++) {
 
-                final MessageContext messageContext = fetch(messageConsumer);
+                    final MessageContext messageContext = fetch(messageConsumer);
 
-                if (messageContext != null) {
-                    dispatch(messageContext);
-                }
-                else {
-                    // either the connection is broken or there are no new massages.
-                    if (log.isDebugEnabled()) {
-                        log.debug("No messages were received for message processor ["+ messageProcessor.getName() + "]");
+                    if (messageContext != null) {
+                        dispatch(messageContext);
                     }
+                    else {
+                        // either the connection is broken or there are no new massages.
+                        if (log.isDebugEnabled()) {
+                            log.debug("No messages were received for message processor ["+ messageProcessor.getName() + "]");
+                        }
+                    }
+                }
+            }
+            else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Exiting service since the message processor is deactivated");
                 }
             }
         } catch (Throwable t) {
@@ -89,9 +96,9 @@ public class SamplingService implements InterruptableJob, Service {
         JobDataMap jdm = jobExecutionContext.getMergedJobDataMap();
         Map<String, Object> parameters = (Map<String, Object>) jdm.get(MessageProcessorConstants.PARAMETERS);
 
-        messageConsumer = ((MessageProcessor)jdm.get(SamplingProcessor.PROCESSOR_INSTANCE)).getMessageConsumer();
+        messageConsumer = ((MessageProcessor)jdm.get(MessageProcessorConstants.PROCESSOR_INSTANCE)).getMessageConsumer();
         sequence = (String) parameters.get(SamplingProcessor.SEQUENCE);
-        messageProcessor = (MessageProcessor)jdm.get(ScheduledMessageForwardingProcessor.PROCESSOR_INSTANCE);
+        messageProcessor = (MessageProcessor)jdm.get(MessageProcessorConstants.PROCESSOR_INSTANCE);
 
         String con = (String) parameters.get(SamplingProcessor.CONCURRENCY);
         if (con != null) {

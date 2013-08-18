@@ -77,41 +77,47 @@ public class ForwardingService implements InterruptableJob, Service {
         try {
             init(jobExecutionContext);
 
-            MessageContext messageContext = fetch(messageConsumer);
+            if (!this.messageProcessor.isDeactivated()) {
+                MessageContext messageContext = fetch(messageConsumer);
 
-            if (messageContext != null) {
+                if (messageContext != null) {
 
-                String serverName = (String)
-                        messageContext.getProperty(SynapseConstants.Axis2Param.SYNAPSE_SERVER_NAME);
+                    String serverName = (String)
+                            messageContext.getProperty(SynapseConstants.Axis2Param.SYNAPSE_SERVER_NAME);
 
-                if(serverName != null && messageContext instanceof Axis2MessageContext) {
+                    if(serverName != null && messageContext instanceof Axis2MessageContext) {
 
-                    AxisConfiguration configuration = ((Axis2MessageContext)messageContext).
-                            getAxis2MessageContext().
-                            getConfigurationContext().getAxisConfiguration();
+                        AxisConfiguration configuration = ((Axis2MessageContext)messageContext).
+                                getAxis2MessageContext().
+                                getConfigurationContext().getAxisConfiguration();
 
-                    String myServerName = getAxis2ParameterValue(configuration,
-                            SynapseConstants.Axis2Param.SYNAPSE_SERVER_NAME);
+                        String myServerName = getAxis2ParameterValue(configuration,
+                                SynapseConstants.Axis2Param.SYNAPSE_SERVER_NAME);
 
-                    if(!serverName.equals(myServerName)) {
-                        return;
+                        if(!serverName.equals(myServerName)) {
+                            return;
+                        }
+                    }
+
+                    Set proSet = messageContext.getPropertyKeySet();
+
+                    if (proSet != null) {
+                        if (proSet.contains(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR)) {
+                            proSet.remove(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR);
+                        }
+                    }
+
+                    dispatch(messageContext);
+
+                } else {
+                    // either the connection is broken or there are no new massages.
+                    if (log.isDebugEnabled()) {
+                        log.debug("No messages were received for message processor ["+ messageProcessor.getName() + "]");
                     }
                 }
-
-                Set proSet = messageContext.getPropertyKeySet();
-
-                if (proSet != null) {
-                    if (proSet.contains(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR)) {
-                        proSet.remove(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR);
-                    }
-                }
-
-                dispatch(messageContext);
-
             } else {
-                // either the connection is broken or there are no new massages.
                 if (log.isDebugEnabled()) {
-                    log.debug("No messages were received for message processor ["+ messageProcessor.getName() + "]");
+                    log.debug("Exiting service since the message processor is deactivated");
                 }
             }
         } catch (Throwable e) {
@@ -119,7 +125,7 @@ public class ForwardingService implements InterruptableJob, Service {
             // we have to shutdown the processor
             log.fatal("Deactivating the message processor [" + this.messageProcessor.getName() + "]", e);
 
-            this.messageProcessor.stop();
+            this.messageProcessor.deactivate();
         }
 
         if (log.isDebugEnabled()) {
@@ -186,7 +192,7 @@ public class ForwardingService implements InterruptableJob, Service {
             }
         }
 
-        messageProcessor = (MessageProcessor)jdm.get(ScheduledMessageForwardingProcessor.PROCESSOR_INSTANCE);
+        messageProcessor = (MessageProcessor)jdm.get(MessageProcessorConstants.PROCESSOR_INSTANCE);
         messageConsumer = messageProcessor.getMessageConsumer();
 
         if (parameters.get(ForwardingProcessorConstants.FAULT_SEQUENCE) != null) {
@@ -290,7 +296,7 @@ public class ForwardingService implements InterruptableJob, Service {
                 }
             } catch (Exception e) {
                 log.error("Message processor [" + messageProcessor.getName() + "] failed to send the message to" +
-                        "client.", e);
+                        " client.", e);
             }
         }
         else {

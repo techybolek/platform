@@ -66,4 +66,9 @@ public final class MessageProcessorConstants {
             "org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread";
 
     public static final String JOB_STORE_CLASS = "org.quartz.jobStore.class";
+
+    public static final String SCHEDULED_MESSAGE_PROCESSOR_GROUP =
+            "synapse.message.processor.quartz";
+    public static final String PROCESSOR_INSTANCE = "processor.instance";
+    public static final String PINNED_SERVER = "pinnedServers";
 }

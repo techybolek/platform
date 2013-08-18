@@ -126,9 +126,22 @@ public interface MessageProcessor extends ManagedLifecycle, Nameable, SynapseArt
      */
     String getTargetEndpoint();
 
+    /**
+     * This method is only used by the associated forwarding services of message processors.
+     * When the service fails to send the message to the backend it pauses the message processor and
+     * starts retrying. Pausing the message processor avoids re-triggering new services till the existing
+     * service succeed.
+     */
     void pauseService();
 
+    /**
+     * This is the opposite of pauseService method. This method resumes a paused method.
+     */
     void resumeService();
 
+    /**
+     * This method is used to check if the state is in paused mode.
+     * @return returns true on success.
+     */
     boolean isPaused();
 }

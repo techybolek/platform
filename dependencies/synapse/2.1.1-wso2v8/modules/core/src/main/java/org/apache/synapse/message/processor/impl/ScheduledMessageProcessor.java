@@ -18,14 +18,12 @@
  */
 package org.apache.synapse.message.processor.impl;
 
-import org.apache.axis2.deployment.Deployer;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.deployers.MessageProcessorDeployer;
-import org.apache.synapse.deployers.MessageStoreDeployer;
 import org.apache.synapse.message.processor.MessageProcessorConstants;
 import org.apache.synapse.message.processor.impl.forwarder.ForwardingService;
 import org.apache.synapse.message.processor.impl.sampler.SamplingProcessor;
@@ -34,6 +32,7 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
@@ -42,9 +41,10 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor {
     private static final Log logger = LogFactory.getLog(ScheduledMessageProcessor.class.getName());
 
-    public static final String SCHEDULED_MESSAGE_PROCESSOR_GROUP =
-            "synapse.message.processor.quartz";
-    public static final String PROCESSOR_INSTANCE = "processor.instance";
+//    public static final String SCHEDULED_MESSAGE_PROCESSOR_GROUP =
+//            "synapse.message.processor.quartz";
+//    public static final String PROCESSOR_INSTANCE = "processor.instance";
+//    public static final String PINNED_SERVER = "pinnedServers";
 
     /**
      * The scheduler, run the the processor
@@ -75,6 +75,12 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
     private AtomicBoolean isActivated = new AtomicBoolean(true);
 
     public void init(SynapseEnvironment se) {
+        if (isPinnedServer(se.getServerContextInformation().getServerConfigurationInformation()
+                .getServerName())) {
+            // If it is a pinned server we do not start the message processors. In that server.
+            setActivated(false);
+        }
+
         super.init(se);
         StdSchedulerFactory sf = null;
 
@@ -192,7 +198,7 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
             jobBuilder = JobBuilder.newJob(ForwardingService.class);
         }
 
-        jobBuilder.withIdentity(name + "-job", SCHEDULED_MESSAGE_PROCESSOR_GROUP);
+        jobBuilder.withIdentity(name + "-job", MessageProcessorConstants.SCHEDULED_MESSAGE_PROCESSOR_GROUP);
 
         return jobBuilder;
     }
@@ -213,7 +219,7 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
                 }
 
                 try {
-                    scheduler.interrupt(new JobKey(name + "-job", SCHEDULED_MESSAGE_PROCESSOR_GROUP));
+                    scheduler.interrupt(new JobKey(name + "-job", MessageProcessorConstants.SCHEDULED_MESSAGE_PROCESSOR_GROUP));
                 } catch (UnableToInterruptJobException e) {
                     logger.info("Unable to interrupt job [" + name + "-job]");
                 }
@@ -264,7 +270,7 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
                 scheduler.standby();
 
                 try {
-                    scheduler.interrupt(new JobKey(name + "-job", SCHEDULED_MESSAGE_PROCESSOR_GROUP));
+                    scheduler.interrupt(new JobKey(name + "-job", MessageProcessorConstants.SCHEDULED_MESSAGE_PROCESSOR_GROUP));
                 } catch (UnableToInterruptJobException e) {
                     logger.info("Unable to interrupt job [" + name + "-job]");
                 }
@@ -384,5 +390,29 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         config.put(MessageProcessorConstants.JOB_STORE_CLASS, "org.quartz.simpl.RAMJobStore");
 
         return config;
+    }
+
+    private boolean isPinnedServer(String serverName) {
+        boolean pinned = false;
+        Object pinnedServersObj = this.parameters.get(MessageProcessorConstants.PINNED_SERVER);
+
+        if (pinnedServersObj != null && pinnedServersObj instanceof String) {
+
+            String pinnedServers = (String) pinnedServersObj;
+            StringTokenizer st = new StringTokenizer(pinnedServers, " ,");
+
+            while (st.hasMoreTokens()) {
+                String token = st.nextToken().trim();
+                if (serverName.equals(token)) {
+                    pinned = true;
+                }
+            }
+            if (!pinned) {
+                logger.info("Message processor '" + name + "' pinned on '" + pinnedServers + "' not starting on" +
+                        " this server '" + serverName + "'");
+            }
+        }
+
+        return pinned;
     }
 }
