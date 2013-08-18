@@ -158,6 +158,7 @@ public class GenericArtifactTestCase {
         artifactManager.addGenericArtifact(artifact2);
 
         governance.addAssociation(artifact1.getPath(), artifact2.getPath(), "depends");
+        governance.addAssociation(artifact2.getPath(), artifact1.getPath(), "usedBy");
 
         GovernanceArtifact[] dependencies = artifact1.getDependencies();
         Assert.assertEquals(dependencies.length, 1, "Number of dependencies expected was incorrect");
