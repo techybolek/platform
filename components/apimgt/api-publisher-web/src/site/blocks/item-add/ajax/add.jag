@@ -26,7 +26,7 @@ include("/jagg/jagg.jag");
                 apiData.transports = null;
             }
             else{
-                request.getParameter("http_checked")+","+request.getParameter("https_checked");
+                apiData.transports=request.getParameter("http_checked")+","+request.getParameter("https_checked");
             }
             apiData.endpoint = request.getParameter("endpoint");
             apiData.sandbox = request.getParameter("sandbox");
