@@ -107,6 +107,11 @@ public class Client
                             clientOptions.setUserUrl(url);
                             i ++;
                         }
+			
+                        if (!arguments[i + 1].startsWith("-")) {
+                            clientOptions.setWorkingLocation(arguments[i + 1]);
+                            i ++;
+                        }
                     }
                 }
                 else if(arguments[i].equals("up") || arguments[i].equals("update")) {
