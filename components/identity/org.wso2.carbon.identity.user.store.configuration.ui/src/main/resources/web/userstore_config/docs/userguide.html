@@ -34,6 +34,48 @@
     <li>Delete User Stores</li>
 </ul>
 
-<p>CONTENT TO BE ADDED</p>
+<h2>Default View</h2>
+<p>The default view of user store management feature will show a summary of the available user store definitions.</p>
+
+<p><img alt="" src="../images/index-view.png"/></p>
+<p>Figure 1: Summary of available user store definitions</p>
+<p>The default view will be as above, until we define a secondary user store. To add a user store, we can go through
+    'Add Secondary User Store'</p>
+
+<h2>Selection</h2>
+<p><img alt="" src="../images/selection.png"/></p>
+<p>Figure 2: Select a preferred user store implementation</p>
+<p>Here it provides a form to define a user store, using the available user store manager implementations. At first we
+    need to select the implementation class we are to use. By default identity server provides 4 such implementations</p>
+<ol>
+    <li>ReadWriteLDAPUserStoreManager</li>
+    <li>ReadOnlyLDAPUserStoreManager</li>
+    <li>ActiveDirectoryUserStoreManager</li>
+    <li>JDBCUserStoreManager</li>
+</ol>
+<p>In addition to the above we can add our own custom user store managers too. We just have to write our custom user manager
+    implementing interface org.wso2.carbon.user.api.UserStoreManager and make it available in the server.
+    From the drop down menu select the required user store manager implementation. It will provide a form to fill as follows
+    according to the selected class</p>
+
+<h2>Define</h2>
+<p><img alt="" src="../images/definition.png"/></p>
+<p>Figure 3: Property defining</p>
+<p>A little description of what each property means is also given for the ease. Fill all the mandatory properties and optional
+    properties as you wish.</p>
+
+<h2>Save</h2>
+<p><img alt="" src="../images/save.png"/></p>
+<p>Figure 4: Try to add the user store</p>
+<p>At saving the user store it will provide a notification as above. This means you have given all the required properties
+    and identity server is in the process of adding this defined user store to the existing chain. Please not that this does
+    not mean user store is successfully added. We have to wait little and refresh the page to confirm it.</p>
+
+<h2>Status</h2>
+<p><img alt="" src="../images/status.png"/></p>
+<p>Figure 5: Status after addition</p>
+<p>At refresh after a moment summary view will show something similar to above, if user store addition is a success.
+    Then we can use the provided links to edit,disable/enable the user store.</p>
+
 </body>
 </html>
