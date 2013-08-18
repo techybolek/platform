@@ -3484,7 +3484,7 @@ function updateMediaType(resourcePath, mediaType) {
 
 function downloadWithDependencies(path, hasAssociations) {
     sessionAwareFunction(function() {
-        if (hasAssociations.toString().trim() == "true") {
+            if (trim(hasAssociations.toString()) == "true") {
             CARBON.showConfirmationDialog(org_wso2_carbon_registry_resource_ui_jsi18n["download.with.all.dependencies"], function() {
                 location.href =  path + '&withDependencies=true';
 
