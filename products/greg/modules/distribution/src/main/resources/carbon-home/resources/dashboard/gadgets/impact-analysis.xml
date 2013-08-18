@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Module>
-	<ModulePrefs title="Service Impact" height="300"
-		description="Shows all dependencies and used-by associations of a particular service"
-		author="Tharindu Mathew" author_email="carbon-dev@wso2.org"
-		author_affiliation="WSO2" author_location="Colombo, Sri Lanka">
-		<Require feature="setprefs" />
-		<Require feature="tabs" />
-		<Require feature="dynamic-height" />
-		<Require feature="views" />
-	</ModulePrefs>
-	<UserPref name="selection" display_name="selection"
-		default_value="[]" datatype="list" required="true"></UserPref>
-	<UserPref name="selectedFlag" default_value="false" datatype="bool" required="true"></UserPref>
-	<Content type="html" view="default, home">
-    <![CDATA[
+    <ModulePrefs title="Service Impact" height="500"
+                 description="Shows all dependencies and used-by associations of a particular service"
+                 author="Tharindu Mathew" author_email="carbon-dev@wso2.org"
+                 author_affiliation="WSO2" author_location="Colombo, Sri Lanka">
+        <Require feature="setprefs" />
+        <Require feature="tabs" />
+        <Require feature="dynamic-height" />
+        <Require feature="views" />
+    </ModulePrefs>
+    <UserPref name="selection" display_name="selection"
+              default_value="[]" datatype="list" required="true"></UserPref>
+    <UserPref name="selectedFlag" default_value="false" datatype="bool" required="true"></UserPref>
+    <Content type="html" view="default, home">
+        <![CDATA[
     
 
 <script type="text/javascript" src="js/wso2vis.js"></script>
@@ -36,9 +36,9 @@ div#qTip {
 <link rel="stylesheet" type="text/css" href="css/gadgets.css"/>
 <link rel="stylesheet" type="text/css" href="css/help.css"/>
 
-    	<div id="filter" style="margin:0 auto; text-align:center;width:300px;"></div>
+      <div id="filter" style="margin:0 auto; text-align:center;width:300px;"></div>
 
-    	<div id="infovis" style="margin:0 auto; text-align:center;height:300px;width:300px"></div>
+      <div id="infovis" style="margin:0 auto; text-align:center;height:100%;width:100%;overflow:scroll;position:fixed;"></div>
 <div id="log"></div>
 <div id="error"></div>
 <script type="text/javascript">
@@ -53,10 +53,10 @@ div#qTip {
                 var filterSelection = dataFilter.filterArray();
                 prefs.set("selection", filterSelection);
                 prefs.set("selectedFlag", true);
-gadgets.window.adjustHeight(300);
-setTimeout("gadgets.window.adjustHeight(300)",100);
+gadgets.window.adjustHeight(500);
+setTimeout("gadgets.window.adjustHeight(500)",100);
             }
-	    var dataFilter = new wso2vis.f.form.Select()
+      var dataFilter = new wso2vis.f.form.Select()
                              .canvas("filter")
                              .dataField(["children"])
                              .dataLabel(["name"])
@@ -67,30 +67,30 @@ dataFilter.onChange = function(text) {
 };
 
 function errorMsg() {
-	return "No services present";
+  return "No services present";
 }
             var init = function () {
-		var treeDiv = document.getElementById("infovis");
-		var logDiv = document.getElementById("log");
+    var treeDiv = document.getElementById("infovis");
+    var logDiv = document.getElementById("log");
 var spaceTree = new wso2vis.s.chart.raphael.DependencyTree(treeDiv,"Dependency Tree","Used to show data in tree structures");
-			spaceTree.dataField(["children"])
-				.dataLabel(["name"])
-				.width(500)
-				.height(300)
+      spaceTree.dataField(["children"])
+        .dataLabel(["name"])
+        .width(500)
+        .height(800)
                 .nodelength(80)
                 .nodeheight(15)
                 .sx(50)
-                .sy(800);
+                .sy(100);
 
 //                var spaceTree = new wso2vis.s.chart.infovis.SpaceTree(logDiv,"infovis","Dependency Tree","Impact Analysis of Services");
-//			spaceTree.dataField(["children"])
-//				.dataLabel(["name"])
-//				.width(300)
-//				.height(300)
-//				.msgDiv("error");
-		
-				
-				spaceTree.messageInterceptFunction = errorMsg;
+//      spaceTree.dataField(["children"])
+//        .dataLabel(["name"])
+//        .width(300)
+//        .height(300)
+//        .msgDiv("error");
+    
+        
+        spaceTree.messageInterceptFunction = errorMsg;
                 spaceTree.load();
 
 
@@ -103,25 +103,24 @@ var spaceTree = new wso2vis.s.chart.raphael.DependencyTree(treeDiv,"Dependency T
                 
                 var prefs = new gadgets.Prefs();
                 if (prefs.getBool("selectedFlag")) {
-                	dataFilter.filterArray(prefs.getArray("selection"));
+                  dataFilter.filterArray(prefs.getArray("selection"));
                 }
                 dataProvider.initialize();
-				dataFilter.load();
-				gadgets.window.adjustHeight(300);
+        dataFilter.load();
+        gadgets.window.adjustHeight(500);
 
-				setTimeout("gadgets.window.adjustHeight(300)",100);
+        setTimeout("gadgets.window.adjustHeight(500)",100);
 }
 
 
     gadgets.util.registerOnLoadHandler(init);
-    
-</script>
+ </script>
 
 ]]>
 
-	</Content>
-	<Content type="html" view="canvas">
-    <![CDATA[
+    </Content>
+    <Content type="html" view="canvas">
+        <![CDATA[
     
 
 <script type="text/javascript" src="js/wso2vis.js"></script>
@@ -144,9 +143,9 @@ div#qTip {
 <link rel="stylesheet" type="text/css" href="css/gadgets.css"/>
 <link rel="stylesheet" type="text/css" href="css/help.css"/>
 
-    	<div id="filter" style="margin:0 auto; text-align:center;width:300px;">Available Services : </div>
-	
-    	<div id="infovis" style="margin:0 auto; text-align:center;height:300px;width:1000px"></div>
+      <div id="filter" style="margin:0 auto; text-align:center;width:300px;">Available Services : </div>
+  
+      <div id="infovis" style="margin:0 auto; text-align:center;height:100%;width:100%;overflow: scroll"></div>
 <div id="log"></div>
 
 <script type="text/javascript">
@@ -161,10 +160,10 @@ div#qTip {
                 var filterSelection = dataFilter.filterArray();
                 prefs.set("selection", filterSelection);
                 prefs.set("selectedFlag", true);
-                gadgets.window.adjustHeight(300);
-	setTimeout("gadgets.window.adjustHeight(300)",100);
+                gadgets.window.adjustHeight(500);
+  setTimeout("gadgets.window.adjustHeight(500)",100);
             }
-	    var dataFilter = new wso2vis.f.form.Select()
+      var dataFilter = new wso2vis.f.form.Select()
                              .canvas("filter")
                              .dataField(["children"])
                              .dataLabel(["name"])
@@ -175,24 +174,24 @@ pullData();
 };
           
             var init = function () {
-		var treeDiv = document.getElementById("infovis");
-		var logDiv = document.getElementById("log");
+    var treeDiv = document.getElementById("infovis");
+    var logDiv = document.getElementById("log");
               var spaceTree = new wso2vis.s.chart.raphael.DependencyTree(treeDiv,"Dependency Tree","Used to show data in tree structures");
-			spaceTree.dataField(["children"])
-				.dataLabel(["name"])
-				.width(1000)
-				.height(300)
+      spaceTree.dataField(["children"])
+        .dataLabel(["name"])
+        .width(1000)
+        .height(800)
                 .nodelength(80)
                 .nodeheight(15)
                 .sx(50)
-                .sy(800);
+                .sy(100);
 
 //                var spaceTree = new wso2vis.s.chart.infovis.SpaceTree(logDiv,"infovis","Dependency Tree","Impact Analysis of Services");
-//			spaceTree.dataField(["children"])
-//				.dataLabel(["name"])
-//				.width(300)
-//				.height(300)
-//				.msgDiv("error");
+//      spaceTree.dataField(["children"])
+//        .dataLabel(["name"])
+//        .width(300)
+//        .height(300)
+//        .msgDiv("error");
                 spaceTree.load();
 
 
@@ -205,10 +204,10 @@ pullData();
               
                 var prefs = new gadgets.Prefs();
                 if (prefs.getBool("selectedFlag")) {
-                	dataFilter.filterArray(prefs.getArray("selection"));
+                  dataFilter.filterArray(prefs.getArray("selection"));
                 }
                 dataProvider.initialize();
-				dataFilter.load();
+        dataFilter.load();
 }
 
 
@@ -217,7 +216,9 @@ pullData();
 
 ]]>
 
-	</Content>
+    </Content>
 
 </Module>
 
+
+        ​
