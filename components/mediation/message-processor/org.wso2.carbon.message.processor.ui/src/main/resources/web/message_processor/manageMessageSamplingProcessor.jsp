@@ -309,6 +309,17 @@
                        value="org.apache.synapse.message.processor.impl.sampler.SamplingProcessor"/>
 
                 <%}%>
+                <tr>
+                    <td><fmt:message key="sequence"/><span class="required"> *</span></td>
+                    <td><input type="text" size="60" id="Sequence" name="Sequence"
+                               value="<%=((null!=processorData)&& processorData.getParams() != null
+                                        && !processorData.getParams().isEmpty()&&(processorData.getParams().get("sequence")!=null))?processorData.getParams().get("sequence"):""%>"/>
+                    </td>
+                    <td>
+                       <a href="#" class="registry-picker-icon-link"  onclick="showRegistryBrowser('Sequence','/_system/config')"><fmt:message key="processor.conf.registry.browser"/></a>
+                       <a href="#" class="registry-picker-icon-link"  onclick="showRegistryBrowser('Sequence','/_system/governance')"><fmt:message key="processor.gov.registry.browser"/></a>
+                    </td>
+                </tr>
                 <%if ((processorData != null)) { %>
                 <tr>
                     <td><fmt:message key="message.store"/><span class="required"> *</span></td>
@@ -334,17 +345,6 @@
                     </td>
                 </tr>
                 <%}%>
-                <tr>
-                    <td><fmt:message key="sequence"/><span class="required"> *</span></td>
-                    <td><input type="text" size="60" id="Sequence" name="Sequence"
-                               value="<%=((null!=processorData)&& processorData.getParams() != null
-                                        && !processorData.getParams().isEmpty()&&(processorData.getParams().get("sequence")!=null))?processorData.getParams().get("sequence"):""%>"/>
-                    </td>
-                    <td>
-                       <a href="#" class="registry-picker-icon-link"  onclick="showRegistryBrowser('Sequence','/_system/config')"><fmt:message key="processor.conf.registry.browser"/></a>
-                       <a href="#" class="registry-picker-icon-link"  onclick="showRegistryBrowser('Sequence','/_system/governance')"><fmt:message key="processor.gov.registry.browser"/></a>
-                    </td>
-                </tr>
                 <tr>
                     <td>
                         <span id="_adv" style="float: left; position: relative;">
