@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <option name="DEFAULT_COMPILER" value="Javac" />
+    <resourceExtensions />
+    <wildcardResourcePatterns>
+      <entry name="?*.properties" />
+      <entry name="?*.xml" />
+      <entry name="?*.gif" />
+      <entry name="?*.png" />
+      <entry name="?*.jpeg" />
+      <entry name="?*.jpg" />
+      <entry name="?*.html" />
+      <entry name="?*.dtd" />
+      <entry name="?*.tld" />
+      <entry name="?*.ftl" />
+    </wildcardResourcePatterns>
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="cep-process-flow" target="1.6" />
+      <module name="event-builder" target="1.6" />
+      <module name="event-formatter" target="1.6" />
+      <module name="event-processing" target="1.6" />
+      <module name="event-processor" target="1.6" />
+      <module name="event-statistics" target="1.6" />
+      <module name="event-tracer" target="1.6" />
+      <module name="input-transport-adaptor" target="1.6" />
+      <module name="org.wso2.carbon.cep.process.flow.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.admin" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.core" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.test" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.formatter.admin" target="1.6" />
+      <module name="org.wso2.carbon.event.formatter.core" target="1.6" />
+      <module name="org.wso2.carbon.event.formatter.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.admin" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.core" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.siddhi.extension" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.statistics" target="1.6" />
+      <module name="org.wso2.carbon.event.statistics.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.tracer" target="1.6" />
+      <module name="org.wso2.carbon.event.tracer.ui" target="1.6" />
+      <module name="org.wso2.carbon.input.transport.adaptor.core" target="1.6" />
+      <module name="org.wso2.carbon.input.transport.adaptor.email" target="1.6" />
+      <module name="org.wso2.carbon.input.transport.adaptor.jms" target="1.6" />
+      <module name="org.wso2.carbon.input.transport.adaptor.manager.admin" target="1.6" />
+      <module name="org.wso2.carbon.input.transport.adaptor.manager.core" target="1.6" />
+      <module name="org.wso2.carbon.input.transport.adaptor.manager.ui" target="1.6" />
+      <module name="org.wso2.carbon.input.transport.adaptor.wsevent" target="1.6" />
+      <module name="org.wso2.carbon.input.transport.adaptor.wsevent.local" target="1.6" />
+      <module name="org.wso2.carbon.input.transport.adaptor.wso2event" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.cassandra" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.core" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.email" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.jms" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.manager.admin" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.manager.core" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.manager.ui" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.mysql" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.sms" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.wsevent" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.wsevent.local" target="1.6" />
+      <module name="org.wso2.carbon.output.transport.adaptor.wso2event" target="1.6" />
+      <module name="output-transport-adaptor" target="1.6" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
+
