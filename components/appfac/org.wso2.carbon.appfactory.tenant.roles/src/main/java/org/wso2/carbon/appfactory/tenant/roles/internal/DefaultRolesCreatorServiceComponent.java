@@ -70,9 +70,9 @@ public class DefaultRolesCreatorServiceComponent {
            /* context.getBundleContext().registerService(TenantMgtListener.class.getName(),
                                                        new S2IntegrationTenantActivationListener(),
                                                        null);*/
-            context.getBundleContext().registerService(TenantMgtListener.class.getName(),
+/*            context.getBundleContext().registerService(TenantMgtListener.class.getName(),
                                                        new AppFactoryTenantMgtListener(),
-                                                       null);
+                                                       null);*/
             context.getBundleContext().registerService(TenantMgtListener.class.getName(),
                                                        new DefaultRolesCreatorForTenant(),
                                                        null);
