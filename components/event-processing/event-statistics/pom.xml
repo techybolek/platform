@@ -26,8 +26,8 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.event.statistics/1.0.0</module>
-        <module>org.wso2.carbon.event.statistics.ui/1.0.0</module>
+        <module>org.wso2.carbon.event.statistics</module>
+        <module>org.wso2.carbon.event.statistics.ui</module>
     </modules>
 
 

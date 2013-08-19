@@ -119,10 +119,10 @@
     </dependencyManagement>
 
     <modules>
-        <module>org.wso2.carbon.event.processor.core/1.0.0</module>
-        <module>org.wso2.carbon.event.processor.ui/1.0.0</module>
-        <module>org.wso2.carbon.event.processor.admin/1.0.0</module>
-        <module>org.wso2.carbon.event.processor.siddhi.extension/1.0.0</module>
+        <module>org.wso2.carbon.event.processor.core</module>
+        <module>org.wso2.carbon.event.processor.ui</module>
+        <module>org.wso2.carbon.event.processor.admin</module>
+        <module>org.wso2.carbon.event.processor.siddhi.extension</module>
     </modules>
 
     <properties>

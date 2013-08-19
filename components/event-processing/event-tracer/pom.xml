@@ -34,8 +34,8 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.event.tracer/1.0.0</module>
-        <module>org.wso2.carbon.event.tracer.ui/1.0.0</module>
+        <module>org.wso2.carbon.event.tracer</module>
+        <module>org.wso2.carbon.event.tracer.ui</module>
     </modules>
 
     <dependencyManagement>

@@ -101,10 +101,10 @@
     </dependencyManagement>
 
     <modules>
-        <module>org.wso2.carbon.event.builder.core/1.0.0</module>
-        <module>org.wso2.carbon.event.builder.admin/1.0.0</module>
-        <module>org.wso2.carbon.event.builder.ui/1.0.0</module>
-        <module>org.wso2.carbon.event.builder.test/1.0.0</module>
+        <module>org.wso2.carbon.event.builder.core</module>
+        <module>org.wso2.carbon.event.builder.admin</module>
+        <module>org.wso2.carbon.event.builder.ui</module>
+        <module>org.wso2.carbon.event.builder.test</module>
     </modules>
 
     <properties>

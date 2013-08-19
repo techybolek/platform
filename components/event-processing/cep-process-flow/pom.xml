@@ -71,7 +71,7 @@
     </dependencyManagement>
 
     <modules>
-        <module>org.wso2.carbon.cep.process.flow.ui/1.0.0</module>
+        <module>org.wso2.carbon.cep.process.flow.ui</module>
     </modules>
 
     <!--<properties>-->
