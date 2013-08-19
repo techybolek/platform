@@ -19,51 +19,55 @@
 
 package org.wso2.carbon.mediation.initializer.multitenancy;
 
-import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.mediation.dependency.mgt.services.ConfigurationTrackingService;
-import org.wso2.carbon.mediation.initializer.ServiceBusInitializer;
-import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.mediation.initializer.configurations.ConfigurationManager;
-import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
-import org.wso2.carbon.mediation.initializer.CarbonSynapseController;
-import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
-import org.wso2.carbon.mediation.initializer.utils.ConfigurationHolder;
-import org.wso2.carbon.mediation.initializer.services.*;
-import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceManager;
-import org.wso2.carbon.mediation.registry.WSO2Registry;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.base.ServerConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.*;
-import org.apache.synapse.deployers.ExtensionDeployer;
-import org.apache.synapse.deployers.ImportDeployer;
-import org.apache.synapse.deployers.LibraryArtifactDeployer;
-import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
-import org.apache.synapse.registry.Registry;
-import org.apache.synapse.libraries.imports.SynapseImport;
-import org.apache.synapse.mediators.base.SequenceMediator;
-import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
-import org.apache.synapse.config.xml.MultiXMLConfigurationSerializer;
-import org.apache.synapse.config.SynapseConfiguration;
-import org.apache.synapse.config.SynapseConfigurationBuilder;
-import org.apache.synapse.core.SynapseEnvironment;
-import org.apache.synapse.task.*;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.AxisServiceGroup;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.deployment.DeploymentEngine;
-import org.osgi.framework.ServiceRegistration;
-import org.wso2.carbon.event.core.EventBroker;
-
 import java.io.File;
-import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.deployment.DeploymentEngine;
+import org.apache.axis2.description.AxisServiceGroup;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.ServerConfigurationInformation;
+import org.apache.synapse.ServerConfigurationInformationFactory;
+import org.apache.synapse.ServerContextInformation;
+import org.apache.synapse.ServerManager;
+import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.config.SynapseConfiguration;
+import org.apache.synapse.config.SynapseConfigurationBuilder;
+import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
+import org.apache.synapse.config.xml.MultiXMLConfigurationSerializer;
+import org.apache.synapse.deployers.ExtensionDeployer;
+import org.apache.synapse.mediators.base.SequenceMediator;
+import org.apache.synapse.registry.Registry;
+import org.apache.synapse.task.TaskConstants;
+import org.apache.synapse.task.TaskDescriptionRepository;
+import org.apache.synapse.task.TaskScheduler;
+import org.osgi.framework.ServiceRegistration;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.event.core.EventBroker;
+import org.wso2.carbon.mediation.dependency.mgt.services.ConfigurationTrackingService;
+import org.wso2.carbon.mediation.initializer.CarbonSynapseController;
+import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
+import org.wso2.carbon.mediation.initializer.ServiceBusInitializer;
+import org.wso2.carbon.mediation.initializer.configurations.ConfigurationManager;
+import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceManager;
+import org.wso2.carbon.mediation.initializer.services.SynapseConfigurationService;
+import org.wso2.carbon.mediation.initializer.services.SynapseConfigurationServiceImpl;
+import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
+import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentServiceImpl;
+import org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsService;
+import org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsServiceImpl;
+import org.wso2.carbon.mediation.initializer.utils.ConfigurationHolder;
+import org.wso2.carbon.mediation.registry.WSO2Registry;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 /**
  * This creates the {@link org.apache.synapse.config.SynapseConfiguration}
@@ -175,6 +179,16 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
                     ConfigurationHolder.getInstance().getBundleContext().registerService(
                     SynapseRegistrationsService.class.getName(),
                     synRegistrationsSvc, null);
+            
+            //creating secure-vault specific location
+            if (!isRepoExists(registry)) {
+    			org.wso2.carbon.registry.core.Collection secureVaultCollection = registry
+    					.newCollection();
+    			registry.put(ServiceBusConstants.CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY,
+    					secureVaultCollection);
+    		
+    		}
+            
 
             ConfigurationTrackingService trackingService = ServiceBusInitializer.
                     getConfigurationTrackingService();
@@ -431,6 +445,24 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
      }
     
     
+    /**
+	 * Checks whether the given repository already existing.
+	 * 
+	 * @return
+	 */
+	protected boolean isRepoExists(org.wso2.carbon.registry.core.Registry registry) {
+		try {
+			registry.get(ServiceBusConstants.CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY);
+		} catch (RegistryException e) {
+			return false;
+		}
+		return true;
+	}
+
+	public String getProviderClass() {
+		return this.getClass().getName();
+	}
+	
 
     public static boolean isRunningSamplesMode() {
         return System.getProperty(ServiceBusConstants.ESB_SAMPLE_SYSTEM_PROPERTY) != null;

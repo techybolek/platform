@@ -112,5 +112,7 @@ public final class ServiceBusConstants {
     public static final String DEPENDS = "depends";
 
     public static final String SUSPEND_PERSISTENCE = "suspend.mediation.persistence";
+    public static final String CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY = "/repository/components/secure-vault";
+
 }
 
