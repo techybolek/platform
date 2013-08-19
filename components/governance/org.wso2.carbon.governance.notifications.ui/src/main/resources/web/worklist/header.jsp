@@ -31,7 +31,7 @@ under the License.
         return;
     }
 %>
-<script type="text/javascript" src="../ajax/js/prototype.js"></script>
+<!-- <script type="text/javascript" src="../ajax/js/prototype.js"></script> -->
 <jsp:include page="../registry_common/registry_common-i18n-ajaxprocessor.jsp"/>
 <script type="text/javascript" src="../registry_common/js/registry_validation.js"></script>
 <script type="text/javascript" src="../registry_common/js/registry_common.js"></script>
@@ -39,6 +39,7 @@ under the License.
         resourceBundle="org.wso2.carbon.governance.notifications.ui.i18n.JSResources"
         request="<%=request%>" namespace="org.wso2.carbon.governance.notifications.ui"/>
 <script type="text/javascript">
+/*
     function createTask() {
         var role = jQuery('#workListRoleInput').val();
         var description = jQuery('#workListDescriptionInput').val();
@@ -80,7 +81,7 @@ under the License.
              }        	
          });
     }
-    
+*/
 </script>
 
 <fmt:bundle basename="org.wso2.carbon.governance.notifications.ui.i18n.Resources">
