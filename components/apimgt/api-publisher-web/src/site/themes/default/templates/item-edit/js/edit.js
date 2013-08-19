@@ -434,6 +434,91 @@ function loadOutSequences() {
 			}, "json");
 }
 
+function toggleSequence(checkbox){
+	if($(checkbox).is(":checked")){
+		$(checkbox).parent().next().show();
+		loadInSequences();
+		loadOutSequences();
+	}else{
+		$(checkbox).parent().next().hide();
+	}
+	
+}
+
+function loadInSequences() {
+	var inFlowtarget = document.getElementById("inSequence");
+	jagg.post("/site/blocks/item-add/ajax/add.jag", {
+		action : "getCustomInSequences"
+	},
+ 	function(result) {
+		if (!result.error) {
+			var arr = [];
+			if (result.sequences.length == 0) {
+				var msg = "No defined sequences";
+				$('<input>').
+				attr('type', 'hidden').
+				attr('name', 'inSeq').
+				attr('id', 'inSeq').
+				attr('value', msg).
+				appendTo('#addAPIForm');
+			} else {
+				for ( var j = 0; j < result.sequences.length; j++) {
+					arr.push(result.sequences[j]);
+				}
+				for ( var i = 0; i < arr.length; i++) {
+					inFlowOption = new Option(result.sequences[i],
+							result.sequences[i]);
+					inFlowtarget.options[i] = inFlowOption;
+					var inSeq = inFlowOption.value;
+					$('<input>').
+					attr('type', 'hidden').
+					attr('name', 'inSeq').
+					attr('id', 'inSeq').
+					attr('value', inSeq).
+					appendTo('#addAPIForm');
+
+				}
+			}
+		}
+	}, "json");
+}
+
+function loadOutSequences() {	
+	var outFlowtarget = document.getElementById("outSequence");
+	jagg.post("/site/blocks/item-add/ajax/add.jag", {
+		action : "getCustomOutSequences"
+	},
+			function(result) {
+				if (!result.error) {
+					var arr = [];
+					if (result.sequences.length == 0) {
+						var msg = "No defined sequences";
+						$('<input>').
+						attr('type', 'hidden').
+						attr('name', 'outSeq').
+						attr('id', 'outSeq').
+						attr('value', msg).
+						appendTo('#addAPIForm');
+					}else {
+						for ( var j = 0; j < result.sequences.length; j++) {
+							arr.push(result.sequences[j]);
+						}
+						for(var i=0; i<arr.length; i++){						
+							outFlowOption = new Option(result.sequences[i],	result.sequences[i]);		
+							outFlowtarget.options[i] = outFlowOption;							
+							var outSeq = outFlowOption.value;				
+							$('<input>').
+							attr('type', 'hidden').
+							attr('name', 'outSeq').
+							attr('id', 'outSeq').
+							attr('value', outSeq).
+							appendTo('#addAPIForm');
+
+						}
+					}
+				}
+			}, "json");
+}
 
 
 
