@@ -26,7 +26,7 @@ cat $resorce_dir/configs/cloud-manager-carbon.xml | sed -e "s@AF_HOST@$af_host_n
 #cp resources/configs/cartridge-config.properties $S2_SC_HOME/repository/conf/cartridge-config.properties
 #cp $resorce_dir/configs/cloud-manager-tenant-mgt.xml $S2_SC_HOME/repository/conf/tenant-mgt.xml
 cp $resorce_dir/configs/cloud-manager-stratos.xml $S2_SC_HOME/repository/conf/multitenancy/stratos.xml
-
+cp $resorce_dir/configs/cloud-services-desc.xml $S2_SC_HOME/repository/conf/multitenancy
 #mkdir $S2_SC_HOME/repository/conf/appfactory
 #cp $APPFACTORY_HOME/repository/conf/appfactory/appfactory.xml $S2_SC_HOME/repository/conf/appfactory
 

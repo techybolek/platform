@@ -41,7 +41,6 @@
        services deployed on this server instance.
     -->
     <HostName>AF_HOST</HostName>
-    <EnableEmailUserName>true</EnableEmailUserName>	
     <!--
     Host name to be used for the Carbon management console
     -->
