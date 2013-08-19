@@ -283,20 +283,22 @@ public class APIGatewayManager {
 	                                                                                         throws APIManagementException {
 		
 		try {
-			SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
-			if (api.getInSequence() != null) {				
-				String inSequence = APIUtil.getSequenceExtensionName(api)+ "--In";
-				if (seqClient.getSequence(inSequence,tenantDomain) != null) {
-					seqClient.deleteSequence(inSequence,tenantDomain);
-					deployCustomSequences(api, tenantDomain, environment);
+			if (api.getInSequence() != null || api.getOutSequence() != null) {
+				SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
+				if (api.getInSequence() != null) {
+					String inSequence = APIUtil.getSequenceExtensionName(api) + "--In";
+					if (seqClient.getSequence(inSequence, tenantDomain) != null) {
+						seqClient.deleteSequence(inSequence, tenantDomain);
+						deployCustomSequences(api, tenantDomain, environment);
+					}
 				}
-			}
-			if (api.getOutSequence() != null) {
-			
-				String outSequence = APIUtil.getSequenceExtensionName(api)+ "--Out";
-				if (seqClient.getSequence(outSequence,tenantDomain) != null) {
-					seqClient.deleteSequence(outSequence,tenantDomain);
-					deployCustomSequences(api, tenantDomain, environment);
+				if (api.getOutSequence() != null) {
+
+					String outSequence = APIUtil.getSequenceExtensionName(api) + "--Out";
+					if (seqClient.getSequence(outSequence, tenantDomain) != null) {
+						seqClient.deleteSequence(outSequence, tenantDomain);
+						deployCustomSequences(api, tenantDomain, environment);
+					}
 				}
 			}
 		} catch (Exception e) {
