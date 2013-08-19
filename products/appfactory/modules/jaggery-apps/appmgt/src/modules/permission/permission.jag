@@ -17,6 +17,10 @@ var log = new Log();
 
    var checkUserActionPermission =function (applicationKey, permission) {
        var username = checkUserAuthenticated();
+
+       return true;
+// Removing since we don't have role based views
+/*
        var appFactoryCarbonUtilModule = require("carbonUtil");
        var appFactoryCarbonUtil = new appFactoryCarbonUtilModule.CarbonUserRealm();
 
@@ -26,9 +30,15 @@ var log = new Log();
             log.error(errorMessage);
             throw errorMessage;
        }
+*/
     };
     var checkAdminPermission =function () {
        var username = checkUserAuthenticated();
+
+       return true;
+// Removing since we don't have role based views
+/*
+
        var appFactoryCarbonUtilModule = require("carbonUtil");
        var appFactoryCarbonUtil = new appFactoryCarbonUtilModule.CarbonUserRealm();
        var isUserAuthorized = appFactoryCarbonUtil.isUserAuthorized(userName, PERMISSION_ADMIN , PERMISSION_EXECUTE);
@@ -37,6 +47,7 @@ var log = new Log();
             log.error(errorMessage);
             throw errorMessage;
        }
+*/
     };
    var isUserAccessGranted =function (applicationKey, permission) {
         var username;
@@ -46,9 +57,14 @@ var log = new Log();
             return false;
         }
 
+       return true;
+// Removing since we don't have role based views
+/*
+
        var appFactoryCarbonUtilModule = require("carbonUtil");
        var appFactoryCarbonUtil = new appFactoryCarbonUtilModule.CarbonUserRealm();
        return appFactoryCarbonUtil.isUserAuthorized(username + '@' + applicationKey, permission , PERMISSION_EXECUTE);
+*/
     };
     var isUserAccessGrantedForPlatform =function (permission) {
         var username;
@@ -57,9 +73,14 @@ var log = new Log();
         }catch (e){
             return false;
         }
+
+       return true;
+// Removing since we don't have role based views
+/*
        var appFactoryCarbonUtilModule = require("carbonUtil");
        var appFactoryCarbonUtil = new appFactoryCarbonUtilModule.CarbonUserRealm();
        return appFactoryCarbonUtil.isUserAuthorized(username , permission , PERMISSION_EXECUTE);
+*/
     };
     var hasPermissionToStage =function (applicationKey, stage) {
         var username;
@@ -69,10 +90,14 @@ var log = new Log();
             return false;
         }
 
+       return true;
+// Removing since we don't have role based views
+/*
        var appFactoryCarbonUtilModule = require("carbonUtil");
        var appFactoryCarbonUtil = new appFactoryCarbonUtilModule.CarbonUserRealm();
        var permission = PERMISSION_VISIBILITY_STAGE + stage;
 
        return appFactoryCarbonUtil.isUserAuthorized(username + '@' + applicationKey, permission , PERMISSION_EXECUTE);
+*/
     };
 %>
