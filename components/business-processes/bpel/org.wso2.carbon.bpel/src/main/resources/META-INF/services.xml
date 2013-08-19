@@ -17,6 +17,9 @@
  -->
 <serviceGroup>
     <service name="ProcessManagementService">
+        <transports> 
+           <transport>https</transport> 
+        </transports>
         <messageReceivers>
             <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
                              class="org.wso2.carbon.bpel.skeleton.ode.integration.mgt.services.ProcessManagementServiceMessageReceiverInOut"/>
@@ -155,6 +158,9 @@
     </service>
 
     <service name="BPELPackageManagementService">
+        <transports> 
+           <transport>https</transport> 
+        </transports>
         <messageReceivers>
             <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
                              class="org.wso2.carbon.bpel.skeleton.ode.integration.mgt.services.BPELPackageManagementServiceMessageReceiverInOut"/>
@@ -226,6 +232,9 @@
         </operation>
     </service>
     <service name="InstanceManagementService">
+        <transports> 
+           <transport>https</transport> 
+        </transports>
         <messageReceivers>
             <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
                              class="org.wso2.carbon.bpel.skeleton.ode.integration.mgt.services.InstanceManagementServiceMessageReceiverInOut"/>
