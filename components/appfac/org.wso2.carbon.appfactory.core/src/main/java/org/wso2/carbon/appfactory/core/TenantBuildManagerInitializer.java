@@ -17,7 +17,7 @@ package org.wso2.carbon.appfactory.core;
 
 /**
  * Implementation of this is used to initialize a Build Manager for a tenant by
- * {@link org.wso2.carbon.appfactory.core.services.AppFactoryTenantToolInitializerService}
+ * {@link org.wso2.carbon.appfactory.core.services.AppFactoryTenantInfraStructureInitializerService}
  */
 public interface TenantBuildManagerInitializer {
     /**

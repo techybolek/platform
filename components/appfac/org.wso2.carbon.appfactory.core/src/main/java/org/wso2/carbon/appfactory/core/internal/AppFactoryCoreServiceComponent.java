@@ -25,8 +25,10 @@ import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.common.util.AppFactoryUtil;
 import org.wso2.carbon.appfactory.core.*;
 import org.wso2.carbon.appfactory.core.util.DependencyUtil;
+import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -35,80 +37,84 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
  * @scr.component name=
- *                "org.wso2.carbon.appfactory.core.internal.AppFactoryCoreServiceComponent"
- *                immediate="true"
+ * "org.wso2.carbon.appfactory.core.internal.AppFactoryCoreServiceComponent"
+ * immediate="true"
  * @scr.reference name="appfactory.maven"
- *                interface="org.wso2.carbon.appfactory.core.BuildDriver"
- *                cardinality="1..1" policy="dynamic" bind="setBuildDriver"
- *                unbind="unsetBuildDriver"
+ * interface="org.wso2.carbon.appfactory.core.BuildDriver"
+ * cardinality="1..1" policy="dynamic" bind="setBuildDriver"
+ * unbind="unsetBuildDriver"
  * @scr.reference name="appfactory.svn"
- *                interface="org.wso2.carbon.appfactory.core.RevisionControlDriver"
- *                cardinality="1..1" policy="dynamic"
- *                bind="setRevisionControlDriver"
- *                unbind="unsetRevisionControlDriver"
+ * interface="org.wso2.carbon.appfactory.core.RevisionControlDriver"
+ * cardinality="1..1" policy="dynamic"
+ * bind="setRevisionControlDriver"
+ * unbind="unsetRevisionControlDriver"
  * @scr.reference name="appfactory.configuration"
- *                interface="org.wso2.carbon.appfactory.common.AppFactoryConfiguration"
- *                cardinality="1..1" policy="dynamic"
- *                bind="setAppFactoryConfiguration"
- *                unbind="unsetAppFactoryConfiguration"
+ * interface="org.wso2.carbon.appfactory.common.AppFactoryConfiguration"
+ * cardinality="1..1" policy="dynamic"
+ * bind="setAppFactoryConfiguration"
+ * unbind="unsetAppFactoryConfiguration"
  * @scr.reference name="appfactory.artifact"
- *                interface="org.wso2.carbon.appfactory.core.ArtifactStorage"
- *                cardinality="1..1" policy="dynamic"
- *                bind="setArtifactStorage"
- *                unbind="unsetArtifactStorage"
+ * interface="org.wso2.carbon.appfactory.core.ArtifactStorage"
+ * cardinality="1..1" policy="dynamic"
+ * bind="setArtifactStorage"
+ * unbind="unsetArtifactStorage"
  * @scr.reference name="appfactory.cidriver"
- *                interface="org.wso2.carbon.appfactory.core.ContinuousIntegrationSystemDriver"
- *                cardinality="0..1" policy="dynamic"
- *                bind="setContinuousIntegrationSystemDriver"
- *                unbind="unsetContinuousIntegrationSystemDriver"
+ * interface="org.wso2.carbon.appfactory.core.ContinuousIntegrationSystemDriver"
+ * cardinality="0..1" policy="dynamic"
+ * bind="setContinuousIntegrationSystemDriver"
+ * unbind="unsetContinuousIntegrationSystemDriver"
  * @scr.reference name="registry.service"
- *                interface="org.wso2.carbon.registry.core.service.RegistryService"
- *                cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
+ * interface="org.wso2.carbon.registry.core.service.RegistryService"
+ * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
  * @scr.reference name="appfactory.storage"
- *                interface="org.wso2.carbon.appfactory.core.Storage"
- *                cardinality="0..1" policy="dynamic"
- *                bind="setStorage"
- *                unbind="unsetStorage"
+ * interface="org.wso2.carbon.appfactory.core.Storage"
+ * cardinality="0..1" policy="dynamic"
+ * bind="setStorage"
+ * unbind="unsetStorage"
  * @scr.reference name="user.realmservice.default"
- *                interface="org.wso2.carbon.user.core.service.RealmService"
- *                cardinality="1..1" policy="dynamic"
- *                bind="setRealmService"
- *                unbind="unsetRealmService"
+ * interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic"
+ * bind="setRealmService"
+ * unbind="unsetRealmService"
  * @scr.reference name="registry.loader.default"
- *                interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader"
- *                cardinality="1..1"
- *                policy="dynamic"
- *                bind="setRegistryLoader"
- *                unbind="unsetRegistryLoader"
+ * interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setRegistryLoader"
+ * unbind="unsetRegistryLoader"
  * @scr.reference name="config.context.service"
- *                interface="org.wso2.carbon.utils.ConfigurationContextService"
- *                cardinality="1..1" policy="dynamic"
- *                bind="setConfigurationContextService"
- *                unbind="unsetConfigurationContextService"
+ * interface="org.wso2.carbon.utils.ConfigurationContextService"
+ * cardinality="1..1" policy="dynamic"
+ * bind="setConfigurationContextService"
+ * unbind="unsetConfigurationContextService"
  * @scr.reference name="repository.initializer"
- *                interface="org.wso2.carbon.appfactory.core.TenantRepositoryManagerInitializer"
- *                cardinality="1..n" policy="dynamic"
- *                bind="setTenantRepositoryManagerInitializer"
- *                unbind="unsetTenantRepositoryManagerInitializer"
- * @scr.reference  name="build.initializer"
- *                interface="org.wso2.carbon.appfactory.core.TenantBuildManagerInitializer"
- *                cardinality="1..n" policy="dynamic"
- *                bind="setTenantBuildManagerInitializer"
- *                unbind="unsetTenantBuildManagerInitializer"
+ * interface="org.wso2.carbon.appfactory.core.TenantRepositoryManagerInitializer"
+ * cardinality="1..n" policy="dynamic"
+ * bind="setTenantRepositoryManagerInitializer"
+ * unbind="unsetTenantRepositoryManagerInitializer"
+ * @scr.reference name="build.initializer"
+ * interface="org.wso2.carbon.appfactory.core.TenantBuildManagerInitializer"
+ * cardinality="1..n" policy="dynamic"
+ * bind="setTenantBuildManagerInitializer"
+ * unbind="unsetTenantBuildManagerInitializer"
+ * @scr.reference name="ntask.component"
+ * interface="org.wso2.carbon.ntask.core.service.TaskService"
+ * cardinality="1..1" policy="dynamic" bind="setTaskService"
+ * unbind="unsetTaskService"
  */
 public class AppFactoryCoreServiceComponent {
 
-	private static final Log log = LogFactory
-			.getLog(AppFactoryCoreServiceComponent.class);
+    private static final Log log = LogFactory
+            .getLog(AppFactoryCoreServiceComponent.class);
     private static BundleContext bundleContext;
-    
+
     protected void activate(ComponentContext context) {
-        AppFactoryCoreServiceComponent. bundleContext = context.getBundleContext();
+        AppFactoryCoreServiceComponent.bundleContext = context.getBundleContext();
         try {
 
             DependencyUtil.createDependenciesMountPoints();
         } catch (AppFactoryException e) {
-           log.error("Error while creating mount points for dependency management");
+            log.error("Error while creating mount points for dependency management");
         }
 
         try {
@@ -120,10 +126,10 @@ public class AppFactoryCoreServiceComponent {
 
             AppFactoryConfiguration config = AppFactoryUtil.getAppfactoryConfiguration();
             String[] permissionList = config.getProperties("Permissions.Permission");
-            for(String permission : permissionList){
-              //  System.out.println("********************permission: " +  permission);
-                String permissionName =config.getFirstProperty("Permissions.Permission." +permission);
-              //  System.out.println("********************permissionName: " +  permissionName);
+            for (String permission : permissionList) {
+                //  System.out.println("********************permission: " +  permission);
+                String permissionName = config.getFirstProperty("Permissions.Permission." + permission);
+                //  System.out.println("********************permissionName: " +  permissionName);
                 resource = registry.newCollection();
                 resource.setProperty(UserMgtConstants.DISPLAY_NAME, permissionName);
                 registry.put(permission, resource);
@@ -153,29 +159,29 @@ public class AppFactoryCoreServiceComponent {
 
     }
 
-	protected void deactivate(ComponentContext context) {
-		if (log.isDebugEnabled()) {
-			log.debug("Appfactory common bundle is deactivated");
-		}
-	}
+    protected void deactivate(ComponentContext context) {
+        if (log.isDebugEnabled()) {
+            log.debug("Appfactory common bundle is deactivated");
+        }
+    }
 
-	protected void unsetBuildDriver(BuildDriver buildDriver) {
-		ServiceHolder.setBuildDriver(null);
-	}
+    protected void unsetBuildDriver(BuildDriver buildDriver) {
+        ServiceHolder.setBuildDriver(null);
+    }
 
-	protected void setBuildDriver(BuildDriver buildDriver) {
-		ServiceHolder.setBuildDriver(buildDriver);
-	}
+    protected void setBuildDriver(BuildDriver buildDriver) {
+        ServiceHolder.setBuildDriver(buildDriver);
+    }
 
-	protected void unsetRevisionControlDriver(
-			RevisionControlDriver revisionControlDriver) {
-		ServiceHolder.setRevisionControlDriver(null);
-	}
+    protected void unsetRevisionControlDriver(
+            RevisionControlDriver revisionControlDriver) {
+        ServiceHolder.setRevisionControlDriver(null);
+    }
 
-	protected void setRevisionControlDriver(
-			RevisionControlDriver revisionControlDriver) {
-		ServiceHolder.setRevisionControlDriver(revisionControlDriver);
-	}
+    protected void setRevisionControlDriver(
+            RevisionControlDriver revisionControlDriver) {
+        ServiceHolder.setRevisionControlDriver(revisionControlDriver);
+    }
 
     protected void unsetArtifactStorage(ArtifactStorage artifactStorage) {
         ServiceHolder.setArtifactStorage(null);
@@ -208,6 +214,7 @@ public class AppFactoryCoreServiceComponent {
     public static void setBundleContext(BundleContext bundleContext) {
         AppFactoryCoreServiceComponent.bundleContext = bundleContext;
     }
+
     protected void unsetContinuousIntegrationSystemDriver(ContinuousIntegrationSystemDriver driver) {
         ServiceHolder.setContinuousIntegrationSystemDriver(null);
     }
@@ -215,6 +222,7 @@ public class AppFactoryCoreServiceComponent {
     protected void setContinuousIntegrationSystemDriver(ContinuousIntegrationSystemDriver driver) {
         ServiceHolder.setContinuousIntegrationSystemDriver(driver);
     }
+
     protected void setRegistryService(RegistryService registryService) {
         if (registryService != null && log.isDebugEnabled()) {
             log.debug("Registry service initialized");
@@ -244,12 +252,15 @@ public class AppFactoryCoreServiceComponent {
     protected void unsetRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
         ServiceHolder.setTenantRegistryLoader(null);
     }
-    protected void setConfigurationContextService(ConfigurationContextService configurationContextService){
+
+    protected void setConfigurationContextService(ConfigurationContextService configurationContextService) {
         ServiceHolder.getInstance().setConfigContextService(configurationContextService);
     }
-    protected void unsetConfigurationContextService(ConfigurationContextService configurationContextService){
+
+    protected void unsetConfigurationContextService(ConfigurationContextService configurationContextService) {
         ServiceHolder.getInstance().setConfigContextService(null);
     }
+
     protected void setTenantRepositoryManagerInitializer(TenantRepositoryManagerInitializer tenantRepositoryManagerInitializer) {
         ServiceHolder.getInstance().addTenantRepositoryManagerInitializer(tenantRepositoryManagerInitializer);
     }
@@ -257,12 +268,22 @@ public class AppFactoryCoreServiceComponent {
     protected void unsetTenantRepositoryManagerInitializer(TenantRepositoryManagerInitializer tenantRepositoryManagerInitializer) {
         //ServiceHolder.getInstance().setConfigContextService(null);
     }
+
     protected void setTenantBuildManagerInitializer(TenantBuildManagerInitializer tenantBuildManagerInitializer) {
         ServiceHolder.getInstance().addTenantBuildManagerInitializer(tenantBuildManagerInitializer);
     }
 
     protected void unsetTenantBuildManagerInitializer(TenantBuildManagerInitializer tenantBuildManagerInitializer) {
         //ServiceHolder.getInstance().setConfigContextService(null);
+    }
+
+    protected void setTaskService(TaskService taskService) throws RegistryException {
+        ServiceHolder.getInstance().setTaskService(taskService);
+
+    }
+
+    protected void unsetTaskService(TaskService taskService) {
+        ServiceHolder.getInstance().setTaskService(null);
     }
 
 }

@@ -18,6 +18,7 @@ package org.wso2.carbon.appfactory.core.internal;
 
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.core.*;
+import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -37,15 +38,15 @@ public class ServiceHolder {
     private static RealmService realmService;
     private static TenantRegistryLoader tenantRegistryLoader;
     private ConfigurationContextService configContextService;
-    private static List<TenantRepositoryManagerInitializer> tenantRepositoryManagerInitializerList=new ArrayList<TenantRepositoryManagerInitializer>();
-    private static List<TenantBuildManagerInitializer> tenantBuildManagerInitializerList=new ArrayList<TenantBuildManagerInitializer>();
-
+    private static List<TenantRepositoryManagerInitializer> tenantRepositoryManagerInitializerList = new ArrayList<TenantRepositoryManagerInitializer>();
+    private static List<TenantBuildManagerInitializer> tenantBuildManagerInitializerList = new ArrayList<TenantBuildManagerInitializer>();
+    private static TaskService taskService;
     private static final ServiceHolder instance = new ServiceHolder();
 
     private ServiceHolder() {
     }
 
-    public static ServiceHolder getInstance(){
+    public static ServiceHolder getInstance() {
         return instance;
     }
 
@@ -107,6 +108,7 @@ public class ServiceHolder {
     public static void setRegistryService(RegistryService registryService) {
         ServiceHolder.registryService = registryService;
     }
+
     public static RealmService getRealmService() {
         return realmService;
     }
@@ -131,18 +133,28 @@ public class ServiceHolder {
     public void setConfigContextService(ConfigurationContextService configContextService) {
         this.configContextService = configContextService;
     }
-    public void addTenantRepositoryManagerInitializer(TenantRepositoryManagerInitializer initializer){
+
+    public void addTenantRepositoryManagerInitializer(TenantRepositoryManagerInitializer initializer) {
         tenantRepositoryManagerInitializerList.add(initializer);
     }
-    public void addTenantBuildManagerInitializer(TenantBuildManagerInitializer initializer){
+
+    public void addTenantBuildManagerInitializer(TenantBuildManagerInitializer initializer) {
         tenantBuildManagerInitializerList.add(initializer);
     }
 
-    public  List<TenantRepositoryManagerInitializer> getTenantRepositoryManagerInitializerList() {
+    public List<TenantRepositoryManagerInitializer> getTenantRepositoryManagerInitializerList() {
         return tenantRepositoryManagerInitializerList;
     }
 
     public List<TenantBuildManagerInitializer> getTenantBuildManagerInitializerList() {
         return tenantBuildManagerInitializerList;
+    }
+
+    public TaskService getTaskService() {
+        return taskService;
+    }
+
+    public void setTaskService(TaskService taskService) {
+        ServiceHolder.taskService = taskService;
     }
 }
