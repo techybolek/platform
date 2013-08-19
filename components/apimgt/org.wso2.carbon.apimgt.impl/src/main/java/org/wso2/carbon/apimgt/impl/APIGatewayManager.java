@@ -191,36 +191,40 @@ public class APIGatewayManager {
 	                                                                                         throws APIManagementException,
 	                                                                                         AxisFault {
 
-		String direction;
-		
-		try {
-	        SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);	     
-	        PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
-	        int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+		String direction;		
+		try {        
 
-	        if (api.getInSequence() != null) {
-	        	direction = "in";
-	        	String inSeqExt = APIUtil.getSequenceExtensionName(api)+ "--In";
-	        	String inSequenceName = api.getInSequence();
-	        	OMElement inSequence = APIUtil.getCustomSequence(inSequenceName, tenantId, direction);
-	        	if (inSequence != null) {
-	        		inSequence.getAttribute(new QName("name")).setAttributeValue(inSeqExt);	        		        	
-	        		seqClient.addSequence(inSequence,tenantDomain);
-	        	}
-	        }
+	        if (api.getInSequence() != null || api.getOutSequence() != null) {
+	        	SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);	     
+		        PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
+		        int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+		        
+	            if (api.getInSequence() != null) {
+		            direction = "in";
+		            String inSeqExt = APIUtil.getSequenceExtensionName(api) + "--In";
+		            String inSequenceName = api.getInSequence();
+		            OMElement inSequence =
+		                                   APIUtil.getCustomSequence(inSequenceName, tenantId,
+		                                                             direction);
+		            if (inSequence != null) {
+			            inSequence.getAttribute(new QName("name")).setAttributeValue(inSeqExt);
+			            seqClient.addSequence(inSequence, tenantDomain);
+		            }
+	            }
+	            if (api.getOutSequence() != null) {
+		            direction = "out";
+		            String outSeqExt = APIUtil.getSequenceExtensionName(api) + "--Out";
+		            String outSequenceName = api.getOutSequence();
+		            OMElement outSequence =
+		                                    APIUtil.getCustomSequence(outSequenceName, tenantId,
+		                                                              direction);
+		            if (outSequence != null) {
+			            outSequence.getAttribute(new QName("name")).setAttributeValue(outSeqExt);
+			            seqClient.addSequence(outSequence, tenantDomain);
 
-	        
-	        if (api.getOutSequence() != null) {	    
-	        	direction = "out";
-	        	String outSeqExt = APIUtil.getSequenceExtensionName(api)+ "--Out";
-	        	String outSequenceName = api.getOutSequence();
-	        	OMElement outSequence = APIUtil.getCustomSequence(outSequenceName, tenantId, direction);
-	        	if (outSequence != null) {
-	        		outSequence.getAttribute(new QName("name")).setAttributeValue(outSeqExt);	        		        		
-	        		seqClient.addSequence(outSequence ,tenantDomain);
-
-	        	}
-	        }
+		            }
+	            }
+            }
         } catch (Exception e) {
         	String msg = "Error in deploying the sequence to gateway";
 			log.error(msg, e);
