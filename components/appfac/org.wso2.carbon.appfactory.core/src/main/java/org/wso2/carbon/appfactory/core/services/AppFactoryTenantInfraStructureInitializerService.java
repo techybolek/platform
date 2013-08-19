@@ -35,8 +35,8 @@ import java.util.Map;
  * Service used to initialize all the 3rd party tools on tenant creation
  * .
  */
-public class AppFactoryTenantToolInitializerService extends AbstractAdmin {
-    private static final Log log = LogFactory.getLog(AppFactoryTenantToolInitializerService.class);
+public class AppFactoryTenantInfraStructureInitializerService extends AbstractAdmin {
+    private static final Log log = LogFactory.getLog(AppFactoryTenantInfraStructureInitializerService.class);
     public static final String APP_FACTORY_TASK_MANAGER = "appfactory.task.manager";
     public static final String REPOSITORY_INITIALIZER_TASK = "org.wso2.carbon.appfactory.core.task" +
             ".AppFactoryTenantRepositoryInitializerTask";
@@ -47,7 +47,7 @@ public class AppFactoryTenantToolInitializerService extends AbstractAdmin {
     private String ENVIRONMENT = "ApplicationDeployment.DeploymentStage";
     private TaskManager taskManager;
 
-    public AppFactoryTenantToolInitializerService() throws AppFactoryException {
+    public AppFactoryTenantInfraStructureInitializerService() throws AppFactoryException {
         try {
             taskManager = ServiceHolder.getInstance().getTaskService().getTaskManager
                     (APP_FACTORY_TASK_MANAGER);
@@ -73,7 +73,7 @@ public class AppFactoryTenantToolInitializerService extends AbstractAdmin {
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(AppFactoryTenantRepositoryInitializerTask.TENANT_DOMAIN, tenantDomain);
         properties.put(AppFactoryTenantRepositoryInitializerTask.TENANT_USAGE_PLAN, usagePlan);
-        TaskInfo taskInfo = new TaskInfo(taskName, AppFactoryTenantToolInitializerService.REPOSITORY_INITIALIZER_TASK,
+        TaskInfo taskInfo = new TaskInfo(taskName, AppFactoryTenantInfraStructureInitializerService.REPOSITORY_INITIALIZER_TASK,
                 properties, triggerInfo);
         try {
             taskManager.registerTask(taskInfo);
@@ -107,7 +107,7 @@ public class AppFactoryTenantToolInitializerService extends AbstractAdmin {
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(AppFactoryTenantRepositoryInitializerTask.TENANT_DOMAIN, tenantDomain);
         properties.put(AppFactoryTenantRepositoryInitializerTask.TENANT_USAGE_PLAN, usagePlan);
-        TaskInfo taskInfo = new TaskInfo(taskName, AppFactoryTenantToolInitializerService.BUILD_MANAGER_INITIALIZER_TASK,
+        TaskInfo taskInfo = new TaskInfo(taskName, AppFactoryTenantInfraStructureInitializerService.BUILD_MANAGER_INITIALIZER_TASK,
                 properties, triggerInfo);
         try {
             taskManager.registerTask(taskInfo);
@@ -153,7 +153,7 @@ public class AppFactoryTenantToolInitializerService extends AbstractAdmin {
         properties.put(AppFactoryTenantCloudInitializerTask.ORIGINATED_SERVICE, bean.getOriginatedService());
         properties.put(AppFactoryTenantCloudInitializerTask.SERVICE_EPR, serverURL);
 
-        TaskInfo taskInfo = new TaskInfo(taskName, AppFactoryTenantToolInitializerService.CLOUD_INITIALIZER_TASK,
+        TaskInfo taskInfo = new TaskInfo(taskName, AppFactoryTenantInfraStructureInitializerService.CLOUD_INITIALIZER_TASK,
                 properties, triggerInfo);
         try {
             taskManager.registerTask(taskInfo);
