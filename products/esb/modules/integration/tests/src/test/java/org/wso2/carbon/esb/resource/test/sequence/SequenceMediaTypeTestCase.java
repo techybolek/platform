@@ -30,7 +30,7 @@ import org.wso2.carbon.automation.api.clients.sequences.SequenceAdminServiceClie
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentVariables;
 import org.wso2.carbon.registry.resource.stub.beans.xsd.MetadataBean;
-import org.wso2.carbon.sequences.stub.types.SequenceEditorException;
+import org.wso2.carbon.sequences.stub.types.SequenceAdminServiceSequenceEditorException;
 
 import java.rmi.RemoteException;
 
@@ -105,7 +105,7 @@ public class SequenceMediaTypeTestCase {
     }
 
     @AfterClass
-    public void destroy() throws SequenceEditorException, RemoteException {
+    public void destroy() throws SequenceAdminServiceSequenceEditorException, RemoteException {
         if (isDefinedSequenceExist) {
             sequenceAdminServiceClient.deleteSequence(DEFINED_SEQUENCE_NAME);
         }
