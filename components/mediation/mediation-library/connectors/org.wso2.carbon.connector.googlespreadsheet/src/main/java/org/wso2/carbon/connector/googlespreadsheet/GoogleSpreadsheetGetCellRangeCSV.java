@@ -40,12 +40,12 @@ import com.google.gdata.util.ServiceException;
 
 public class GoogleSpreadsheetGetCellRangeCSV extends AbstractConnector {
 
-	public static final String WORKSHEET_NAME = "worksheet.name";
-	public static final String SPREADSHEET_NAME = "spreadsheet.name";
-	public static final String MIN_ROW = "min.row";
-	public static final String MAX_ROW = "max.row";
-	public static final String MIN_COLUMN = "min.column";
-	public static final String MAX_COLUMN = "max.column";
+	public static final String WORKSHEET_NAME = "worksheetName";
+	public static final String SPREADSHEET_NAME = "spreadsheetName";
+	public static final String MIN_ROW = "minRow";
+	public static final String MAX_ROW = "maxRow";
+	public static final String MIN_COLUMN = "minColumn";
+	public static final String MAX_COLUMN = "maxColumn";
 	private static Log log = LogFactory
 			.getLog(GoogleSpreadsheetGetCellRangeCSV.class);
 

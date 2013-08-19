@@ -39,8 +39,8 @@ import com.google.gdata.util.ServiceException;
 
 public class GoogleSpreadsheetGetAllCellsCSV extends AbstractConnector {
 
-	public static final String WORKSHEET_NAME = "worksheet.name";
-	public static final String SPREADSHEET_NAME = "spreadsheet.name";
+	public static final String WORKSHEET_NAME = "worksheetName";
+	public static final String SPREADSHEET_NAME = "spreadsheetName";
 	private static Log log = LogFactory
 			.getLog(GoogleSpreadsheetGetAllCellsCSV.class);
 
@@ -107,7 +107,6 @@ public class GoogleSpreadsheetGetAllCellsCSV extends AbstractConnector {
 						previousRow = resultData.get(iterateCount).getCell().getRow();				        
 				}
 			}
-			//String cellNotation = "R"+resultData.get(iterateCount).getCell().getRow()+"C"+resultData.get(iterateCount).getCell().getCol();
 		 	OMElement cellId      = factory.createOMElement("text", ns);        
 	        searchResult.addChild(cellId);
 	        cellId.setText(csvBuilder.toString());

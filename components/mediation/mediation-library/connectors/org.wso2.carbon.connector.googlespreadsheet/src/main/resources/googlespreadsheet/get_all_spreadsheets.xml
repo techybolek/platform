@@ -1,4 +1,4 @@
-<template xmlns="http://ws.apache.org/ns/synapse" name="get_all_spreadsheets">	
+<template xmlns="http://ws.apache.org/ns/synapse" name="getAllSpreadsheets">	
 	<sequence>
 		<log level="custom">
 			<property name="FLW" value="GoogleSpreadsheet : Get All Spreadsheets"/>			

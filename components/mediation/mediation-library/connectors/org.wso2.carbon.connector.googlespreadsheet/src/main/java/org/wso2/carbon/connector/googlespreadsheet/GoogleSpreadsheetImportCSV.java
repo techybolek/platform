@@ -39,11 +39,11 @@ import com.google.gdata.util.ServiceException;
 
 public class GoogleSpreadsheetImportCSV extends AbstractConnector {
 
-	public static final String WORKSHEET_NAME = "worksheet.name";
-	public static final String SPREADSHEET_NAME = "spreadsheet.name";
-	public static final String CSV_NAME = "csv.name";
-	public static final String BATCH_ENABLE = "batch.enable";
-	public static final String BATCH_SIZE = "batch.size";
+	public static final String WORKSHEET_NAME = "worksheetName";
+	public static final String SPREADSHEET_NAME = "spreadsheetName";
+	public static final String FILE_PATH = "filePath";
+	public static final String BATCH_ENABLE = "batchEnable";
+	public static final String BATCH_SIZE = "batchSize";
 	
 	private static Log log = LogFactory
 			.getLog(GoogleSpreadsheetImportCSV.class);
@@ -54,8 +54,8 @@ public class GoogleSpreadsheetImportCSV extends AbstractConnector {
 					.lookupFunctionParam(messageContext, WORKSHEET_NAME);
 			String spreadsheetName = GoogleSpreadsheetUtils
 					.lookupFunctionParam(messageContext, SPREADSHEET_NAME);
-			String csvName = GoogleSpreadsheetUtils
-					.lookupFunctionParam(messageContext, CSV_NAME);
+			String filePath = GoogleSpreadsheetUtils
+					.lookupFunctionParam(messageContext, FILE_PATH);
 			String batchEnable = GoogleSpreadsheetUtils
 					.lookupFunctionParam(messageContext, BATCH_ENABLE);
 			String batchSize = GoogleSpreadsheetUtils
@@ -63,7 +63,7 @@ public class GoogleSpreadsheetImportCSV extends AbstractConnector {
 			
 			if (worksheetName == null || "".equals(worksheetName.trim())
 					|| spreadsheetName == null
-					|| "".equals(spreadsheetName.trim()) || csvName == null || "".equals(csvName.trim())) {
+					|| "".equals(spreadsheetName.trim())) {
 				log.info("Please make sure you have given a valid input for the worksheet, spreadsheet and csv name");
 				return;
 			}
@@ -100,7 +100,7 @@ public class GoogleSpreadsheetImportCSV extends AbstractConnector {
 			    }
 			   
 			    
-			    if (csvName.equalsIgnoreCase("MessageContext")) {
+			    if (filePath == null) {
 
 					if (messageContext.getEnvelope().getBody().getFirstElement() != null) {
 						String data = messageContext.getEnvelope().getBody()
@@ -146,7 +146,7 @@ public class GoogleSpreadsheetImportCSV extends AbstractConnector {
 
 				} else {
 
-					BufferedReader br = new BufferedReader(new FileReader(csvName));
+					BufferedReader br = new BufferedReader(new FileReader(filePath));
 					String line;
 					int rowNumber = 1;
 					if(batchSizeInt > 0) {
@@ -180,7 +180,7 @@ public class GoogleSpreadsheetImportCSV extends AbstractConnector {
 				
 			} else {			
 
-			if (csvName.equalsIgnoreCase("MessageContext")) {
+			if (filePath == null) {
 
 				if (messageContext.getEnvelope().getBody().getFirstElement() != null) {
 					String data = messageContext.getEnvelope().getBody()
@@ -207,7 +207,7 @@ public class GoogleSpreadsheetImportCSV extends AbstractConnector {
 
 			} else {
 
-				BufferedReader br = new BufferedReader(new FileReader(csvName));
+				BufferedReader br = new BufferedReader(new FileReader(filePath));
 				String line;
 				int rowNumber = 1;
 				while ((line = br.readLine()) != null) {

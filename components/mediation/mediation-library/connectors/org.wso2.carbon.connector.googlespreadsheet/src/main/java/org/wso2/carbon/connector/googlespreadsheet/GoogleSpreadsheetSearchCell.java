@@ -37,9 +37,9 @@ import com.google.gdata.util.ServiceException;
 
 public class GoogleSpreadsheetSearchCell extends AbstractConnector {
 
-	public static final String WORKSHEET_NAME = "worksheet.name";
-	public static final String SPREADSHEET_NAME = "spreadsheet.name";
-	public static final String SEARCH_STRING = "search.string";
+	public static final String WORKSHEET_NAME = "worksheetName";
+	public static final String SPREADSHEET_NAME = "spreadsheetName";
+	public static final String SEARCH_STRING = "searchString";
 	private static Log log = LogFactory
 			.getLog(GoogleSpreadsheetSearchCell.class);
 

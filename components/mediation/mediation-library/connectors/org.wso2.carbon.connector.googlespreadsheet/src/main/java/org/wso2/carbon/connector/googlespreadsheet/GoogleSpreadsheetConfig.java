@@ -28,10 +28,10 @@ public class GoogleSpreadsheetConfig extends AbstractConnector {
 
 	private static Log log = LogFactory.getLog(GoogleSpreadsheetConfig.class);
 
-	public static final String CONSUMER_KEY = "oauth.consumerKey";
-	public static final String CONSUMER_SECRET = "oauth.consumerSecret";
-	public static final String ACCESS_TOKEN = "oauth.accessToken";
-	public static final String ACCESS_TOKEN_SECRET = "oauth.accessTokenSecret";
+	public static final String CONSUMER_KEY = "oauthConsumerKey";
+	public static final String CONSUMER_SECRET = "oauthConsumerSecret";
+	public static final String ACCESS_TOKEN = "oauthAccessToken";
+	public static final String ACCESS_TOKEN_SECRET = "oauthAccessTokenSecret";
 
 	boolean USE_RSA_SIGNING = false;
 

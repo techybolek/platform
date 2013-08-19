@@ -32,11 +32,11 @@ import com.google.gdata.util.ServiceException;
 
 public class GoogleSpreadsheetUpdateWorksheetMetadata extends AbstractConnector {
 	
-	public static final String SPREADSHEET_NAME = "spreadsheet.name";
-	public static final String WORKSHEET_OLD_NAME = "worksheet.old.name";
-	public static final String WORKSHEET_NEW_NAME = "worksheet.new.name";
-	public static final String WORKSHEET_ROWS = "worksheet.rows";
-	public static final String WORKSHEET_COLUMNS = "worksheet.columns";
+	public static final String SPREADSHEET_NAME = "spreadsheetName";
+	public static final String WORKSHEET_OLD_NAME = "worksheetOldName";
+	public static final String WORKSHEET_NEW_NAME = "worksheetNewName";
+	public static final String WORKSHEET_ROWS = "worksheetRows";
+	public static final String WORKSHEET_COLUMNS = "worksheetColumns";
 	private int rowCount;
 	private int columnCount;
 	private static Log log = LogFactory

@@ -20,11 +20,11 @@
 
 <!-- Splitter eip library function template shipped with the Apache Synapse -->
 <template xmlns="http://ws.apache.org/ns/synapse" name="config">
-	<parameter name="oauth.consumerKey"/>
-	<parameter name="oauth.consumerSecret"/>
-	<parameter name="oauth.accessToken"/>
-	<parameter name="oauth.accessTokenSecret"/>
-	<sequence>
+	<parameter name="oauthConsumerKey"/>
+	<parameter name="oauthConsumerSecret"/>
+	<parameter name="oauthAccessToken"/>
+	<parameter name="oauthAccessTokenSecret"/>
+	<sequence>	    
 		<class name="org.wso2.carbon.connector.googlespreadsheet.GoogleSpreadsheetConfig" />
 	</sequence>
 </template>

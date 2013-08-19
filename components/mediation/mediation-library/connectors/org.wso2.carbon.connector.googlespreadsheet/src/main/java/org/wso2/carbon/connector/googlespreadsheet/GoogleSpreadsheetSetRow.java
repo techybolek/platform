@@ -35,10 +35,10 @@ import com.google.gdata.util.ServiceException;
 
 public class GoogleSpreadsheetSetRow extends AbstractConnector {
 
-	public static final String WORKSHEET_NAME = "worksheet.name";
-	public static final String SPREADSHEET_NAME = "spreadsheet.name";
-	public static final String ROW_ID = "row.id";
-	public static final String ROW_DATA = "row.data";
+	public static final String WORKSHEET_NAME = "worksheetName";
+	public static final String SPREADSHEET_NAME = "spreadsheetName";
+	public static final String ROW_ID = "rowId";
+	public static final String ROW_DATA = "rowData";
 	
 	private static Log log = LogFactory
 			.getLog(GoogleSpreadsheetSetRow.class);

@@ -38,7 +38,7 @@ import com.google.gdata.util.ServiceException;
 public class GoogleSpreadsheetGetAllWorksheets extends AbstractConnector {
 
 	
-	public static final String SPREADSHEET_NAME = "spreadsheet.name";
+	public static final String SPREADSHEET_NAME = "spreadsheetName";
 	private static Log log = LogFactory
 			.getLog(GoogleSpreadsheetSearchCell.class);
 
