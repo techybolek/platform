@@ -42,7 +42,7 @@ import org.wso2.carbon.endpoint.stub.types.EndpointAdminEndpointAdminException;
 import org.wso2.carbon.localentry.stub.types.LocalEntryAdminException;
 import org.wso2.carbon.proxyadmin.stub.ProxyServiceAdminProxyAdminException;
 import org.wso2.carbon.rest.api.stub.RestApiAdminAPIException;
-import org.wso2.carbon.sequences.stub.types.SequenceEditorException;
+import org.wso2.carbon.sequences.stub.types.SequenceAdminServiceSequenceEditorException;
 import org.wso2.carbon.task.stub.TaskManagementException;
 
 import javax.servlet.ServletException;
@@ -580,12 +580,12 @@ public class ESBTestCaseUtils {
      * @param sessionCookie
      * @param messageProcessorName
      * @return
-     * @throws SequenceEditorException
+     * @throws SequenceAdminServiceSequenceEditorException
      * @throws RemoteException
      */
     public boolean isMessageProcessorDeployed(String backEndUrl, String sessionCookie,
                                               String messageProcessorName)
-            throws SequenceEditorException, RemoteException {
+            throws SequenceAdminServiceSequenceEditorException, RemoteException {
         MessageProcessorClient messageProcessorClient = new MessageProcessorClient(backEndUrl, sessionCookie);
         log.info("waiting " + SERVICE_DEPLOYMENT_DELAY + " millis for Message Processor " + messageProcessorName);
         boolean isMessageStoreExist = false;
@@ -620,11 +620,11 @@ public class ESBTestCaseUtils {
      * @param sessionCookie
      * @param sequenceName
      * @return
-     * @throws SequenceEditorException
+     * @throws SequenceAdminServiceSequenceEditorException
      * @throws RemoteException
      */
     public boolean isSequenceDeployed(String backEndUrl, String sessionCookie, String sequenceName)
-            throws SequenceEditorException, RemoteException {
+            throws SequenceAdminServiceSequenceEditorException, RemoteException {
         SequenceAdminServiceClient sequenceAdminServiceClient = new SequenceAdminServiceClient(backEndUrl,
                                                                                                sessionCookie);
         log.info("waiting " + SERVICE_DEPLOYMENT_DELAY + " millis for Sequence " + sequenceName);
@@ -660,12 +660,12 @@ public class ESBTestCaseUtils {
      * @param sessionCookie
      * @param messageStoreName
      * @return
-     * @throws SequenceEditorException
+     * @throws SequenceAdminServiceSequenceEditorException
      * @throws RemoteException
      */
     public boolean isMessageStoreDeployed(String backEndUrl, String sessionCookie,
                                           String messageStoreName)
-            throws SequenceEditorException, RemoteException {
+            throws SequenceAdminServiceSequenceEditorException, RemoteException {
         MessageStoreAdminClient messageStoreAdminClient = new MessageStoreAdminClient(backEndUrl, sessionCookie);
         log.info("waiting " + SERVICE_DEPLOYMENT_DELAY + " millis for Message Store " + messageStoreName);
         boolean isMessageStoreExist = false;
@@ -895,11 +895,11 @@ public class ESBTestCaseUtils {
      * @param sessionCookie
      * @param sequenceName
      * @return
-     * @throws SequenceEditorException
+     * @throws SequenceAdminServiceSequenceEditorException
      * @throws RemoteException
      */
     public boolean isSequenceExist(String backEndUrl, String sessionCookie, String sequenceName)
-            throws SequenceEditorException, RemoteException {
+            throws SequenceAdminServiceSequenceEditorException, RemoteException {
         SequenceAdminServiceClient sequenceAdminServiceClient = new SequenceAdminServiceClient(backEndUrl,
                                                                                                sessionCookie);
         String[] sequences = sequenceAdminServiceClient.getSequences();
@@ -1044,11 +1044,11 @@ public class ESBTestCaseUtils {
      * @param backEndUrl
      * @param sessionCookie
      * @param sequenceName
-     * @throws SequenceEditorException
+     * @throws SequenceAdminServiceSequenceEditorException
      * @throws RemoteException
      */
     public void deleteSequence(String backEndUrl, String sessionCookie, String sequenceName)
-            throws SequenceEditorException, RemoteException {
+            throws SequenceAdminServiceSequenceEditorException, RemoteException {
         SequenceAdminServiceClient sequenceAdminServiceClient = new SequenceAdminServiceClient(backEndUrl,
                                                                                                sessionCookie);
         sequenceAdminServiceClient.deleteSequence(sequenceName);
@@ -1063,7 +1063,7 @@ public class ESBTestCaseUtils {
      * @throws RemoteException
      */
     public void deleteMessageStore(String backEndUrl, String sessionCookie, String messageStore)
-            throws RemoteException, SequenceEditorException {
+            throws RemoteException, SequenceAdminServiceSequenceEditorException {
         MessageStoreAdminClient messageStoreAdminClient = new MessageStoreAdminClient(backEndUrl, sessionCookie);
         messageStoreAdminClient.deleteMessageStore(messageStore);
         Assert.assertTrue(isMessageStoreUnDeployed(backEndUrl, sessionCookie, messageStore), "Message Store undeployment failed");
@@ -1077,7 +1077,7 @@ public class ESBTestCaseUtils {
      */
     public void deleteMessageProcessor(String backEndUrl, String sessionCookie,
                                        String messageProcessor)
-            throws RemoteException, SequenceEditorException {
+            throws RemoteException, SequenceAdminServiceSequenceEditorException {
         MessageProcessorClient messageProcessorClient = new MessageProcessorClient(backEndUrl, sessionCookie);
         messageProcessorClient.deleteMessageProcessor(messageProcessor);
         Assert.assertTrue(isMessageProcessorUnDeployed(backEndUrl, sessionCookie, messageProcessor), "Message Processor undeployment failed");
@@ -1085,7 +1085,7 @@ public class ESBTestCaseUtils {
 
     public void deleteEndpointTemplate(String backEndUrl, String sessionCookie,
                                        String endpointTemplate)
-            throws RemoteException, SequenceEditorException, EndpointAdminEndpointAdminException {
+            throws RemoteException, SequenceAdminServiceSequenceEditorException, EndpointAdminEndpointAdminException {
 
         EndpointTemplateAdminServiceClient endpointTemplateAdminServiceClient = new EndpointTemplateAdminServiceClient(backEndUrl, sessionCookie);
         endpointTemplateAdminServiceClient.deleteEndpointTemplate(endpointTemplate);
@@ -1094,7 +1094,7 @@ public class ESBTestCaseUtils {
 
     public void deleteSequenceTemplate(String backEndUrl, String sessionCookie,
                                        String sequenceTemplateName)
-            throws RemoteException, SequenceEditorException, EndpointAdminEndpointAdminException {
+            throws RemoteException, SequenceAdminServiceSequenceEditorException, EndpointAdminEndpointAdminException {
         SequenceTemplateAdminServiceClient sequenceTemplateAdminServiceClient = new SequenceTemplateAdminServiceClient(backEndUrl, sessionCookie);
         sequenceTemplateAdminServiceClient.deleteTemplate(sequenceTemplateName);
         Assert.assertTrue(isSequenceTemplateUnDeployed(backEndUrl, sessionCookie, sequenceTemplateName), "Sequence Template undeployment failed");
@@ -1167,7 +1167,7 @@ public class ESBTestCaseUtils {
 
     public boolean isMessageStoreUnDeployed(String backEndUrl, String sessionCookie,
                                             String messageStoreName)
-            throws SequenceEditorException, RemoteException {
+            throws SequenceAdminServiceSequenceEditorException, RemoteException {
         MessageStoreAdminClient messageStoreAdminClient = new MessageStoreAdminClient(backEndUrl, sessionCookie);
         log.info("waiting " + SERVICE_DEPLOYMENT_DELAY + " millis for Undeployment Message Store " + messageStoreName);
         boolean isMessageStoreDeleted = false;
@@ -1192,7 +1192,7 @@ public class ESBTestCaseUtils {
 
     public boolean isMessageProcessorUnDeployed(String backEndUrl, String sessionCookie,
                                                 String messageProcessorName)
-            throws SequenceEditorException, RemoteException {
+            throws SequenceAdminServiceSequenceEditorException, RemoteException {
         MessageProcessorClient messageProcessorClient = new MessageProcessorClient(backEndUrl, sessionCookie);
         log.info("waiting " + SERVICE_DEPLOYMENT_DELAY + " millis for Undeployment Message Processor " + messageProcessorName);
         boolean isMessageProcessorDeleted = false;
@@ -1293,12 +1293,12 @@ public class ESBTestCaseUtils {
      * @param sessionCookie
      * @param sequenceName
      * @return
-     * @throws SequenceEditorException
+     * @throws SequenceAdminServiceSequenceEditorException
      * @throws RemoteException
      */
     public boolean isSequenceUnDeployed(String backEndUrl, String sessionCookie,
                                         String sequenceName)
-            throws SequenceEditorException, RemoteException {
+            throws SequenceAdminServiceSequenceEditorException, RemoteException {
         SequenceAdminServiceClient sequenceAdminServiceClient = new SequenceAdminServiceClient(backEndUrl,
                                                                                                sessionCookie);
         log.info("waiting " + SERVICE_DEPLOYMENT_DELAY + " millis for Undeployment Sequence " + sequenceName);
@@ -1489,12 +1489,12 @@ public class ESBTestCaseUtils {
      * @throws RemoteException
      * @throws EndpointAdminEndpointAdminException
      *
-     * @throws SequenceEditorException
+     * @throws SequenceAdminServiceSequenceEditorException
      */
     public void verifySynapseDeployment(OMElement synapseConfig, String backendURL,
                                         String sessionCookie)
             throws LocalEntryAdminException, RemoteException, EndpointAdminEndpointAdminException,
-                   SequenceEditorException, RestApiAdminAPIException {
+                   SequenceAdminServiceSequenceEditorException, RestApiAdminAPIException {
         Iterator<OMElement> localEntries = synapseConfig.getChildrenWithLocalName(LOCAL_ENTRY);
         while (localEntries.hasNext()) {
             String le = localEntries.next().getAttributeValue(new QName(KEY));

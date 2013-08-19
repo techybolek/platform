@@ -53,7 +53,7 @@ import org.wso2.carbon.message.store.stub.*;
 import org.wso2.carbon.proxyadmin.stub.ProxyServiceAdminProxyAdminException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.rule.service.stub.fileupload.ExceptionException;
-import org.wso2.carbon.sequences.stub.types.SequenceEditorException;
+import org.wso2.carbon.sequences.stub.types.SequenceAdminServiceSequenceEditorException;
 import org.wso2.carbon.task.stub.TaskManagementException;
 import org.wso2.carbon.utils.FileManipulator;
 import org.wso2.carbon.utils.ServerConstants;
@@ -363,7 +363,7 @@ public class ArtifactDeployerUtil {
                                        String configName, String artifactLocation,
                                        String productName)
             throws IOException, AxisFault, XMLStreamException,
-                   ProxyServiceAdminProxyAdminException, SequenceEditorException,
+                   ProxyServiceAdminProxyAdminException, SequenceAdminServiceSequenceEditorException,
                    EndpointAdminEndpointAdminException, LocalEntryAdminException,
                    TaskManagementException, TransformerException, SAXException, ServletException,
                    ParserConfigurationException, org.wso2.carbon.message.store.stub.Exception {
@@ -636,7 +636,7 @@ public class ArtifactDeployerUtil {
                                      String scenarioConfigDir, FolderTraversar dirTraversar,
                                      String aConfigDir)
             throws IOException, XMLStreamException, EndpointAdminEndpointAdminException,
-                   SequenceEditorException, TaskManagementException {
+                   SequenceAdminServiceSequenceEditorException, TaskManagementException {
         if (aConfigDir.equalsIgnoreCase(TASKS_DIR)) {
             String[] tasksFiles = dirTraversar.getConfigFiles
                     (new File(scenarioConfigDir + File.separator + TASKS_DIR));
@@ -696,7 +696,7 @@ public class ArtifactDeployerUtil {
     private void deploySequences(String sessionCookie, String backendURL,
                                  String scenarioConfigDir, FolderTraversar dirTraversar,
                                  String aConfigDir)
-            throws IOException, SequenceEditorException, XMLStreamException {
+            throws IOException, SequenceAdminServiceSequenceEditorException, XMLStreamException {
 
         if (aConfigDir.equalsIgnoreCase(SEQUENCES_DIR)) {
             String[] sequenceConfigFiles =
