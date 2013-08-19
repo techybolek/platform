@@ -88,6 +88,7 @@ var registerOrg = function (organizationDomain,adminUsername,adminPassword, firs
         creatTenant.open(options,endPoint, false);
         creatTenant.send(payload);
         result = creatTenant.responseE4X;
+        registerOrganization(organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan); 
 
         return result;
     } catch (e) {
@@ -168,13 +169,5 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
                         throw "Error while checking for application key";
                     }
                     return captchaInfo;
-        }
-
-    var storeSubscription = function(aPaaS, iPaaS, domain) {
-        var registry = new MetadataStore(getProperty(ADMIN_USERNAME), getProperty(ADMIN_PASSWORD));
-        var resource = registry.newResource();
-        resource.addProperty("aPaaS", aPaaS);
-        resource.addProperty("iPaaS", iPaaS);
-        registry.put("subscriptions/"+domain, resource);
-    };
+        };
 %>
