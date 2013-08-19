@@ -61,7 +61,7 @@
           </elementProp>
           <elementProp name="context" elementType="Argument">
             <stringProp name="Argument.name">context</stringProp>
-            <stringProp name="Argument.value">/youtube</stringProp>
+            <stringProp name="Argument.value">/geodata</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="storeIP" elementType="Argument">
@@ -400,10 +400,15 @@
               <collectionProp name="Arguments.arguments"/>
             </elementProp>
             <stringProp name="SoapSampler.URL_DATA">https://localhost:9443/services/UserAdmin.UserAdminHttpsSoap11Endpoint/</stringProp>
-            <stringProp name="HTTPSamper.xml_data">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:mgt=&quot;http://mgt.user.carbon.wso2.org&quot;&gt;
+            <stringProp name="HTTPSamper.xml_data">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:xsd=&quot;http://org.apache.axis2/xsd&quot;&gt;
    &lt;soapenv:Header/&gt;
    &lt;soapenv:Body&gt;
-      &lt;mgt:getAllRolesNames/&gt;
+      &lt;xsd:getAllRolesNames&gt;
+         &lt;!--Optional:--&gt;
+         &lt;xsd:filter&gt;*&lt;/xsd:filter&gt;
+         &lt;!--Optional:--&gt;
+         &lt;xsd:limit&gt;100&lt;/xsd:limit&gt;
+      &lt;/xsd:getAllRolesNames&gt;
    &lt;/soapenv:Body&gt;
 &lt;/soapenv:Envelope&gt;</stringProp>
             <stringProp name="SoapSampler.xml_data_file"></stringProp>
@@ -439,14 +444,15 @@
                 <collectionProp name="Arguments.arguments"/>
               </elementProp>
               <stringProp name="SoapSampler.URL_DATA">https://localhost:9443/services/UserAdmin.UserAdminHttpsSoap11Endpoint/</stringProp>
-              <stringProp name="HTTPSamper.xml_data">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:mgt=&quot;http://mgt.user.carbon.wso2.org&quot;&gt;
+              <stringProp name="HTTPSamper.xml_data">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:mgt=&quot;http://org.apache.axis2/xsd&quot;&gt;
    &lt;soapenv:Header/&gt;
    &lt;soapenv:Body&gt;
       &lt;mgt:addRole&gt;
          &lt;!--Optional:--&gt;
          &lt;mgt:roleName&gt;subscriber_role&lt;/mgt:roleName&gt;
          &lt;mgt:permissions&gt;/permission/admin/login&lt;/mgt:permissions&gt;
-          &lt;mgt:permissions&gt;/permission/admin/manage/api/subscribe&lt;/mgt:permissions&gt;
+         &lt;mgt:permissions&gt;/permission/admin/manage/api/subscribe&lt;/mgt:permissions&gt;
+         &lt;mgt:isSharedRole&gt;false&lt;/mgt:isSharedRole&gt;
        &lt;/mgt:addRole&gt;
    &lt;/soapenv:Body&gt;
 &lt;/soapenv:Envelope&gt;</stringProp>
@@ -477,12 +483,13 @@
                 <collectionProp name="Arguments.arguments"/>
               </elementProp>
               <stringProp name="SoapSampler.URL_DATA">https://localhost:9443/services/UserAdmin.UserAdminHttpsSoap11Endpoint/</stringProp>
-              <stringProp name="HTTPSamper.xml_data">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:mgt=&quot;http://mgt.user.carbon.wso2.org&quot;&gt;
+              <stringProp name="HTTPSamper.xml_data">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:mgt=&quot;http://org.apache.axis2/xsd&quot;&gt;
    &lt;soapenv:Header/&gt;
    &lt;soapenv:Body&gt;
       &lt;mgt:listUsers&gt;
          &lt;!--Optional:--&gt;
          &lt;mgt:filter&gt;tennant${tenant_counter}_user${user_ref}&lt;/mgt:filter&gt;
+         &lt;mgt:limit&gt;10&lt;/mgt:limit&gt;
       &lt;/mgt:listUsers&gt;
    &lt;/soapenv:Body&gt;
 &lt;/soapenv:Envelope&gt;</stringProp>
@@ -519,7 +526,7 @@
                   <collectionProp name="Arguments.arguments"/>
                 </elementProp>
                 <stringProp name="SoapSampler.URL_DATA">https://localhost:9443/services/UserAdmin.UserAdminHttpsSoap11Endpoint/</stringProp>
-                <stringProp name="HTTPSamper.xml_data">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:mgt=&quot;http://mgt.user.carbon.wso2.org&quot; xmlns:xsd=&quot;http://common.mgt.user.carbon.wso2.org/xsd&quot;&gt;
+                <stringProp name="HTTPSamper.xml_data">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:mgt=&quot;http://org.apache.axis2/xsd&quot; xmlns:xsd=&quot;http://common.mgt.user.carbon.wso2.org/xsd&quot;&gt;
    &lt;soapenv:Header/&gt;
    &lt;soapenv:Body&gt;
       &lt;mgt:addUser&gt;
@@ -759,7 +766,7 @@ FileOutputStream f = new FileOutputStream(currentDir + &quot;/results.csv&quot;)
                     </elementProp>
                     <elementProp name="endpoint" elementType="HTTPArgument">
                       <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                      <stringProp name="Argument.value">http://gdata.youtube.com/feeds/api/standardfeeds</stringProp>
+                      <stringProp name="Argument.value">http://www.google.com/ig</stringProp>
                       <stringProp name="Argument.metadata">=</stringProp>
                       <boolProp name="HTTPArgument.use_equals">true</boolProp>
                       <stringProp name="Argument.name">endpoint</stringProp>
@@ -827,6 +834,13 @@ FileOutputStream f = new FileOutputStream(currentDir + &quot;/results.csv&quot;)
                       <boolProp name="HTTPArgument.use_equals">true</boolProp>
                       <stringProp name="Argument.name">resourceMethodAuthType-0</stringProp>
                     </elementProp>
+                    <elementProp name="resourceMethodThrottlingTier-0" elementType="HTTPArgument">
+                      <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                      <stringProp name="Argument.value">Unlimited</stringProp>
+                      <stringProp name="Argument.metadata">=</stringProp>
+                      <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                      <stringProp name="Argument.name">resourceMethodThrottlingTier-0</stringProp>
+                    </elementProp>
                     <elementProp name="addNewAPIButton" elementType="HTTPArgument">
                       <boolProp name="HTTPArgument.always_encode">false</boolProp>
                       <stringProp name="Argument.value">Create</stringProp>
@@ -854,6 +868,27 @@ FileOutputStream f = new FileOutputStream(currentDir + &quot;/results.csv&quot;)
                       <stringProp name="Argument.metadata">=</stringProp>
                       <boolProp name="HTTPArgument.use_equals">true</boolProp>
                       <stringProp name="Argument.name">resourceMethodAuthType-1</stringProp>
+                    </elementProp>
+                    <elementProp name="resourceMethodThrottlingTier-1" elementType="HTTPArgument">
+                      <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                      <stringProp name="Argument.value">Unlimited</stringProp>
+                      <stringProp name="Argument.metadata">=</stringProp>
+                      <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                      <stringProp name="Argument.name">resourceMethodThrottlingTier-1</stringProp>
+                    </elementProp>
+                    <elementProp name="http_checked" elementType="HTTPArgument">
+                      <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                      <stringProp name="Argument.value">http</stringProp>
+                      <stringProp name="Argument.metadata">=</stringProp>
+                      <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                      <stringProp name="Argument.name">http_checked</stringProp>
+                    </elementProp>
+                    <elementProp name="https_checked" elementType="HTTPArgument">
+                      <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                      <stringProp name="Argument.value">https</stringProp>
+                      <stringProp name="Argument.metadata">=</stringProp>
+                      <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                      <stringProp name="Argument.name">https_checked</stringProp>
                     </elementProp>
                   </collectionProp>
                 </elementProp>
@@ -1501,7 +1536,7 @@ print(&quot;domain&quot;+ tenant_count+&quot;.com&quot; + &quot;@@@&quot; + acce
                   <stringProp name="HTTPSampler.response_timeout"></stringProp>
                   <stringProp name="HTTPSampler.protocol"></stringProp>
                   <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-                  <stringProp name="HTTPSampler.path">/t/domain${input_value}.com${context}${api_id}/${version}/most_popular</stringProp>
+                  <stringProp name="HTTPSampler.path">/t/domain${input_value}.com${context}${api_id}/${version}/api?stock=WSO2</stringProp>
                   <stringProp name="HTTPSampler.method">GET</stringProp>
                   <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
                   <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -1527,11 +1562,11 @@ print(&quot;domain&quot;+ tenant_count+&quot;.com&quot; + &quot;@@@&quot; + acce
                   <hashTree/>
                   <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
                     <collectionProp name="Asserion.test_strings">
-                      <stringProp name="-1498428454">xmlns=&quot;http://www.w3.org/2005/Atom&quot;</stringProp>
+                      <stringProp name="-575879071">&lt;no_data_message data=&quot;No data found&quot;/&gt;</stringProp>
                     </collectionProp>
                     <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
                     <boolProp name="Assertion.assume_success">false</boolProp>
-                    <intProp name="Assertion.test_type">2</intProp>
+                    <intProp name="Assertion.test_type">6</intProp>
                   </ResponseAssertion>
                   <hashTree/>
                 </hashTree>
@@ -1572,7 +1607,7 @@ print(&quot;domain&quot;+ tenant_count+&quot;.com&quot; + &quot;@@@&quot; + acce
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get ALL APIs" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get ALL APIs" enabled="false">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
@@ -1920,7 +1955,7 @@ FileWriter writer = new FileWriter(outPath);
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get Recently Added APIs" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get Recently Added APIs" enabled="false">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
@@ -2281,7 +2316,7 @@ FileWriter writer = new FileWriter(outPath);
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get Tags" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get Tags" enabled="false">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
@@ -2628,7 +2663,7 @@ FileWriter writer = new FileWriter(outPath);
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Gateway Call load test" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Gateway Call load test" enabled="false">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
