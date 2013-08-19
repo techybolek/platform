@@ -146,7 +146,7 @@ public class APIKeyValidator {
     }
 
     public String getResourceAuthenticationScheme(String context, String apiVersion,
-                                                  String requestPath, String httpMethod) {
+                                                  String requestPath, String httpMethod) throws APISecurityException {
 
         String cacheKey = context + ":" + apiVersion;
         APIInfoDTO apiInfoDTO = null;
@@ -239,47 +239,42 @@ public class APIKeyValidator {
         return APIConstants.NO_MATCHING_AUTH_SCHEME;
     }
 
-    private APIInfoDTO doGetAPIInfo(String context, String apiVersion) {
+    private APIInfoDTO doGetAPIInfo(String context, String apiVersion) throws APISecurityException {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
-        try {
-            ArrayList<URITemplate> uriTemplates = getAllURITemplates(context, apiVersion);
+        
+        ArrayList<URITemplate> uriTemplates = getAllURITemplates(context, apiVersion);
 
-            apiInfoDTO.setApiName(context);
-            apiInfoDTO.setContext(context);
-            apiInfoDTO.setVersion(apiVersion);
-            apiInfoDTO.setResources(new HashSet<ResourceInfoDTO>());
+        apiInfoDTO.setApiName(context);
+        apiInfoDTO.setContext(context);
+        apiInfoDTO.setVersion(apiVersion);
+        apiInfoDTO.setResources(new HashSet<ResourceInfoDTO>());
 
-            ResourceInfoDTO resourceInfoDTO = null;
-            VerbInfoDTO verbInfoDTO = null;
-            int i = 0;
-            for (URITemplate uriTemplate : uriTemplates) {
-                if (resourceInfoDTO != null && resourceInfoDTO.getUrlPattern().equalsIgnoreCase(uriTemplate.getUriTemplate())) {
-                    HashSet<VerbInfoDTO> verbs = (HashSet<VerbInfoDTO>) resourceInfoDTO.getHttpVerbs();
-                    verbInfoDTO = new VerbInfoDTO();
-                    verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
-                    verbInfoDTO.setAuthType(uriTemplate.getAuthType());
-                    verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
-                    verbs.add(verbInfoDTO);
-                    resourceInfoDTO.setHttpVerbs(verbs);
-                    apiInfoDTO.getResources().add(resourceInfoDTO);
-                } else {
-                    resourceInfoDTO = new ResourceInfoDTO();
-                    resourceInfoDTO.setUrlPattern(uriTemplate.getUriTemplate());
-                    verbInfoDTO = new VerbInfoDTO();
-                    verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
-                    verbInfoDTO.setAuthType(uriTemplate.getAuthType());
-                    verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
-                    HashSet<VerbInfoDTO> httpVerbs2 = new HashSet();
-                    httpVerbs2.add(verbInfoDTO);
-                    resourceInfoDTO.setHttpVerbs(httpVerbs2);
-                    apiInfoDTO.getResources().add(resourceInfoDTO);
-                }
+        ResourceInfoDTO resourceInfoDTO = null;
+        VerbInfoDTO verbInfoDTO = null;
+        int i = 0;
+        for (URITemplate uriTemplate : uriTemplates) {
+        	if (resourceInfoDTO != null && resourceInfoDTO.getUrlPattern().equalsIgnoreCase(uriTemplate.getUriTemplate())) {
+        		HashSet<VerbInfoDTO> verbs = (HashSet<VerbInfoDTO>) resourceInfoDTO.getHttpVerbs();
+                verbInfoDTO = new VerbInfoDTO();
+                verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
+                verbInfoDTO.setAuthType(uriTemplate.getAuthType());
+                verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
+                verbs.add(verbInfoDTO);
+                resourceInfoDTO.setHttpVerbs(verbs);
+                apiInfoDTO.getResources().add(resourceInfoDTO);
+             } else {
+            	 resourceInfoDTO = new ResourceInfoDTO();
+                 resourceInfoDTO.setUrlPattern(uriTemplate.getUriTemplate());
+                 verbInfoDTO = new VerbInfoDTO();
+                 verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
+                 verbInfoDTO.setAuthType(uriTemplate.getAuthType());
+                 verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
+                 HashSet<VerbInfoDTO> httpVerbs2 = new HashSet();
+                 httpVerbs2.add(verbInfoDTO);
+                 resourceInfoDTO.setHttpVerbs(httpVerbs2);
+                 apiInfoDTO.getResources().add(resourceInfoDTO);
+               }
             }
-        } catch (APIManagementException e) {
-            log.error("Loading URI templates for " + context + ":" + apiVersion + " failed", e);
-        } catch (APISecurityException e) {
-            log.error("Loading URI templates for " + context + ":" + apiVersion + " failed", e);
-        }
         return apiInfoDTO;
     }
 
@@ -290,8 +285,9 @@ public class APIKeyValidator {
      * @param requestPath Incoming request path
      * @param httpMethod  http method of request
      * @return verbInfoDTO which contains throttling tier for given resource and verb+resource key
+     * @throws APISecurityException 
      */
-    public VerbInfoDTO getVerbInfoDTOFromAPIData(String context, String apiVersion, String requestPath, String httpMethod) {
+    public VerbInfoDTO getVerbInfoDTOFromAPIData(String context, String apiVersion, String requestPath, String httpMethod) throws APISecurityException {
 
         String cacheKey = context + ":" + apiVersion;
         APIInfoDTO apiInfoDTO = null;
@@ -390,7 +386,7 @@ public class APIKeyValidator {
 
 
     private ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion)
-            throws APIManagementException, APISecurityException {
+            throws APISecurityException {
         return dataStore.getAllURITemplates(context, apiVersion);
     }
 }
