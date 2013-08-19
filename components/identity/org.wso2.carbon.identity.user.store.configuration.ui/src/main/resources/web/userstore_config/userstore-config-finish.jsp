@@ -106,7 +106,7 @@
 	        	CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);
             }
             else {
-                String message = "Domain name is invalide";
+                String message = resourceBundle.getString("invalid.domain");
                 CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
                 forwardTo = "index.jsp?region=region1&item=userstores_mgt_menu";
             }

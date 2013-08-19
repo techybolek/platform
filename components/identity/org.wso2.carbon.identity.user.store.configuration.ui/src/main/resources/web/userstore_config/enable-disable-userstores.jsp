@@ -48,9 +48,15 @@
         try {
             if (action.equals("enable")) {
                 userStoreConfigAdminServiceClient.changeUserStoreState(domain, "false");
+                String message = resourceBundle.getString("successful.enable");
+                CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);
+
             }
             if (action.equals("disable")) {
                 userStoreConfigAdminServiceClient.changeUserStoreState(domain, "true");
+                String message = resourceBundle.getString("successful.disable");
+                CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);
+
             }
 
             // Session need to be update according to new user store info 
@@ -59,7 +65,7 @@
             session.setAttribute(UserAdminUIConstants.ROLE_LIST_CACHE, null);
             forwardTo = "index.jsp?region=region1&item=userstores_mgt_menu";
         } catch (Exception e) {
-            String message = resourceBundle.getString("invalid.user.store.not.updated");
+            String message = resourceBundle.getString("invalid.domain.not.updated");
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
             forwardTo = "index.jsp?region=region1&item=userstores_mgt_menu";
         }
