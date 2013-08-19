@@ -142,6 +142,21 @@
 			<artifactId>org.wso2.carbon.theme.mgt</artifactId>
 			<version>${stratos.version}</version>
 		</dependency>
+<dependency>
+                <groupId>org.apache.rampart.wso2</groupId>
+                <artifactId>rampart-policy</artifactId>
+                <version>${orbit.version.rampart}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.rampart.wso2</groupId>
+                <artifactId>rampart-core</artifactId>
+                <version>${orbit.version.rampart}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.rampart.wso2</groupId>
+                <artifactId>rampart-trust</artifactId>
+                <version>${orbit.version.rampart}</version>
+            </dependency>
     </dependencies>
 
     <build>
@@ -227,11 +242,15 @@
                                 
                             </bundles>
                             <importBundles>
+				<importBundleDef>org.apache.rampart.wso2:rampart-policy</importBundleDef>
+                                <importBundleDef>org.apache.rampart.wso2:rampart-core</importBundleDef>
+                                <importBundleDef>org.apache.rampart.wso2:rampart-trust</importBundleDef>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.application.upload</importBundleDef>
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso.server:${carbon.version}</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.registry.core.server:${carbon.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
