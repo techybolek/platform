@@ -7,11 +7,11 @@
     <provide partnerLink="client">
       <service name="sample:CreateTenant" port="CreateTenantPort"/>
     </provide>
-    <invoke partnerLink="TenantMgtAdminServicePL">
+   <!--  <invoke partnerLink="TenantMgtAdminServicePL">
       <service name="services.mgt.tenant.carbon.wso2.org:TenantMgtAdminService" port="TenantMgtAdminServiceHttpsSoap12Endpoint">
         <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/TenantMgtService.epr" />
       </service>
-    </invoke>
+    </invoke> -->
     <invoke partnerLink="AppFactoryTenantInfraStructureInitializerServicePL">
       <service name="services.core.appfactory.carbon.wso2.org:AppFactoryTenantInfraStructureInitializerService" port="AppFactoryTenantInfraStructureInitializerServiceHttpsSoap12Endpoint">
         <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/AppFactoryTenantInfraStructureInitializerService.epr" />

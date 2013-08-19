@@ -17,12 +17,28 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.11"/>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.7"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
     <extendedObject href="CreateTenant.bpel#/"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ProcessExtension" modificationStamp="1376928231000"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ProcessExtension" modificationStamp="1376939656000"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.6"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.6/@copy.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.6/@copy.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
     <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.2"/>
@@ -33,6 +49,10 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
     <extendedObject href="CreateTenant.bpel#//@variables/@children.2"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
   </extensions>
@@ -41,7 +61,7 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.1"/>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.2"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
   <extensions>
@@ -49,60 +69,16 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.2"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.3"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.4"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.5"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.6"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.7"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.8"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.9"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.10"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.1/@copy.11"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.10"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.10/@copy.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.10/@copy.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
     <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.4"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@variables/@children.4"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@variables/@children.5"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
   </extensions>
   <extensions>
     <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.3"/>
@@ -113,32 +89,28 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
   <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.3/@copy.2"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
     <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.3/@copy.0"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@variables/@children.5"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@variables/@children.4"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.6"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
     <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension" width="536" height="200"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@copy.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension" x="8" y="8" width="-1" height="-1"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension" x="368" y="8" width="-1" height="-1"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
     <extendedObject href="CreateTenant.bpel#//@variables/@children.6"/>
@@ -149,16 +121,168 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@copy.2"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@copy.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.8"/>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.2"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.3"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.4"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.5"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.6"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.7"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.8"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.9"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.0/@activities.0/@copy.10"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension" x="778" y="8"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.2"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.3"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.4"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.5"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.6"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.7"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.8"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.9"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.10"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.1/@activities.0/@copy.11"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.2"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.3"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.4"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.5"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.6"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.7"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.8"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.9"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.10"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.5/@activities.2/@activities.0/@copy.11"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
   <extensions>
     <extendedObject href="CreateTenant.bpel#//@variables/@children.8"/>
@@ -169,223 +293,11 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.7"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.7/@copy.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.7/@copy.2"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.7/@copy.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension" width="536" height="200"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension" x="8" y="8" width="-1" height="-1"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension" x="368" y="8" width="-1" height="-1"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
     <extendedObject href="CreateTenant.bpel#//@variables/@children.10"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
   </extensions>
   <extensions>
     <extendedObject href="CreateTenant.bpel#//@variables/@children.11"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.2"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.3"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.4"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.5"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.6"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.7"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.8"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.9"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.0/@activities.0/@copy.10"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension" x="778" y="8"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.2"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.3"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.4"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.5"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.6"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.7"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.8"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.9"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.10"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.1/@activities.0/@copy.11"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.2"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.3"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.4"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.5"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.6"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.7"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.8"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.9"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.10"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.11"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@variables/@children.12"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@variables/@children.13"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@variables/@children.14"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateTenant.bpel#//@variables/@children.15"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
   </extensions>
 </extensionmodel:ExtensionMap>
