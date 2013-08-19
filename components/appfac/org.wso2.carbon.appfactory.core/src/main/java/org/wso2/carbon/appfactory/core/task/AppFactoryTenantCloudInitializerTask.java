@@ -67,10 +67,10 @@ public class AppFactoryTenantCloudInitializerTask implements Task {
         tenantInfoBean.setOriginatedService(properties.get(ORIGINATED_SERVICE));
         try {
             stub.addSkeletonTenant(tenantInfoBean);
-            if (log.isDebugEnabled()) {
-                log.debug("Called TenantMgt Admin Service in " + properties.get
+           /* if (log.isDebugEnabled()) {*/
+                log.info("Called TenantMgt Admin Service in " + properties.get
                         (AppFactoryTenantCloudInitializerTask.SERVICE_EPR) + " with " + tenantInfoBean);
-            }
+           /* }*/
         } catch (RemoteException e) {
             String msg = "Error while adding tenant " + tenantInfoBean.getTenantDomain();
             log.error(msg, e);

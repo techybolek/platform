@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.appfactory.core.services;
 
+import com.hazelcast.impl.ClientEndpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
@@ -29,6 +30,8 @@ import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,9 +70,8 @@ public class AppFactoryTenantInfraStructureInitializerService extends AbstractAd
      * @return
      */
     public boolean initializeRepositoryManager(String tenantDomain, String usagePlan) throws AppFactoryException {
-        TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
-        //trigger immediately at once
-        triggerInfo.setCronExpression(null);
+        TaskInfo.TriggerInfo triggerInfo = getTriggerWithDalay();
+
         String taskName = "repository-init-" + tenantDomain;
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(AppFactoryTenantRepositoryInitializerTask.TENANT_DOMAIN, tenantDomain);
@@ -101,9 +103,7 @@ public class AppFactoryTenantInfraStructureInitializerService extends AbstractAd
      * @return
      */
     public boolean initializeBuildManager(String tenantDomain, String usagePlan) throws AppFactoryException {
-        TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
-        //trigger immediately at once
-        triggerInfo.setCronExpression(null);
+        TaskInfo.TriggerInfo triggerInfo = getTriggerWithDalay();
         String taskName = "build-init-" + tenantDomain;
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(AppFactoryTenantRepositoryInitializerTask.TENANT_DOMAIN, tenantDomain);
@@ -141,9 +141,7 @@ public class AppFactoryTenantInfraStructureInitializerService extends AbstractAd
         String serviceEPR=serverURL+"/services/TenantMgtAdminService";
         String adminUsername=configuration.getFirstProperty(AppFactoryConstants.SERVER_ADMIN_NAME);
         String adminPassword=configuration.getFirstProperty(AppFactoryConstants.SERVER_ADMIN_PASSWORD);;
-        TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
-        //trigger immediately at once
-        triggerInfo.setCronExpression(null);
+        TaskInfo.TriggerInfo triggerInfo = getTriggerWithDalay();
         String taskName = "cloud-init-" + stage + "-" + bean.getTenantDomain();
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(AppFactoryTenantCloudInitializerTask.TENANT_USAGE_PLAN, bean.getUsagePlan());
@@ -170,12 +168,22 @@ public class AppFactoryTenantInfraStructureInitializerService extends AbstractAd
             throw new AppFactoryException(msg, e);
         }
         try {
-            taskManager.scheduleTask(taskName);
+            taskManager.rescheduleTask(taskInfo.getName());
         } catch (TaskException e) {
             String msg = "Error while scheduling " + taskName;
             log.error(msg, e);
             throw new AppFactoryException(msg, e);
         }
         return true;
+    }
+
+    private TaskInfo.TriggerInfo getTriggerWithDalay() {
+        TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
+        //trigger immediately after 5s and one time
+        Calendar triggerTime=Calendar.getInstance();
+        triggerTime.roll(Calendar.SECOND, 5);
+        triggerInfo.setStartTime(triggerTime.getTime());
+        triggerInfo.setRepeatCount(0);
+        return triggerInfo;
     }
 }
