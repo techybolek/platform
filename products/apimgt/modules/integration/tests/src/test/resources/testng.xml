@@ -13,6 +13,7 @@
             <class name="org.wso2.jmeter.tests.JmeterSuperTenantTestCase"/>
             <class name="org.wso2.jmeter.tests.JmeterDomainRestrictionTestCase"/>
             <class name="org.wso2.jmeter.tests.PassthroughTestCase"/>
+            <class name="org.wso2.jmeter.tests.JmeterTransportRestrictionTestCase"/>
         </classes>
     </test>
 </suite>
