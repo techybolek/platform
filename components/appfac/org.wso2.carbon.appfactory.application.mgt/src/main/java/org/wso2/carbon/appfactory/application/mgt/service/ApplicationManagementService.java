@@ -1245,35 +1245,6 @@ public class ApplicationManagementService extends AbstractAdmin {
         return b;
     }
 
-    public boolean createDefaultRoles(String domainName, String applicationId, String appOwner) throws ApplicationManagementException {
-        List<RoleBean> roleBeanList = initRoleBean();
-        int tenantId = getTenantID(domainName);
-
-        try {
-            String[] users = {appOwner};
-            UserStoreManager userStoreManager =
-                    Util.getRealmService()
-                            .getTenantUserRealm(tenantId)
-                            .getUserStoreManager();
-            for (RoleBean roleBean : roleBeanList) {
-                if (!userStoreManager.isExistingRole(roleBean.getRoleName())) {
-                    userStoreManager.addRole(getCarbonRole(applicationId, roleBean.getRoleName()), users
-                            ,
-                            roleBean.getPermissions().
-                                    toArray(new Permission[roleBean.getPermissions().
-                                            size()]));
-                }
-            }
-        } catch (UserStoreException e) {
-            String message =
-                    "Failed to create default roles of tenant:" +
-                            domainName;
-            log.error(message, e);
-            throw new ApplicationManagementException(message, e);
-        }
-        return true;
-    }
-
     private int getTenantID(String domainName) throws ApplicationManagementException {
         int tenantId;
         try {
