@@ -70,6 +70,13 @@
                         <configuration>
                             <id>org.wso2.carbon.event.ui</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
+			    <adviceFile>
+                               <properties>
+                                    <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
+                                    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
+                                </properties>
+                            </adviceFile>
+
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.event.ui</bundleDef>
 		                <bundleDef>org.wso2.carbon:org.wso2.carbon.event.stub</bundleDef>
@@ -79,6 +86,7 @@
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.ui</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.event.common:${wso2carbon.version.event}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core.ui</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.event.common.feature:${wso2carbon.version.event}</includedFeatureDef>

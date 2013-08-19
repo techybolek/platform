@@ -104,6 +104,13 @@
                         <configuration>
                             <id>org.wso2.carbon.event.server</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
+			    <adviceFile>
+                                <properties>
+                                    <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
+                                    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
+                                </properties>
+                            </adviceFile>
+
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.event.core</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.event.admin</bundleDef>
@@ -112,6 +119,7 @@
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server</importFeatureDef>			
+                                <importFeatureDef>org.wso2.carbon.registry.core.server</importFeatureDef>			
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.event.common.feature:${wso2carbon.version}</includedFeatureDef>
