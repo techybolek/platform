@@ -51,6 +51,7 @@ public class MediatorSerializerFinder {
         ClassMediatorSerializer.class,
         ValidateMediatorSerializer.class,
         XSLTMediatorSerializer.class,
+        CallPOJOMediatorSerializer.class,
         POJOCommandMediatorSerializer.class,
         CloneMediatorSerializer.class,
         IterateMediatorSerializer.class,
