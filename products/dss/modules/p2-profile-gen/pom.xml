@@ -154,7 +154,7 @@
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.transaction.manager.feature:${carbon.platform.version}</featureArtifactDef>
 				<!--<featureArtifactDef> org.wso2.carbon:org.wso2.carbon.cloud.gateway.agent.feature:${carbon.platform.patch.version.402}</featureArtifactDef>-->
 
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.cassandra-jdbc-1.1.1.server.feature:${carbon.platform.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.cassandra-jdbc-1.2.5.server.feature:${carbon.platform.version}</featureArtifactDef>
 
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.server.feature:${carbon.platform.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.ui.feature:${carbon.platform.version}</featureArtifactDef>
@@ -461,7 +461,7 @@
                                     <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
-                                    <id>org.wso2.carbon.cassandra-jdbc-1.1.1.server.feature.group</id>
+                                    <id>org.wso2.carbon.cassandra-jdbc-1.2.5.server.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 				                <feature>
@@ -693,7 +693,7 @@
                                 </feature>
 
                                 <feature>
-                                    <id>org.wso2.carbon.cassandra-jdbc-1.1.1.server.feature.group</id>
+                                    <id>org.wso2.carbon.cassandra-jdbc-1.2.5.server.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
