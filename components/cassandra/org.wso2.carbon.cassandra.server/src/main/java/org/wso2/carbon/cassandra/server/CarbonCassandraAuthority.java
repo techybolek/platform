@@ -79,12 +79,14 @@ public class CarbonCassandraAuthority implements IAuthority {
         }
 
         try {
-            //TODO - get the realm for a special user that can be used to authorize other users - security team - already talked but need to implement
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext cc = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
             UserRealm userRealm =
                     CassandraServerComponentManager.getInstance().getRealmForTenant(authenticatedUser.domainName);
             UserStoreManager userStoreManager = userRealm.getUserStoreManager();
             AuthorizationManager authorizationManager = userRealm.getAuthorizationManager();
-
             String tenantLessUsername = MultitenantUtils.getTenantAwareUsername(authenticatedUser.username);
 
             switch (action) {
@@ -101,7 +103,7 @@ public class CarbonCassandraAuthority implements IAuthority {
                     return authorizeForWrite(authorizationManager, tenantLessUsername, resourcePath);
                 }
                 case ALL: {
-                    return authorizeForWrite(authorizationManager, tenantLessUsername, resourcePath); //TODO check read if need
+                    return authorizeForWrite(authorizationManager, tenantLessUsername, resourcePath);
                 }
                 default: {
                     log.error("Undefined action for resource" + resourcePath);
@@ -111,6 +113,8 @@ public class CarbonCassandraAuthority implements IAuthority {
         } catch (UserStoreException e) {
             log.error("Error during authorizing a user for a resource" + resourcePath, e);
             return Permission.NONE;
+        }finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
