@@ -18,6 +18,7 @@ package org.wso2.carbon.appfactory.core.services;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
+import org.wso2.carbon.appfactory.common.AppFactoryConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.internal.ServiceHolder;
 import org.wso2.carbon.appfactory.core.task.AppFactoryTenantCloudInitializerTask;
@@ -26,7 +27,7 @@ import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskManager;
-import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
+import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -137,7 +138,9 @@ public class AppFactoryTenantInfraStructureInitializerService extends AbstractAd
     public boolean initializeCloudManager(TenantInfoBean bean, String stage) throws AppFactoryException {
         AppFactoryConfiguration configuration = ServiceHolder.getAppFactoryConfiguration();
         String serverURL = configuration.getFirstProperty(ENVIRONMENT + "." + stage + "." + "TenantMgtUrl");
-
+        String serviceEPR=serverURL+"/services/TenantMgtAdminService";
+        String adminUsername=configuration.getFirstProperty(AppFactoryConstants.SERVER_ADMIN_NAME);
+        String adminPassword=configuration.getFirstProperty(AppFactoryConstants.SERVER_ADMIN_PASSWORD);;
         TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
         //trigger immediately at once
         triggerInfo.setCronExpression(null);
@@ -150,8 +153,12 @@ public class AppFactoryTenantInfraStructureInitializerService extends AbstractAd
         properties.put(AppFactoryTenantCloudInitializerTask.ADMIN_EMAIL, bean.getEmail());
         properties.put(AppFactoryTenantCloudInitializerTask.ADMIN_FIRST_NAME, bean.getFirstname());
         properties.put(AppFactoryTenantCloudInitializerTask.ADMIN_LAST_NAME, bean.getLastname());
-        properties.put(AppFactoryTenantCloudInitializerTask.ORIGINATED_SERVICE, bean.getOriginatedService());
-        properties.put(AppFactoryTenantCloudInitializerTask.SERVICE_EPR, serverURL);
+        properties.put(AppFactoryTenantCloudInitializerTask.ORIGINATED_SERVICE,
+                "WSO2 Stratos Manager");
+
+        properties.put(AppFactoryTenantCloudInitializerTask.SERVICE_EPR, serviceEPR);
+        properties.put(AppFactoryTenantCloudInitializerTask.SUPER_TENANT_ADMIN, adminUsername);
+        properties.put(AppFactoryTenantCloudInitializerTask.SUPER_TENANT_ADMIN_PASSWORD,adminPassword);
 
         TaskInfo taskInfo = new TaskInfo(taskName, AppFactoryTenantInfraStructureInitializerService.CLOUD_INITIALIZER_TASK,
                 properties, triggerInfo);

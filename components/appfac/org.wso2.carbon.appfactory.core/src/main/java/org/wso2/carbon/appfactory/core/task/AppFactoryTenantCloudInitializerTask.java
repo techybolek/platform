@@ -8,6 +8,7 @@ import org.wso2.carbon.ntask.core.Task;
 import org.wso2.carbon.tenant.mgt.stub.TenantMgtAdminServiceExceptionException;
 import org.wso2.carbon.tenant.mgt.stub.TenantMgtAdminServiceStub;
 import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.rmi.RemoteException;
 import java.util.Calendar;
@@ -27,6 +28,8 @@ public class AppFactoryTenantCloudInitializerTask implements Task {
     public static final String ADMIN_FIRST_NAME = "firstName";
     public static final String ADMIN_LAST_NAME = "lastName";
     public static final String ORIGINATED_SERVICE = "originatedService";
+    public static final String SUPER_TENANT_ADMIN = "superAdmin";
+    public static final String SUPER_TENANT_ADMIN_PASSWORD = "superAdminPassword";
     public TenantMgtAdminServiceStub stub;
     public Map<String, String> properties;
 
@@ -40,6 +43,8 @@ public class AppFactoryTenantCloudInitializerTask implements Task {
         try {
             stub = new TenantMgtAdminServiceStub(ServiceHolder.getInstance().getConfigContextService()
                     .getClientConfigContext(), properties.get(SERVICE_EPR));
+            CarbonUtils.setBasicAccessSecurityHeaders(properties.get(SUPER_TENANT_ADMIN),properties.get(SUPER_TENANT_ADMIN_PASSWORD),
+                    stub._getServiceClient());
         } catch (AxisFault axisFault) {
             String msg = "Error while initializing TenantMgt Admin Service Stub ";
             log.error(msg, axisFault);
@@ -51,15 +56,15 @@ public class AppFactoryTenantCloudInitializerTask implements Task {
         TenantInfoBean tenantInfoBean = new TenantInfoBean();
         tenantInfoBean.setCreatedDate(Calendar.getInstance());
         tenantInfoBean.setUsagePlan(properties.get(TENANT_USAGE_PLAN));
-        tenantInfoBean.setTenantDomain(TENANT_DOMAIN);
-        tenantInfoBean.setSuccessKey(SUCCESS_KEY);
+        tenantInfoBean.setTenantDomain(properties.get(TENANT_DOMAIN));
+        tenantInfoBean.setSuccessKey(properties.get(SUCCESS_KEY));
         tenantInfoBean.setActive(true);
-        tenantInfoBean.setAdmin(ADMIN_USERNAME);
+        tenantInfoBean.setAdmin(properties.get(ADMIN_USERNAME));
         tenantInfoBean.setAdminPassword(null);
-        tenantInfoBean.setEmail(ADMIN_EMAIL);
-        tenantInfoBean.setFirstname(ADMIN_FIRST_NAME);
-        tenantInfoBean.setLastname(ADMIN_LAST_NAME);
-        tenantInfoBean.setOriginatedService(ORIGINATED_SERVICE);
+        tenantInfoBean.setEmail(properties.get(ADMIN_EMAIL));
+        tenantInfoBean.setFirstname(properties.get(ADMIN_FIRST_NAME));
+        tenantInfoBean.setLastname(properties.get(ADMIN_LAST_NAME));
+        tenantInfoBean.setOriginatedService(properties.get(ORIGINATED_SERVICE));
         try {
             stub.addSkeletonTenant(tenantInfoBean);
             if (log.isDebugEnabled()) {

@@ -71,7 +71,7 @@
         <parameter name="hiddenService" locked="true">true</parameter>
         <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
     </service>
-    <service name="AppFactoryTenantToolInitializerService" scope="transportsession">
+    <service name="AppFactoryTenantInfraStructureInitializerService" scope="transportsession">
         <transports>
             <transport>https</transport>
         </transports>
