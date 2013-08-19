@@ -342,7 +342,12 @@ public class PassThroughHttpSender extends AbstractHandler implements TransportS
 					ByteArrayOutputStream _out = new ByteArrayOutputStream();
 					MessageFormatter formatter =  MessageFormatterDecoratorFactory.createMessageFormatterDecorator(msgContext);
 					OMOutputFormat format = PassThroughTransportUtils.getOMOutputFormat(msgContext);
-					formatter.writeTo(msgContext, format, _out, false);
+                    if(null == msgContext.getProperty(PassThroughConstants.FORMATTER_PRESERVE) || msgContext.isPropertyTrue(PassThroughConstants.FORMATTER_PRESERVE)) {
+                        formatter.writeTo(msgContext, format, _out, true);
+                    } else {
+                        formatter.writeTo(msgContext, format, _out, false);
+                    }
+
 					try {
 	                    long messageSize =setStreamAsTempData(formatter,msgContext,format);
 	                    msgContext.setProperty(PassThroughConstants.PASSTROUGH_MESSAGE_LENGTH,messageSize);

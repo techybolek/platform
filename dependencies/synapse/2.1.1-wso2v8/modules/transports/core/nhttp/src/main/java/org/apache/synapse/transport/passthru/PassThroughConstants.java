@@ -95,6 +95,9 @@ public class PassThroughConstants {
 
     // This is similar to isDoingREST  - if the request contains a REST (i.e. format=POX | GET | REST) call, then we set this to TRUE
     public static final String INVOKED_REST = "invokedREST";
+
+    // Use this to make PassThroughHttpSender set the Message Formatter's writeTo() preserve boolean value
+    public static final String FORMATTER_PRESERVE = "chunkedFormatterPreserve";     
     
     public static final String CLONE_PASS_THROUGH_PIPE_REQUEST = "clone_pass-through.pipe_connected";
     

@@ -126,25 +126,34 @@ public class HTTPEndpoint extends AbstractEndpoint {
             }
         }
 
-        uriTemplate.set(variables);
+        // We have to create a local UriTemplate object, or else the UriTemplate.set(variables) call will fill up a list of variables and since uriTemplate
+        // is not thread safe, this list won't be clearing.
+        UriTemplate template = null;
+        template = UriTemplate.fromTemplate(uriTemplate.getTemplate());
+
+        if(template != null) {
+            template.set(variables);
+        }
+
         String evaluatedUri = "";
         try {
-            evaluatedUri = uriTemplate.expand();
+            //URL url = new URL(URLDecoder.decode(template.expand(), "UTF-8"));
+            //evaluatedUri = url.toURI().toString();
+            evaluatedUri = template.expand();
             evaluatedUri=evaluatedUri.replace("%3A", ":");
             evaluatedUri=evaluatedUri.replace("%2F", "/");
             
         } catch(ExpressionParseException e) {
             log.debug("No URI Template variables defined in HTTP Endpoint: " + this.getName());
-            evaluatedUri = uriTemplate.getTemplate();
+            evaluatedUri = template.getTemplate();
         }
+
         if (evaluatedUri != null) {
             synCtx.setTo(new EndpointReference(evaluatedUri));
             if (super.getDefinition() != null) {
                 super.getDefinition().setAddress(evaluatedUri);
             }
         }
-
-
     }
 
     public String getHttpMethod() {
