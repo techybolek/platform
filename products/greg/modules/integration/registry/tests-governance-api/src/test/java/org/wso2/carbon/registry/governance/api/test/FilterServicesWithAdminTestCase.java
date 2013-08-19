@@ -507,7 +507,7 @@ public class FilterServicesWithAdminTestCase {
         deleteService(serviceForSearching3);
         deleteService(serviceForSearching4);
         deleteService(serviceForSearching6);
-        deleteService(searchResultPromoted);
+        //deleteService(searchResultPromoted);
 
         serviceManager = null;
         resourceAdminServiceClient = null;
