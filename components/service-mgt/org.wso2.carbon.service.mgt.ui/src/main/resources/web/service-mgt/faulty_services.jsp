@@ -126,33 +126,9 @@
                                 location.href = 'delete_faulty_service_groups.jsp?deleteAllServiceGroups=true';
                     });
                 } else {
-                    var serviceGroupsString = '';
-                    jQuery('.chkBox').each(function(index) {
-                        if(this.checked) {
-                            serviceGroupsString += this.value + ':';
-                        }
+                    CARBON.showConfirmationDialog("<fmt:message key="delete.all.faulty.service.groups.prompt"/>", function() {
+                        document.faultyServiceForm.submit();
                     });
-
-                    jQuery.ajax(
-                            {
-                                url : "checkForGroupedServices_ajaxprocessor.jsp?serviceGroupsString=" + serviceGroupsString,
-                                success : function (data) {
-                                    if(data.search('foundgroupedservice') > 0){
-                                        CARBON.showConfirmationDialog("<fmt:message key="delete.service.groups.with.multiples.services.prompt"/>",
-                                                function(){
-                                                    document.faultyServiceForm.submit();
-                                                },
-                                                function(){
-                                                    location.href='';
-                                                });
-                                    } else {
-                                        CARBON.showConfirmationDialog("<fmt:message key="delete.services.on.page.prompt"/>", function() {
-                                            document.faultyServiceForm.submit();
-                                        });
-                                    }
-                                }
-                            }
-                    );
                 }
             }
 
