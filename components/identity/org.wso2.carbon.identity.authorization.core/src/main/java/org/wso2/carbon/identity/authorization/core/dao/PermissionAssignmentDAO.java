@@ -92,8 +92,8 @@ public abstract class PermissionAssignmentDAO extends GenericDAO {
 			}
 		} catch (SQLException e) {
 			String error = "Error while setting the connection to autocommit false ";
-			log.error(error);
-			throw new UserStoreException(error);
+			log.error(error, e);
+			throw new UserStoreException(error, e);
 		} finally {
 			DatabaseUtil.closeConnection(connection);
 		}

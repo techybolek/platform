@@ -25,6 +25,7 @@ import org.wso2.carbon.identity.authorization.core.permission.CarbonPermissionFi
 import org.wso2.carbon.identity.authorization.core.permission.PermissionFinderModule;
 import org.wso2.carbon.utils.CarbonUtils;
 
+
 import java.io.*;
 import java.util.Properties;
 

@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.authorization.core.dao.GenericDAO;
 import org.wso2.carbon.identity.authorization.core.dao.ModuleDAO;
+import org.wso2.carbon.identity.authorization.core.dao.ModuleResourceDAO;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.util.DatabaseUtil;
 
@@ -81,14 +82,13 @@ public class JDBCModuleDAO extends ModuleDAO {
 				dataList.add(moduel);
 				moduel.setModuleId(res.getInt("UM_ID"));
 				moduel.setModuleName(res.getString("UM_MODULE_NAME"));
-				loadAllowedActions(moduel, connection);
+				loadDependancies(moduel, connection);
 			}
 			return dataList;
 
 		} catch (SQLException e) {
-			log.error("Error while loading modules for the id: " + getModuleId() + " " +
-			          e.getMessage());
-			throw new UserStoreException("Error while loading modules: " + e.getMessage());
+			log.error("Error while loading modules for the id: " + getModuleId(), e);
+			throw new UserStoreException("Error while loading modules ", e);
 		} finally {
 			DatabaseUtil.closeAllConnections(connection, res, stmt);
 		}
@@ -107,8 +107,8 @@ public class JDBCModuleDAO extends ModuleDAO {
 	}
 
 	@Override
-	protected void loadAllowedActions(ModuleDAO module, Connection connection)
-	                                                                          throws UserStoreException {
+	protected void loadDependancies(ModuleDAO module, Connection connection)
+	                                                                        throws UserStoreException {
 		PreparedStatement stmt = null;
 		ResultSet res = null;
 		try {
@@ -123,6 +123,13 @@ public class JDBCModuleDAO extends ModuleDAO {
 			while (res.next()) {
 				module.getAllowedActions().add(res.getString("UM_ACTION"));
 			}
+
+			JDBCModuleResourceDAO resource = new JDBCModuleResourceDAO();
+			resource.setModuleId(module.getModuleId());
+			List<ModuleResourceDAO> resources =
+			                                    (List<ModuleResourceDAO>) resource.load(connection,
+			                                                                            false);
+			module.setResources(resources);
 
 		} catch (SQLException e) {
 			log.error("Error while loading module actions for the id: " + module.getModuleName() +
@@ -167,6 +174,18 @@ public class JDBCModuleDAO extends ModuleDAO {
 				DatabaseUtil.updateDatabase(connection, sql, action, getModuleId());
 			}
 		}
+
+		if (getResources() != null && !getResources().isEmpty()) {
+			for (ModuleResourceDAO dao : getResources()) {
+				dao.setModuleId(getIdentifier());
+				dao.save(connection, false);
+			}
+		}
+	}
+
+	@Override
+	protected ModuleResourceDAO createResource() {
+		return new JDBCModuleResourceDAO();
 	}
 
 }

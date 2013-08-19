@@ -29,6 +29,7 @@ public class PermissionModule {
 	private Permission[] permissions;
 	private String[] actions;
 	private String[] deletedActions;
+	private Resource[] resources;
 
 	public String getModuleName() {
 		return moduleName;
@@ -68,6 +69,14 @@ public class PermissionModule {
 
 	public void setDeletedActions(String[] deletedActions) {
 		this.deletedActions = deletedActions;
+	}
+
+	public Resource[] getResources() {
+		return resources;
+	}
+
+	public void setResources(Resource[] resources) {
+		this.resources = resources;
 	}
 
 }

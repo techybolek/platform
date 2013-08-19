@@ -48,8 +48,6 @@ public abstract class GenericDAO {
 	private byte status;
 	private int tenantId;
 
-	// private List<Object> deletedObjects;
-
 	public byte getStatus() {
 		return status;
 	}
@@ -57,14 +55,6 @@ public abstract class GenericDAO {
 	public void setStatus(byte status) {
 		this.status = status;
 	}
-
-	// public List<Object> getDeletedObjects() {
-	// return deletedObjects;
-	// }
-
-	// public void setDeletedObjects(List<Object> deletedObjects) {
-	// this.deletedObjects = deletedObjects;
-	// }
 
 	public int getTenantId() {
 		return tenantId;
@@ -75,10 +65,14 @@ public abstract class GenericDAO {
 	}
 
 	public void save(Connection connection) throws UserStoreException {
+		save(connection, true);
+	}
+
+	public void save(Connection connection, boolean commit) throws UserStoreException {
 
 		log.debug(this.toString());
 		try {
-			if (!connection.getAutoCommit()) {
+			if (connection.getAutoCommit()) {
 				connection.setAutoCommit(false);
 			}
 
@@ -91,18 +85,23 @@ public abstract class GenericDAO {
 				delete(connection, false);
 			}
 			saveDependentModules(connection, false);
-			connection.commit();
+			if (commit) {
+				connection.commit();
+			}
+
 		} catch (SQLException e) {
 			String error = "Error while setting the connection to autocommit false ";
-			log.error(error);
+			log.error(error, e);
 			try {
 				connection.rollback();
 			} catch (SQLException e1) {
-				log.error(e.getMessage());
+				log.error(e);
 			}
 			throw new UserStoreException(error, e);
 		} finally {
-			DatabaseUtil.closeConnection(connection);
+			if (commit) {
+				DatabaseUtil.closeConnection(connection);
+			}
 		}
 	}
 
@@ -144,6 +143,11 @@ public abstract class GenericDAO {
 
 	public abstract List<? extends GenericDAO> load(Connection connection)
 	                                                                      throws UserStoreException;
+
+	public List<? extends GenericDAO> load(Connection connection, boolean closeConnection)
+	                                                                                      throws UserStoreException {
+		throw new UserStoreException("Need implementation");
+	}
 
 	protected void resetAppendTxt() {
 		appendTxt = WHERE;

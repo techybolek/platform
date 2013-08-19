@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.wso2.carbon.identity.authorization.core.dto.PermissionModule;
+import org.wso2.carbon.identity.authorization.core.dto.Resource;
 import org.wso2.carbon.user.core.UserStoreException;
 
 /**
@@ -40,7 +41,9 @@ public abstract class ModuleDAO extends GenericDAO {
 	private List<String> allowedActions;
 	private List<String> deletedActions;
 
-	protected abstract void loadAllowedActions(ModuleDAO module, Connection connection)
+	private List<ModuleResourceDAO> resources;
+
+	protected abstract void loadDependancies(ModuleDAO module, Connection connection)
 	                                                                                   throws UserStoreException;
 
 	public int getModuleId() {
@@ -83,6 +86,14 @@ public abstract class ModuleDAO extends GenericDAO {
 		return moduleId;
 	}
 
+	public List<ModuleResourceDAO> getResources() {
+		return resources;
+	}
+
+	public void setResources(List<ModuleResourceDAO> resources) {
+		this.resources = resources;
+	}
+
 	public ModuleDAO map(PermissionModule module) {
 		moduleId = module.getModuleId();
 		moduleName = module.getModuleName();
@@ -92,6 +103,15 @@ public abstract class ModuleDAO extends GenericDAO {
 
 		if (module.getDeletedActions() != null && module.getDeletedActions().length > 0) {
 			deletedActions = Arrays.asList(module.getDeletedActions());
+		}
+
+		if (module.getResources() != null && module.getResources().length > 0) {
+			resources = new ArrayList<ModuleResourceDAO>();
+			for (Resource resource : module.getResources()) {
+				ModuleResourceDAO dao = createResource();
+				dao.map(resource);
+				resources.add(dao);
+			}
 		}
 		return this;
 	}
@@ -118,4 +138,6 @@ public abstract class ModuleDAO extends GenericDAO {
 
 		return builder.toString();
 	}
+
+	protected abstract ModuleResourceDAO createResource();
 }

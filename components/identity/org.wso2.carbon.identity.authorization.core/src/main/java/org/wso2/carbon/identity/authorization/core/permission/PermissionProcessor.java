@@ -33,6 +33,7 @@ import org.wso2.carbon.identity.authorization.core.AuthorizationManagerService;
 import org.wso2.carbon.identity.authorization.core.CustomAuthorizationCache;
 import org.wso2.carbon.identity.authorization.core.dao.GenericDAO;
 import org.wso2.carbon.identity.authorization.core.dao.ModuleDAO;
+import org.wso2.carbon.identity.authorization.core.dao.ModuleResourceDAO;
 import org.wso2.carbon.identity.authorization.core.dao.PermissionDAO;
 import org.wso2.carbon.identity.authorization.core.dto.Permission;
 import org.wso2.carbon.identity.authorization.core.dto.PermissionGroup;
@@ -123,28 +124,49 @@ public class PermissionProcessor {
 	}
 
 	/**
-	 * Validates the permission against actions permitted on a module.
+	 * Validates the permission against actions and resources permitted on a
+	 * module.
 	 * 
 	 * @param moduleName
 	 * @param permission
 	 * @return
+	 * @throws UserStoreException
 	 */
-	public boolean validatePermissionAction(final String moduleName,
-	                                        final PermissionGroup permission) {
-		boolean state = false;
+	public boolean validatePermission(final String moduleName, final PermissionGroup permission)
+	                                                                                            throws UserStoreException {
+		boolean validAction = false;
+		ModuleDAO module = null;
 		if (moduleCache == null || moduleCache.isEmpty()) {
-			log.error("Modules applicable for permissions ha not been loaded");
+			log.debug("Modules applicable for permissions ha not been loaded");
+			module = loadModule(moduleName);
 		} else {
-			ModuleDAO module = moduleCache.get(moduleName);
-			for (String action : module.getAllowedActions()) {
-				if (action.equals(permission.getAction())) {
-					state = true;
+			module = moduleCache.get(moduleName);
+		}
+		for (String action : module.getAllowedActions()) {
+			if (action.equals(permission.getAction())) {
+				validAction = true;
+				break;
+			}
+		}
+
+		if (!validAction) {
+			return validAction;
+		}
+
+		boolean validResource = false;
+
+		if (module.getResources() == null || module.getResources().isEmpty()) {
+			log.debug("Resources are not assigned");
+		} else {
+			for (ModuleResourceDAO resource : module.getResources()) {
+				if (resource.getResource().equalsIgnoreCase(permission.getResource())) {
+					validResource = true;
 					break;
 				}
 			}
 		}
 
-		return state;
+		return validAction && validResource;
 	}
 
 	/**

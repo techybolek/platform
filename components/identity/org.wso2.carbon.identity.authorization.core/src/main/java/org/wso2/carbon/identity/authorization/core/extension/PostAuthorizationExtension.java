@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.authorization.core.extension;
 
 import java.util.Properties;
 
+
 /**
  * This extension provides to do post actions after persisting the authorization data with the server.
  * Such as extended logging, publisher to publish required data to another server.

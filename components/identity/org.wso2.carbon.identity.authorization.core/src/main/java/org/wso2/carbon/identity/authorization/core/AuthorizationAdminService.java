@@ -126,7 +126,7 @@ public class AuthorizationAdminService {
 		if (modules != null && !modules.isEmpty()) {
 			return modules.toArray(new PermissionModule[modules.size()]);
 		}
-		return null;
+		return new PermissionModule[0];
 
 	}
 

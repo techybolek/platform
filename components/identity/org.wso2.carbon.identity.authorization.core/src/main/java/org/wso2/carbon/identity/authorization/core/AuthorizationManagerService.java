@@ -82,7 +82,7 @@ public class AuthorizationManagerService implements AuthorizationManager {
 				ModuleDAO module =
 				                   permissionProcessor.loadPermissionDependency(permission.getModuleName());
 				if (module != null) {
-					if (!permissionProcessor.validatePermissionAction(module.getModuleName(),
+					if (!permissionProcessor.validatePermission(module.getModuleName(),
 					                                                  permission)) {
 						log.error("Required actions are not supported by the module");
 						throw new IdentityAuthorizationException(
