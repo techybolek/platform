@@ -12,30 +12,11 @@
         <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/TenantMgtService.epr" />
       </service>
     </invoke>
-    <invoke partnerLink="AppFactoryTenantToolInitializerServicePL">
-      <service name="services.core.appfactory.carbon.wso2.org:AppFactoryTenantToolInitializerService" port="AppFactoryTenantToolInitializerServiceHttpsSoap12Endpoint">
-        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/AppFactoryTenantToolInitializerService.epr" />
+    <invoke partnerLink="AppFactoryTenantInfraStructureInitializerServicePL">
+      <service name="services.core.appfactory.carbon.wso2.org:AppFactoryTenantInfraStructureInitializerService" port="AppFactoryTenantInfraStructureInitializerServiceHttpsSoap12Endpoint">
+        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/AppFactoryTenantInfraStructureInitializerService.epr" />
       </service>
-    </invoke>
-      <!--   <invoke partnerLink="dev-cloud-create-tenant">
-      <service name="services.mgt.tenant.carbon.wso2.org:TenantMgtAdminService" port="TenantMgtAdminServiceHttpsSoap12Endpoint">
-        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/DevTenantMgtService.epr" />
-      </service>
-    </invoke>
-      <invoke partnerLink="test-cloud-create-tenant">
-      <service name="services.mgt.tenant.carbon.wso2.org:TenantMgtAdminService" port="TenantMgtAdminServiceHttpsSoap12Endpoint">
-        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/TestTenantMgtService.epr" />
-      </service>
-    </invoke>
-      <invoke partnerLink="staging-cloud-create-tenant">
-      <service name="services.mgt.tenant.carbon.wso2.org:TenantMgtAdminService" port="TenantMgtAdminServiceHttpsSoap12Endpoint">
-        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/StagingTenantMgtService.epr" />
-      </service>
-    </invoke>
-      <invoke partnerLink="prod-cloud-create-tenant">
-      <service name="services.mgt.tenant.carbon.wso2.org:TenantMgtAdminService" port="TenantMgtAdminServiceHttpsSoap12Endpoint">
-        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/ProdTenantMgtService.epr" />
-      </service>
-    </invoke> -->
+    </invoke> 
+
   </process>
 </deploy>

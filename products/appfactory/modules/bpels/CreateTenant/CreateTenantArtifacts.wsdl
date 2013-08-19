@@ -16,8 +16,11 @@
     <plnk:partnerLinkType name="AppFactoryTenantMgtAdminServicePLT">
     <plnk:role name="AppFactoryTenantMgtAdminServiceProvider" portType="wsdl2:AppFactoryTenantMgtAdminServicePortType"/>
   </plnk:partnerLinkType>
+    <plnk:partnerLinkType name="AppFactoryTenantInfraStructureInitializerServicePLT">
+    <plnk:role name="AppFactoryTenantInfraStructureInitializerServiceProvider" portType="wsdl1:AppFactoryTenantInfraStructureInitializerServicePortType"/>
+  </plnk:partnerLinkType>
     <import location="TenantMgtAdminService.wsdl" namespace="http://services.mgt.tenant.carbon.wso2.org"/>
-    <import location="AppFactoryTenantToolInitializerService.wsdl" namespace="http://services.core.appfactory.carbon.wso2.org"/>
+    <import location="AppFactoryTenantInfraStructureInitializerService.wsdl" namespace="http://services.core.appfactory.carbon.wso2.org"/>
     <types>
         <schema xmlns="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://wso2.org/bps/sample">
 

@@ -1,0 +1,241 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://services.core.appfactory.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax264="http://common.appfactory.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax266="http://beans.common.stratos.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://services.core.appfactory.carbon.wso2.org">
+    <wsdl:documentation>AppFactoryTenantInfraStructureInitializerService</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://beans.common.stratos.carbon.wso2.org/xsd">
+            <xs:complexType name="TenantInfoBean">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="active" type="xs:boolean"></xs:element>
+                    <xs:element minOccurs="0" name="admin" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="adminPassword" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="createdDate" nillable="true" type="xs:dateTime"></xs:element>
+                    <xs:element minOccurs="0" name="email" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="firstname" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="lastname" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="originatedService" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="successKey" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="tenantId" type="xs:int"></xs:element>
+                    <xs:element minOccurs="0" name="usagePlan" nillable="true" type="xs:string"></xs:element>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema xmlns:ax265="http://common.appfactory.carbon.wso2.org/xsd" xmlns:ax267="http://beans.common.stratos.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://services.core.appfactory.carbon.wso2.org">
+            <xs:import namespace="http://common.appfactory.carbon.wso2.org/xsd"></xs:import>
+            <xs:import namespace="http://beans.common.stratos.carbon.wso2.org/xsd"></xs:import>
+            <xs:element name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="AppFactoryException" nillable="true" type="ax264:AppFactoryException"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="initializeRepositoryManager">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="usagePlan" nillable="true" type="xs:string"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="initializeRepositoryManagerResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="initializeCloudManager">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="bean" nillable="true" type="ax266:TenantInfoBean"></xs:element>
+                        <xs:element minOccurs="0" name="stage" nillable="true" type="xs:string"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="initializeCloudManagerResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="initializeBuildManager">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="usagePlan" nillable="true" type="xs:string"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="initializeBuildManagerResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://common.appfactory.carbon.wso2.org/xsd">
+            <xs:complexType name="AppFactoryException">
+                <xs:sequence></xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="initializeBuildManagerRequest">
+        <wsdl:part name="parameters" element="ns:initializeBuildManager"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="initializeBuildManagerResponse">
+        <wsdl:part name="parameters" element="ns:initializeBuildManagerResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException">
+        <wsdl:part name="parameters" element="ns:AppFactoryTenantInfraStructureInitializerServiceAppFactoryException"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="initializeCloudManagerRequest">
+        <wsdl:part name="parameters" element="ns:initializeCloudManager"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="initializeCloudManagerResponse">
+        <wsdl:part name="parameters" element="ns:initializeCloudManagerResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="initializeRepositoryManagerRequest">
+        <wsdl:part name="parameters" element="ns:initializeRepositoryManager"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="initializeRepositoryManagerResponse">
+        <wsdl:part name="parameters" element="ns:initializeRepositoryManagerResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:portType name="AppFactoryTenantInfraStructureInitializerServicePortType">
+        <wsdl:operation name="initializeBuildManager">
+            <wsdl:input message="ns:initializeBuildManagerRequest" wsaw:Action="urn:initializeBuildManager"></wsdl:input>
+            <wsdl:output message="ns:initializeBuildManagerResponse" wsaw:Action="urn:initializeBuildManagerResponse"></wsdl:output>
+            <wsdl:fault message="ns:AppFactoryTenantInfraStructureInitializerServiceAppFactoryException" name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException" wsaw:Action="urn:initializeBuildManagerAppFactoryTenantInfraStructureInitializerServiceAppFactoryException"></wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="initializeCloudManager">
+            <wsdl:input message="ns:initializeCloudManagerRequest" wsaw:Action="urn:initializeCloudManager"></wsdl:input>
+            <wsdl:output message="ns:initializeCloudManagerResponse" wsaw:Action="urn:initializeCloudManagerResponse"></wsdl:output>
+            <wsdl:fault message="ns:AppFactoryTenantInfraStructureInitializerServiceAppFactoryException" name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException" wsaw:Action="urn:initializeCloudManagerAppFactoryTenantInfraStructureInitializerServiceAppFactoryException"></wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="initializeRepositoryManager">
+            <wsdl:input message="ns:initializeRepositoryManagerRequest" wsaw:Action="urn:initializeRepositoryManager"></wsdl:input>
+            <wsdl:output message="ns:initializeRepositoryManagerResponse" wsaw:Action="urn:initializeRepositoryManagerResponse"></wsdl:output>
+            <wsdl:fault message="ns:AppFactoryTenantInfraStructureInitializerServiceAppFactoryException" name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException" wsaw:Action="urn:initializeRepositoryManagerAppFactoryTenantInfraStructureInitializerServiceAppFactoryException"></wsdl:fault>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="AppFactoryTenantInfraStructureInitializerServiceSoap11Binding" type="ns:AppFactoryTenantInfraStructureInitializerServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap:binding>
+        <wsdl:operation name="initializeBuildManager">
+            <soap:operation soapAction="urn:initializeBuildManager" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"></soap:body>
+            </wsdl:output>
+            <wsdl:fault name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException">
+                <soap:fault use="literal" name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException"></soap:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="initializeCloudManager">
+            <soap:operation soapAction="urn:initializeCloudManager" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"></soap:body>
+            </wsdl:output>
+            <wsdl:fault name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException">
+                <soap:fault use="literal" name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException"></soap:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="initializeRepositoryManager">
+            <soap:operation soapAction="urn:initializeRepositoryManager" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"></soap:body>
+            </wsdl:output>
+            <wsdl:fault name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException">
+                <soap:fault use="literal" name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException"></soap:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="AppFactoryTenantInfraStructureInitializerServiceSoap12Binding" type="ns:AppFactoryTenantInfraStructureInitializerServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap12:binding>
+        <wsdl:operation name="initializeBuildManager">
+            <soap12:operation soapAction="urn:initializeBuildManager" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:output>
+            <wsdl:fault name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException">
+                <soap12:fault use="literal" name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException"></soap12:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="initializeCloudManager">
+            <soap12:operation soapAction="urn:initializeCloudManager" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:output>
+            <wsdl:fault name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException">
+                <soap12:fault use="literal" name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException"></soap12:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="initializeRepositoryManager">
+            <soap12:operation soapAction="urn:initializeRepositoryManager" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:output>
+            <wsdl:fault name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException">
+                <soap12:fault use="literal" name="AppFactoryTenantInfraStructureInitializerServiceAppFactoryException"></soap12:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="AppFactoryTenantInfraStructureInitializerServiceHttpBinding" type="ns:AppFactoryTenantInfraStructureInitializerServicePortType">
+        <http:binding verb="POST"></http:binding>
+        <wsdl:operation name="initializeBuildManager">
+            <http:operation location="initializeBuildManager"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="initializeCloudManager">
+            <http:operation location="initializeCloudManager"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="initializeRepositoryManager">
+            <http:operation location="initializeRepositoryManager"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="AppFactoryTenantInfraStructureInitializerService">
+        <wsdl:port name="AppFactoryTenantInfraStructureInitializerServiceHttpsSoap11Endpoint" binding="ns:AppFactoryTenantInfraStructureInitializerServiceSoap11Binding">
+            <soap:address location="https://milestones.appfactory.wso2.com:9443/services/AppFactoryTenantInfraStructureInitializerService.AppFactoryTenantInfraStructureInitializerServiceHttpsSoap11Endpoint/"></soap:address>
+        </wsdl:port>
+        <wsdl:port name="AppFactoryTenantInfraStructureInitializerServiceHttpsSoap12Endpoint" binding="ns:AppFactoryTenantInfraStructureInitializerServiceSoap12Binding">
+            <soap12:address location="https://milestones.appfactory.wso2.com:9443/services/AppFactoryTenantInfraStructureInitializerService.AppFactoryTenantInfraStructureInitializerServiceHttpsSoap12Endpoint/"></soap12:address>
+        </wsdl:port>
+        <wsdl:port name="AppFactoryTenantInfraStructureInitializerServiceHttpsEndpoint" binding="ns:AppFactoryTenantInfraStructureInitializerServiceHttpBinding">
+            <http:address location="https://milestones.appfactory.wso2.com:9443/services/AppFactoryTenantInfraStructureInitializerService.AppFactoryTenantInfraStructureInitializerServiceHttpsEndpoint/"></http:address>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
