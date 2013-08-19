@@ -198,7 +198,7 @@ public class HttpSessionDispatcher extends AbstractDispatcher {
         if (headerMap != null) {
             Object hostObj = headerMap.get(HTTP.TARGET_HOST);
             hostName = (String) hostObj;
-            if (hostName.contains(":")) {
+            if (hostName != null && hostName.contains(":")) {
                 hostName = hostName.substring(0, hostName.indexOf(":"));
             }
         }
