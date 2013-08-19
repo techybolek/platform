@@ -66,7 +66,7 @@ try{
 	   String errorMsg = e.getLocalizedMessage();
 	   %>
 <script type="text/javascript">
-	location.href = "dsErrorPage.jsp?errorMsg=<%=errorMsg%>";
+	location.href = "../ds/dsErrorPage.jsp?errorMsg=<%=errorMsg%>";
 </script>
 <%
    }
