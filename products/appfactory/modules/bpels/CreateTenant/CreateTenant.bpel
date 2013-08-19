@@ -71,8 +71,12 @@
         <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLRequest" messageType="ns0:initializeRepositoryManagerRequest"></bpel:variable>
         <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLResponse1" messageType="ns0:initializeBuildManagerResponse"></bpel:variable>
         <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLRequest1" messageType="ns0:initializeBuildManagerRequest"></bpel:variable>
-        <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLResponse2" messageType="ns0:initializeCloudManagerResponse"></bpel:variable>
-        <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLRequest2" messageType="ns0:initializeCloudManagerRequest"></bpel:variable>
+        <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLResponseDev" messageType="ns0:initializeCloudManagerResponse"></bpel:variable>
+        <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLRequestDev" messageType="ns0:initializeCloudManagerRequest"></bpel:variable>
+        <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLResponseTest" messageType="ns0:initializeCloudManagerResponse"></bpel:variable>
+        <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLRequestTest" messageType="ns0:initializeCloudManagerRequest"></bpel:variable>
+        <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLResponseProd" messageType="ns0:initializeCloudManagerResponse"></bpel:variable>
+        <bpel:variable name="AppFactoryTenantInfraStructureInitializerServicePLRequestProd" messageType="ns0:initializeCloudManagerRequest"></bpel:variable>
     </bpel:variables>
 
     <!-- ================================================================= -->         
@@ -324,7 +328,7 @@
                             
                             
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2"></bpel:to>
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev"></bpel:to>
                         
                         
                         
@@ -338,7 +342,7 @@
                                     <![CDATA[tns:admin]]>
                                 </bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:admin]]></bpel:query>
                             </bpel:to>
                         
@@ -346,7 +350,7 @@
                         <bpel:copy><bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:firstName]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:firstname]]></bpel:query>
                             </bpel:to>
                         
@@ -356,7 +360,7 @@
                                     <![CDATA[tns:tenantDomain]]>
                                 </bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:tenantDomain]]></bpel:query>
                             </bpel:to>
                         
@@ -366,7 +370,7 @@
                                     <![CDATA[tns:email]]>
                                 </bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:email]]></bpel:query>
                             </bpel:to>
                         
@@ -374,7 +378,7 @@
                         <bpel:copy><bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:active]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:active]]></bpel:query>
                             </bpel:to>
                         
@@ -382,7 +386,7 @@
                         <bpel:copy><bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:successKey]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:successKey]]></bpel:query>
                             </bpel:to>
                         
@@ -390,7 +394,7 @@
                         <bpel:copy><bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:createdDate]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:createdDate]]></bpel:query>
                             </bpel:to>
                         
@@ -398,7 +402,7 @@
                         <bpel:copy><bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:originatedService]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:originatedService]]></bpel:query>
                             </bpel:to>
                         
@@ -406,7 +410,7 @@
                         <bpel:copy><bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:usagePlan]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:usagePlan]]></bpel:query>
                             </bpel:to>
                         
@@ -415,12 +419,12 @@
                             <bpel:from>
                                 <bpel:literal xml:space="preserve">Development</bpel:literal>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:stage]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
                     </bpel:assign>
-                    <bpel:invoke name="Invoke-initializeCloudManager-Dev" partnerLink="AppFactoryTenantInfraStructureInitializerServicePL" operation="initializeCloudManager" portType="ns0:AppFactoryTenantInfraStructureInitializerServicePortType" inputVariable="AppFactoryTenantInfraStructureInitializerServicePLRequest2" outputVariable="AppFactoryTenantInfraStructureInitializerServicePLResponse2"></bpel:invoke>
+                    <bpel:invoke name="Invoke-initializeCloudManager-Dev" partnerLink="AppFactoryTenantInfraStructureInitializerServicePL" operation="initializeCloudManager" portType="ns0:AppFactoryTenantInfraStructureInitializerServicePortType" inputVariable="AppFactoryTenantInfraStructureInitializerServicePLRequestDev" outputVariable="AppFactoryTenantInfraStructureInitializerServicePLResponseDev"></bpel:invoke>
                 </bpel:sequence>
                 <bpel:sequence name="Test-Sequence">
                     
@@ -445,13 +449,13 @@
 <xs:stage xmlns:xs="http://services.core.appfactory.carbon.wso2.org">dev</xs:stage>
 </p:initializeCloudManager></bpel:literal>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2"></bpel:to>
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest"></bpel:to>
                         </bpel:copy>
                         <bpel:copy>
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:admin]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:admin]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -459,7 +463,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:firstName]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:firstname]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -467,7 +471,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:lastName]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:lastname]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -475,7 +479,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:tenantDomain]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:tenantDomain]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -483,7 +487,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:email]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:email]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -491,7 +495,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:active]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:active]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -499,7 +503,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:successKey]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:successKey]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -507,7 +511,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:createdDate]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:createdDate]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -515,7 +519,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:originatedService]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:originatedService]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -523,7 +527,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:usagePlan]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:usagePlan]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -531,12 +535,12 @@
                             <bpel:from>
                                 <bpel:literal xml:space="preserve">Testing</bpel:literal>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:stage]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
                     </bpel:assign>
-                    <bpel:invoke name="Invoke-initializeCloudManager-Test" partnerLink="AppFactoryTenantInfraStructureInitializerServicePL" operation="initializeCloudManager" portType="ns0:AppFactoryTenantInfraStructureInitializerServicePortType" inputVariable="AppFactoryTenantInfraStructureInitializerServicePLRequest2" outputVariable="AppFactoryTenantInfraStructureInitializerServicePLResponse2"></bpel:invoke>
+                    <bpel:invoke name="Invoke-initializeCloudManager-Test" partnerLink="AppFactoryTenantInfraStructureInitializerServicePL" operation="initializeCloudManager" portType="ns0:AppFactoryTenantInfraStructureInitializerServicePortType" inputVariable="AppFactoryTenantInfraStructureInitializerServicePLRequestTest" outputVariable="AppFactoryTenantInfraStructureInitializerServicePLResponseTest"></bpel:invoke>
                 </bpel:sequence><bpel:sequence name="Prod-Sequence"><bpel:assign validate="no" name="Assign-InitializeCloudManager-Prod">
                         <bpel:copy>
                             <bpel:from>
@@ -558,13 +562,13 @@
 <xs:stage xmlns:xs="http://services.core.appfactory.carbon.wso2.org">dev</xs:stage>
 </p:initializeCloudManager></bpel:literal>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2"></bpel:to>
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd"></bpel:to>
                         </bpel:copy>
                         <bpel:copy>
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:admin]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:admin]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -572,7 +576,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:firstName]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:firstname]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -580,7 +584,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:lastName]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:lastname]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -588,7 +592,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:tenantDomain]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:tenantDomain]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -596,7 +600,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:email]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:email]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -604,7 +608,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:active]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:active]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -612,7 +616,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:successKey]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:successKey]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -620,7 +624,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:createdDate]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:createdDate]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -628,7 +632,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:originatedService]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:originatedService]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -636,7 +640,7 @@
                             <bpel:from part="payload" variable="input">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:usagePlan]]></bpel:query>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:bean/xsd:usagePlan]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
@@ -644,12 +648,12 @@
                             <bpel:from>
                                 <bpel:literal xml:space="preserve">Production</bpel:literal>
                             </bpel:from>
-                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequest2">
+                            <bpel:to part="parameters" variable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd">
                                 <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:stage]]></bpel:query>
                             </bpel:to>
                         </bpel:copy>
                     </bpel:assign>
-                    <bpel:invoke name="Invoke-initializeCloudManager-Prod" partnerLink="AppFactoryTenantInfraStructureInitializerServicePL" operation="initializeCloudManager" portType="ns0:AppFactoryTenantInfraStructureInitializerServicePortType" inputVariable="AppFactoryTenantInfraStructureInitializerServicePLRequest2" outputVariable="AppFactoryTenantInfraStructureInitializerServicePLResponse2"></bpel:invoke>
+                    <bpel:invoke name="Invoke-initializeCloudManager-Prod" partnerLink="AppFactoryTenantInfraStructureInitializerServicePL" operation="initializeCloudManager" portType="ns0:AppFactoryTenantInfraStructureInitializerServicePortType" inputVariable="AppFactoryTenantInfraStructureInitializerServicePLRequestProd" outputVariable="AppFactoryTenantInfraStructureInitializerServicePLResponseProd"></bpel:invoke>
                 
                     </bpel:sequence></bpel:flow>
             <bpel:assign validate="no" name="Assign-result"><bpel:copy>

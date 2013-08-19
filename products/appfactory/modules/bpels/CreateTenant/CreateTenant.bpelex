@@ -22,7 +22,7 @@
   </extensions>
   <extensions>
     <extendedObject href="CreateTenant.bpel#/"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ProcessExtension" modificationStamp="1376905295000"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ProcessExtension" modificationStamp="1376928231000"/>
   </extensions>
   <extensions>
     <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.2"/>
@@ -371,5 +371,21 @@
   <extensions>
     <extendedObject href="CreateTenant.bpel#//@activity/@activities.0/@activities.9/@activities.2/@activities.0/@copy.11"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@variables/@children.12"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@variables/@children.13"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@variables/@children.14"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateTenant.bpel#//@variables/@children.15"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
   </extensions>
 </extensionmodel:ExtensionMap>
