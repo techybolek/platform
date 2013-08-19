@@ -26,7 +26,7 @@
 <auth:module config="<%=config%>" request="<%=request%>" action="4"></auth:module>
 <script type="text/javascript">
 	function forward() {
-		location.href = "index.jsp";
+		location.href = "index.jsp?region=region1&item=authorization_menu";
 	}
 
 	forward();

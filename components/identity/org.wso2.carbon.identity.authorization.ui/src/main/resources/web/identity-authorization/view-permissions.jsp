@@ -23,24 +23,33 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="auth" uri="tld/identity-authoization.tld"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
+	prefix="carbon"%>
 
 <script type="text/javascript" src="js/util.js"></script>
 <script type="text/javascript" src="js/cust_permissions.js"></script>
+<fmt:bundle basename="org.wso2.carbon.identity.authorization.ui.i18n.Resources" >
+<carbon:breadcrumb
+		label="root.actions.search.perm"
+		resourceBundle="org.wso2.carbon.identity.authorization.ui.i18n.Resources"
+		topPage="false"
+		request="<%=request%>" />
 
 <div id="middle">
 	<%@include file="messages.jsp"%>
 
-	<h2>Custom Permissions</h2>
-	<h3>View Permissions</h3>
+	<h2><fmt:message key="identity.cusom.perm.heading" /></h2>
+	<h3><fmt:message key="identity.cusom.perm.heading.view.perm" /></h3>
 	<div id="workArea" style="padding-bottom: 70px; margin-top: 10px;">
-		<span>Search Criteria</span>
+		<span><fmt:message key="name.search.cri" /></span>
 		<form id="viewPermissionsForm"
 			action="/carbon/identity-authorization/view-permissions-controller.jsp"
 			method="post">
 			<input type="hidden" name="operation" id="operation" value="1" />
 			<table class="styledLeft" style="width: 50%">
 				<tr>
-					<td>Application</td>
+					<td><fmt:message key="name.application" /></td>
 					<td><select name="application">
 							<c:forEach items="${sessionScope.modules }" var="module">
 								<option
@@ -50,14 +59,14 @@
 					</select></td>
 				</tr>
 				<tr>
-					<td>Role</td>
+					<td><fmt:message key="name.role" /></td>
 					<td><input
 						<c:if
 						test="${not empty permissionRequest and not empty permissionRequest.subject}">value="${permissionRequest.subject }"</c:if>
 						type="text" name="role" /></td>
 				</tr>
 				<tr>
-					<td>Resource</td>
+					<td><fmt:message key="name.resource" /></td>
 					<td><input
 						<c:if
 						test="${not empty permissionRequest and not empty permissionRequest.resource}">value="${permissionRequest.resource }"</c:if>
@@ -65,7 +74,7 @@
 				</tr>
 
 				<tr id="buttonPanel">
-					<td colspan="2"><input type="button" onclick="submitPermissionsSearchReq();" value="Search"
+					<td colspan="2"><input type="button" onclick="submitPermissionsSearchReq();" value="<fmt:message key="link.search" />"
 						class="button" /></td>
 				</tr>
 			</table>
@@ -79,11 +88,11 @@
 					<tr>
 						<th style="width: 5%"><input type="checkbox" id="selectAll" />
 						</th>
-						<th>Application</th>
-						<th>Resource</th>
-						<th>Role</th>
-						<th>Action</th>
-						<th>Authorized</th>
+						<th><fmt:message key="name.application" /></th>
+						<th><fmt:message key="name.resource" /></th>
+						<th><fmt:message key="name.role" /></th>
+						<th><fmt:message key="name.action" /></th>
+						<th><fmt:message key="name.autho" /></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -132,10 +141,10 @@
 						<td colspan="6"><a
 							style="background-image: url(../admin/images/add.gif);"
 							class="icon-link"
-							href="javascript:document.location.href='add-permissions.jsp?extuser=false'">Add
-								New Permission</a> <input type="button" value="Delete"
+							href="javascript:document.location.href='add-permissions.jsp?extuser=false&region=region1&item=authorization_menu'"><fmt:message key="root.actions.newperm" /></a>
+							<input type="button" value='<fmt:message key="link.delete" />'
 							class="button" onclick="deletePermissions();" /> <input
-							type="button" onclick="cancellAdding();" value="Cancel"
+							type="button" onclick="cancellAdding();" value="<fmt:message key="link.cancel" />"
 							class="button" /></td>
 					</tr>
 				</tbody>
@@ -148,3 +157,4 @@
 
 	</div>
 </div>
+</fmt:bundle>

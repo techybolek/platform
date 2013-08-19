@@ -39,12 +39,42 @@ $(document).ready(function() {
 		addMoreActionRow($(this));
 	});
 
+	$("a[id*='addMoreResource_']").live("click", function(){
+		addMoreResourceRow($(this));
+	});
+	
 	$("input[type='checkbox'][id='selectAll']").live("click", function() {
 		selectAll($(this));
 	});
 
+	$("#submitNewModule").live("click", function() {
+
+		if (validatNewModuleForm()) {
+			$("#moduleNewForm").submit();
+		}
+	});
 	displayErrorMsgs();
 });
+
+function validatNewModuleForm(){
+	var moduleName = $("input[name='moduleName']").val();
+	if(moduleName == undefined || moduleName.length == 0){
+		CARBON
+		.showErrorDialog("Please enter an application name.");
+		return false
+	}
+	var status = true;
+	$("input[name^='newAction_']").each(function(){
+		var val = $(this).val();
+		if(val == undefined || val.length == 0){
+			CARBON
+			.showErrorDialog("Please enter a authorized action.");
+			status = false;
+		}
+	});
+	
+	return status;
+}
 
 function submitPermissionsSearchReq() {
 	var role = $("input[name='role']").val();
@@ -127,8 +157,36 @@ function savePermissionCallback(data, extraParam) {
 }
 
 function cancellAdding() {
-	location.href = "/carbon/identity-authorization/index.jsp";
+	location.href = "/carbon/identity-authorization/index.jsp?region=region1&item=authorization_menu";
 }
+
+function createDependancySections(jqObj){
+}
+
+
+function addMoreResourceRow(obj) {
+	var count = $("#numberOfResources");
+	var previousCount = parseInt(count.val(), 10);
+
+	var newIndex = previousCount + 1;
+
+	count.val(newIndex);
+
+	var cloned = $("tr[id='newResourceRow_0']").clone();
+	cloned.attr("id", "newResourceRow_" + newIndex);
+	$("#buttonPanel_resource").before(cloned);
+	cloned.show();
+
+	var checkBox = $("tr[id^='newResourceRow_" + newIndex
+			+ "'] input[name^='deleteResourcection_']");
+	var inputField = $("tr[id^='newResourceRow_" + newIndex
+			+ "'] input[name^='newResource_']");
+
+	checkBox.attr("name", "deleteNewResource_" + newIndex);
+	inputField.attr("name", "newResource_" + newIndex);
+	inputField.val("");
+}
+
 
 function addMoreActionRow(obj) {
 	var count = $("#numberOfActions");
@@ -140,7 +198,7 @@ function addMoreActionRow(obj) {
 
 	var cloned = $("tr[id='newActionRow_0']").clone();
 	cloned.attr("id", "newActionRow_" + newIndex);
-	$("#buttonPanel").before(cloned);
+	$("#buttonPanel_action").before(cloned);
 	cloned.show();
 
 	var checkBox = $("tr[id^='newActionRow_" + newIndex

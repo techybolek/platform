@@ -27,6 +27,12 @@ public class IdentityAuthorizationConstants {
 
 	public static final String COMBO_BOX_DEFAULT_VALUE = "---Select---";
 
+	public static final byte INSERT = 1;
+
+	public static final byte UPDATE = 2;
+
+	public static final byte DELETE = 3;
+
 	public static class SessionConstants {
 
 		public static final String MODULES = "modules";

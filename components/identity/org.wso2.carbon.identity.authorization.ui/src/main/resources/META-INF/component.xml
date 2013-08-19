@@ -11,9 +11,8 @@
 	<menus>
 		<menu>
 			<id>authorization_menu</id>
-			<i18n-key>identity.pap</i18n-key>
-			<i18n-bundle>org.wso2.carbon.identity.authorization.ui.i18n.Resources
-			</i18n-bundle>
+			<i18n-key>identity.custom.perm</i18n-key>
+			<i18n-bundle>org.wso2.carbon.identity.authorization.ui.i18n.Resources</i18n-bundle>
 			<parent-menu>configure_menu</parent-menu>
 			<link>../identity-authorization/index.jsp</link>
 			<region>region1</region>

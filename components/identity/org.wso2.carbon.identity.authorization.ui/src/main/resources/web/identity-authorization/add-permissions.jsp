@@ -23,12 +23,22 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="auth" uri="tld/identity-authoization.tld"%>
 
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
+	prefix="carbon"%>
+<script type="text/javascript" src="js/jquery.multiselect.min.js"></script>
 <script type="text/javascript" src="js/util.js"></script>
 <script type="text/javascript" src="js/cust_permissions.js"></script>
+<fmt:bundle basename="org.wso2.carbon.identity.authorization.ui.i18n.Resources" >
+<carbon:breadcrumb
+		label="root.actions.newperm"
+		resourceBundle="org.wso2.carbon.identity.authorization.ui.i18n.Resources"
+		topPage="false"
+		request="<%=request%>" />
 
 <div id="middle">
-	<h2>Custom Permissions</h2>
-	<h3>Add Permissions</h3>
+	<h2><fmt:message key="identity.cusom.perm.heading" /></h2>
+	<h3><fmt:message key="identity.cusom.perm.heading.add.perm" /></h3>
 	<div id="workArea" style="padding-bottom: 70px; margin-top: 10px;">
 
 		<auth:module config="<%=config%>" request="<%=request%>" action="1"></auth:module>
@@ -38,17 +48,17 @@
 			<table class="styledLeft" style="width: 65%; clear: both;">
 				<thead>
 					<tr>
-						<th>Module</th>
-						<th>Resource</th>
-						<th>Action</th>
-						<th>Role</th>
+						<th><fmt:message key="name.module" /></th>
+						<th><fmt:message key="name.resource" /></th>
+						<th><fmt:message key="name.action" /></th>
+						<th><fmt:message key="name.role"/></th>
 						<th></th>
 					</tr>
 				</thead>
 				<tbody>
 
 					<tr id="permRow_1">
-						<td><select id="permModule_1" name="permModule_1">
+						<td><select onchange="createDependancySections($(this));" id="permModule_1" name="permModule_1">
 								<c:forEach items="${modules }" var="module">
 
 									<option id="${module.moduleId }"
@@ -58,7 +68,11 @@
 						</select></td>
 						<td><input type="text" id="permResource_1"
 							name="permResource_1"></td>
-						<td><input type="text" id="permAction_1" name="permAction_1"></td>
+						<td>
+						
+						<input type="text" id="permAction_1" name="permAction_1">
+						
+						</td>
 						<td><input type="text" id="permRole_1" name="permRole_1"></td>
 						<td id="permAddMore_1"><a id="addMorePermissions_1"
 							style="background-image: url(../admin/images/add.gif);"
@@ -69,8 +83,8 @@
 					</tr>
 					<tr id="buttonPanel">
 						<td colspan="5" class="buttonRow"><input type="button"
-							onclick="finishAdding();" value="Finish" class="button">
-							<input type="button" onclick="cancellAdding();" value="Cancel"
+							onclick="finishAdding();" value="<fmt:message key="link.finish" />" class="button">
+							<input type="button" onclick="cancellAdding();" value="<fmt:message key="link.cancel" />"
 							class="button"></td>
 					</tr>
 				</tbody>
@@ -78,3 +92,4 @@
 		</form>
 	</div>
 </div>
+</fmt:bundle>

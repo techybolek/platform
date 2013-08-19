@@ -31,7 +31,7 @@
 	action="<%=(byte)Integer.parseInt(request.getParameter("operation"))%>"></auth:permission>
 <script type="text/javascript">
 	function forward() {
-		location.href = "view-permissions.jsp";
+		location.href = "view-permissions.jsp?region=region1&item=authorization_menu";
 	}
 
 	forward();

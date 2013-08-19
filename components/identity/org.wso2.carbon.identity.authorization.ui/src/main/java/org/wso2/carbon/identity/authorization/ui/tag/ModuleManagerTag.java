@@ -19,6 +19,7 @@
 package org.wso2.carbon.identity.authorization.ui.tag;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,9 +28,13 @@ import javax.servlet.jsp.PageContext;
 
 import org.wso2.carbon.identity.authorization.core.dto.xsd.PermissionModule;
 import org.wso2.carbon.identity.authorization.core.dto.xsd.PermissionRequest;
+import org.wso2.carbon.identity.authorization.core.dto.xsd.Resource;
 import org.wso2.carbon.identity.authorization.ui.ErrorStatusBean;
 import org.wso2.carbon.identity.authorization.ui.IdentityAuthorizationClient;
+import org.wso2.carbon.identity.authorization.ui.IdentityAuthorizationConstants;
 import org.wso2.carbon.identity.authorization.ui.IdentityAuthorizationConstants.SessionConstants;
+import org.wso2.carbon.registry.core.jdbc.dao.JDBCCommentsDAO;
+import org.wso2.carbon.registry.core.jdbc.dataaccess.JDBCDAOManager;
 
 /**
  * 
@@ -48,8 +53,6 @@ public class ModuleManagerTag extends BaseTag {
 
 	public ModuleManagerTag() {
 		super();
-
-		System.out.println("Base tag created for");
 	}
 
 	private byte action;
@@ -137,6 +140,17 @@ public class ModuleManagerTag extends BaseTag {
 
 		module.setActions(newActions.toArray(new String[newActions.size()]));
 
+		int numberOfNewResources = Integer.parseInt(req.getParameter("numberOfResources"));
+		List<Resource> resourceList = new ArrayList<Resource>();
+		for (int i = 0; i <= numberOfNewResources; i++) {
+			String resource = req.getParameter("newResource_" + i);
+			Resource res = new Resource();
+			res.setName(resource);
+			resourceList.add(res);
+		}
+
+		module.setResources(resourceList.toArray(new Resource[resourceList.size()]));
+
 		return module;
 	}
 
@@ -195,6 +209,34 @@ public class ModuleManagerTag extends BaseTag {
 		module.setDeletedActions(deletedActions.toArray(new String[deletedActions.size()]));
 		module.setActions(newActions.toArray(new String[newActions.size()]));
 
+		List<Resource> deletedResources = new ArrayList<Resource>();
+		List<Resource> newResources = new ArrayList<Resource>();
+		index = 1;
+		for (Resource res : module.getResources()) {
+			String deleted = req.getParameter("delete_" + res.getId());
+			if (deleted.equals(String.valueOf(res.getId()))) {
+				// this action is removed
+				res.setState(IdentityAuthorizationConstants.DELETE);
+				deletedResources.add(res);
+			}
+			++index;
+		}
+
+		int numberOfNewResources = Integer.parseInt(req.getParameter("numberOfResources"));
+		for (int i = 1; i <= numberOfNewResources; i++) {
+			String resource = req.getParameter("newResource_" + i);
+			String deleted = req.getParameter("deleteNewResource_" + i);
+			if (!TOKEN_DELETED.equals(deleted)) {
+				Resource res = new Resource();
+				res.setName(resource);
+				newResources.add(res);
+			}
+		}
+
+		List<Resource> resources = new ArrayList<Resource>();
+		resources.addAll(deletedResources);
+		resources.addAll(newResources);
+		module.setResources(resources.toArray(new Resource[resources.size()]));
 		return module;
 
 	}
