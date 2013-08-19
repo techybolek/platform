@@ -413,9 +413,9 @@
 		<Dialect dialectURI="http://axschema.org">
 			<Claim>
 				<ClaimURI>http://axschema.org/namePerson/first</ClaimURI>
-				<DisplayName>Nick Name</DisplayName>
-				<AttributeID>nickName</AttributeID>
-				<Description>Nick Name</Description>
+				<DisplayName>First Name</DisplayName>
+				<AttributeID>cn</AttributeID>
+				<Description>First Name</Description>
 				<Required />
 				<SupportedByDefault />
 			</Claim>
