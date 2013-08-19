@@ -48,6 +48,9 @@ import org.wso2.carbon.appfactory.utilities.project.ProjectUtils;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.email.sender.api.EmailSender;
 import org.wso2.carbon.email.sender.api.EmailSenderConfiguration;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.*;
 import org.wso2.carbon.user.core.Permission;
@@ -580,7 +583,27 @@ public class ApplicationManagementService extends AbstractAdmin {
     }
 
     public String[] getAllApplications(String domainName, String userName) throws ApplicationManagementException {
-        String apps[] = new String[0]; /*= userApplicationCache.getValueFromCache(userName);*/
+        List<String> applications = new ArrayList<String>();
+        try {
+            GenericArtifactManager manager = ProjectUtils.getApplicationRXTManager(domainName);
+            for (GenericArtifact artifact : manager.getAllGenericArtifacts()) {
+                Application application = ProjectUtils.getAppInfoFromRXT(artifact);
+                applications.add(application.getId());
+            }
+        } catch (AppFactoryException e) {
+            String msg = "Error while getting applications of  " + userName + " in " + domainName;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (GovernanceException e) {
+            String msg = "Error while getting applications RXTs  " + userName + " in " + domainName;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+        return applications.toArray(new String[applications.size()]);
+
+
+//        Removing this code segment since we are removing roles
+        /*String apps[] = new String[0]; *//*= userApplicationCache.getValueFromCache(userName);*//*
         //TODO:fix caching
         List<String> list;
         int tenantId = getTenantID(domainName);
@@ -609,7 +632,7 @@ public class ApplicationManagementService extends AbstractAdmin {
             apps = list.toArray(new String[list.size()]);
         }
         //userApplicationCache.addToCache(userName, apps);
-        return apps;
+        return apps;*/
     }
 
    /* public String[] getAllApplications(String userName) throws ApplicationManagementException {
