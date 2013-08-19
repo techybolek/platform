@@ -220,10 +220,6 @@
                                 </bundleDef>
                                 <bundleDef> org.wso2.carbon:org.wso2.carbon.appfactory.core
                                 </bundleDef>
-                                <bundleDef> org.wso2.carbon:org.wso2.carbon.appfactory.events.notification
-                                </bundleDef>
-                                <bundleDef> org.wso2.carbon:org.wso2.carbon.appfactory.events.notification.stub
-                                </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.hostobjects.sso
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.appfactory.application.mgt
@@ -250,7 +246,6 @@
                                 <bundleDef> org.wso2.carbon:org.wso2.carbon.appfactory.repository.mgt.service</bundleDef>
                                 <bundleDef> org.apache.maven.scm.wso2:maven-scm</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.appfactory.utilities</bundleDef>
-                                <bundleDef> org.wso2.carbon:org.wso2.carbon.appfactory.events.notification.stub</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.appfactory.buildserver.teanant.mgt.stub</bundleDef>
                                 <bundleDef> org.wso2.carbon:org.wso2.carbon.appfactory.apiManager.integration</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.appfactory.bam.integration</bundleDef>
