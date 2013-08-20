@@ -3,7 +3,7 @@
     <config id="GSpreadDataSource">
         <property name="gspread_datasource">https://spreadsheets.google.com/ccc?key=0Av5bU8aVtFjPdElrUVN3VmZlRkoyM1ZzVlE1MzdtbXc&amp;hl=en</property>
         <property name="gspread_visibility">private</property>
-        <property name="gspread_username">zaqxsw987593</property>
+        <property name="gspread_username">zaqxsw987592</property>
         <property name="gspread_password">oijoacxe42</property>
     </config>
     <query id="aa" useConfig="GSpreadDataSource">
