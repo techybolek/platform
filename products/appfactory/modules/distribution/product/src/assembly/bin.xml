@@ -38,7 +38,7 @@
                 <exclude>**/carbon.xml</exclude>
                 <exclude>**/axis2/axis2.xml</exclude>
                 <exclude>**/dbscripts/**</exclude>
-		<exclude>**/INSTALL.txt</exclude>
+		        <exclude>**/INSTALL.txt</exclude>
                 <exclude>**/README.txt</exclude>
                 <exclude>**/LICENSE.txt</exclude>
                 <exclude>**/release-notes.html</exclude>
@@ -46,7 +46,7 @@
                 <exclude>**/user-mgt.xml</exclude>
                 <exclude>**/conf/security/cipher-text.properties</exclude>
                 <exclude>**/conf/security/cipher-tool.properties</exclude>
-		<exclude>**/repository/resources/security/client-truststore.jks</exclude>
+		        <exclude>**/repository/resources/security/client-truststore.jks</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -139,6 +139,7 @@
                 <include>**/krb5.conf</include>
                 <include>**/jaas.conf</include>
                 <include>**/zoo.cfg</include>
+                <include>**/tasks-config.xml</include>
             </includes>
         </fileSet>
         <fileSet>
