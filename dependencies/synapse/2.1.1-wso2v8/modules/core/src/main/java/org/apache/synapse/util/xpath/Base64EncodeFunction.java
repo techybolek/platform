@@ -104,6 +104,7 @@ public class Base64EncodeFunction implements Function {
         String encodedString;
         try {
             encodedString = new String(encodedValue, encoding).trim();
+            encodedString = encodedString.replace("\r\n", "");
         } catch (UnsupportedEncodingException e) {
             String msg = "Unsupported Encoding";
             log.error(msg, e);

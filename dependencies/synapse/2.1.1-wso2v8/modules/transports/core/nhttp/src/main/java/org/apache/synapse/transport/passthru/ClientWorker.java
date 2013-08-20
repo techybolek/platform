@@ -167,6 +167,9 @@ public class ClientWorker implements Runnable {
         try {
             if (expectEntityBody) {
                 String cType = response.getHeader(HTTP.CONTENT_TYPE);
+                if(cType == null){
+                	cType =  response.getHeader(HTTP.CONTENT_TYPE.toLowerCase());
+                }
                 String contentType;
                 if (cType != null) {
                     // This is the most common case - Most of the time servers send the Content-Type
