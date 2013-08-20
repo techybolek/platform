@@ -62,9 +62,7 @@
 <importFeatureDef>org.wso2.carbon.transport.mail:${carbon.platform.version}</importFeatureDef>
 <importFeatureDef>org.wso2.carbon.xfer:${carbon.platform.version}</importFeatureDef>
 <importFeatureDef>org.wso2.carbon.mex:${carbon.platform.version}</importFeatureDef>
-<importFeatureDef>org.wso2.carbon.event.common:${carbon.platform.version}</importFeatureDef>
-<importFeatureDef>org.wso2.carbon.event.server:${carbon.platform.version}</importFeatureDef>
-<importFeatureDef>org.wso2.carbon.event.ui:${carbon.platform.version}</importFeatureDef>
+<importFeatureDef>org.wso2.carbon.event:${carbon.platform.version}</importFeatureDef>
 <importFeatureDef>org.wso2.carbon.discovery.core:${carbon.platform.version}</importFeatureDef>
 <importFeatureDef>org.wso2.carbon.discovery.admin.ui:${carbon.platform.version}</importFeatureDef>
 <importFeatureDef>org.wso2.carbon.deployment.synchronizer:${carbon.platform.version}</importFeatureDef>
