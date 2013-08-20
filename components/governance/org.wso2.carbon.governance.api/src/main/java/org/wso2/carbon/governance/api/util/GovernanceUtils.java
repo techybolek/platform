@@ -596,7 +596,10 @@ public class GovernanceUtils {
 		while (iter.hasNext()) {
 			String current = iter.next();
 			String name = current.substring(2,current.length()-1);
-
+            //To replace special values such as {@resourcePath}
+            if(name.equals("resourcePath")){
+                parameterizedString = parameterizedString.replaceAll("\\"+current.replace("}", "\\}"), resourcePath);
+            }
 			try {
 				governanceArtifact = GovernanceUtils.retrieveGovernanceArtifactByPath(requestContext.getSystemRegistry(), resourcePath);
 				if (governanceArtifact!=null&&governanceArtifact.getAttribute(name)!=null) {
