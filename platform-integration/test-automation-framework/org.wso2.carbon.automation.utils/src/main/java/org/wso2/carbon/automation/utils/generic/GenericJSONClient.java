@@ -46,7 +46,7 @@ public class GenericJSONClient {
             URLConnection conn = new URL(endpoint).openConnection();
             conn.setRequestProperty(GenericJSONClient.HEADER_CONTENT_TYPE, contentType);
             conn.setRequestProperty(GenericJSONClient.HEADER_ACCEPT_CHARSET, charset);
-
+            conn.setDoOutput(true);
             OutputStream os = conn.getOutputStream();
             os.write(query.getBytes(charset));
             os.flush();
@@ -81,7 +81,7 @@ public class GenericJSONClient {
             conn.setRequestProperty(GenericJSONClient.HEADER_CONTENT_TYPE, contentType);
             conn.setRequestProperty(GenericJSONClient.HEADER_ACCEPT_CHARSET, charset);
             conn.setRequestMethod("POST");
-
+            conn.setDoOutput(true);
             OutputStream os = conn.getOutputStream();
             os.write(queryString.getBytes(charset));
             os.flush();
