@@ -25,5 +25,8 @@ public interface JenkinsTenantConstants {
 	public static String JENKINS_TENANT_HOME = "JENKINS_TENANT_HOME";
 
 	public static String COMMON_PLUGINS_DIR = "plugins";
+	public static String COMMON_CONFIGS_DIR = "configs";
+	
+	public static String COMMON_CONFIG_DESTINATION = ".";
 
 }

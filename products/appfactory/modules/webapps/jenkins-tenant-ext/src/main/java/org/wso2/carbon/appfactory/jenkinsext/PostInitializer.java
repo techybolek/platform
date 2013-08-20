@@ -59,7 +59,9 @@ public class PostInitializer implements ServletContextListener {
 			String jenkinsHome = (String) env.lookup("JENKINS_HOME");
 
 			AppfactoryPluginDeployer pluginDeloyer = new AppfactoryPluginDeployer();
+            AppfactoryConfigurationDeployer configDeployer = new AppfactoryConfigurationDeployer();
 			pluginDeloyer.copyBundledPlugin(tenantHome, jenkinsHome);
+			configDeployer.copyBundledConfigs(tenantHome, jenkinsHome);	
 
 		} catch (IOException e) {
 			e.printStackTrace();

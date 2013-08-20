@@ -50,6 +50,7 @@ cp $resorce_dir/lib/jenkins/org.wso2.carbon.appfactory.jenkinsext-1.0-SNAPSHOT.j
 echo "[Build Server] Copying jenkins plugins..."
 mkdir -p $JENKINS_TENANT_HOME
 cp -r $resorce_dir/lib/jenkins/plugins $JENKINS_TENANT_HOME/
+cp -r $resorce_dir/lib/jenkins/configs $JENKINS_TENANT_HOME/
 
 echo "[Build Server] Copying AS JNDI patch..."
 cp $resorce_dir/lib/jenkins/AS-patch/org.wso2.carbon.tomcat_4.1.0.jar $BUILD_SERVER_AS_HOME/repository/components/plugins/
