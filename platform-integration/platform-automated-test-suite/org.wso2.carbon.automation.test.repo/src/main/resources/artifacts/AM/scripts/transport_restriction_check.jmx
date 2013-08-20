@@ -71,7 +71,7 @@
             </elementProp>
             <elementProp name="subsPrefix" elementType="Argument">
               <stringProp name="Argument.name">subsPrefix</stringProp>
-              <stringProp name="Argument.value">transport_user</stringProp>
+              <stringProp name="Argument.value">transport_users</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="publisherName" elementType="Argument">
@@ -525,18 +525,6 @@ Failure=true;
                     <boolProp name="HTTPArgument.use_equals">true</boolProp>
                     <stringProp name="Argument.name">allFieldsValues</stringProp>
                   </elementProp>
-                  <elementProp name="" elementType="HTTPArgument">
-                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                    <stringProp name="Argument.value"></stringProp>
-                    <stringProp name="Argument.metadata">=</stringProp>
-                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
-                  </elementProp>
-                  <elementProp name="" elementType="HTTPArgument">
-                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                    <stringProp name="Argument.value"></stringProp>
-                    <stringProp name="Argument.metadata">=</stringProp>
-                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
-                  </elementProp>
                 </collectionProp>
               </elementProp>
               <stringProp name="HTTPSampler.domain">${storeIP}</stringProp>
@@ -687,7 +675,7 @@ vars.put(&quot;appid&quot;, appid);</stringProp>
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="action" elementType="HTTPArgument">
                     <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                    <stringProp name="Argument.value">addAPISubscription</stringProp>
+                    <stringProp name="Argument.value">addSubscription</stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                     <boolProp name="HTTPArgument.use_equals">true</boolProp>
                     <stringProp name="Argument.name">action</stringProp>
@@ -726,6 +714,13 @@ vars.put(&quot;appid&quot;, appid);</stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                     <boolProp name="HTTPArgument.use_equals">true</boolProp>
                     <stringProp name="Argument.name">version</stringProp>
+                  </elementProp>
+                  <elementProp name="username" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.value">${subsPrefix}_${subsCount}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                    <stringProp name="Argument.name">username</stringProp>
                   </elementProp>
                 </collectionProp>
               </elementProp>
