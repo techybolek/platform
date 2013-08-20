@@ -94,7 +94,7 @@ public class POXSecurityHandler implements Handler {
 
          //this handler only intercepts
         if (!(msgCtx.isDoingREST() || isSOAPWithoutSecHeader(msgCtx)) ||
-		!msgCtx.getIncomingTransportName().equals("https")) {
+		!msgCtx.getIncomingTransportName().equals("https") || (basicAuthHeader == null)) {
             return InvocationResponse.CONTINUE;
         }
 
