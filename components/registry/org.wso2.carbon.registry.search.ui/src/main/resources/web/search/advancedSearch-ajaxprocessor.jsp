@@ -1,20 +1,20 @@
 <!--
- ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- ~
- ~ WSO2 Inc. licenses this file to you under the Apache License,
- ~ Version 2.0 (the "License"); you may not use this file except
- ~ in compliance with the License.
- ~ You may obtain a copy of the License at
- ~
- ~    http://www.apache.org/licenses/LICENSE-2.0
- ~
- ~ Unless required by applicable law or agreed to in writing,
- ~ software distributed under the License is distributed on an
- ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- ~ KIND, either express or implied.  See the License for the
- ~ specific language governing permissions and limitations
- ~ under the License.
- -->
+~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+~
+~ WSO2 Inc. licenses this file to you under the Apache License,
+~ Version 2.0 (the "License"); you may not use this file except
+~ in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~    http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing,
+~ software distributed under the License is distributed on an
+~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~ KIND, either express or implied.  See the License for the
+~ specific language governing permissions and limitations
+~ under the License.
+-->
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -35,47 +35,47 @@
 
 
 <%
-        String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-        AdvancedSearchResultsBean advancedSearchBean;
-        String requestedPage = request.getParameter(UIConstants.REQUESTED_PAGE);
-        try {
+    String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+    AdvancedSearchResultsBean advancedSearchBean;
+    String requestedPage = request.getParameter(UIConstants.REQUESTED_PAGE);
+    try {
 
-            int start;
-            int count = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
-            if (requestedPage != null) {
-                start = (int) ((Integer.parseInt(requestedPage) - 1) * (RegistryConstants.ITEMS_PER_PAGE * 1.5));
-            } else {
-                start = 1;
-            }
-            PaginationContext.init(start, count, "", "", 1500);
-            SearchServiceClient client = new SearchServiceClient(cookie, config, session);
-            advancedSearchBean = client.getAdvancedSearchResults(request);
+        int start;
+        int count = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+        if (requestedPage != null) {
+            start = (int) ((Integer.parseInt(requestedPage) - 1) * (RegistryConstants.ITEMS_PER_PAGE * 1.5));
+        } else {
+            start = 1;
+        }
+        PaginationContext.init(start, count, "", "", 1500);
+        SearchServiceClient client = new SearchServiceClient(cookie, config, session);
+        advancedSearchBean = client.getAdvancedSearchResults(request);
 
-        } catch (Exception e) {
-            response.setStatus(500);
+    } catch (Exception e) {
+        response.setStatus(500);
 %>
 <script type="text/javascript">
     CARBON.showErrorDialog("<%=e.getMessage()%>");
 </script>
 <%
-            return;
-        }
+        return;
+    }
     ResourceData[] resourceDataList;
     resourceDataList = advancedSearchBean.getResourceDataList();
     int itemsPerPage = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
     int pageNumber = 1;
     int numberOfPages;
 
-        if (requestedPage != null && requestedPage.length() > 0) {
-            pageNumber = new Integer(requestedPage);
-        }
+    if (requestedPage != null && requestedPage.length() > 0) {
+        pageNumber = new Integer(requestedPage);
+    }
 
-        int rowCount = Integer.parseInt(session.getAttribute("row_count").toString());
-        if (rowCount % itemsPerPage == 0) {
-            numberOfPages = rowCount / itemsPerPage;
-        } else {
-            numberOfPages = rowCount / itemsPerPage + 1;
-        }
+    int rowCount = Integer.parseInt(session.getAttribute("row_count").toString());
+    if (rowCount % itemsPerPage == 0) {
+        numberOfPages = rowCount / itemsPerPage;
+    } else {
+        numberOfPages = rowCount / itemsPerPage + 1;
+    }
 
 
 
@@ -113,13 +113,10 @@
     <%
         }
     %>
-<%
-        
-        if (resourceDataList != null && resourceDataList.length >0) {
-    %>
-    
+
+
     <h3 style="margin-top:20px;margin-bottom:20px;"> <fmt:message key="search.results"/> </h3>
-    
+
     <table cellpadding="0" cellspacing="0" border="0" style="width:100%" class="styledLeft">
         <thead>
         <tr>
@@ -130,6 +127,10 @@
         </tr>
         </thead>
         <tbody>
+        <%
+
+            if (resourceDataList != null && resourceDataList.length >0) {
+        %>
         <%
             for (ResourceData resourceData : resourceDataList) {
                 if (resourceData == null) {
@@ -211,50 +212,47 @@
                                   resourceBundle="org.wso2.carbon.registry.search.ui.i18n.Resources"
                                   nextKey="next" prevKey="prev" tdColSpan="4"
                                   paginationFunction="submitAdvSearchForm({0})" />
+        <%
+        } else {
+        %>
+        <tr id="1">
+            <td style="padding-left:5px;padding-top:3px;text-align:left;">
+                <strong><fmt:message key="your.search.did.not.match.any.resources"/></strong>
+            </td>
+        </tr>
+        <%
+            }
+        %>
 
-                 <%
-                     if (resourceExists) {
-                 %>
-             <tr>
-                 <td colspan="4">
+        <tr>
+            <td colspan="4">
 
-                     <div class="search-subtitle" style="padding-left:10px;padding-bottom:10px"><fmt:message
-                             key="save.search"/></div>
-                     <div style="padding-left:10px;color:#666666;font-style:italic;"><fmt:message
-                             key="search.save.txt"/></div>
+                <div class="search-subtitle" style="padding-left:10px;padding-bottom:10px"><fmt:message
+                        key="save.search"/></div>
+                <div style="padding-left:10px;color:#666666;font-style:italic;"><fmt:message
+                        key="search.save.txt"/></div>
 
 
-                     <form id="saveAdvancedSearchForm" name="saveAdvancedSearch" action=""
-                           method="get">
-                         <table class="normal">
-                             <tr>
-                                 <td class="leftCol-small"><fmt:message key="filter.name"/></td>
-                                 <td>
-                                     <input type="text" name="saveFilterName" id="#_saveFilterName"
-                                            onkeypress="handletextBoxKeyPress(event)"/>
-                                 </td>
-                                 <td>
-                                     <input type="button" id="#_clicked"
-                                            value="<fmt:message key="save"/>" class="button"
-                                            onclick="submitSaveSearchForm()"/>
-                                 </td>
-                             </tr>
-                         </table>
-                     </form>
-                 </td>
-             </tr>
-                <%
-                     }
-                 %>
+                <form id="saveAdvancedSearchForm" name="saveAdvancedSearch" action=""
+                      method="get">
+                    <table class="normal">
+                        <tr>
+                            <td class="leftCol-small"><fmt:message key="filter.name"/></td>
+                            <td>
+                                <input type="text" name="saveFilterName" id="#_saveFilterName"
+                                       onkeypress="handletextBoxKeyPress(event)"/>
+                            </td>
+                            <td>
+                                <input type="button" id="#_clicked"
+                                       value="<fmt:message key="save"/>" class="button"
+                                       onclick="submitSaveSearchForm()"/>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+        </tr>
+
         </tbody>
     </table>
-
-    <%
-    } else {
-    %>
-    
-    <strong><fmt:message key="your.search.did.not.match.any.resources"/></strong>
-    <%
-        }
-    %>
 </fmt:bundle>
