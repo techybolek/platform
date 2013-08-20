@@ -70,6 +70,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
 import org.apache.synapse.transport.http.conn.Scheme;
 import org.apache.synapse.transport.http.conn.ServerConnFactory;
 import org.apache.synapse.transport.nhttp.config.ServerConnFactoryBuilder;
@@ -160,7 +161,9 @@ public class HttpCoreNIOListener implements TransportListener, ManagementSupport
                         cfg.getProperty(NhttpConstants.SO_TIMEOUT_RECEIVER, 60000))
                 .setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE,
                         cfg.getProperty(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024))
-                .setParameter(CoreProtocolPNames.ORIGIN_SERVER, "Synapse-HttpComponents-NIO");
+                .setParameter(CoreProtocolPNames.ORIGIN_SERVER, "Synapse-HttpComponents-NIO")
+                .setParameter(CoreProtocolPNames.HTTP_ELEMENT_CHARSET,
+                        cfg.getStringValue(CoreProtocolPNames.HTTP_ELEMENT_CHARSET, HTTP.DEFAULT_PROTOCOL_CHARSET));
 
         name = transportIn.getName().toUpperCase(Locale.US) + " Listener";
         scheme = initScheme();

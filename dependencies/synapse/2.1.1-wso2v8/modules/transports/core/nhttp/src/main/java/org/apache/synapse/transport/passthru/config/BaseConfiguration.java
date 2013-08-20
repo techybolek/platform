@@ -27,6 +27,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HTTP;
 import org.apache.synapse.transport.passthru.jmx.PassThroughTransportMetricsCollector;
 import org.apache.synapse.transport.passthru.util.BufferFactory;
 
@@ -112,7 +113,9 @@ public abstract class BaseConfiguration {
                 setParameter(HttpProtocolParams.ORIGIN_SERVER,
                         conf.getStringProperty(HttpProtocolParams.ORIGIN_SERVER,  "WSO2-PassThrough-HTTP")).
                 setParameter(HttpProtocolParams.USER_AGENT,
-                        conf.getStringProperty(HttpProtocolParams.USER_AGENT, "Synapse-PT-HttpComponents-NIO"));
+                        conf.getStringProperty(HttpProtocolParams.USER_AGENT, "Synapse-PT-HttpComponents-NIO")).
+                setParameter(HttpProtocolParams.HTTP_ELEMENT_CHARSET,
+                        conf.getStringProperty(HttpProtocolParams.HTTP_ELEMENT_CHARSET, HTTP.DEFAULT_PROTOCOL_CHARSET));
 
         return params;
     }
