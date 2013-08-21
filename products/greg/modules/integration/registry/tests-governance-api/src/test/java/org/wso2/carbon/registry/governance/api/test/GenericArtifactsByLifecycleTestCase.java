@@ -64,39 +64,67 @@ public class GenericArtifactsByLifecycleTestCase {
         Assert.assertEquals(lifecycleState, "Development", "Different lifecycle state found");
 
         GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
-        GenericArtifact[] filterByLCName = genericArtifactManager.
-                getAllGenericArtifactsByLifecycle(LIFE_CYCLE_NAME);
+        GenericArtifact[] filterByLCName = genericArtifactManager.findGenericArtifacts(new GenericArtifactFilter() {
+            @Override
+            public boolean matches(GenericArtifact artifact) throws GovernanceException {
+                return artifact.getQName().getLocalPart().equals("GenericArtifactStoreService") &&
+                        LIFE_CYCLE_NAME.equals(artifact.getLifecycleName());
+            }
+        });
         Assert.assertEquals(filterByLCName.length, 1,
                 "Wrong number of artifacts associated with the lifecycle found");
         Assert.assertEquals(filterByLCName[0].getPath(), "/trunk/services/com/wso2/www/greg/store/GenericArtifactStoreService",
                 "Different artifact path found");
 
-        GenericArtifact[] filterByLCNameAndStatus = genericArtifactManager.
-                getAllGenericArtifactsByLifecycleStatus(LIFE_CYCLE_NAME, "Development");
+        GenericArtifact[] filterByLCNameAndStatus = genericArtifactManager.findGenericArtifacts(new GenericArtifactFilter() {
+            @Override
+            public boolean matches(GenericArtifact artifact) throws GovernanceException {
+                return artifact.getQName().getLocalPart().equals("GenericArtifactStoreService") &&
+                        "Development".equals(artifact.getLifecycleState());
+            }
+        });
         Assert.assertEquals(filterByLCNameAndStatus.length, 1,
                 "Wrong number of artifacts associated with the lifecycle in the given lifecycle state found");
         Assert.assertEquals(filterByLCNameAndStatus[0].getPath(), "/trunk/services/com/wso2/www/greg/store/GenericArtifactStoreService",
                         "Different artifact path found");
     }
 
-    @Test(groups = {"wso2.greg"}, description = "Artifacts by LC")
+    @Test(groups = {"wso2.greg"}, description = "Artifacts by LC", dependsOnMethods = "testAttachLifecycle")
     public void testGetArtifactsAfterPromoting() throws RegistryException {
         GenericArtifact artifact = getAddedGenericArtifact();
         Map<String, String> map = new HashMap<String, String>();
         map.put("/_system/governance/trunk/services/com/wso2/www/greg/store/GenericArtifactStoreService", "2.3.5");
         artifact.invokeAction("Promote", map);
 
-        GenericArtifact[] filterByLCName = genericArtifactManager.
-                getAllGenericArtifactsByLifecycle(LIFE_CYCLE_NAME);
+        GenericArtifact[] filterByLCName = genericArtifactManager.findGenericArtifacts(new GenericArtifactFilter() {
+            @Override
+            public boolean matches(GenericArtifact artifact) throws GovernanceException {
+                return artifact.getQName().getLocalPart().equals("GenericArtifactStoreService") &&
+                        LIFE_CYCLE_NAME.equals(artifact.getLifecycleName());
+            }
+        });
+        GenericArtifact artifactInBranch, artifactInTrunk;
+        if(filterByLCName[0].getPath().startsWith("/branches/testing/services")){
+            artifactInBranch = filterByLCName[0];
+            artifactInTrunk = filterByLCName[1];
+        } else {
+            artifactInBranch = filterByLCName[1];
+            artifactInTrunk = filterByLCName[0];
+        }
         Assert.assertEquals(filterByLCName.length, 2,
                 "Wrong number of artifacts associated with the lifecycle found");
-        Assert.assertEquals(filterByLCName[0].getPath(), "/trunk/services/com/wso2/www/greg/store/GenericArtifactStoreService",
+        Assert.assertEquals(artifactInTrunk.getPath(), "/trunk/services/com/wso2/www/greg/store/GenericArtifactStoreService",
                 "Different artifact path found");
-        Assert.assertEquals(filterByLCName[1].getPath(), "/branches/testing/services/com/wso2/www/greg/store/2.3.5/GenericArtifactStoreService",
+        Assert.assertEquals(artifactInBranch.getPath(), "/branches/testing/services/com/wso2/www/greg/store/2.3.5/GenericArtifactStoreService",
                         "Different artifact path found");
 
-        GenericArtifact[] filterByLCNameAndStatus = genericArtifactManager.
-                getAllGenericArtifactsByLifecycleStatus(LIFE_CYCLE_NAME, "Testing");
+        GenericArtifact[] filterByLCNameAndStatus = genericArtifactManager.findGenericArtifacts(new GenericArtifactFilter() {
+            @Override
+            public boolean matches(GenericArtifact artifact) throws GovernanceException {
+                return artifact.getQName().getLocalPart().equals("GenericArtifactStoreService") &&
+                        "Testing".equals(artifact.getLifecycleState());
+            }
+        });
         Assert.assertEquals(filterByLCNameAndStatus.length, 1,
                         "Wrong number of artifacts associated with the lifecycle in the given lifecycle state found");
         Assert.assertEquals(filterByLCNameAndStatus[0].getPath(),

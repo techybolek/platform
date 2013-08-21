@@ -25,7 +25,6 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.automation.api.clients.governance.HumanTaskAdminClient;
 import org.wso2.carbon.automation.api.clients.governance.LifeCycleAdminServiceClient;
-import org.wso2.carbon.automation.api.clients.governance.LifeCycleManagementClient;
 import org.wso2.carbon.automation.api.clients.governance.WorkItem;
 import org.wso2.carbon.automation.api.clients.registry.InfoServiceAdminClient;
 import org.wso2.carbon.automation.api.clients.registry.PropertiesAdminServiceClient;
@@ -34,8 +33,6 @@ import org.wso2.carbon.automation.api.clients.registry.ResourceAdminServiceClien
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.annotations.ExecutionEnvironment;
 import org.wso2.carbon.automation.core.annotations.SetEnvironment;
-import org.wso2.carbon.automation.core.utils.UserInfo;
-import org.wso2.carbon.automation.core.utils.UserListCsvReader;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.core.utils.environmentutils.ManageEnvironment;
 import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
@@ -88,6 +85,7 @@ public class ServicesResourceInformationManagementTestCase {
     private Registry governance, governance2;
     int userId = ProductConstant.ADMIN_USER_ID;
     int userId2 = 2;
+    String startDate, endDate;
 
     Service newService, serviceForInformationVerification, serviceForCommentVerification,
             serviceForCheckpointVerification, serviceForSavingServiceTestCase,
@@ -99,7 +97,7 @@ public class ServicesResourceInformationManagementTestCase {
                     "src/test/resources/artifacts/GREG/wsdl/info.wsdl";
     private final static String POLICY_URL =
             "http://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
-            + "platform-integration/system-test-framework/core/org.wso2.automation.platform.core/"
+            + "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/"
             + "src/main/resources/artifacts/GREG/policy/UTPolicy.xml";
     private final static String SCHEMA_URL =
             "https://svn.wso2.org/repos/wso2/trunk/commons/qa/"
@@ -398,9 +396,9 @@ public class ServicesResourceInformationManagementTestCase {
 
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
         Calendar now = Calendar.getInstance();
-        String startDate = dateFormat.format(now.getTime());
+        startDate = dateFormat.format(now.getTime());
         now.add(Calendar.DAY_OF_MONTH, 2);
-           String endDate = dateFormat.format(now.getTime());
+        endDate = dateFormat.format(now.getTime());
 
         serviceForRetentionVerification =
                 serviceManager.newService(new QName(
@@ -427,7 +425,8 @@ public class ServicesResourceInformationManagementTestCase {
      */
     @Test(groups = "wso2.greg", description = "Retention Verification", dependsOnMethods = {"testRetentionVerification"},
           expectedExceptions = GovernanceException.class)
-    public void testRetentionVerification2() throws GovernanceException {
+    public void testRetentionVerification2() throws GovernanceException,
+            PropertiesAdminServiceRegistryExceptionException, RemoteException {
         serviceManager2.removeService(serviceForRetentionVerification.getId());
     }
 
@@ -578,7 +577,9 @@ public class ServicesResourceInformationManagementTestCase {
     }
 
     @AfterClass(alwaysRun = true)
-    public void endGame() throws RegistryException {
+    public void endGame() throws RegistryException, PropertiesAdminServiceRegistryExceptionException, RemoteException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
+        removeServiceRetention(ROOT + serviceForRetentionVerification.getPath());
 
         deleteService(serviceForCheckpointVerification);
         deleteService(serviceForCommentVerification);
@@ -604,10 +605,10 @@ public class ServicesResourceInformationManagementTestCase {
             }
         }
 
-        wsdlManager.removeWsdl(wsdl.getId());
+        //wsdlManager.removeWsdl(wsdl.getId());
         policyManager.removePolicy(policy.getId());
         schemaManager.removeSchema(schema.getId());
-        endpointManager.removeEndpoint(endpoint.getId());
+
         governance = null;
         governance2 = null;
         newService = null;
@@ -643,6 +644,11 @@ public class ServicesResourceInformationManagementTestCase {
         endpoint = null;
     }
 
+    private void removeServiceRetention(String path) throws GovernanceException,
+            PropertiesAdminServiceRegistryExceptionException, RemoteException {
+        propertiesAdminServiceClient.setRetentionProperties(path, "can_remove",
+                startDate, endDate);
+    }
     private void deleteService(Service service) throws RegistryException {
         if (service != null) {
             if (governance.resourceExists(service.getPath())) {
