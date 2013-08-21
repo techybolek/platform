@@ -19,15 +19,16 @@
 
 package org.apache.cassandra.io.sstable;
 
-import java.io.*;
-import java.util.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.cassandra.db.commitlog.ReplayPosition;
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.utils.EstimatedHistogram;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Metadata for a SSTable.
@@ -217,6 +218,11 @@ public class SSTableMetadata
             ReplayPosition replayPosition = desc.metadataIncludesReplayPosition
                                           ? ReplayPosition.serializer.deserialize(dis)
                                           : ReplayPosition.NONE;
+            if (!desc.metadataIncludesModernReplayPosition) {
+                // replay position may be "from the future" thanks to older versions generating them with nanotime.
+                // make sure we don't omit replaying something that we should.  see CASSANDRA-4782
+                replayPosition = ReplayPosition.NONE;
+            }
             long maxTimestamp = desc.containsTimestamp() ? dis.readLong() : Long.MIN_VALUE;
             if (!desc.tracksMaxTimestamp) // see javadoc to Descriptor.containsTimestamp
                 maxTimestamp = Long.MIN_VALUE;
