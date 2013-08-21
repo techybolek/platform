@@ -261,20 +261,20 @@ public class GovernanceMgtUIListMetadataServiceComponent {
         }
     }
     protected void deactivate(ComponentContext context) {
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
-            serviceRegistration = null;
-        }
-        try {
-            List<TaskInfo> tasks = CommonUtil.getTaskManager().getAllTasks();
-            for (TaskInfo task : tasks) {
-                CommonUtil.getTaskManager().deleteTask(task.getName());
-            }
-//            ArtifactCacheManager.getCacheManager().removeTenantArtifactCache();
-        } catch (TaskException e) {
-            log.error("Error while stopping the tasks", e);
-        }
-        log.debug("Governance List Metadata bundle is deactivated ");
+//        if (serviceRegistration != null) {
+//            serviceRegistration.unregister();
+//            serviceRegistration = null;
+//        }
+//        try {
+//            List<TaskInfo> tasks = CommonUtil.getTaskManager().getAllTasks();
+//            for (TaskInfo task : tasks) {
+//                CommonUtil.getTaskManager().deleteTask(task.getName());
+//            }
+////            ArtifactCacheManager.getCacheManager().removeTenantArtifactCache();
+//        } catch (TaskException e) {
+//            log.error("Error while stopping the tasks", e);
+//        }
+//        log.debug("Governance List Metadata bundle is deactivated ");
     }
 
     protected void setRegistryService(RegistryService registryService) {
