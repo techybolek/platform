@@ -669,7 +669,6 @@ public class ProjectUtils {
             artifact.setAttribute("application_branchcount", newBranchCount);
 
             artifactManager.updateGenericArtifact(artifact);
-            updateBranchCount(userRegistry, applicationId,domainName);
 
             log.info(String.format("Application - %s Branch count is updated to - %s", applicationId, newBranchCount));
         } catch (RegistryException e) {
