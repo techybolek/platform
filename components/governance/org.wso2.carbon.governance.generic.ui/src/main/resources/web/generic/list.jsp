@@ -125,7 +125,7 @@
         } else {
             start = 1;
         }
-        PaginationContext.init(start, count, sortOrder, sortBy, 1500);
+        PaginationContext.init(start, count, sortOrder, sortBy, Integer.MAX_VALUE);
         ManageGenericArtifactServiceClient client = new ManageGenericArtifactServiceClient(config, session);
 
         if(client != null) {
