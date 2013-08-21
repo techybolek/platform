@@ -126,7 +126,7 @@
 	        var status;
 	        var newStatus;
 	        var className;
-	        if(existingStatus=='BLOCKED'){
+	        if(existingStatus=='BLOCKED' || existingStatus=='PROD_ONLY_BLOCKED'){
 		        status='Unblock';
 		        newStatus='UNBLOCKED';
 		        className='icon-ok-circle';
