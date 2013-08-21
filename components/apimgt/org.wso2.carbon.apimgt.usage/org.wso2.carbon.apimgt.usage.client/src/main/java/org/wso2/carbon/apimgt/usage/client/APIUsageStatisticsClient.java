@@ -1173,10 +1173,10 @@ public class APIUsageStatisticsClient {
             if (fromDate != null && toDate != null) {
                 query = "SELECT API, API_VERSION, VERSION, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "+
                         "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                        "\'" + fromDate + "\' AND \'" + toDate + "\'" +"GROUP BY API, API_VERSION ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
+                        "\'" + fromDate + "\' AND \'" + toDate + "\'" +"GROUP BY API, API_VERSION, USERID ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
             } else {
                 query = "SELECT API, API_VERSION, VERSION, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "+
-                        "FROM API_REQUEST_SUMMARY GROUP BY API, API_VERSION ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
+                        "FROM API_REQUEST_SUMMARY GROUP BY API, API_VERSION, USERID ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
 
             }
             rs = statement.executeQuery(query);
