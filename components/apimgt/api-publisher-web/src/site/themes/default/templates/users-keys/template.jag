@@ -37,7 +37,8 @@
         if(tenant!=null) {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
 
         var i, apiPath,subscriber, numberOfPages, subscribers = outputs.subscribers;
-
+		
+		var listCount = 0;
         var itemsPerPage = 10; //reduce this number to preview the pagination
         var currentPage = 1;
 
@@ -134,6 +135,8 @@
 		        newStatus='BLOCKED';
 		        className='icon-ban-circle';
 	        }
+	        listCount ++;
+        	var radioInputName = "blockType" + listCount;
        %>
        <div>
        <%if (existingStatus=='PROD_ONLY_BLOCKED') { %>
@@ -150,7 +153,7 @@
        		<input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll" id="z" />
        <% }%>
        <label for="z" class="radio-label-class"><%=i18n.localize("blockAll")%></label>
-       <a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>" onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>','<%=subscriber.appId%>', '<%=newStatus%>', <%=n%>, this)"> <i class="<%=className%>"></i> <%=status%> </a>
+       <a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>" onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>','<%=subscriber.appId%>', '<%=newStatus%>', <%=listCount%>, this)"> <i class="<%=className%>"></i> <%=status%> </a>
        </div> <br/>
       <%}
         }%>
