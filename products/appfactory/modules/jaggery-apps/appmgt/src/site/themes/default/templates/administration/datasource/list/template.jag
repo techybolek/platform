@@ -55,21 +55,21 @@ var hasProductionPermission = jagg.module("permission").isUserAccessGranted(inpu
 	
 	        });
 	        
-	        $("#datasource_url_select_staging").bind("change", function () {
-	            var selectedOption = $(this).find(":selected");
-	            var selectedValue = selectedOption.val();
-	            if (selectedValue === 'Custom') {
-	
-	                dbCustomUrlSelected("staging");
-	
-	            } else {
-	
-	                var selectedDBName = selectedOption.attr('data-dbname');
-	                var selectedRSSInstanceName = selectedOption.attr('data-rssname');
-	
-	                dbUrlSelected(selectedDBName, selectedRSSInstanceName, selectedValue, "staging");	
-	            }	
-	        }); 
+//	        $("#datasource_url_select_staging").bind("change", function () {
+//	            var selectedOption = $(this).find(":selected");
+//	            var selectedValue = selectedOption.val();
+//	            if (selectedValue === 'Custom') {
+//
+//	                dbCustomUrlSelected("staging");
+//
+//	            } else {
+//
+//	                var selectedDBName = selectedOption.attr('data-dbname');
+//	                var selectedRSSInstanceName = selectedOption.attr('data-rssname');
+//
+//	                dbUrlSelected(selectedDBName, selectedRSSInstanceName, selectedValue, "staging");
+//	            }
+//	        });
 	        
 	        $("#datasource_url_select_prod").bind("change", function () {
 	            var selectedOption = $(this).find(":selected");
@@ -476,7 +476,9 @@ var hasProductionPermission = jagg.module("permission").isUserAccessGranted(inpu
     var copyToTest = true;
     var copyToStaging = true;
     var copyToProd = true;
-    var uiStages = new Array("dev","testing","staging", "prod");
+// Removing staging
+//    var uiStages = new Array("dev","testing","staging", "prod");
+    var uiStages = new Array("dev","testing", "prod");
     $(document).ready(function () {
     	init();
         drawDatabaseURLsList();
@@ -598,7 +600,9 @@ var hasProductionPermission = jagg.module("permission").isUserAccessGranted(inpu
                                          
                                          
                                          <!-- staging configurations ---------------------------------------------------------------->
-                                         
+
+                                         <!-- removing staging -->
+                                         <!--
                                          <div id="staging_conf">  
                                          <hr />
                                          <h2>Staging</h2>
@@ -639,6 +643,7 @@ var hasProductionPermission = jagg.module("permission").isUserAccessGranted(inpu
                                         </div>
                                         
                                      </div>
+                                     -->
                                            
                                      
                                      <!-- production configurations ---------------------------------------------------------------->

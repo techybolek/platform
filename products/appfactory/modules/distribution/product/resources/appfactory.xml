@@ -210,6 +210,9 @@
             <BaseAccessUrl>http://appserver.test.appfactorypreview.wso2.com/</BaseAccessUrl>
         </DeploymentStage>
 
+
+        <!--Removing the staging state-->
+<!--
         <DeploymentStage name="Staging">
             <Class><Name>org.wso2.carbon.appfactory.jenkins.deploy.Carbon4Deployer</Name></Class>
             <AllowDirectDeploy>true</AllowDirectDeploy>
@@ -218,12 +221,12 @@
             </AutomaticDeployment>
             <DeploymentArtifact>
                 <TriggerBuild>
-                    <ArtifactStoragePolicy>Tagged</ArtifactStoragePolicy> <!-- Latest, Marked-->
+                    <ArtifactStoragePolicy>Tagged</ArtifactStoragePolicy> &lt;!&ndash; Latest, Marked&ndash;&gt;
                 </TriggerBuild>
             </DeploymentArtifact>
             <Promote>
                 <DeploymentPolicy>Promoted</DeploymentPolicy>
-                <!-- Tagged/Promoted artifact will be deployed to the promoted stage-->
+                &lt;!&ndash; Tagged/Promoted artifact will be deployed to the promoted stage&ndash;&gt;
             </Promote>
             <CreateArtifact>UserInput</CreateArtifact>
             <ProcessEndPoint>https://appfactorypreview.wso2.com:9443/services/DeployToStage</ProcessEndPoint>
@@ -231,6 +234,7 @@
             <MountPoint>staging</MountPoint>
             <BaseAccessUrl>http://appserver.staging.appfactorypreview.wso2.com/</BaseAccessUrl>
         </DeploymentStage>
+-->
 
         <DeploymentStage name="Production">
             <Class>

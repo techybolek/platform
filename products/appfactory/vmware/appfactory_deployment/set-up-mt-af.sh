@@ -53,14 +53,14 @@ mkdir setup
 . `pwd`/set-up-sc.sh
  setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "dev" -v $SC_VERSION -h $af_host_name -o 20 
  setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "test" -v $SC_VERSION -h $af_host_name -o 21
- setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "staging" -v $SC_VERSION -h $af_host_name -o 22
+# setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "staging" -v $SC_VERSION -h $af_host_name -o 22
  setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "prod" -v $SC_VERSION -h $af_host_name -o 23
 
 . `pwd`/set-up-as.sh
 
  setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "dev" -v $APPSERVER_VERSION -h $af_host_name -o 2
  setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "test" -v $APPSERVER_VERSION -h $af_host_name -o 4
- setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "staging" -v $APPSERVER_VERSION -h $af_host_name -o 7
+# setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "staging" -v $APPSERVER_VERSION -h $af_host_name -o 7
  setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "prod" -v $APPSERVER_VERSION -h $af_host_name -o 5
 
 #configure build server
