@@ -1,4 +1,4 @@
-var updateSubscription = function (apiName, version, provider, appId, newstatus, link) {
+var updateSubscription = function (apiName, version, provider, appId, newstatus, n, link) {
     //var ahrefId = $('#' + apiName + provider + appId);
     var ahrefId = $(link);
     var status = ahrefId.text();
