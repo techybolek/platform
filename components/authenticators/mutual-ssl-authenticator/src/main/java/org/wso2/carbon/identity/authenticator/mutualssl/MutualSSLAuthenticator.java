@@ -16,6 +16,7 @@ import org.wso2.carbon.core.services.authentication.CarbonServerAuthenticator;
 import org.wso2.carbon.core.services.util.CarbonAuthenticationUtil;
 import org.wso2.carbon.identity.authenticator.mutualssl.internal.MutualSSLAuthenticatorServiceComponent;
 import org.wso2.carbon.user.api.TenantManager;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class MutualSSLAuthenticator implements CarbonServerAuthenticator {
@@ -92,7 +93,11 @@ public class MutualSSLAuthenticator implements CarbonServerAuthenticator {
                                                   MutualSSLAuthenticatorServiceComponent.getRealmService()
                                                                                         .getTenantManager();
                     int tenantId = tenantManager.getTenantId(tenantDomain);
-                    isAuthenticated = true;
+                    
+                    UserStoreManager userstore = MutualSSLAuthenticatorServiceComponent.getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
+                    if (userstore.isExistingUser(userName)) {
+                        isAuthenticated = true;    
+                    }
                     CarbonAuthenticationUtil.onSuccessAdminLogin(request.getSession(), userName,
                                                                  tenantId, tenantDomain, "");
                 }
