@@ -92,7 +92,7 @@
         function removeParameter(parameter) {
             CARBON.showConfirmationDialog("<fmt:message key="confirm.remove.service.group.parameter"/> '" + parameter + "' ?",
                     function() {
-                        location.href = "edit_group_param.jsp?delete=true&serviceGroupName=<%=serviceGroupName%>&parameter=" + parameter;
+                        location.href = "edit_service_group_params.jsp?delete=true&serviceGroupName=<%=serviceGroupName%>&parameter=" + parameter;
                     },
                     null);
         }
