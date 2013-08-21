@@ -238,7 +238,6 @@
                                 <module>org.wso2.carbon.appfactory.apiManager.dependency.management.stub</module>
 				<module>org.wso2.carbon.appfactory.application.deployer.stub</module>
 				<module>org.wso2.carbon.appfactory.artifact.storage.stub</module>
-				<module>org.wso2.carbon.appfactory.events.notification.stub</module>
 				<module>org.wso2.carbon.appfactory.jenkins.build.stub</module>
 				<module>org.wso2.carbon.appfactory.tenant.mgt.stub</module>
 				<module>org.wso2.carbon.appfactory.buildserver.teanant.mgt.stub</module>
