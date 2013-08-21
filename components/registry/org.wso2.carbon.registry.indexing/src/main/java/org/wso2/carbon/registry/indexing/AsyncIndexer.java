@@ -27,9 +27,13 @@ import org.wso2.carbon.registry.indexing.indexer.Indexer;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.solr.SolrClient;
 import org.wso2.carbon.utils.WaitBeforeShutdownObserver;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The run() method of this class takes files from a blocking queue and indexes them.
@@ -42,6 +46,7 @@ public class AsyncIndexer implements Runnable {
     private final SolrClient client;
     private LinkedBlockingQueue<File2Index> queue = new LinkedBlockingQueue<File2Index>();
     private boolean canAcceptFiles = true;
+    int poolSize = 50;
 
     @SuppressWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
     public static class File2Index {
@@ -109,39 +114,36 @@ public class AsyncIndexer implements Runnable {
      * This handles interrupts properly so that it is compatible with the Executor framework.
      */
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) { //to be compatible with executor framework
-            if (!indexFile()) {
-                return;
-            }
-        }
+      indexFile();
     }
 
     private boolean indexFile() {
         try {
+            if(!canAcceptFiles){
+                return false;
+            }
 
             long batchSize = IndexingManager.getInstance().getBatchSize();
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                    setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                    setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             long i =0;
-            if (queue.size() > 0 && i<= batchSize) {
+            List<IndexingTask> taskList = new ArrayList<IndexingTask>();
+            while (queue.size() > 0 && i <= batchSize) {
                 ++i;
-                File2Index fileData = queue.take();
-                Indexer indexer = IndexingManager.getInstance().getIndexerForMediaType(
-                        fileData.mediaType);
-                try {
-                    getClient().indexDocument(fileData, indexer);
-                } catch (Exception e) {
-                    log.warn("Could not index the resource: path=" + fileData.path +
-                            ", media type=" + fileData.mediaType); // to ease debugging
-                }
-            }else{
-                if(!canAcceptFiles){
-                    return false;
-                }
+                IndexingTask indexingTask = new IndexingTask(MultitenantConstants.SUPER_TENANT_NAME,
+                        MultitenantConstants.SUPER_TENANT_ID, queue.take());
+                taskList.add(indexingTask);
 
-                Thread.sleep(getIndexingFreqInMilliSecs());
             }
+            if (taskList.size() > 0) {
+                uploadFiles(taskList);
+            }else {
+                return true;
+            }
+
         } catch (Throwable e) { // Throwable is caught to prevent the executor termination
             if (e instanceof InterruptedException) {
                 return false; // to be compatible with executor framework. No need of logging anything
@@ -154,8 +156,70 @@ public class AsyncIndexer implements Runnable {
         return true;
     }
 
-    private long getIndexingFreqInMilliSecs(){
-        long freqInSec = IndexingManager.getInstance().getIndexingFreqInSecs();
-        return TimeUnit.MILLISECONDS.convert(freqInSec,TimeUnit.SECONDS);
+    protected void uploadFiles(List<IndexingTask> tasks) throws RegistryException {
+
+        poolSize = IndexingManager.getInstance().getIndexerPoolSize();
+        if (poolSize <= 0) {
+            for (IndexingTask task : tasks) {
+                task.run();
+            }
+        } else {
+            ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
+            try {
+                for (IndexingTask task : tasks) {
+                    executorService.submit(task);
+                }
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to submit indexing task ", e);
+                }
+            } finally {
+                executorService.shutdown();
+            }
+        }
+    }
+
+    protected static class IndexingTask implements Runnable {
+        private String userId;
+        private int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        private File2Index fileData;
+
+        protected IndexingTask(String userId, int tenantId, File2Index fileData) {
+            this.userId = userId;
+            this.tenantId = tenantId;
+            this.fileData = fileData;
+        }
+
+        public void run() {
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                        setTenantDomain(MultitenantUtils.getTenantDomain(userId));
+                doWork(fileData);
+
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        private boolean doWork(File2Index file2Index) {
+            AsyncIndexer asyncIndexer;
+            try {
+                Indexer indexer = IndexingManager.getInstance().getIndexerForMediaType(
+                        file2Index.mediaType);
+                try {
+                    asyncIndexer = new AsyncIndexer();
+                    asyncIndexer.getClient().indexDocument(file2Index, indexer);
+                } catch (Exception e) {
+                    log.warn("Could not index the resource: path=" + file2Index.path +
+                            ", media type=" + file2Index.mediaType); // to ease debugging
+                }
+
+            } catch (Throwable e) { // Throwable is caught to prevent the executor termination
+                log.error("Error while indexing.", e);
+            }
+            return true;
+        }
     }
 }

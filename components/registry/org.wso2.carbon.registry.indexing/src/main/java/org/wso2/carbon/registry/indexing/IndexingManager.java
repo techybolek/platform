@@ -81,7 +81,7 @@ public class IndexingManager {
                 getStartingDelayInSecs(), getIndexingFreqInSecs(), TimeUnit.SECONDS);
 
         indexingExecutor = Executors.newSingleThreadScheduledExecutor();
-        indexingExecutor.schedule(indexer, getStartingDelayInSecs(), TimeUnit.SECONDS);
+        indexingExecutor.scheduleWithFixedDelay(indexer, getStartingDelayInSecs(),getIndexingFreqInSecs(), TimeUnit.SECONDS);
         readLastAccessTime();
     }
 
@@ -137,6 +137,15 @@ public class IndexingManager {
 
     public long getBatchSize(){
         return registryConfig.getBatchSize();
+    }
+
+    /**
+     * This is to get the indexing worker thread pool size.
+     *
+     * @return pool size
+     */
+    public int getIndexerPoolSize() {
+        return registryConfig.getIndexerPoolSize();
     }
 
     public void deleteFromIndex(String oldPath, int tenantId) throws RegistryException {

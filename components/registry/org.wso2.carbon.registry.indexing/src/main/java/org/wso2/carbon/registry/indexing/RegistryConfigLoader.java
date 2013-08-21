@@ -53,6 +53,12 @@ public class RegistryConfigLoader {
 
     private long batchSize = 50;
 
+    public int getIndexerPoolSize() {
+        return indexerPoolSize;
+    }
+
+    private  int indexerPoolSize;
+
     public long getBatchSize() {
         return batchSize;
     }
@@ -86,6 +92,7 @@ public class RegistryConfigLoader {
             }
 
             batchSize =  Long.parseLong(indexingConfig.getFirstChildWithName(new QName("batchSize")).getText());
+            indexerPoolSize =  Integer.parseInt(indexingConfig.getFirstChildWithName(new QName("indexerPoolSize")).getText());
 
             Iterator exclusions = indexingConfig.getFirstChildWithName(new QName("exclusions")).
                     getChildrenWithName(new QName("exclusion"));

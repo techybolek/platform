@@ -48,7 +48,7 @@
     If both ramBufferSizeMB and maxBufferedDocs is set, then Lucene will flush based on whichever limit is hit first.
 
     -->
-    <ramBufferSizeMB>32</ramBufferSizeMB>
+    <ramBufferSizeMB>512</ramBufferSizeMB>
     <maxMergeDocs>2147483647</maxMergeDocs>
     <maxFieldLength>10000</maxFieldLength>
     <writeLockTimeout>1000</writeLockTimeout>
@@ -99,7 +99,7 @@
   <mainIndex>
     <!-- options specific to the main on-disk lucene index -->
     <useCompoundFile>false</useCompoundFile>
-    <ramBufferSizeMB>32</ramBufferSizeMB>
+    <ramBufferSizeMB>512</ramBufferSizeMB>
     <mergeFactor>10</mergeFactor>
     <!-- Deprecated -->
     <!--<maxBufferedDocs>1000</maxBufferedDocs>-->
@@ -298,7 +298,9 @@
     <!-- Maximum number of searchers that may be warming in the background
       concurrently.  An error is returned if this limit is exceeded. Recommend
       1-2 for read-only slaves, higher for masters w/o cache warming. -->
-    <maxWarmingSearchers>2</maxWarmingSearchers>
+
+    <!--If this is enable G-Reg throw the exception, when the search frequency is high-->
+    <!--<maxWarmingSearchers>2</maxWarmingSearchers>-->
 
   </query>
 
