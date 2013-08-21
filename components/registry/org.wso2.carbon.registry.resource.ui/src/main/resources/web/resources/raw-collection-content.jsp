@@ -55,7 +55,7 @@
     }
     try {
         client = new ResourceServiceClient(cookie, config, session);
-        PaginationContext.init(start, count, "", "", 1500);
+        PaginationContext.init(start, count, "", "", Integer.MAX_VALUE);
         ccb = client.getCollectionContent(request);
         mimeMappings = client.getCustomUIMediatypeDefinitions();
         colMimeMappings = client.getCollectionMediatypeDefinitions();
