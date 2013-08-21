@@ -19,11 +19,11 @@ package org.wso2.carbon.connector.googlespreadsheet;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
-import org.wso2.carbon.mediation.library.connectors.core.util.ConnectorUtils;
+import org.wso2.carbon.connector.core.util.ConnectorUtils;
 
 public class GoogleSpreadsheetUtils {
 	 public static String lookupFunctionParam(MessageContext ctxt, String paramName) {
-	        return (String)ConnectorUtils.lookupFunctionParam(ctxt, paramName);
+	        return (String)ConnectorUtils.lookupTemplateParamater(ctxt, paramName);
 	    }
 
 	    public static void storeLoginUser(MessageContext ctxt, String consumerKey, String consumerSecret, String accessToken, String accessTokenSecret){
