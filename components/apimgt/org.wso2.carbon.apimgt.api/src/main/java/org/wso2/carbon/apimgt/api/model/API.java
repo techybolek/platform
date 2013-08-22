@@ -370,7 +370,7 @@ public class API {
  	}
 
  	 public String getOutSequence() {
-  		return inSequence;
+  		return outSequence;
   	}
 
      /**
