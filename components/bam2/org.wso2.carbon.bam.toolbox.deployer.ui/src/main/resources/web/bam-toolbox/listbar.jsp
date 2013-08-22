@@ -23,6 +23,7 @@
 <%@ page import="org.wso2.carbon.bam.toolbox.deployer.ui.client.BAMToolBoxDeployerClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="java.util.Map" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
@@ -113,6 +114,8 @@
 
     BAMToolBoxDeployerClient client = new BAMToolBoxDeployerClient(cookie, serverURL, configContext);
     String[] deployedTools = null;
+    String[] deployedToolsFromDir = null;
+    String[] deployedToolsFromcApp = null;
     String[] toBeDeployedTools = null;
     String[] toBeUndeployedTools = null;
 
@@ -127,6 +130,8 @@
     try {
         ToolBoxStatusDTO statusDTO = client.getToolBoxStatus(toolBoxType, toolBoxSearchString);
         deployedTools = statusDTO.getDeployedTools();
+        deployedToolsFromDir = statusDTO.getDeployedToolsFromDir();
+        deployedToolsFromcApp = statusDTO.getDeployedToolsFromCApp();
         toBeDeployedTools = statusDTO.getToBeDeployedTools();
         toBeUndeployedTools = statusDTO.getToBeUndeployedTools();
 
@@ -361,8 +366,8 @@
         <tbody>
 
         <% int position = 0;
-            if (null != deployedTools) {
-                for (String aName : deployedTools) {
+            if (null != deployedToolsFromDir) {
+                for (String aName : deployedToolsFromDir) {
                     String bgColor = ((position % 2) == 1) ? "#EEEFFB" : "white";
                     position++;
         %>
@@ -371,6 +376,39 @@
                 <input type="checkbox" id="toolboxes_<%=position%>" name=toolboxes_<%=position%>
                        value="<%=aName%>"
                        class="chkBox"/>
+            </td>
+            <td><label>
+                <%=aName%>
+            </label>
+            </td>
+            <td><fmt:message key="bam.tool.status.deployed"></fmt:message>
+            </td>
+            <td>
+                <nobr>
+                    <a href="download-ajaxprocessor.jsp?toolboxName=<%=aName%>"
+                       class="icon-link" style="background-image:url(images/download.gif);"
+                       target="_self">
+                        <fmt:message key="download"/>
+                    </a>
+                </nobr>
+            </td>
+        </tr>
+        <%
+                }
+            }
+        %>
+
+        <%
+            if (null != deployedToolsFromcApp) {
+                for (String aName : deployedToolsFromcApp) {
+                    String bgColor = ((position % 2) == 1) ? "#EEEFFB" : "white";
+                    position++;
+        %>
+        <tr bgcolor="<%=bgColor%>">
+            <td width="10px" style="text-align:center; !important">
+                <input type="checkbox" id="toolboxes_<%=position%>" name=toolboxes_<%=position%>
+                       value="<%=aName%>"
+                       class="chkBox" disabled="true"/>
             </td>
             <td><label>
                 <%=aName%>

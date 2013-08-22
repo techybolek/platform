@@ -40,7 +40,7 @@
         } catch (Exception e) {
     %>
     <script type="text/javascript">
-        location.href = "../bam-toolbox/listbar.jsp?message=Error while removing toolbox&undeploysuccess=false";
+        location.href = "../bam-toolbox/listbar.jsp?message=Error while removing toolbox: The toolbox/toolboxes that you are going to remove might be deployed by a car file&undeploysuccess=false";
     </script>
     <%
         }
@@ -55,7 +55,7 @@
     } else {
     %>
     <script type="text/javascript">
-        location.href = "../bam-toolbox/listbar.jsp?message=Error while removing toolbox " +"&undeploysuccess=false";
+        location.href = "../bam-toolbox/listbar.jsp?message=Error while removing toolbox: The toolbox/toolboxes that you are going to remove might be deployed by a car file " +"&undeploysuccess=false";
     </script>
     <%
         }
