@@ -263,7 +263,7 @@ function populateAppOverview() {
             parsedAppArray = jQuery.parseJSON(result);
             if (parsedAppArray.length == 0 && hasTriedOnce == false) {
     	    	hasTriedOnce = true;
-                createDefaultApplication();
+//                createDefaultApplication();
             }
             parsedAppArray.sort(NameComparator);
             init();
