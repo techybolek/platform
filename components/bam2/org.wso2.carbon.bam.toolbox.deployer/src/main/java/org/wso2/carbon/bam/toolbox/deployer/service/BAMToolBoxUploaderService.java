@@ -1,7 +1,9 @@
 package org.wso2.carbon.bam.toolbox.deployer.service;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.analytics.hive.exception.HiveScriptStoreException;
 import org.wso2.carbon.bam.toolbox.deployer.BAMToolBoxDeployerConstants;
 import org.wso2.carbon.bam.toolbox.deployer.BasicToolBox;
 import org.wso2.carbon.bam.toolbox.deployer.ServiceHolder;
@@ -12,6 +14,10 @@ import org.wso2.carbon.bam.toolbox.deployer.util.ToolBoxDTO;
 import org.wso2.carbon.bam.toolbox.deployer.util.ToolBoxStatusDTO;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -21,6 +27,8 @@ import javax.mail.util.ByteArrayDataSource;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Copyright (c) 2009, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -73,6 +81,7 @@ public class BAMToolBoxUploaderService extends AbstractAdmin {
     }
 
     public ToolBoxStatusDTO getDeployedToolBoxes(String type, String searchKey) throws BAMToolboxDeploymentException {
+
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
 
         ToolBoxStatusDTO toolBoxStatusDTO = new ToolBoxStatusDTO();
@@ -93,26 +102,68 @@ public class BAMToolBoxUploaderService extends AbstractAdmin {
             }
         };
 
-        String[] toolsInDir = hotDeploymentDir.list(filter);
+        String [] toolsInDir = hotDeploymentDir.list(filter);
+        String [] toolsInReg = getRegisteredToolBoxes();
+
+        List <String> toolboxesFromDirList = Arrays.asList(toolsInDir);
+        List <String> toolboxesFromRegList = Arrays.asList(toolsInReg);
+        List <String> toolBoxesList = new ArrayList<String>();
+        toolBoxesList.addAll(toolboxesFromDirList);
+        toolBoxesList.addAll(toolboxesFromRegList);
 
         if (null == searchKey) searchKey = "";
 
         ToolBoxConfigurationManager configurationManager = ToolBoxConfigurationManager.getInstance();
         ArrayList<String> toolsInConf = configurationManager.getAllToolBoxNames(tenantId);
         if (null == type || "".equals(type) || type.equals("1")) {
-            toolBoxStatusDTO.setDeployedTools(getDeployedTools(toolsInDir, toolsInConf, searchKey));
-            toolBoxStatusDTO.setToBeDeployedTools(getToBeDeployedTools(toolsInDir, toolsInConf, searchKey));
-            toolBoxStatusDTO.setToBeUndeployedTools(getToBeUnDeployedTools(toolsInDir, toolsInConf, searchKey));
+            toolBoxStatusDTO.setDeployedTools(getDeployedTools(toolBoxesList.toArray(new String[toolBoxesList.size()]), toolsInConf, searchKey));
+            toolBoxStatusDTO.setDeployedToolsFromDir(getDeployedTools(toolboxesFromDirList.toArray(new String[toolboxesFromDirList.size()]), toolsInConf, searchKey));
+            toolBoxStatusDTO.setDeployedToolsFromCApp(getDeployedTools(toolboxesFromRegList.toArray(new String[toolboxesFromRegList.size()]), toolsInConf, searchKey));
+            toolBoxStatusDTO.setToBeDeployedTools(getToBeDeployedTools(toolBoxesList.toArray(new String[toolBoxesList.size()]), toolsInConf, searchKey));
+            toolBoxStatusDTO.setToBeUndeployedTools(getToBeUnDeployedTools(toolBoxesList.toArray(new String[toolBoxesList.size()]), toolsInConf, searchKey));
 
         } else if (type.equalsIgnoreCase("2")) {
-            toolBoxStatusDTO.setDeployedTools(getDeployedTools(toolsInDir, toolsInConf, searchKey));
+            toolBoxStatusDTO.setDeployedTools(getDeployedTools(toolBoxesList.toArray(new String[toolBoxesList.size()]), toolsInConf, searchKey));
+            toolBoxStatusDTO.setDeployedToolsFromDir(getDeployedTools(toolboxesFromDirList.toArray(new String[toolboxesFromDirList.size()]), toolsInConf, searchKey));
+            toolBoxStatusDTO.setDeployedToolsFromCApp(getDeployedTools(toolboxesFromRegList.toArray(new String[toolboxesFromRegList.size()]), toolsInConf, searchKey));
         } else if (type.equalsIgnoreCase("3")) {
-            toolBoxStatusDTO.setToBeDeployedTools(getToBeDeployedTools(toolsInDir, toolsInConf, searchKey));
+            toolBoxStatusDTO.setToBeDeployedTools(getToBeDeployedTools(toolBoxesList.toArray(new String[toolBoxesList.size()]), toolsInConf, searchKey));
         } else {
-            toolBoxStatusDTO.setToBeUndeployedTools(getToBeUnDeployedTools(toolsInDir, toolsInConf, searchKey));
+            toolBoxStatusDTO.setToBeUndeployedTools(getToBeUnDeployedTools(toolBoxesList.toArray(new String[toolBoxesList.size()]), toolsInConf, searchKey));
         }
 
         return toolBoxStatusDTO;
+    }
+
+    private String[] getRegisteredToolBoxes(){
+        Registry registry = null;
+        InputStream scriptStream;
+        Resource resource;
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        try {
+            registry = ServiceHolder.getRegistry(tenantId);
+        } catch (RegistryException e) {
+            e.printStackTrace();
+        }
+        List < String > toolBoxesList = new ArrayList<String>();
+        String scriptPath = "repository/component/org.wso2.carbon.application.deployer.bam/tools";
+        try {
+            resource = registry.get(scriptPath);
+            scriptStream = resource.getContentStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(scriptStream));
+            StringBuilder sb = new StringBuilder();
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                toolBoxesList.add(line);
+            }
+        } catch (RegistryException e) {
+            log.error("Error while retrieving the deployed toolboxes' names from the registry ", e);
+        } catch (IOException e) {
+            log.error("Error while retrieving the deployed toolboxes' names from the registry", e);
+            //throw new HiveScriptStoreException("Error while retrieving the script - " + scriptName + " from registry", e);
+        }
+        return toolBoxesList.toArray(new String[toolBoxesList.size()]);
     }
 
     public ArrayList<JaggeryDashboardDTO> getJaggeryDashboards() throws BAMToolboxDeploymentException {

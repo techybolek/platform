@@ -17,19 +17,40 @@ package org.wso2.carbon.bam.toolbox.deployer.util;
  */
 public class ToolBoxStatusDTO {
     private String[] deployedTools;
+    private String[] deployedToolsFromCApp;
+    private String[] deployedToolsFromDir;
     private String[] toBeDeployedTools;
     private String[] toBeUndeployedTools;
 
     public ToolBoxStatusDTO(){
-        deployedTools = new String[0];
+        deployedToolsFromDir = new String[0];
+        deployedToolsFromCApp = new String[0];
         toBeDeployedTools = new String[0];
         toBeUndeployedTools = new String[0];
+        deployedTools = new String[0];
     }
+
     public String[] getDeployedTools() {
         return deployedTools;
     }
 
-    public void setDeployedTools(String[] deployedTools) {
+    public String[] getDeployedToolsFromDir() {
+        return deployedToolsFromDir;
+    }
+
+    public String[] getDeployedToolsFromCApp() {
+        return deployedToolsFromCApp;
+    }
+
+    public void setDeployedToolsFromDir(String[] deployedTools) {
+        this.deployedToolsFromDir = deployedTools;
+    }
+
+    public void setDeployedToolsFromCApp(String [] deployedTools) {
+        this.deployedToolsFromCApp = deployedTools;
+    }
+
+    public void setDeployedTools(String [] deployedTools) {
         this.deployedTools = deployedTools;
     }
 
