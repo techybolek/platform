@@ -50,7 +50,7 @@ public class SequenceAdminServiceClient extends AbstractAPIGatewayAdminClient {
 		try {
 			if (tenantDomain != null && !("").equals(tenantDomain) &&
 			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-				//sequenceAdminStub.addSequenceForTenant(sequence, tenantDomain);
+				sequenceAdminStub.addSequenceForTenant(sequence, tenantDomain);
 			} else {
 				sequenceAdminStub.addSequence(sequence);
 			}
@@ -70,7 +70,7 @@ public class SequenceAdminServiceClient extends AbstractAPIGatewayAdminClient {
 		try {
 			if (tenantDomain != null && !("").equals(tenantDomain) &&
 			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-			//	sequenceAdminStub.deleteSequenceForTenant(sequenceName, tenantDomain);
+				sequenceAdminStub.deleteSequenceForTenant(sequenceName, tenantDomain);
 			} else {
 				sequenceAdminStub.deleteSequence(sequenceName);
 			}
@@ -92,7 +92,7 @@ public class SequenceAdminServiceClient extends AbstractAPIGatewayAdminClient {
 		try {
 			if (tenantDomain != null && !("").equals(tenantDomain) &&
 			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-			//	return (OMElement) sequenceAdminStub.getSequenceForTenant(sequenceName, tenantDomain);
+				return (OMElement) sequenceAdminStub.getSequenceForTenant(sequenceName, tenantDomain);
 			} else {
 				return  (OMElement) sequenceAdminStub.getSequence(sequenceName);
 			}
@@ -100,6 +100,6 @@ public class SequenceAdminServiceClient extends AbstractAPIGatewayAdminClient {
 		} catch (Exception e) {
 			throw new AxisFault("Error while retriving the sequence", e);
 		}
-		return null;
+		
 	}
 }
