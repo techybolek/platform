@@ -35,6 +35,8 @@
                 <module>org.wso2.carbon.logging.service</module>
                 <module>org.wso2.carbon.logging.admin.ui</module>
                 <module>org.wso2.carbon.logging.view.ui</module>
+                <module>org.wso2.carbon.logging.summarizer</module>
+
             </modules>
 
     <dependencyManagement>
@@ -87,7 +89,9 @@
 		<artifactId>spring.framework</artifactId>
 		<version>${orbit.version.spring}</version>
 	   </dependency>
+
         </dependencies>
+       
     </dependencyManagement>
 
     <properties>
