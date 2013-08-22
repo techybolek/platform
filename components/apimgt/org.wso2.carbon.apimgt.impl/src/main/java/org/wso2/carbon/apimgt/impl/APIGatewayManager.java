@@ -244,31 +244,18 @@ public class APIGatewayManager {
 	private void undeployCustomSequences(API api,String tenantDomain, Environment environment) {	
 		
 		try {
-			SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
+			if (api.getInSequence() != null || api.getOutSequence() != null) {
+                SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
 
-			if (api.getInSequence() != null) {			
-				String inSequence = APIUtil.getSequenceExtensionName(api) + "--In";
-				seqClient.deleteSequence(inSequence,tenantDomain);
-			} 
-			if (api.getOutSequence() != null) {			
-				String outSequence = APIUtil.getSequenceExtensionName(api) + "--Out";
-				seqClient.deleteSequence(outSequence,tenantDomain);
-			}
-			
-			// when deleting the API we pass apiIdentifier, which contains few
-			// basic attributes.
-			// Check if there is any possible sequences available for that
-			else if (api.getId().getApiName() != null) {
-				String sequence = APIUtil.getSequenceExtensionName(api);
-				String inSequenceName = sequence + "--In";
-				String outSequenceName = sequence + "--Out";
-				if (seqClient.getSequence(inSequenceName,tenantDomain) != null) {
-					seqClient.deleteSequence(inSequenceName,tenantDomain);
-				}
-				if (seqClient.getSequence(outSequenceName,tenantDomain) != null) {
-					seqClient.deleteSequence(outSequenceName,tenantDomain);
-				}
-			}
+                if (api.getInSequence() != null) {
+                    String inSequence = APIUtil.getSequenceExtensionName(api) + "--In";
+                    seqClient.deleteSequence(inSequence, tenantDomain);
+                }
+                if (api.getOutSequence() != null) {
+                    String outSequence = APIUtil.getSequenceExtensionName(api) + "--Out";
+                    seqClient.deleteSequence(outSequence, tenantDomain);
+                }
+            }		
 			
 		} catch (Exception e) {
 			String msg = "Error in deleting the sequence from gateway";

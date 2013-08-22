@@ -1304,6 +1304,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                       identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                       identifier.getApiName()+RegistryConstants.PATH_SEPARATOR+identifier.getVersion();
+        
+        String apiArtifactPath = APIUtil.getAPIPath(identifier);
+      
         try {
 
             long subsCount = apiMgtDAO.getAPISubscriptionCountByAPI(identifier);
@@ -1311,13 +1314,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 handleException("Cannot remove the API. Active Subscriptions Exist", null);
             }
 
+            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);
             Resource apiResource = registry.get(path);
             String artifactId = apiResource.getUUID();
+            
+            Resource apiArtifactResource = registry.get(apiArtifactPath);
+            String apiArtifactResourceId = apiArtifactResource.getUUID();
             if (artifactId == null) {
                 throw new APIManagementException("artifact id is null for : " + path);
             }
+           
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactResourceId);
+            String inSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
+            String outSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
+            
             artifactManager.removeGenericArtifact(artifactId);
 
             String thumbPath = APIUtil.getIconPath(identifier);
@@ -1340,6 +1352,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // gatewayType check is required when API Management is deployed on other servers to avoid synapse
             if (gatewayExists && gatewayType.equals("Synapse")) {
                 //if (isAPIPublished(api)) {
+            		api.setInSequence(inSequence); //need to remove the custom sequences
+            		api.setOutSequence(outSequence);
                     removeFromGateway(api);
                 //}
             } else {
