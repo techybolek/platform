@@ -334,7 +334,7 @@
                 </elementProp>
                 <elementProp name="resourceMethodAuthType-0" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">Application &amp; Application User,Application &amp; Application User,Application &amp; Application User,Application &amp; Application User,Application &amp; Application User</stringProp>
+                  <stringProp name="Argument.value">Application User</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                   <stringProp name="Argument.name">resourceMethodAuthType-0</stringProp>
