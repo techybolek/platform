@@ -64,7 +64,7 @@ function changeLC() {
     if(document.getElementById('filterBy').value == "null"||document.getElementById('filterBy').value == "1"){
         var visible = $('lifeCycleList').value;
         var inout = $('inoutListLC').value;
-        var lc_state = document.getElementById('searchVal3').getValue();
+        var lc_state = document.getElementById('searchVal3').value;
         if(visible == "Any"|| inout=="out" ){
             $('stateList').style.display = "none";
             $('inoutListLCState').style.display = "none";
@@ -76,7 +76,7 @@ function changeLC() {
 
                 onSuccess: function(data) {
                     stateHtml =  eval(data).responseText;
-                    $('stateList').innerHTML = stateHtml;
+                    $('stateList').outerHTML = "<select id='stateList'>" + stateHtml + "</select>";
                     $('stateList').style.display = "";
                     $('inoutListLCState').style.display = "";
                 },
