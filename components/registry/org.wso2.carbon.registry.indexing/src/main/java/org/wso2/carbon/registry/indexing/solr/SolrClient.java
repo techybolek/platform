@@ -32,6 +32,7 @@ import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.pagination.PaginationUtils;
@@ -107,7 +108,7 @@ public class SolrClient {
         byte[] buf = new byte[1024];
         FileOutputStream out = new FileOutputStream(file);
         try {
-            int read = 0;
+            int read;
 
             while ((read = in.read(buf)) >= 0) {
                 out.write(buf, 0, read);
@@ -215,6 +216,12 @@ public class SolrClient {
                 query.addFilterQuery(IndexingConstants.FIELD_TENANT_ID + ":" + "\\"+tenantId);
             }else {
                 query.addFilterQuery(IndexingConstants.FIELD_TENANT_ID + ":" + tenantId);
+            }
+            //This is for fixing  REGISTRY-1695, This is temporary solution until
+            //the default security polices also stored in Governance registry.
+            if(fields.get(IndexingConstants.FIELD_MEDIA_TYPE).equals(RegistryConstants.POLICY_MEDIA_TYPE)){
+                query.addFilterQuery(IndexingConstants.FIELD_ID + ":" +
+                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + "*");
             }
             if (fields.size() > 0) {
                 for (Map.Entry<String, String> e : fields.entrySet()) {
