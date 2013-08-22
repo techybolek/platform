@@ -9,9 +9,9 @@
     if (dsName != null && !"".equals(dsName)) {
     	NDataSourceAdminServiceClient client;
         try {
+        	client = NDataSourceAdminServiceClient.getInstance(config, session);
         	WSDataSourceMetaInfo dataSourceMetaInformation = NDataSourceHelper
-					.createWSDataSourceMetaInfo(request);
-            client = NDataSourceAdminServiceClient.getInstance(config, session);
+					.createWSDataSourceMetaInfo(request, client);
             canAdd = client.testDataSourceConnection(dataSourceMetaInformation);
 %>
 <%=canAdd%>

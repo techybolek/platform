@@ -18,6 +18,7 @@ package org.wso2.carbon.ndatasource.ui;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.ui.config.DSXMLConfiguration;
 import org.wso2.carbon.ndatasource.ui.config.RDBMSDSXMLConfiguration;
 import org.wso2.carbon.ndatasource.ui.config.RDBMSDSXMLConfiguration.DataSourceProperty;
@@ -57,7 +59,7 @@ public class NDataSourceHelper {
 
 	private static ResourceBundle bundle;
 	
-	public static WSDataSourceMetaInfo createWSDataSourceMetaInfo(HttpServletRequest request) {
+	public static WSDataSourceMetaInfo createWSDataSourceMetaInfo(HttpServletRequest request, NDataSourceAdminServiceClient client) throws RemoteException, DataSourceException, NDataSourceAdminDataSourceException {
 		WSDataSourceMetaInfo_WSDataSourceDefinition dataSourceDefinition = null;
 		String datasourceType = request.getParameter("dsType");
 		String datasourceCustomType = request.getParameter("customDsType");
@@ -96,7 +98,7 @@ public class NDataSourceHelper {
 				}
 			}
 	
-			DSXMLConfiguration dsXMLConfig = createDSXMLConfiguration(datasourceType, request);
+			DSXMLConfiguration dsXMLConfig = createDSXMLConfiguration(datasourceType, request, client);
 	
 			dataSourceDefinition = createWSDataSourceDefinition(
 					dsXMLConfig, datasourceType);
@@ -115,7 +117,7 @@ public class NDataSourceHelper {
 	}
 
 	private static DSXMLConfiguration createDSXMLConfiguration(String type,
-			HttpServletRequest request) {
+			HttpServletRequest request, NDataSourceAdminServiceClient client) throws RemoteException, DataSourceException, NDataSourceAdminDataSourceException {
 		if (type.equals(NDataSourceClientConstants.RDBMS_DTAASOURCE_TYPE)) {
 			RDBMSDSXMLConfiguration rdbmsDSXMLConfig = null;
 			try {
@@ -159,7 +161,24 @@ public class NDataSourceHelper {
 					handleException(bundle.getString("ds.url.cannotfound.msg"));
 				}
 				String username = request.getParameter("username");
-				String password = request.getParameter("password");
+				String password = null;
+				
+				boolean isEditMode = Boolean.parseBoolean(request.getParameter("editMode"));
+				if (isEditMode){
+					String changePassword = request.getParameter("changePassword");
+					changePassword = (changePassword == null || changePassword.equals("false")) ? "false" : "true";
+					if (Boolean.parseBoolean(changePassword)) {
+						password = request.getParameter("newPassword");
+					} else {
+						WSDataSourceInfo dataSourceInfo = client.getDataSource(request.getParameter("dsName"));
+						WSDataSourceMetaInfo_WSDataSourceDefinition dataSourceDefinition = dataSourceInfo.getDsMetaInfo().getDefinition();
+						String configuration = dataSourceDefinition.getDsXMLConfiguration();
+						RDBMSDSXMLConfiguration rdbmsCon = (RDBMSDSXMLConfiguration)NDataSourceHelper.unMarshal(type, configuration);
+						password = rdbmsCon.getPassword().getValue();
+					}
+				} else {
+					password = request.getParameter("password");
+				}
 
 				rdbmsDSXMLConfig.setUrl(url);
 				rdbmsDSXMLConfig.setDriverClassName(driver);

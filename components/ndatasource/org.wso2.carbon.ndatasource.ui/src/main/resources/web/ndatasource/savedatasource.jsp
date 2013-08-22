@@ -36,7 +36,7 @@
 			try {
 				client = NDataSourceAdminServiceClient.getInstance(config, session);
 				WSDataSourceMetaInfo dataSourceMetaInformation = NDataSourceHelper
-						.createWSDataSourceMetaInfo(request);
+						.createWSDataSourceMetaInfo(request, client);
 				name = dataSourceMetaInformation.getName();
 				if (!editMode) {
 					if (client.getDataSource(name) != null) {

@@ -447,6 +447,13 @@ function loadConfigView() {
 	}
 }
 
+function displayPasswordField() {
+	if(document.getElementById('changePassword').checked) {
+		document.getElementById('newPasswordRow').style.display = "";
+	} else {
+		document.getElementById('newPasswordRow').style.display = "none";
+	}
+}
 
 </script>
 <form method="post" name="dscreationform" id="dscreationform"
@@ -488,10 +495,11 @@ function loadConfigView() {
 	<td align="left">
 		 <select id="dsTypeSelector" name="dsTypeSelector"
                         onchange="changeConfigView(this,document)">
-                    <% if (type.equals(NDataSourceClientConstants.RDBMS_DTAASOURCE_TYPE) 
-                    		|| !editMode) { %>
+                    <% if (!editMode) { %>
 	                    <option value="rdbms" selected="selected">RDBMS</option>
 	                    <option value="Custom">Custom</option>
+                    <% } else if (type.equals(NDataSourceClientConstants.RDBMS_DTAASOURCE_TYPE)) {%>
+                    	<option value="rdbms" selected="selected">RDBMS</option>
                     <% } else { %>
 	                    <option value="rdbms">RDBMS</option>
 	                    <option value="Custom" selected="selected">Custom</option>
@@ -573,12 +581,27 @@ function loadConfigView() {
         <input id="username" name="username" class="longInput" value="<%=username %>"/>
     </td>
 </tr>
-<tr>
+<% if (!editMode) { %>
+	<tr>
     <td><fmt:message key="password"/></td>
     <td align="left">
-        <input id="password" name="password" type="password" class="longInput" value="<%=password %>"/>
+        <input id="password" name="password" type="password" class="longInput"/>
     </td>
+	</tr>
+<%} else if (!isSystem){%>
+	<tr>
+		<td><label for="changePassword"><fmt:message  key="change.password"/></label></td>
+		<td><input type="checkbox" id="changePassword" name="changePassword" onclick="displayPasswordField()"/>
+		</td>
+	</tr>
+<%}%> 
+	
+<tr id="newPasswordRow" style="display:none">
+	<td><label for="changePassword"><fmt:message  key="password"/></label></td>
+	<td><input type="text" id="newPassword" name="newPassword" class="longInput" /></td>
 </tr>
+	
+
 <% } else if ("External Data Source".equals(dsProvider)){ %>
 <tr>
     <td><fmt:message key="datasource.className"/><span class='required'>*</span></td>
@@ -1099,7 +1122,7 @@ function loadConfigView() {
                       color: darkblue;
                       border:solid 1px #9fc2d5;
                       overflow-x:auto;
-                      overflow-y:auto"><%if (dataSourceDefinition != null) { %><%=NDataSourceHelper.prettifyXML((dataSourceDefinition.getDsXMLConfiguration().trim())) %>
+                      overflow-y:auto"><%if (!(type.equals(NDataSourceClientConstants.RDBMS_DTAASOURCE_TYPE)) && (dataSourceDefinition != null)) { %><%=NDataSourceHelper.prettifyXML((dataSourceDefinition.getDsXMLConfiguration().trim())) %>
         <%} %></textarea>
         <textarea id="configContent" name="configContent" style="display:none"></textarea>
     </td>
@@ -1125,6 +1148,7 @@ function loadConfigView() {
             }
 
             function testConnection() {
+            	var password;
             	if (document.getElementById("jndiPropertyTable") != null) {
                 	extractJndiProps();
                 } 
@@ -1139,15 +1163,29 @@ function loadConfigView() {
             		var driver = document.getElementById('driver').value;
             		var url = document.getElementById('url').value;
             		var username = document.getElementById('username').value;
-            		var password = document.getElementById('password').value;
             	} else {
             		var dsclassname = document.getElementById('dsclassname').value;
             		var dsproviderProperties = document.getElementById('dsproviderProperties').value;
             	}
             	dsProvider = escape(dsProvider);
+            	
+            	         	
                 var url = 'validateconnection-ajaxprocessor.jsp?&dsName=' + document.getElementById('dsName').value+'&driver='+driver+
-           	'&url='+encodeURIComponent(url)+'&username='+username+'&password='+password+'&dsType=' + datasourceType+'&customDsType='+datasourceCustomType+'&dsProviderType='+dsProvider+
-    	'&dsclassname='+dsclassname+'&dsclassname='+dsclassname+'&dsproviderProperties='+dsproviderProperties;
+           	'&url='+encodeURIComponent(url)+'&username='+username+'&dsType=' + datasourceType+'&customDsType='+datasourceCustomType+'&dsProviderType='+dsProvider+
+    	'&dsclassname='+dsclassname+'&dsclassname='+dsclassname+'&dsproviderProperties='+dsproviderProperties+'&editMode='+<%=editMode%>;
+    	
+    		var editMode = document.getElementById("editMode").value;
+			if (editMode == null || editMode == "false") {
+				password = document.getElementById('password').value;
+				url = url + '&password='+password;
+			} else {
+				var changePassword = "false";
+				password = document.getElementById('newPassword').value;
+				if (document.getElementById('changePassword') != null) {
+					changePassword = document.getElementById('changePassword').checked;
+				}
+				url = url + '&changePassword='+changePassword + '&newPassword='+password;
+			}
                 jQuery('#connectionTestMsgDiv').load(url, displayMsg);
                 return false;
             }
