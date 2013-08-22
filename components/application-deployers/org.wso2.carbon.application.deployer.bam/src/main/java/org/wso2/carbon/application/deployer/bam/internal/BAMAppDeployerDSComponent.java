@@ -10,6 +10,7 @@ import org.wso2.carbon.application.deployer.AppDeployerUtils;
 import org.wso2.carbon.application.deployer.Feature;
 import org.wso2.carbon.application.deployer.handler.AppDeploymentHandler;
 import org.wso2.carbon.application.deployer.bam.BAMAppDeployer;
+import org.wso2.carbon.registry.core.service.RegistryService;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -18,6 +19,12 @@ import java.util.Map;
 
 /**
  * @scr.component name="application.deployer.bam" immediate="true"
+ * @scr.reference name="registry.service"
+ * interface="org.wso2.carbon.registry.core.service.RegistryService"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setRegistryService"
+ * unbind="unsetRegistryService"
  */
 public class BAMAppDeployerDSComponent {
 
@@ -40,5 +47,13 @@ public class BAMAppDeployerDSComponent {
         if (appHandlerRegistration != null) {
             appHandlerRegistration.unregister();
         }
+    }
+
+    protected void setRegistryService(RegistryService registryService) {
+        ServiceHolder.setRegistryService(registryService);
+    }
+
+    protected void unsetRegistryService(RegistryService registryService) {
+        ServiceHolder.setRegistryService(null);
     }
 }
