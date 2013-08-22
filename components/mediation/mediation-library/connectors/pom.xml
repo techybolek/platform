@@ -36,6 +36,7 @@
  	<module>org.wso2.carbon.connector.jira</module>
 	<module>org.wso2.carbon.connector.salesforce</module>
 	<module>org.wso2.carbon.connector.twilio</module>
+        <module>org.wso2.carbon.connector.googlespreadsheet</module>
 
     </modules>
 
