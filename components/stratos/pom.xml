@@ -74,7 +74,7 @@
         <module>cartridge-agent</module>
         <module>org.wso2.carbon.stratos.cloud.controller</module>
         <!--module>artifact-deployment-coordinator</module-->
-        <!--module>org.wso2.carbon.cartridge.mgt.ui</module-->
+        <module>org.wso2.carbon.cartridge.mgt.ui</module>
 	<module>sso-mgt</module>
     </modules>
 
