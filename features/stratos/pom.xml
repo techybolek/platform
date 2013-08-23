@@ -46,9 +46,9 @@
 	<module>status-monitor</module>
 	<module>sso-mgt</module>
         <!--module>adc-mgt</module-->
-        <module>cartridge-agent</module>
+        <!--module>cartridge-agent</module-->
         <module>cloud-controller</module>
-        <module>cartridge-mgt</module>
+        <!--module>cartridge-mgt</module-->
     </modules>
 
     <distributionManagement>
