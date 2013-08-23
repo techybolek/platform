@@ -41,6 +41,23 @@ import java.util.zip.ZipOutputStream;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+import org.wso2.carbon.adc.mgt.exception.ADCException;
+import org.wso2.carbon.adc.mgt.exception.AlreadySubscribedException;
+import org.wso2.carbon.adc.mgt.exception.DomainMappingExistsException;
+import org.wso2.carbon.adc.mgt.exception.DuplicateCartridgeAliasException;
+import org.wso2.carbon.adc.mgt.exception.InvalidCartridgeAliasException;
+import org.wso2.carbon.adc.mgt.exception.InvalidRepositoryException;
+import org.wso2.carbon.adc.mgt.exception.NotSubscribedException;
+import org.wso2.carbon.adc.mgt.exception.PolicyException;
+import org.wso2.carbon.adc.mgt.exception.RepositoryCredentialsRequiredException;
+import org.wso2.carbon.adc.mgt.exception.RepositoryRequiredException;
+import org.wso2.carbon.adc.mgt.exception.RepositoryTransportException;
+import org.wso2.carbon.adc.mgt.exception.UnregisteredCartridgeException;
+
 import org.apache.axis2.AxisFault;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -70,6 +87,14 @@ import org.wso2.carbon.stratos.cloud.controller.util.xsd.Properties;
 import org.wso2.carbon.stratos.cloud.controller.util.xsd.Property;
 import org.wso2.carbon.adc.topology.mgt.service.TopologyManagementService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.adc.mgt.utils.ApplicationManagementUtil;
+import org.wso2.carbon.adc.mgt.utils.CartridgeConstants;
+import org.wso2.carbon.adc.mgt.utils.PersistenceManager;
+import org.wso2.carbon.adc.mgt.utils.PolicyHolder;
+import org.wso2.carbon.adc.mgt.utils.RepositoryFactory;
+import org.wso2.carbon.context.CarbonContext;
+
+
 
 /**
  *
@@ -1125,4 +1150,73 @@ public class ApplicationManagementService extends AbstractAdmin {
         return Integer.parseInt(System.getProperty(CartridgeConstants.CARTRIDGE_CLUSTER_MAX_LIMIT));
     }
 
+     /**
+     * This method will create the long url for a given domain for given app
+     * @param actualDomain ie - as.cloud-test.wso2.com:8280
+     * @param appType - application name (webapps,jaggeryapps,jaxwebapps)
+     * @return long url
+     * @throws ADCException
+     */
+    private String createLongURL (String actualDomain, String appType) throws ADCException {
+    	//sample domains
+    	// "as.cloud-test.wso2.com:8280/services/t/amani123.com"
+    	// as.cloud-test.wso2.com:8280/t/amani123.com/webapps
+    	// as.cloud-test.wso2.com:8280/t/amani123.com/jaggeryapps
+    	// as.cloud-test.wso2.com:8280/t/amani123.com/jaxwebapps
+		int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+//		tenantId = 1;
+		if (tenantId == MultitenantConstants.SUPER_TENANT_ID || tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+			// for ST/ invalid tenant
+			if (appType.equals("services")) {
+				return actualDomain + "/" + "services";
+			} else {
+				return actualDomain;
+			}
+		} else {
+			// tenant apps
+			String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+//			tenantDomain = "amani12.com";
+			if (appType.equals("webapps") || appType.equals("jaggeryapps") ||
+			    appType.equals("jaxwebapps")) {
+				return actualDomain + "/t/" + tenantDomain+"/"+appType;
+			} else if (appType.equals("services")) {
+				return actualDomain +"/"+appType+ "/t/" +tenantDomain;
+			} else {
+				  throw new ADCException("cannot create the long url for domain mapping ");
+			}
+
+		}
+    }
+    /**
+     *  This will overload the method addDomainMapping (String, String ) to map long url with a given domain
+     * @param mappedDomain - the new domain which needs to be mapped with the actual url
+     * @param actualDomain - the actual domain with the port - ie as.cloud-test.wso2.com:8280
+     * @param appType - type of the app - ie webapp,jaggeryapps,service,jaxwebapps
+     * @return
+     * @throws ADCException
+     * @throws DomainMappingExistsException
+     * @throws NotSubscribedException
+     */
+    public String addDomainMapping(String mappedDomain, String actualDomain, String appType ) throws ADCException, DomainMappingExistsException, NotSubscribedException {
+        try {
+            String actualURL = createLongURL(actualDomain, appType);
+            registryManager.addDomainMappingToRegistry(mappedDomain, actualURL);
+            log.info("Domain mapping is added for " + mappedDomain + " tenant: " + tenantDomain);
+            PersistenceManager.updateDomainMapping(
+                    ApplicationManagementUtil.getTenantId(getConfigContext()), actualURL, mappedDomain);
+        } catch (RegistryException e) {
+            String msg = "Unable to add the mapping due to registry transaction error";
+            log.error(msg, e);
+            throw new ADCException("Unable to add the mapping due to internal error!", e);
+        } catch (DomainMappingExistsException e) {
+            String msg = "Domain mapping already exists.";
+            log.error(msg, e);
+            throw e;
+        } catch (Exception e) {
+            String msg = "Error occurred. Reason : " + e.getMessage();
+            log.error(msg, e);
+            throw new ADCException(msg, e);
+        }
+        return actualDomain;
+    }
 }
