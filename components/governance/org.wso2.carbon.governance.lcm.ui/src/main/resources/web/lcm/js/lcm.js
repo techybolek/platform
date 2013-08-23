@@ -125,11 +125,15 @@ var lifecyleOperationStarted = false;
                 onSuccess: function(transport) {
                     var returnValue = transport.responseText;
                     if (returnValue.search(/----IsInUse----/) != -1) {
-                    	CARBON.showConfirmationDialog(lifecycleName + " " +org_wso2_carbon_governance_lcm_ui_jsi18n["lifecycle.operation.edit.warn"],function() {
-                    		saveLCPlayLoad(lifecycleName, isNew,override);           		          		
-                    	},function() {	});
+                        if (lifecycleName != "null") {
+                            CARBON.showConfirmationDialog(lifecycleName + " " +org_wso2_carbon_governance_lcm_ui_jsi18n["lifecycle.operation.edit.warn"],function() {
+                                saveLCPlayLoad(lifecycleName, isNew,override);           		          		
+                            },function() {	});
+                        } else {
+                            CARBON.showErrorDialog(org_wso2_carbon_governance_lcm_ui_jsi18n["unable.to.save.lifecycle.in.use"] );
+                        }
                     } else {
-                    	saveLCPlayLoad(lifecycleName, isNew,override);
+                        saveLCPlayLoad(lifecycleName, isNew,override);
                     }
                 },
                 onFailure: function(transport) {
