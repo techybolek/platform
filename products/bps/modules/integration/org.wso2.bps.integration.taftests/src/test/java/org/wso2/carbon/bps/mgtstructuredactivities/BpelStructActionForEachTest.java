@@ -35,6 +35,7 @@ import org.wso2.carbon.bpel.stub.mgt.types.LimitedInstanceInfoType;
 import org.wso2.carbon.bpel.stub.mgt.types.PaginatedInstanceList;
 import org.wso2.carbon.bps.BPSMasterTest;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -61,8 +62,9 @@ public class BpelStructActionForEachTest extends BPSMasterTest {
     }
 
     @BeforeClass(alwaysRun = true)
-    public void deployArtifact() throws InterruptedException, RemoteException, MalformedURLException, PackageManagementException {
+    public void deployArtifact() throws Exception {
         uploadBpelForTest("TestForEach");
+        requestSender.waitForProcessDeployment(serviceUrl + File.separator + "ForEachService");
     }
 
     @Test(groups = {"wso2.bps", "wso2.bps.structures"}, description = "Deploys Bpel with Flow", priority=1)

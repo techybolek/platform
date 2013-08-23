@@ -35,6 +35,7 @@ import org.wso2.carbon.bpel.stub.mgt.types.LimitedInstanceInfoType;
 import org.wso2.carbon.bpel.stub.mgt.types.PaginatedInstanceList;
 import org.wso2.carbon.bps.BPSMasterTest;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 
@@ -60,9 +61,9 @@ public class BpelInMemoryDeploymentTest extends BPSMasterTest {
 
     @BeforeClass(alwaysRun = true)
     public void deployArtifact()
-            throws InterruptedException, RemoteException, MalformedURLException,
-                   PackageManagementException {
+            throws Exception {
         uploadBpelForTest("CustomerInfo");
+        requestSender.waitForProcessDeployment(serviceUrl + File.separator + "CustomerInfoService");
     }
 
 
@@ -70,7 +71,7 @@ public class BpelInMemoryDeploymentTest extends BPSMasterTest {
     public void testInmemoryUolpad() throws Exception {
         bpelProcrss.getStatus(bpelProcrss.getProcessId("CustomerInfo"));
         RequestSender requestSender = new RequestSender();
-        requestSender.waitForProcessDeployment(serviceUrl + "/CustomerInfoService");
+        requestSender.waitForProcessDeployment(serviceUrl + File.separator + "CustomerInfoService");
 
         requestSender.assertRequest(serviceUrl + "/CustomerInfoService", "getCustomerSSN", "<p:CustomerInfo xmlns:p=\"http://wso2.org/bps/samples/loan_process/schema\">\n" +
                 "      <!--Exactly 1 occurrence-->\n" +

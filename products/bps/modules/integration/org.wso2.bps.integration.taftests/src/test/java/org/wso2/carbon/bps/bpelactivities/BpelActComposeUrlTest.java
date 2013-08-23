@@ -48,9 +48,9 @@ public class BpelActComposeUrlTest extends BPSMasterTest {
 
     @BeforeClass(alwaysRun = true,groups = {"wso2.bps", "wso2.bps.bpelactivities"})
     public void deployArtifact()
-            throws InterruptedException, RemoteException, PackageManagementException,
-                   MalformedURLException {
+            throws Exception {
         uploadBpelForTest("TestComposeUrl");
+        requestSender.waitForProcessDeployment(serviceUrl + File.separator + "TestComposeUrlService");
     }
 
     @Test(groups = {"wso2.bps", "wso2.bps.bpelactivities"}, description = "Invike combine URL Bpel")
@@ -103,7 +103,7 @@ public class BpelActComposeUrlTest extends BPSMasterTest {
                  "      </pairs>\n" +
                  "   </p:composeUrl>";
         String operation = "composeUrl";
-        String serviceName = "/TestComposeUrlService";
+        String serviceName = File.separator+ "TestComposeUrlService";
         List<String> expectedOutput = new ArrayList<String>();
         expectedOutput.add("www.google");
 

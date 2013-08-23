@@ -62,9 +62,9 @@ public class BpelActIgnoreMissingFromDataTest extends BPSMasterTest {
 
     @BeforeClass(alwaysRun = true,groups = {"wso2.bps", "wso2.bps.bpelactivities"})
     public void deployArtifact()
-            throws InterruptedException, RemoteException, MalformedURLException,
-                   PackageManagementException {
+            throws Exception {
         uploadBpelForTest("TestCombineUrl");
+        requestSender.waitForProcessDeployment(serviceUrl + File.separator + "TestCombineUrlService");
     }
 
     @Test(groups = {"wso2.bps", "wso2.bps.bpelactivities"}, description = "Invike combine URL Bpel")
@@ -111,7 +111,7 @@ public class BpelActIgnoreMissingFromDataTest extends BPSMasterTest {
         String serviceName = "TestCombineUrlService";
         List<String> expectedOutput = new ArrayList<String>();
         expectedOutput.add("http://www.google.lk/search");
-        requestSender.sendRequest(serviceUrl+"/" + serviceName, operation, payload,
+        requestSender.sendRequest(serviceUrl+ File.separator + serviceName, operation, payload,
                 1, expectedOutput, true);
     }
 }

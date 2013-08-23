@@ -69,9 +69,9 @@ public class BpelVersioningTest extends BPSMasterTest {
 
     @BeforeClass(alwaysRun = true)
     public void deployArtifact()
-            throws InterruptedException, RemoteException, MalformedURLException,
-            PackageManagementException {
+            throws Exception {
         uploadBpelForTest("HelloWorld2");
+        requestSender.waitForProcessDeployment(serviceUrl + File.separator + "HelloService");
 
     }
 
@@ -97,7 +97,7 @@ public class BpelVersioningTest extends BPSMasterTest {
                 "   </p:hello>";
 
         String operation = "hello";
-        String serviceName = "/HelloService";
+        String serviceName = File.separator + "HelloService";
         String expectedBefore = "World";
         String expectedAfter = "World-Version";
         requestSender.assertRequest(serviceUrl + serviceName, operation, payLoad,

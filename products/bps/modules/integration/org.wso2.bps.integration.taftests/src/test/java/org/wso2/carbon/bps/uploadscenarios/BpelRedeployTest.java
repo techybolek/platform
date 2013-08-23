@@ -32,6 +32,7 @@ import org.wso2.carbon.bpel.stub.mgt.PackageManagementException;
 import org.wso2.carbon.bpel.stub.mgt.types.LimitedInstanceInfoType;
 import org.wso2.carbon.bps.BPSMasterTest;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 
@@ -56,14 +57,16 @@ public class BpelRedeployTest extends BPSMasterTest {
     }
 
     @Test(groups = {"wso2.bps", "wso2.bps.manage"}, description = "Tests redeploy bpel",priority=0)
-    public void testUplpad() throws InterruptedException, RemoteException, PackageManagementException, MalformedURLException {
+    public void testUplpad() throws Exception {
         uploadBpelForTest("HelloWorld2");
+        requestSender.waitForProcessDeployment(serviceUrl + File.separator + "HelloService");
         bpelManager.undeployBPEL("HelloWorld2");
     }
 
     @Test(groups = {"wso2.bps", "wso2.bps.manage"}, description = "Tests redeploy bpel",priority=0)
-    public void testRedeploy() throws InterruptedException, RemoteException, PackageManagementException, MalformedURLException {
+    public void testRedeploy() throws Exception {
         uploadBpelForTest("HelloWorld2");
+        requestSender.waitForProcessDeployment(serviceUrl + File.separator + "HelloService");
         bpelManager.checkProcessDeployment("HelloWorld2");
     }
 
