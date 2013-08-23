@@ -18,19 +18,18 @@
     </sequence>
     <sequence name="main">
         <in>
-            <log level="full"/>
             <property name="FORCE_SC_ACCEPTED" value="true" scope="axis2"/>
+            <header name="Action" value="urn:throwAxisFault"/>
             <property name="target.endpoint" value="SOAPFaultSample"/>
             <property name="RETRY_ON_SOAPFAULT" value="false"/>
             <store messageStore="MyStore"/>
         </in>
         <out>
-            <log level="full" />
         </out>
         <description>The main sequence for the message mediation</description>
     </sequence>
     <messageStore name="MyStore"/>
-    <messageProcessor class="org.apache.synapse.message.processors.forward.ScheduledMessageForwardingProcessor"
+    <messageProcessor class="org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor"
                       name="ScheduledProcessor"
                       messageStore="MyStore">
         <parameter name="max.delivery.attempts">5</parameter>
