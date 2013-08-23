@@ -16,7 +16,6 @@
 package org.wso2.carbon.ntask.core.impl.clustered;
 
 import org.wso2.carbon.ntask.common.TaskException;
-import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.TaskManagerId;
 import org.wso2.carbon.ntask.core.TaskRepository;
@@ -29,10 +28,9 @@ import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
  */
 public class ClusteredTaskManagerFactory extends StandaloneTaskManagerFactory {
 
-    public ClusteredTaskManagerFactory() throws TaskException {
+    public ClusteredTaskManagerFactory() {
         if (!isClusteringEnabled()) {
-            throw new TaskException("Clustering is not initialized to use Clustered Task Managers",
-                    Code.CONFIG_ERROR);
+            throw new IllegalStateException("Clustering is not initialized to use Clustered Task Managers");
         }
     }
     
