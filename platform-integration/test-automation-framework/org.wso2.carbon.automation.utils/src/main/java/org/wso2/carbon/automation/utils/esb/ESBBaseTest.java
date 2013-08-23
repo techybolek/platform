@@ -34,7 +34,7 @@ import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentVariabl
 import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkFactory;
 import org.wso2.carbon.automation.utils.services.ServiceDeploymentUtil;
 import org.wso2.carbon.security.mgt.stub.config.SecurityAdminServiceSecurityConfigExceptionException;
-import org.wso2.carbon.sequences.stub.types.SequenceAdminServiceSequenceEditorException;
+import org.wso2.carbon.sequences.stub.types.SequenceEditorException;
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
@@ -245,7 +245,7 @@ public class ESBBaseTest {
     }
 
     public void deleteSequence(String sequenceName)
-            throws SequenceAdminServiceSequenceEditorException, RemoteException {
+            throws SequenceEditorException, RemoteException {
         if (esbUtils.isSequenceExist(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), sequenceName)) {
             esbUtils.deleteSequence(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), sequenceName);
         }

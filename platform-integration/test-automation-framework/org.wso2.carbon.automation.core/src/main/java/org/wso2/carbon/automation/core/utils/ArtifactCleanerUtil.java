@@ -34,7 +34,7 @@ import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.bpel.stub.mgt.PackageManagementException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
-import org.wso2.carbon.sequences.stub.types.SequenceAdminServiceSequenceEditorException;
+import org.wso2.carbon.sequences.stub.types.SequenceEditorException;
 import org.wso2.carbon.service.mgt.stub.ServiceAdminException;
 import org.wso2.carbon.service.mgt.stub.types.carbon.ServiceMetaData;
 import org.wso2.carbon.utils.ServerConstants;
@@ -234,7 +234,7 @@ public class ArtifactCleanerUtil {
     }
 
     public void restToDefaultConfiguration(String sessionCookie, String backendURL)
-            throws IOException, SequenceAdminServiceSequenceEditorException, XMLStreamException,
+            throws IOException, SequenceEditorException, XMLStreamException,
                    ParserConfigurationException,
                    SAXException, TransformerException, ServletException {
 
