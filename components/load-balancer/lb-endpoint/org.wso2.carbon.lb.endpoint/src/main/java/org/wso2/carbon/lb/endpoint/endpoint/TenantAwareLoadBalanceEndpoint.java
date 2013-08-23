@@ -199,13 +199,12 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         return tlbMembershipHandler;
     }
 
-
     public void send(MessageContext synCtx) {
         /*   setCookieHeader(synCtx);     */
         Member currentMember = null;
         SessionInformation sessionInformation = null;
         String actualHost = null;
-
+        String toAddress = synCtx.getTo().getAddress();
         //Gathering required information for domain mapping
         org.apache.axis2.context.MessageContext axis2MessageContext =
                                 ((Axis2MessageContext) synCtx).getAxis2MessageContext();
@@ -235,13 +234,16 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
             if (domainMapping != null) {
                 actualHost = domainMapping.getActualHost();
 
-                if(actualHost.contains("/t")) {
-                	 transportHeaders.put(HTTP.TARGET_HOST, actualHost);
+                if(actualHost.contains("/") && containsPort ) {
+                	 transportHeaders.put(HTTP.TARGET_HOST,actualHost.substring(0,actualHost.indexOf("/"))+ ":" + port+actualHost.substring(actualHost.indexOf("/"))) ;
                 } else if(containsPort){
                     transportHeaders.put(HTTP.TARGET_HOST, actualHost + ":" + port);
                 } else {
                     transportHeaders.put(HTTP.TARGET_HOST, actualHost);
                 }
+                if(actualHost.contains("/")) {
+              	   synCtx.setTo(new EndpointReference(actualHost.substring(actualHost.indexOf("/"))+ toAddress));
+               }
                 ((Axis2MessageContext) synCtx).getAxis2MessageContext().setProperty("TRANSPORT_HEADERS" , transportHeaders);
 
             } else {
@@ -299,9 +301,10 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         log.debug("************* Actual Host: "+actualHost +" ****** Target Host: "+targetHost);
         faultHandler.setHost(actualHost != null ? actualHost : targetHost);
 
-        if (sessionInformation != null && currentMember != null) {
+        if (sessionInformation != null && currentMember != null	) {
             //send message on current session
             sessionInformation.updateExpiryTime();
+          
             sendToApplicationMember(synCtx, currentMember, faultHandler, false);
         } else {
 //            prepare for a new session
@@ -327,14 +330,17 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                     
                     log.debug("************* Actual Host: "+actualHost +" ****** Target Host: "+targetHost);
                     faultHandler.setHost(actualHost != null ? actualHost : targetHost);
-
-                    if(containsPort){
+                    if (actualHost.contains("/") && containsPort ) {
+                    	 transportHeaders.put(HTTP.TARGET_HOST,actualHost.substring(0,actualHost.indexOf("/"))+ ":" + port+actualHost.substring(actualHost.indexOf("/"))) ;     
+                    } else if (containsPort) {
                         transportHeaders.put(HTTP.TARGET_HOST, actualHost + ":" + port);
                     } else {
                         transportHeaders.put(HTTP.TARGET_HOST, actualHost);
                     }
                     ((Axis2MessageContext) synCtx).getAxis2MessageContext().setProperty("TRANSPORT_HEADERS" , transportHeaders);
-
+                    if(actualHost.contains("/")) {
+                   	   synCtx.setTo(new EndpointReference(actualHost.substring(actualHost.indexOf("/"))+ toAddress));
+                    }
                     currentMember = tlbMembershipHandler.getNextApplicationMember(actualHost,tenantId);
                     sendToApplicationMember(synCtx,currentMember,faultHandler,true);
                 }else {
