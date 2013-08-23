@@ -18,5 +18,36 @@
 
 package org.wso2.carbon.automation.core.context.featuremanagementContext;
 
-public class FeatureManagementcontext {
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class P2Repositories {
+
+    private String name;
+
+    private List<Repository> repositories = new ArrayList<Repository>();
+
+
+    public List<Repository> getRepositories() {
+        return repositories;
+    }
+
+    public void setRepositories(List<Repository> repositories) {
+        this.repositories = repositories;
+    }
+
+    //to add repositories to the current p2repository
+    public void addRepository(Repository repo) {
+
+
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

@@ -16,9 +16,23 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.context.toolcontext;
+package org.wso2.carbon.automation.core.context.featuremanagementContext;
 
+import org.apache.axiom.om.OMElement;
 import org.wso2.carbon.automation.core.context.AutomationContext;
 
-public class ToolContext extends AutomationContext {
+import java.util.HashMap;
+
+public class FeatureManagementContext extends AutomationContext {
+
+
+    private HashMap<String, P2Repositories> p2Repositories = new HashMap<String, P2Repositories>();
+
+    public HashMap<String, P2Repositories> getP2Repositories() {
+        return p2Repositories;
+    }
+
+    public void setP2Repositories(HashMap<String, P2Repositories> p2Repositories) {
+        this.p2Repositories = p2Repositories;
+    }
 }

@@ -16,9 +16,17 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.context.toolcontext;
+package org.wso2.carbon.automation.core.context.securitycontext;
 
-import org.wso2.carbon.automation.core.context.AutomationContext;
 
-public class ToolContext extends AutomationContext {
+/**
+ * Represents the data structure for Security->Truststore node automation.xml
+ */
+
+
+// TrustStore has same feature set in store
+
+public class Truststore extends Store {
+
+
 }

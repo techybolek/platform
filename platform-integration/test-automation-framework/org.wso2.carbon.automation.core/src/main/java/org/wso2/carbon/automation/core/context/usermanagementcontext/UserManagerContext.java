@@ -18,10 +18,12 @@
 
 package org.wso2.carbon.automation.core.context.usermanagementcontext;
 
+import org.wso2.carbon.automation.core.context.AutomationContext;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserManagerContext {
+public class UserManagerContext extends AutomationContext {
 
     private List<Tenant> tenant = new ArrayList<Tenant>();
 

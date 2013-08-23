@@ -18,5 +18,21 @@
 
 package org.wso2.carbon.automation.core.context.securitycontext;
 
+import java.util.HashMap;
+
+/**
+ * Represents the data structure for Cluster node in automation.xml
+ */
 public class SecurityContext {
+
+    private HashMap<String, Object> storeList = new HashMap<String, Object>();
+
+
+    public HashMap<String, Object> getStoreList() {
+        return storeList;
+    }
+
+    public void setStoreList(HashMap<String, Object> storeList) {
+        this.storeList = storeList;
+    }
 }

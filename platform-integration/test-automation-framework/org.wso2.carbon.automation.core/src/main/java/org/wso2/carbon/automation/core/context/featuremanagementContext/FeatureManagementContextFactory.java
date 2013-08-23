@@ -18,5 +18,62 @@
 
 package org.wso2.carbon.automation.core.context.featuremanagementContext;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.impl.llom.OMElementImpl;
+import org.wso2.carbon.automation.core.context.ContextConstants;
+
+import javax.xml.namespace.QName;
+import java.util.HashMap;
+import java.util.Iterator;
+
+
 public class FeatureManagementContextFactory {
+
+    public FeatureManagementContext getFeatureManagementContext(OMElement element) {
+
+        FeatureManagementContext featureManagementContext = new FeatureManagementContext();
+        featureManagementContext.setP2Repositories(listP2Repositories(element));
+        return featureManagementContext;
+
+    }
+
+    /**
+     * List all P2repositories
+     */
+    public HashMap<String, P2Repositories> listP2Repositories(OMElement element) {
+
+        HashMap<String, P2Repositories> p2RepositoriesMap = new HashMap<String, P2Repositories>();
+        OMNode node;
+        Iterator children = element.getChildElements();
+        String p2RepoName = null;
+        while (children.hasNext()) {
+
+            P2Repositories p2Repositories = new P2Repositories();
+            node = (OMNode) children.next();
+            p2RepoName = ((OMElementImpl) node).getAttributeValue(QName.valueOf(ContextConstants.FEATURE_MANAGEMENT_CONTEXT_P2RESITORIES_NAME));
+            p2Repositories.setName(p2RepoName);
+            Iterator repoList = ((OMElementImpl) node).getChildElements();
+
+            //add all repositories to current p2repository
+            while (repoList.hasNext()) {
+                Repository repository = new Repository();
+                OMNode repositoryNode = (OMNode) repoList.next();
+                String repoId = ((OMElementImpl) repositoryNode).getAttributeValue(QName.valueOf(ContextConstants.FEATURE_MANAGEMENT_CONTEXT_REPOSITORY_ID));
+                String url = ((OMElementImpl) repositoryNode).getText();
+                repository.setRepo_id(repoId);
+                repository.setUrl(url);
+
+                // add the current repository to the p2repository
+                p2Repositories.addRepository(repository);
+
+
+            }
+            //add current p2repository to the hash map
+            p2RepositoriesMap.put(p2RepoName, p2Repositories);
+
+        }
+
+        return p2RepositoriesMap;
+    }
 }

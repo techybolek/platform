@@ -18,5 +18,116 @@
 
 package org.wso2.carbon.automation.core.context;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.impl.llom.OMElementImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.automation.core.ProductConstant;
+import org.wso2.carbon.automation.core.context.configurationcontext.ConfigurationContextFactory;
+import org.wso2.carbon.automation.core.context.databasecontext.DatabaseContextFactory;
+
+import javax.activation.DataHandler;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class AutomationContextReader {
+    private static final Log log = LogFactory.getLog(AutomationContextReader.class);
+    AutomationContextReader contextReaderInstance;
+    AutomationContext automationContext;
+    XMLStreamReader xmlStream = null;
+
+    public AutomationContextReader readAutomationContext() {
+        if (contextReaderInstance == null) {
+            synchronized (AutomationContextReader.class) {
+                if (contextReaderInstance == null) {
+                    contextReaderInstance = new AutomationContextReader();
+                    readContext();
+                }
+            }
+        }
+        return contextReaderInstance;
+    }
+
+    public AutomationContext getAutomationContext() {
+        return automationContext;
+    }
+
+    private void readContext()
+    {
+        {
+            DataHandler handler;
+            try {
+                String nodeFile = ProductConstant.NODE_FILE_NAME;
+
+                //URL clusterXmlURL = new File(String.format("%s%s", ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION, nodeFile)).toURI().toURL();
+                URL clusterXmlURL = new File("/home/dharshana/wso2source/carbon/platform/trunk/products/is/modules/integration/tests/src/test/resources/automation.xml").toURI().toURL();
+                handler = new DataHandler(clusterXmlURL);
+                xmlStream = XMLInputFactory.newInstance().createXMLStreamReader(handler.getInputStream());
+                listPlatforms(xmlStream);
+
+            } catch (XMLStreamException e) {
+                log.error(String.format("Cannot create Stream :-%s", e.getMessage()));
+            } catch (IOException e) {
+                log.error(String.format("File Input Error :-%s", e.getMessage()));
+            }
+        }
+    }
+
+    private List<OMNode> listPlatforms(XMLStreamReader xmlStreamReader) {
+        StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
+        OMElement endPointElem = builder.getDocumentElement();
+        List<OMNode> platformList = new ArrayList<OMNode>();
+
+        OMElement nodeElement;
+        Iterator elemChildren = endPointElem.getChildElements();
+        while (elemChildren.hasNext()) {
+            nodeElement = (OMElement) elemChildren.next();
+            if(nodeElement.getLocalName().equals(ContextConstants.CONFIGURATION_CONTEXT_NODE))
+            {
+                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
+                contextFactory.createConfiguration(nodeElement);
+            }
+            if(nodeElement.getLocalName().equals(ContextConstants.DATABASE_CONTEXT_NODE))
+            {
+                DatabaseContextFactory databaseContextFactory = new DatabaseContextFactory();
+                databaseContextFactory.listDatabases(nodeElement);
+            }
+            if(nodeElement.getLocalName().equals(ContextConstants.PLATFORM_CONTEXT_NODE))
+            {
+                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
+                contextFactory.createConfiguration(nodeElement);
+            }
+            if(nodeElement.getLocalName().equals(ContextConstants.SECURITY_CONTEXT_NODE))
+            {
+                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
+                contextFactory.createConfiguration(nodeElement);
+            }
+            if(nodeElement.getLocalName().equals(ContextConstants.TOOLS_CONTEXT_NODE))
+            {
+                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
+                contextFactory.createConfiguration(nodeElement);
+            }
+            if(nodeElement.getLocalName().equals(ContextConstants.USER_MANAGEMENT_CONTEXT_NODE))
+            {
+                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
+                contextFactory.createConfiguration(nodeElement);
+            }
+            if(nodeElement.getLocalName().equals(ContextConstants.FEATURE_MANAGEMENT_CONTEXT_NODE))
+            {
+                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
+                contextFactory.createConfiguration(nodeElement);
+            }
+            platformList.add(nodeElement);
+        }
+        return platformList;
+    }
 }

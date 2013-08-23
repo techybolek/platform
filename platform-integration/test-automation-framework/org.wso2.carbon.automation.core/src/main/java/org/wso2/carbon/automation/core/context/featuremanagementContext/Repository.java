@@ -16,9 +16,30 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.context.toolcontext;
+package org.wso2.carbon.automation.core.context.featuremanagementContext;
 
-import org.wso2.carbon.automation.core.context.AutomationContext;
+/**
+ * Represent the internal data structure of the features->P2Repositories->repository node in the automation.xml file
+ */
+public class Repository {
 
-public class ToolContext extends AutomationContext {
+    private String url;
+    private String repo_id;
+
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getRepo_id() {
+        return repo_id;
+    }
+
+    public void setRepo_id(String repo_id) {
+        this.repo_id = repo_id;
+    }
 }

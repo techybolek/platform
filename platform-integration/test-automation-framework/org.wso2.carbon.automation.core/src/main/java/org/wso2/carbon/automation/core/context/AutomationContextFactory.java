@@ -16,9 +16,7 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.context.toolcontext;
+package org.wso2.carbon.automation.core.context;
 
-import org.wso2.carbon.automation.core.context.AutomationContext;
-
-public class ToolContext extends AutomationContext {
+public class AutomationContextFactory {
 }

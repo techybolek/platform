@@ -16,34 +16,40 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.context.databasecontext;
-
-import org.wso2.carbon.automation.core.context.usermanagementcontext.User;
-
-
-import java.util.HashMap;
-import java.util.Map;
-
+package org.wso2.carbon.automation.core.context.securitycontext;
 
 /**
- * has the methods : operations for database contexts
+ * parent class for the representations keystore and trustStore
  */
-public class DatabaseContext {
+
+public class Store {
+
+    private String fileName;
+    private String type;
+    private String password;
 
 
-    private Map<String, Database> databaseConfigurations = new HashMap<String, Database>();
-
-    public void setDatabaseConfigurations(Map<String, Database> config) {
-
-        this.databaseConfigurations = config;
+    public String getFileName() {
+        return fileName;
     }
 
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
-    public Map<String, Database> getDatabaseConfigurations() {
+    public String getType() {
+        return type;
+    }
 
-        return databaseConfigurations;
+    public void setType(String type) {
+        this.type = type;
+    }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
-
-

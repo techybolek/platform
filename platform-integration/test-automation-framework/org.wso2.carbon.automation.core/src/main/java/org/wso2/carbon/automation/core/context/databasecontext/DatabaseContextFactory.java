@@ -18,5 +18,70 @@
 
 package org.wso2.carbon.automation.core.context.databasecontext;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.impl.llom.OMElementImpl;
+import org.wso2.carbon.automation.core.context.ContextConstants;
+
+import javax.xml.namespace.QName;
+import java.util.*;
+
+/**
+ * this class return the database context object
+ */
 public class DatabaseContextFactory {
+
+
+    /**
+     * this method returns the list of databases ojects in the provided OMElement
+     */
+    public HashMap<String, Database> listDatabases(OMElement endPointElem) {
+
+
+        HashMap<String, Database> databaseMap = new HashMap<String, Database>();
+        OMNode node;
+        Iterator children = endPointElem.getChildElements();
+        while (children.hasNext()) {
+            Database database = new Database();
+            node = (OMNode) children.next();
+            String databaseName = (((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants.DATABASE_CONTEXT_NAME))).getAttributeValue();
+            database.setName(databaseName);
+            Iterator configPropertiesIterator = ((OMElementImpl) node).getChildElements();
+            while (configPropertiesIterator.hasNext()) {
+
+                OMNode databaseNode = (OMNode) configPropertiesIterator.next();
+                String attribute = ((OMElementImpl) databaseNode).getLocalName();
+                String attributeValue = ((OMElementImpl) databaseNode).getText();
+                if (attribute.equals(ContextConstants.DATABASE_CONTEXT_URL))
+                    database.setUrl(attributeValue);
+                else if (attribute.equals(ContextConstants.DATABASE_CONTEXT_USERNAME))
+                    database.setUsername(attributeValue);
+                else if (attribute.equals(ContextConstants.DATABASE_CONTEXT_PASSWORD))
+                    database.setPassword(attributeValue);
+                else if (attribute.equals(ContextConstants.DATABASE_CONTEXT_DRIVERCLASSNAME))
+                    database.setDriverClassName(attributeValue);
+
+            }
+            databaseMap.put(databaseName, database);
+
+
+        }
+        return databaseMap;
+    }
+
+    /**
+     * this method return the databaseContext object providing the appropriate database node in autoconfig.xml
+     */
+    public DatabaseContext getDatabaseContext(OMElement element) {
+
+
+        DatabaseContext databaseContext = new DatabaseContext();
+        databaseContext.setDatabaseConfigurations(listDatabases(element));
+        return databaseContext;
+
+
+    }
+
+
 }
+

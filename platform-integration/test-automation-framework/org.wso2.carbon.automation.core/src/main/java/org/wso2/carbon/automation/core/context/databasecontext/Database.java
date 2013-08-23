@@ -18,67 +18,69 @@
 
 package org.wso2.carbon.automation.core.context.databasecontext;
 
-public class Configuration {
+/**
+ *
+ */
+public class Database {
 
     private String name;
-    private  String url;
-    private  String username;
+    private String url;
+    private String username;
     private String password;
     private String driverClassName;
 
-    public void setName(String name){
+    public void setName(String name) {
 
-        this.name=name;
+        this.name = name;
 
     }
 
-    public void  setUrl(String url)
-    {
+    public void setUrl(String url) {
 
-         this.url=url;
+        this.url = url;
 
     }
 
     public void setUsername(String uName) {
 
 
-        this.username=uName;
+        this.username = uName;
     }
 
-    public  void  setPassword(String password){
+    public void setPassword(String password) {
 
-        this.password=password;
+        this.password = password;
 
     }
 
-    public void  setDriverClassName(String dClass)  {
+    public void setDriverClassName(String dClass) {
 
-        this.driverClassName=dClass;
+        this.driverClassName = dClass;
     }
 
-    public String getName(){
+    public String getName() {
 
         return name;
     }
 
-    public  String getUrl(){
+    public String getUrl() {
 
 
         return url;
     }
 
-    public String getUsername(){
+    public String getUsername() {
 
         return username;
     }
 
-    public String getPassword(){
+    public String getPassword() {
 
-        return  password;
+        return password;
     }
 
-    public String getDriverClassName(){
+    public String getDriverClassName() {
 
-        return  driverClassName;
+        return driverClassName;
     }
 }

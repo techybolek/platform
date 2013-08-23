@@ -18,5 +18,7 @@
 
 package org.wso2.carbon.automation.core.context;
 
-public class AbstractContext {
+public class AutomationContext {
+    public void testMethod()
+    {}
 }

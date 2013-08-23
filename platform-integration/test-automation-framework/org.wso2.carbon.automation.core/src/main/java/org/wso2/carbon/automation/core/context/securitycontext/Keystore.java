@@ -16,7 +16,30 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.context.platformcontext;
+package org.wso2.carbon.automation.core.context.securitycontext;
 
-public class Platformcontext {
+/**
+ * Represents the data structure for Security->Keystore node automation.xml
+ */
+public class Keystore extends Store {
+
+    private String keyAlias;
+    private String keyPassword;
+
+
+    public String getKeyAlias() {
+        return keyAlias;
+    }
+
+    public void setKeyAlias(String keyAlias) {
+        this.keyAlias = keyAlias;
+    }
+
+    public String getKeyPassword() {
+        return keyPassword;
+    }
+
+    public void setKeyPassword(String keyPassword) {
+        this.keyPassword = keyPassword;
+    }
 }
