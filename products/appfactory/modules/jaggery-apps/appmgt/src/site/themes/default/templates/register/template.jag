@@ -67,10 +67,24 @@ body#home{
 
               },
               function (result) {
-		            jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
-            		    window.location.href = "index.jag";
-     			    }
-		        });
+				    jagg.post("../blocks/register/ajax/register.jag", {
+                        action:"storeSubscription",
+                        iPaaS:document.getElementById("iPaaS").checked,
+                        aPaaS:document.getElementById("aPaaS").checked, //
+                        domainName:$("#domainName").attr('value')
+                  },
+                  function (result) {
+                        jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
+                                window.location.href = "index.jag";
+                        }
+                        });
+                  },
+                  function (jqXHR, textStatus, errorThrown) {
+                        jagg.message({content:'Error while storing subscription details.',type:'error',cbk:function(){
+                                window.location.href = "index.jag";
+                        }
+                        });
+                  });
               },
               function (jqXHR, textStatus, errorThrown) {
                   jagg.message({content:'Your request to register in WSO2 AppFactory has been submitted.',type:'info', cbk:function(){
@@ -190,6 +204,10 @@ function showKaptcha(captcha) {
 							<label for="captcha-user-answer">Word Verification</label>
 							<div id="captchaImgDiv"></div>
 							<input type="text" id="captcha-user-answer" name="captcha-user-answer" class="required" />
+						</div>
+						<div class="input_row">
+							<div><input type="checkbox" name="aPaaS" id="aPaaS">aPaaS</div>
+							<div><input type="checkbox" name="iPaaS" id="iPaaS">iPaaS</div>
 						</div>
 						
 						<div class="input_row btn_row">

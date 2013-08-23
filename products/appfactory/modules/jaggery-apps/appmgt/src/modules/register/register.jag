@@ -14,6 +14,7 @@ var creatTenant = new ws.WSRequest();
 var options = new Array();
 options.useSOAP = 1.1;
 options.action = "http://wso2.org/process";
+options.mep = "in-only";
 
 var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
     '<admin xmlns="http://wso2.org/bps/sample">'+adminUsername+'</admin>'+
@@ -169,5 +170,13 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
                         throw "Error while checking for application key";
                     }
                     return captchaInfo;
-        };
+        }
+ var storeSubscription = function(aPaaS, iPaaS, domain) {
+        var registry = new MetadataStore(getProperty(ADMIN_USERNAME), getProperty(ADMIN_PASSWORD));
+        var resource = registry.newResource();
+        resource.addProperty("aPaaS", aPaaS);
+        resource.addProperty("iPaaS", iPaaS);
+        registry.put("subscriptions/"+domain, resource);
+    }
+;
 %>
