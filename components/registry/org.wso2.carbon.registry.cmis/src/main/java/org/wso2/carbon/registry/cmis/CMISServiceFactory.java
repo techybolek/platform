@@ -18,6 +18,8 @@ package org.wso2.carbon.registry.cmis;
 
 import org.apache.axis2.AxisFault;
 
+import org.apache.catalina.connector.RequestFacade;
+
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.chemistry.opencmis.commons.impl.server.AbstractServiceFactory;
 import org.apache.chemistry.opencmis.commons.server.CallContext;
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+import org.wso2.carbon.registry.cmis.util.UserInfo;
 import org.wso2.carbon.registry.cmis.impl.DocumentTypeHandler;
 import org.wso2.carbon.registry.cmis.impl.FolderTypeHandler;
 import org.wso2.carbon.registry.cmis.impl.UnversionedDocumentTypeHandler;
@@ -61,12 +64,15 @@ public class CMISServiceFactory extends AbstractServiceFactory {
     public static final BigInteger DEFAULT_MAX_ITEMS_OBJECTS = BigInteger.valueOf(200);
     public static final BigInteger DEFAULT_DEPTH_OBJECTS = BigInteger.valueOf(10);
 
+    private static final String uriPart = "/cmis/atom/WSO2%20CMIS%20Repository/content/";
+
     private RegistryTypeManager typeManager;
     private PathManager pathManager;
     private Map<String, String> gregConfig;
     private String mountPath = "/";
     private CMISRepository gregRepository;
-    private Map<String, CMISRepository> sessions = Collections.synchronizedMap(new HashMap<String,CMISRepository>());
+    private Map<UserInfo, CMISRepository> sessions = Collections.synchronizedMap(new HashMap<UserInfo,CMISRepository>());
+
     @Override
     public void init(Map<String, String> parameters) {
         
@@ -100,15 +106,26 @@ public class CMISServiceFactory extends AbstractServiceFactory {
 
         CMISRepository repository = null;
         String username = context.getUsername();
+	
+	String ip = ((RequestFacade)context.get(context.HTTP_SERVLET_REQUEST)).getRemoteAddr();
+	String uri = ((RequestFacade)context.get(context.HTTP_SERVLET_REQUEST)).getRequestURI();
 
-        if(sessions.containsKey(username)){
-            repository = sessions.get(username);
+	UserInfo userInfoObj = new UserInfo(ip, username);
+	
+        if(uri.contains(uriPart)) {
+	    repository = getRepo(userInfoObj);
+	   
+	    if (repository == null) {
+		 throw new CmisRuntimeException("User is not authenticated to the repository to view the content");
+	    }	
+       } else if(sessions.containsKey(userInfoObj)){
+            repository = sessions.get(userInfoObj);
             //TODO check for session timeout
         } else{
             try {
                 repository = new CMISRepository(acquireGregRepository(gregConfig, context), pathManager, typeManager);
                 //put to sessions for future reference
-                sessions.put(username, repository);
+                sessions.put(userInfoObj, repository);
 
             } catch (RegistryException e) {
                 e.printStackTrace();
@@ -126,6 +143,24 @@ public class CMISServiceFactory extends AbstractServiceFactory {
 
         serviceWrapper.getWrappedService().setCallContext(context);
         return serviceWrapper;
+    }
+
+    /**
+     *
+     * @return repo  CMISRepository instance for the user whoo has a valid session for the given ip 
+     */
+    private CMISRepository getRepo (UserInfo obj) {
+
+        boolean result = false;
+        CMISRepository repo = null;
+
+        for (UserInfo uInfo : sessions.keySet()) {
+            if (uInfo.getIp().equals(obj.getIp())) {
+                repo = sessions.get(uInfo);
+                break;
+            }
+        }
+        return repo;
     }
 
 
