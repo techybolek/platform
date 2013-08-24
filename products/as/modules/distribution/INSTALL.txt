@@ -12,7 +12,7 @@ Standalone Mode
 2. All the shell scripts and .bat files are available in CARBON_HOME/bin directory.
 
 3. To start Application Server one can use either wso2server.sh in all *nix
-   system & wso2server.bat file on Windows operating systems.
+   system, and wso2server.bat file on Windows operating systems.
 
 4. Either of the following commands can be used to start Carbon
       i)  ./wso2server.sh {console|start|stop|restart|status|dump|version}
@@ -41,11 +41,13 @@ Standalone Mode
                 -DserverRoles=<roles>		A comma separated list of roles. Used in deploying cApps
                 -Dcarbon.use.registry.repo	Use registry based repository.
                 -DdisableHttpLog		    Disable HTTP access logging
-                -DapplyPatches			    Use this system property when there are patches to be applied/reverted to/from the system.
-                                            Drop the patches to $CARBON_HOME/repository/componenets/patches directory and restart the system with this property.
-                                            When you want to revert a patch, delete it from the patches directory and restart the system with this property
                 -DworkerNode=true			Set this system property when starting as a worker node.
 					                        This is required in clustered setups with master and worker nodes.
+
+
+NOTE: The system property, applyPatches (-DapplyPatches), is no longer used. We have automated the patch application/reverting process. 
+Drop the patches to $CARBON_HOME/repository/componenets/patches directory and restart the system WITHOUT this system property. 
+When you want to revert a patch, delete it from the patches directory and restart the system WITHOUT this property.
 
 
 System Requirements
@@ -56,7 +58,7 @@ System Requirements
 4. The Management Console requires full Javascript enablement of the Web browser
 
 For more details see
-http://docs.wso2.org/wiki/display/AS510/Installation+Prerequisites
+http://docs.wso2.org/wiki/display/AS520/Installation+Prerequisites
 
 (2) Running Samples
 -------------------

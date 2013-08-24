@@ -7,7 +7,7 @@ Welcome to the WSO2 Application Server ${appserver.version} release
 
  The WSO2 Application Server is an enterprise-ready cloud-enabled application server, powered by Apache Tomcat and also integrates Apache Axis2 and Apache CXF frameworks. It provides first class support for standard Web applications, JAX-WS/RS applications and Jaggery scripting applications. Coupled with features of WSO2 Carbon, users can now manage their applications including JAX-WS and JAX-RS to web applications in a unified manner within the management console itself.
 
- Application Server also provides a comprehensive Web services server platform, using Axis2 and CXF as its Web services runtimes and provide many value additions on top of service runtime. It can expose services using both SOAP and REST models and supports a comprehensive set of WS-* specifications such as WS-Security, WS-Trust, WS-SecureConversation, WS-Reliable Messaging, WS-Addressing, WS-Policy, WS-SecurityPolicy, etc. WSO2 Application Server also has inbuilt support for Mashup services and WSO2 Data services. WSO2 Application Server can be installed on on-premise or any public/private cloud infrastructure and provide unified management console and lifestyle management features which are independent from underlying deployment option.
+ Application Server also provides a comprehensive Web services server platform using Axis2 and CXF as its Web services runtimes, and provides many value additions on top of these runtimes. It can expose services using both SOAP and REST models and supports a comprehensive set of WS-* specifications such as WS-Security, WS-Trust, WS-SecureConversation, WS-Reliable Messaging, WS-Addressing, WS-Policy, WS-SecurityPolicy, etc. WSO2 Application Server also has inbuilt support for Jaggery, WSO2 Data services, and Mashup services. WSO2 Application Server can be installed on on-premise or any public/private cloud infrastructure and provide unified management console and lifecycle management features which are independent from underlying deployment option.
 
 WSO2 Application Server is a part of WSO2 Stratos cloud platform (PaaS) and hosted offering of WSO2 Application Server as a service  can be accessed from here https://appserver.stratoslive.wso2.com.
 
@@ -15,43 +15,43 @@ WSO2 Application Server is a part of WSO2 Stratos cloud platform (PaaS) and host
 New Features In This Release
 ----------------------------
 
-* New classloader environment customization architecture which can configure classloader per server or per web application.
-* User defined classloaders environments.
-* Upgraded Tomcat runtime into Tomcat 7.0.34.
-* In built support for Servlet -3, JSP 2.2, EL 2.2, JSTL 1.2 specifications.
-* Full JNDI based data source support.
-* Enhanced service dashboard page for JAX-WS and JAX-RS services.
-* Try-It feature for JAX-WS services.
-* Maven based client side code generation support for JAX-WS, JAX-RS services.
-* Maven based new code generation feature for Axis2 services.
-* Upgraded CXF runtime into 2.7.3.
-
+* J2EE Web Profile support - support for Java Server Faces (JSF), Java Persistence API (JPA), and Java Transaction API (JTA) specifications out-of-the-box.
+* Publish Webapp Statistics from Application Server to Business Activity Monitor (BAM)
+* Improved JNDI support for Tomcat JNDI resources for Web applications
+* Run AS on multiple modes/profiles which includes webapp profile, axis2 service profile etc.
+* Hazelcast based Distributed Caching
+* Hazelcast based Clustering support
+* Atomic Carbon Application (CApp) deployment
+* Automated patch application process
+* Configuration files read/write support for third party libraries
+* CXF version upgraded to 2.7.6
+* Jettison version upgraded to 1.3.4
+* Tomcat version is 7.0.34
 
 Key Features
 ------------
+* Support for Servlet 3, JSP 2.2, EL 2.2, JSTL 1.2 specifications.
 * Full JAX-WS 2.2 and JAX-RS 2.0 Specification support
 * Integration of Jaggery - server side scripting framework
 * Unified Application listing and management UI for WebApps, JAX-WS/RS, Jaggery
 * Inbuilt Mashup services support
 * Multi Tenant support for standalone deployment
 * 100% Apache Tomcat compliance runtime
-   - Added support for server descriptor file (server.xml) for embedded tomcat
-   - Added support for WebApp specific context descriptor file (context.xml) for webapps
-* Lazy loading for applications and services
+* Lazy loading for web applications and services
 * Tooling - Application Server related artifacts can be easily generated using WSO2 Developer Studio
-* Clustering support for High Availability &amp; High Scalability
+* Clustering support for High Availability and High Scalability
 * Full support for WS-Security, WS-Trust, WS-Policy and WS-Secure Conversation
-* JMX &amp; Web interface based monitoring and management
-* WS-* &amp; REST support
-* GUI, command line &amp; IDE based tools for Web service development
+* JMX and Web interface based monitoring and management
+* WS-* and REST support
+* GUI, command line, and IDE based tools for Web service development
 * Equinox P2 based provisioning support
-* WSDL2Java/Java2WSDL/WSDL 1.1 &amp; try it(invoke any remote Web service)
+* WSDL2Java/Java2WSDL/WSDL 1.1, and UI-based try it (invoke any remote Web service)
 
 Issues Fixed in This Release
 ----------------------------
 
 * Application Server related components of the WSO2 Carbon Platform -
-       https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=10910
+      https://wso2.org/jira/issues/?filter=11272
 
 Installation & Running
 ----------------------
@@ -59,8 +59,6 @@ Installation & Running
 2. Run the wso2server.sh or wso2server.bat file in the bin directory
 3. Once the server starts, point your Web browser to
    https://localhost:9443/carbon/
-
-For more details, see the Installation Guide
 
 System Requirements
 -------------------
@@ -70,13 +68,13 @@ System Requirements
 3. The Management Console requires full Javascript enablement of the Web browser
 
 For more details see the Installation guide or,
-http://docs.wso2.org/wiki/display/AS510/Installation+Prerequisites
+http://docs.wso2.org/wiki/display/AS520/Installing+the+Product
 
 Known Issues in This Release
 ----------------------------
 
 * Application Server related components of the WSO2 Carbon Platform -
-       https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=10951
+       https://wso2.org/jira/issues/?filter=11229
 
 Including External Dependencies
 --------------------------------
@@ -95,6 +93,7 @@ Application Server Binary Distribution Directory Structure
 		   `-- ext <directory>
         |-- repository <directory>
         |   |-- carbonapps <directory>
+        |       `-- work <directory>
         |   |-- components <directory>
         |   |-- conf <directory>
         |   |-- data <directory>
@@ -106,7 +105,6 @@ Application Server Binary Distribution Directory Structure
         |   |   `-- security <directory>
         |   `-- tenants <directory>
         |-- tmp <directory>
-	    |-- webapp-mode <directory>
         |-- LICENSE.txt <file>
         |-- README.txt <file>
         |-- INSTALL.txt <file>
@@ -129,8 +127,8 @@ Application Server Binary Distribution Directory Structure
       In addition to this other custom deployers such as
       dataservices and axis1services are also stored.
 
-        - carbonapps
-          Carbon Application hot deployment directory.
+        - carbonapps/work
+          Work directory for Carbon Applications. Carbon Application hot deployment directory is repository/deployment/server/carbonapps/
 
     	- components
           Contains all OSGi related libraries and configurations.
@@ -161,10 +159,6 @@ Application Server Binary Distribution Directory Structure
     - tmp
       Used for storing temporary files, and is pointed to by the
       java.io.tmpdir System property.
-
-    - webapp-mode
-      The user has the option of running WSO2 Carbon in webapp mode (hosted as a web-app in an application server).
-      This directory contains files required to run Carbon in webapp mode.
 
     - LICENSE.txt
       Apache License 2.0 under which WSO2 Carbon is distributed.
@@ -261,14 +255,14 @@ code and source code.
 The following provides more details on the included cryptographic
 software:
 
-Apacge Rampart   : http://ws.apache.org/rampart/
+Apache Rampart   : http://ws.apache.org/rampart/
 Apache WSS4J     : http://ws.apache.org/wss4j/
 Apache Santuario : http://santuario.apache.org/
 Bouncycastle     : http://www.bouncycastle.org/
 
 
 For further details, see the WSO2 Application Server documentation at
-http://docs.wso2.org/wiki/application-server-documentation
+http://docs.wso2.org/wiki/display/AS520/
 
 ---------------------------------------------------------------------------
-(c) Copyright 2012 WSO2 Inc.
+(c) Copyright 2013 WSO2 Inc.

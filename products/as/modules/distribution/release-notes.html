@@ -63,34 +63,40 @@
 <h2>New Features In This Release</h2>
 <ul>
 <li>
- New classloader environment customization architecture which can configure classloader per server or per web application.   
+   J2EE Web Profile support - support for Java Server Faces (JSF), Java Persistence API (JPA), and Java Transaction API (JTA) specifications out-of-the-box.
 </li>
 <li>
-   User defined classloaders environments.
+   Publish Webapp Statistics from Application Server to Business Activity Monitor (BAM)
 </li>
 <li>
-   Upgraded Tomcat runtime into Tomcat 7.0.34.
+   Improved JNDI support for Tomcat JNDI resources for Web applications
 </li>
 <li>
-   In built support for Servlet -3, JSP 2.2, EL 2.2, JSTL 1.2 specifications. 
+   Run AS on multiple modes/profiles which includes webapp profile, axis2 service profile etc. 
 </li>
 <li>
-   Full JNDI based data source support. 
+   Hazelcast based Distributed Caching
 </li>
 <li>
-   Enhanced service dashboard page for JAX-WS and JAX-RS services. 
+   Hazelcast based Clustering support
 </li>
 <li>
-   Try-It feature for JAX-WS services.
+   Atomic Carbon Application (CApp) deployment
 </li>
 <li>
-   Maven based client side code generation support for JAX-WS, JAX-RS services. 
+   Automated patch application process
 </li>
 <li>
-   Maven based new code generation feature for Axis2 services.
+   Configuration files read/write support for third party libraries
 </li>
 <li>
-   Upgraded CXF runtime into 2.7.3.   
+   CXF version upgraded to 2.7.6
+</li>
+<li>
+   Jettison version upgraded to 1.3.4
+</li>
+<li>
+   Tomcat version is 7.0.34
 </li>
 </ul>
 
@@ -99,37 +105,33 @@
 <h2>Key Features</h2>
 
 <ul>
+    <li>Support for Servlet 3, JSP 2.2, EL 2.2, JSTL 1.2 specifications.</li>
     <li>Full JAX-WS 2.2 and JAX-RS 2.0 Specification support</li>
     <li>Integration of Jaggery - server side scripting framework</li>
     <li>Unified Application listing and management UI for WebApps, JAX-WS/RS, Jaggery</li>
     <li>Inbuilt Mashup services support</li>
     <li>Multi Tenant support for standalone deployment</li>
-    <li>100% Apache Tomcat compliance runtime
-        <ul>Added support for server descriptor file (server.xml) for embedded tomcat</ul>
-        <ul>Added support for WebApp specific context descriptor file (context.xml) for
-            webapps
-        </ul>
-    </li>
-    <li>Lazy loading for applications and services</li>
+    <li>100% Apache Tomcat compliance runtime</li>
+    <li>Lazy loading for web applications and services</li>
     <li>AppServer tooling - AppServer related artifacts can be easily generated using WSO2
         Developer Studio
     </li>
-    <li>Clustering support for High Availability &amp; High Scalability</li>
+    <li>Clustering support for High Availability and High Scalability</li>
     <li>Full support for WS-Security, WS-Trust, WS-Policy and WS-Secure
         Conversation
     </li>
-    <li>JMX &amp; Web interface based monitoring and management</li>
-    <li>WS-* &amp; REST support</li>
-    <li>GUI, command line &amp; IDE based tools for Web service development</li>
+    <li>JMX and Web interface based monitoring and management</li>
+    <li>WS-* and REST support</li>
+    <li>GUI, command line, and IDE based tools for Web service development</li>
     <li>Equinox P2 based provisioning support</li>
-    <li>WSDL2Java/Java2WSDL/WSDL 1.1 &amp; try it(invoke any remote Web service)</li>
+    <li>WSDL2Java/Java2WSDL/WSDL 1.1 and try it (invoke any remote Web service)</li>
 </ul>
 
 <h2>Issues Fixed for this release</h2>
 <ul>
     <li>AppServer related components of the WSO2 Carbon Platform -
-        <a href="https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10910">
-            https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10910
+        <a href="https://wso2.org/jira/issues/?filter=11272">
+            https://wso2.org/jira/issues/?filter=11272
         </a>
     </li>
 </ul>
@@ -161,6 +163,9 @@
     <li>Expression Language (EL) 2.2</li>
     <li>Standard Tag Library for JavaServer Pages (JSTL) 1.2</li>
     <li>Java Naming and Directory Interface (JNDI)</li>
+    <li>Java Server Faces (JSF) 2.1</li>
+    <li>Java Persistence API (JPA) 2.0</li>
+    <li>Java Transaction API (JTA) - JSR-907</li>
     <li>JAXB 2.2</li>
     <li>JMS</li>
     <li>Java Mail</li>
@@ -169,7 +174,7 @@
 <h2>Open Source components included in WSO2 Application Server</h2>
 <ul>
     <li>Embedded Apache Tomcat</li>
-    <li>Apache CXF Support: Supporting JAX-WS and JAX-RS</li>
+    <li>Apache CXF: Supporting JAX-WS and JAX-RS</li>
     <li>Apache Axis2 (SOAP)</li>
     <li>Apache Axiom (High performance XML Object Model)</li>
     <li>Apache Rampart/Apache WSS4J (WS-Security)</li>
@@ -185,8 +190,8 @@
 <h2>Known Issues</h2>
 <ul>
     <li>Application Server related components of the WSO2 Carbon Platform -
-        <a href="https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10951">
-            https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10951
+        <a href="https://wso2.org/jira/issues/?filter=11229">
+            https://wso2.org/jira/issues/?filter=11229
         </a>
     </li>
 </ul>
