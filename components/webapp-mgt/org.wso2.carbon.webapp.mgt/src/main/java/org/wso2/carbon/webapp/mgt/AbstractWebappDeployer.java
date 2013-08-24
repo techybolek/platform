@@ -146,7 +146,10 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
                 }
                 webApplication.setProperty(WebappsConstants.WEBAPP_FILTER, webappType);
 
-                persistWebappMetadata(webApplication, axisConfig);
+                if(!CarbonUtils.isWorkerNode()) {
+                    persistWebappMetadata(webApplication, axisConfig);
+                }
+
             }
 
         } catch (Exception e) {
@@ -208,7 +211,6 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
             bamStatsEnabled = "false";
         }
 
-        String webappName = webApplication.getWebappFile().getName();
         ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
         ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).
                 getMetadataManager();

@@ -60,6 +60,7 @@ public class WebApplication {
     private String serviceListPath;
     private Map<String, Object> properties = new HashMap<String, Object>();
     private TomcatGenericWebappsDeployer tomcatGenericWebappsDeployer;
+    private String version;
 
     // We need this variable to use in the Statistics inner class which is static
     private boolean isThisGhost = false;
@@ -92,6 +93,20 @@ public class WebApplication {
             serviceListPathParam = "";
         }
         setServiceListPath(serviceListPathParam);
+
+        String versionString = context.getName();
+        if (context.getName().startsWith("/t/")) {
+            //remove tenant context
+            versionString = versionString.substring(context.getName().lastIndexOf("/webapps/") + 9);
+        } else if(context.getName().startsWith("/")) {
+            versionString = versionString.substring(1);
+        }
+        if (versionString.indexOf("/") > -1) {
+            versionString = versionString.substring(versionString.indexOf("/"));
+            setVersion(versionString);
+        } else {
+            setVersion(WebappsConstants.DEFAULT_VERSION);
+        }
     }
 
     private boolean checkFaultyWebappParam(Context context) {
@@ -622,6 +637,14 @@ public class WebApplication {
 
     public void setServiceListPath(String serviceListPath) {
         this.serviceListPath = serviceListPath;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     /**

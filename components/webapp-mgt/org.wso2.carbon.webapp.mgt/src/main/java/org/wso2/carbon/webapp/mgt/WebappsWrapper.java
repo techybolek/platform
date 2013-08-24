@@ -24,7 +24,7 @@ import java.util.List;
  * This class holds summary information about all the webapps in the system
  */
 public final class WebappsWrapper implements Pageable {
-    private WebappMetadata[] webapps;
+    private VersionedWebappMetadata[] webapps;
     private int numberOfCorrectWebapps;
     private int numberOfFaultyWebapps;
     private int numberOfPages;
@@ -42,7 +42,7 @@ public final class WebappsWrapper implements Pageable {
     }
 
     public <T> void set(List<T> items) {
-        this.webapps = items.toArray(new WebappMetadata[items.size()]);
+        this.webapps = items.toArray(new VersionedWebappMetadata[items.size()]);
     }
 
     public int getNumberOfCorrectWebapps() {
@@ -93,11 +93,11 @@ public final class WebappsWrapper implements Pageable {
         this.httpsPort = httpsPort;
     }
 
-    public WebappMetadata[] getWebapps() {
+    public VersionedWebappMetadata[] getWebapps() {
         return CarbonUtils.arrayCopyOf(webapps);
     }
 
-    public void setWebapps(WebappMetadata[] webapps) {
+    public void setWebapps(VersionedWebappMetadata[] webapps) {
         this.webapps = CarbonUtils.arrayCopyOf(webapps);
     }
 }

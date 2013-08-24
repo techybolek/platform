@@ -369,4 +369,12 @@ public class WebappAdminClient {
             return null;
         }
     }
+
+    public void changeDefaultAppVersion(String appFileName, String appContext) throws AxisFault {
+        try {
+            stub.changeDefaultAppVersion(appFileName, appContext);
+        } catch (Exception e) {
+            handleException("cannot.make.default.version", e);
+        }
+    }
 }

@@ -36,23 +36,14 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.webapp.mgt.WebappsConstants.ApplicationOpType;
 import org.wso2.carbon.webapp.mgt.sync.ApplicationSynchronizeRequest;
 import org.wso2.carbon.webapp.mgt.utils.WebAppUtils;
+import org.wso2.carbon.webapp.mgt.version.AppVersionGroupPersister;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,6 +55,18 @@ import java.util.regex.Pattern;
 public class WebappAdmin extends AbstractAdmin {
 
     private static final Log log = LogFactory.getLog(WebappAdmin.class);
+    private static Boolean defaultVersionManagement = null;
+    private Map<String, Boolean>  versioningConfiguration = new HashMap<String, Boolean>();
+    /*
+      This map contains - MAP <Web-application-group-name , original-file-name-of-current-default-version> mapping.
+
+      This is useful when reverting current default version into it's original version.
+
+      e.g - app => app#4.war
+            mvcapp => mvcapp#2.war
+     */
+    private Map<String, String>  appGroupToCurrentVersionMap = null;
+
 
     public WebappAdmin() {
     }
@@ -94,8 +97,21 @@ public class WebappAdmin extends AbstractAdmin {
             return getPagedWebapps(pageNumber,
                                    getStoppedWebapps(webappType, webappSearchString), webappType);
         } else if(webappState.equalsIgnoreCase(WebappsConstants.WebappState.ALL)){
-            List<WebappMetadata> webapps = getStartedWebapps(webappType, webappSearchString);
-            webapps.addAll(getStoppedWebapps(webappType, webappSearchString));
+            Map<String, VersionedWebappMetadata> startedWebapps = getStartedWebapps(webappType, webappSearchString);
+            Map<String, VersionedWebappMetadata> stoppedWebapps = getStoppedWebapps(webappType, webappSearchString);
+
+            Map<String, VersionedWebappMetadata> webapps =
+                    new ConcurrentHashMap<String, VersionedWebappMetadata>(startedWebapps);
+
+            for (String versionGroup : stoppedWebapps.keySet()) {
+                if (stoppedWebapps.containsKey(versionGroup)) {
+                    for (WebappMetadata webappMetadata : stoppedWebapps.get(versionGroup).getVersionGroups()) {
+                        webapps.get(versionGroup).addWebappVersion(webappMetadata);
+                    }
+                } else {
+                    webapps.put(versionGroup, stoppedWebapps.get(versionGroup));
+                }
+            }
             return getPagedWebapps(pageNumber, webapps, webappType);
         } else {
             throw new AxisFault("Invalid webapp state: ", webappState);
@@ -154,6 +170,8 @@ public class WebappAdmin extends AbstractAdmin {
         webappMetadata.setWebappFile(webApplication.getWebappFile().getName());
         webappMetadata.setState(webApplication.getState());
         webappMetadata.setServiceListPath(webApplication.getServiceListPath());
+        webappMetadata.setAppVersion(webApplication.getVersion());
+        webappMetadata.setContextPath(webApplication.getContext().getPath());
 
         WebApplication.Statistics statistics = webApplication.getStatistics();
         WebappStatistics stats = new WebappStatistics();
@@ -184,14 +202,17 @@ public class WebappAdmin extends AbstractAdmin {
         return getPagedWebapps(pageNumber, getFaultyWebapps(webappSearchString), webappType);
     }
 
-    private WebappsWrapper getPagedWebapps(int pageNumber, List<WebappMetadata> webapps, String webappType) {
+    private WebappsWrapper getPagedWebapps(int pageNumber, Map<String, VersionedWebappMetadata> webapps, String webappType) {
+        List<VersionedWebappMetadata> webappsList = new ArrayList<VersionedWebappMetadata>(webapps.values());
         WebApplicationsHolder webappsHolder = getWebappsHolder();
-        WebappsWrapper webappsWrapper = getWebappsWrapper(webappsHolder, webapps, webappType);
+        WebappsWrapper webappsWrapper = getWebappsWrapper(webappsHolder, webappsList, webappType);
         try {
             webappsWrapper.setHostName(NetworkUtils.getLocalHostname());
         } catch (SocketException e) {
             log.error("Error occurred while getting local hostname", e);
         }
+
+//        DataHolder.getCarbonTomcatService().getTomcat().getHost().
 
         if(getConfigContext().getAxisConfiguration().getTransportIn("http") != null) {
             int httpProxyPort = CarbonUtils.getTransportProxyPort(getConfigContext(), "http");
@@ -213,33 +234,35 @@ public class WebappAdmin extends AbstractAdmin {
             }
         }
 
-
-        sortWebapps(webapps);
-        DataPaginator.doPaging(pageNumber, webapps, webappsWrapper);
+        sortWebapps(webappsList);
+        DataPaginator.doPaging(pageNumber, webappsList, webappsWrapper);
         return webappsWrapper;
     }
 
-    private void sortWebapps(List<WebappMetadata> webapps) {
+    private void sortWebapps(List<VersionedWebappMetadata> webapps) {
         if (webapps.size() > 0) {
-            Collections.sort(webapps, new Comparator<WebappMetadata>() {
-                public int compare(WebappMetadata arg0, WebappMetadata arg1) {
-                    return arg0.getContext().compareToIgnoreCase(arg1.getContext());
+            Collections.sort(webapps, new Comparator<VersionedWebappMetadata>() {
+                public int compare(VersionedWebappMetadata arg0, VersionedWebappMetadata arg1) {
+                    return  arg0.getAppVersionRoot().compareToIgnoreCase(arg1.getAppVersionRoot());
                 }
             });
         }
+        for (VersionedWebappMetadata versionedWebappMetadata : webapps) {
+            versionedWebappMetadata.sort();
+        }
     }
 
-    private List<WebappMetadata> getStartedWebapps(String webappType, String webappSearchString) {
+    private Map<String, VersionedWebappMetadata> getStartedWebapps(String webappType, String webappSearchString) {
         return getWebapps(getWebappsHolder().getStartedWebapps().values(), webappType, webappSearchString);
     }
 
-    private List<WebappMetadata> getStoppedWebapps(String webappType, String webappSearchString) {
+    private Map<String, VersionedWebappMetadata> getStoppedWebapps(String webappType, String webappSearchString) {
         return getWebapps(getWebappsHolder().getStoppedWebapps().values(), webappType, webappSearchString);
     }
 
-    private List<WebappMetadata> getWebapps(Collection<WebApplication> allWebapps,
+    private Map<String, VersionedWebappMetadata> getWebapps(Collection<WebApplication> allWebapps,
                                             String webappType, String webappsSearchString) {
-        List<WebappMetadata> webapps = new ArrayList<WebappMetadata>();
+        Map<String, VersionedWebappMetadata> webapps = new ConcurrentHashMap<String, VersionedWebappMetadata>();
         for (WebApplication webapp : allWebapps) {
             if (!doesWebappSatisfySearchString(webapp, webappsSearchString)) {
                 continue;
@@ -252,17 +275,34 @@ public class WebappAdmin extends AbstractAdmin {
             WebappMetadata webappMetadata = getWebapp(webapp);
             WebappStatistics stats = webappMetadata.getStatistics();
 
-            webapps.add(webappMetadata);
+            String appVersionRoot = webappMetadata.getContext();
+            if (!WebappsConstants.DEFAULT_VERSION.equals(webapp.getVersion())) {
+                appVersionRoot = appVersionRoot.substring(0,
+                        appVersionRoot.lastIndexOf(webappMetadata.getAppVersion()));
+            }
+
+            VersionedWebappMetadata versionedWebappMetadata;
+            if (webapps.containsKey(appVersionRoot)) {
+                versionedWebappMetadata = webapps.get(appVersionRoot);
+            } else  {
+                versionedWebappMetadata = new VersionedWebappMetadata(appVersionRoot);
+                webapps.put(appVersionRoot, versionedWebappMetadata);
+            }
+            versionedWebappMetadata.addWebappVersion(webappMetadata);
         }
         return webapps;
     }
 
-    private List<WebappMetadata> getFaultyWebapps(String webappsSearchString) {
+    private Map<String, VersionedWebappMetadata> getFaultyWebapps(String webappsSearchString) {
         WebApplicationsHolder webappsHolder = getWebappsHolder();
         if (webappsHolder == null) {
             return null;
         }
-        List<WebappMetadata> webapps = new ArrayList<WebappMetadata>();
+        String faultyAppVersionRoot = "/faulty";
+        Map<String, VersionedWebappMetadata> webapps = new ConcurrentHashMap<String, VersionedWebappMetadata>();
+        VersionedWebappMetadata versionedWebappMetadata = new VersionedWebappMetadata(faultyAppVersionRoot);
+        webapps.put(faultyAppVersionRoot, versionedWebappMetadata);
+
         for (WebApplication webapp : webappsHolder.getFaultyWebapps().values()) {
             if (!doesWebappSatisfySearchString(webapp, webappsSearchString)) {
                 continue;
@@ -281,7 +321,7 @@ public class WebappAdmin extends AbstractAdmin {
             String faultException = sw.toString();
             webappMetadata.setFaultException(faultException);
 
-            webapps.add(webappMetadata);
+            versionedWebappMetadata.addWebappVersion(webappMetadata);
         }
         return webapps;
     }
@@ -309,9 +349,9 @@ public class WebappAdmin extends AbstractAdmin {
     }
 
     private WebappsWrapper getWebappsWrapper(WebApplicationsHolder webappsHolder,
-                                             List<WebappMetadata> webapps, String webappType) {
+                                             List<VersionedWebappMetadata> webapps, String webappType) {
         WebappsWrapper webappsWrapper = new WebappsWrapper();
-        webappsWrapper.setWebapps(webapps.toArray(new WebappMetadata[webapps.size()]));
+        webappsWrapper.setWebapps(webapps.toArray(new VersionedWebappMetadata[webapps.size()]));
         webappsWrapper.setNumberOfCorrectWebapps(
                 getNumberOfWebapps(webappsHolder.getStartedWebapps(), webappType));
         webappsWrapper.setNumberOfFaultyWebapps(
@@ -340,7 +380,7 @@ public class WebappAdmin extends AbstractAdmin {
      * @return - true if relevant
      */
     protected boolean isWebappRelevant(WebApplication webapp, String webappType) {
-        // skip the Stratos landing page webapp 
+        // skip the Stratos landing page webapp
         if (webapp.getContextName().contains("STRATOS_ROOT")) {
             return false;
         }
@@ -907,4 +947,91 @@ public class WebappAdmin extends AbstractAdmin {
             }
         }
     }
+
+    public void changeDefaultAppVersion(String appGroupName, String fileName) throws AxisFault, ArtifactMetadataException {
+        String appGroup = appGroupName.replace("/", "");
+        if (appGroup != null && fileName != null && isDefaultVersionManagementEnabled()) {
+            boolean proceed = false;
+            boolean noCurrentDefaultApp = false;
+            AxisConfiguration axisConfig = getAxisConfig();
+            String webappsDirPath = getWebappDeploymentDirPath(WebappsConstants.WEBAPP_FILTER_PROP);
+            if (new File(webappsDirPath).exists()) {
+                proceed = true;
+            }
+
+
+            //phase 1 - revert current default version to it's original version.
+            if (proceed) {
+                String originalNameOfCurrentDefaultApp = getOriginalNameOfCurrentDefaultApp(appGroup);
+                File currentAppFile = new File(webappsDirPath, appGroup.concat(".war"));
+                File currentAppOriginalFile = new File(webappsDirPath, originalNameOfCurrentDefaultApp);
+                if (currentAppFile.exists() && !currentAppOriginalFile.exists()) {
+                    handleWebappMetaDetaFile(appGroup.concat(".war"),
+                            originalNameOfCurrentDefaultApp, WebappsConstants.KEEP_DEFAULT_VERSION_META_DATA_STRATEGY);
+                    proceed = currentAppFile.renameTo(currentAppOriginalFile);
+
+                }
+            }
+
+            //phase 2 - rename new version as new default application.
+            if (proceed) {
+                File newAppOriginalFile = new File(webappsDirPath, fileName);
+                File newAppFile = new File(webappsDirPath, appGroup.concat(".war"));
+                if (newAppOriginalFile.exists() && !newAppFile.exists()) {
+                    proceed = newAppOriginalFile.renameTo(newAppFile);
+                    if (proceed && log.isWarnEnabled()) {
+                        setOriginalNameOfCurrentDefaultApp(appGroup, fileName);
+                        log.info(fileName + " is marked as new default version ");
+
+                    } else if (log.isWarnEnabled()) {
+                        log.info("Error occurred making " + fileName + " as the default version");
+
+                    }
+                }
+            }
+
+            if (!proceed && log.isWarnEnabled()) {
+                log.info("Error occurred making " + fileName + " as the default version");
+            }
+
+        }
+    }
+
+    private void setOriginalNameOfCurrentDefaultApp(String appName, String fileName) throws AxisFault, ArtifactMetadataException {
+        AppVersionGroupPersister.persistWebappGroupMetadata(appName, fileName, getAxisConfig());
+    }
+
+    private void handleWebappMetaDetaFile(String originalFileName, String newFileName, int handlingStrategy) {
+        switch (handlingStrategy) {
+            case WebappsConstants.KEEP_DEFAULT_VERSION_META_DATA_STRATEGY:
+                WebApplicationsHolder holder = getWebappsHolder();
+                WebApplication webApplication = holder.getStartedWebapps().get(originalFileName);
+                webApplication.addParameter(WebappsConstants.KEEP_WEBAPP_METADATA_HISTORY_PARAM, Boolean.TRUE.toString());
+                break;
+        }
+    }
+
+    private String getOriginalNameOfCurrentDefaultApp(String appName) throws AxisFault, ArtifactMetadataException {
+        String originalName = AppVersionGroupPersister.readWebappGroupMetadata(appName, getAxisConfig());
+        if (originalName == null) {
+             /*
+              If  'originalName == null' means current default app is unversioned app (e.g- app.war )
+              if so just append "/0" as the file name.( e.g "app#o.war" )
+              */
+            StringBuilder builder = new StringBuilder(appName);
+            builder.append(WebappsConstants.FWD_SLASH_REPLACEMENT).append(WebappsConstants.DEFAULT_VERSION_STRING).append(".war");
+            return builder.toString();
+        } else {
+            return originalName;
+        }
+    }
+
+
+    public boolean isDefaultVersionManagementEnabled() {
+        return (defaultVersionManagement == null) ?
+                Boolean.parseBoolean(System.getProperty(WebappsConstants.WEB_APP_DEFAULT_VERSION_SUPPORT)) :
+                defaultVersionManagement;
+    }
+
+
 }

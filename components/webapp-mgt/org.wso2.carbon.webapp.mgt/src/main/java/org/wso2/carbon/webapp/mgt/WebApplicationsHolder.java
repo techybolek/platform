@@ -51,6 +51,13 @@ public class WebApplicationsHolder {
     private Map<String, WebApplication> faultyWebapps =
             new ConcurrentHashMap<String, WebApplication>();
 
+    /**
+     * default version to context map
+     * contextPath / version
+     */
+    private Map<String, String> appVersionMap =
+            new ConcurrentHashMap<String, String>();
+
     public WebApplicationsHolder(File webappsDir) {
         this.webappsDir = webappsDir;
     }
@@ -88,5 +95,13 @@ public class WebApplicationsHolder {
     public File getWebappsDir() {
         return webappsDir;
     }
+
+    public Map<String, String> getAppVersionMap() {
+        return appVersionMap;
+    }
+
+/*    public void setAppVersionMap(Map<String, String> appVersionMap) {
+        this.appVersionMap = appVersionMap;
+    }*/
 }
 

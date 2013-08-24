@@ -32,6 +32,8 @@ public class WebappMetadata {
     private String webappType;
     private String servletContext;
     private String serviceListPath;
+    private String appVersion;
+    private String contextPath;
 
     public String getContext() {
         return context;
@@ -137,4 +139,19 @@ public class WebappMetadata {
         this.serviceListPath = serviceListPath;
     }
 
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setContextPath(String contextPath) {
+        this.contextPath = contextPath;
+    }
+
+    public String getContextPath() {
+        return contextPath;
+    }
 }

@@ -25,6 +25,7 @@
 <%@ page import="org.wso2.carbon.webapp.list.ui.WebappAdminClient" %>
 <%@ page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappMetadata" %>
 <%@ page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappsWrapper" %>
+<%@ page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.VersionedWebappMetadata" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
 <%
@@ -86,7 +87,7 @@
                 return;
             }
 
-            WebappMetadata[] faultyWebapps = faultyWebappsWrapper.getWebapps();
+            WebappMetadata[] faultyWebapps = (faultyWebappsWrapper.getWebapps()[0]).getVersionGroups();
             numberOfPages = faultyWebappsWrapper.getNumberOfPages();
         %>
 

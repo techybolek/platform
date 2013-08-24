@@ -19,6 +19,7 @@ package org.wso2.carbon.webapp.mgt;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.catalina.core.StandardContext;
@@ -337,6 +338,9 @@ public class TomcatGenericWebappsDeployer {
         Map<String, WebApplication> deployedWebapps = webappsHolder.getStartedWebapps();
         Map<String, WebApplication> stoppedWebapps = webappsHolder.getStoppedWebapps();
         String fileName = webappFile.getName();
+
+        removeMetadata(fileName);
+
         if (deployedWebapps.containsKey(fileName)) {
             undeploy(deployedWebapps.get(fileName));
         }
@@ -353,7 +357,7 @@ public class TomcatGenericWebappsDeployer {
         }
 
         clearFaultyWebapp(fileName);
-        removeMetadata(fileName);
+
     }
 
     /**
@@ -429,6 +433,24 @@ public class TomcatGenericWebappsDeployer {
 
     private void removeMetadata(String artifactFileName) throws CarbonException {
         try {
+            Map<String, WebApplication> deployedWebapps = webappsHolder.getStartedWebapps();
+            Map<String, WebApplication> stoppedWebapps = webappsHolder.getStoppedWebapps();
+
+            String keepMetadataHistory = null;
+            if (deployedWebapps.containsKey(artifactFileName)) {
+                keepMetadataHistory = deployedWebapps.get(artifactFileName).
+                                findParameter(WebappsConstants.KEEP_WEBAPP_METADATA_HISTORY_PARAM);
+            }
+
+            if (keepMetadataHistory == null && stoppedWebapps.containsKey(artifactFileName)) {
+                keepMetadataHistory = stoppedWebapps.get(artifactFileName).
+                        findParameter(WebappsConstants.KEEP_WEBAPP_METADATA_HISTORY_PARAM);
+            }
+
+            if (!JavaUtils.isFalse(keepMetadataHistory)) {
+                return;
+            }
+
             AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
             ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
             ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).

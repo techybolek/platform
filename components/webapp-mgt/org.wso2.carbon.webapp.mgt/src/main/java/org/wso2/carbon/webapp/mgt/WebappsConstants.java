@@ -42,6 +42,7 @@ public final class WebappsConstants {
 //    public static final String TOMCAT_JAX_WEBAPP_DEPLOYER = "tomcatJaxWebappsDeplyer";
 
     public static final String WEBAPP_METADATA_DIR = "artifactMetafiles" + File.separator + "webapp";
+    public static final String WEBAPP_GROUP_METADATA_DIR = "artifactMetafiles" + File.separator + "webappDefaultVersion";
 
     public static final String ENABLE_BAM_STATISTICS = "enable.statistics";
     public static final String FAULTY_WEBAPP = "faulty.webapp";
@@ -55,6 +56,15 @@ public final class WebappsConstants {
 
     public static final String FWD_SLASH_REPLACEMENT = "#";
     public static final String VERSION_MARKER = "##";
+    public static final String DEFAULT_VERSION = "/default";
+    public static final String DEFAULT_VERSION_STRING = "0";
+
+    public static final String WEB_APP_DEFAULT_VERSION_SUPPORT = "webapp.defaultversion";
+    public static final String WEB_APP_VERSION_DEFAULT_WEBAPP = "webapp.defaultversion.name";
+
+    public static final String KEEP_WEBAPP_METADATA_HISTORY_PARAM = "keepWebappMetadataHistory";
+    //Meta data handling strategies
+    public  static  final  int KEEP_DEFAULT_VERSION_META_DATA_STRATEGY = 1;
 
     public static final class WebappState {
         public static final String STARTED = "started";

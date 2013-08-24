@@ -83,7 +83,14 @@ public class WebAppDataExtractor {
             String webXmlString = stripNonValidXMLCharacters(new String(map.get("WEB-INF/web.xml")));
 
             processWebXml(webXmlString);
-            String configFile = new String(map.get(cxfConfigFileLocation));
+
+            String configFile = "";
+
+            if (map.containsKey(cxfConfigFileLocation)) {
+                configFile = new String(map.get(cxfConfigFileLocation));
+            } else {
+                return;
+            }
 
             configFile = stripNonValidXMLCharacters(configFile);
             OMElement element = AXIOMUtil.stringToOM(configFile);
@@ -221,6 +228,11 @@ public class WebAppDataExtractor {
             String configLocationParam = xPath.evaluate(
                     "/web-app/servlet/init-param[param-name[contains(text(),'config-location')]]/param-value/text()",
                     doc.getDocumentElement());
+            if(configLocationParam == null || configLocationParam == ""){
+                configLocationParam = xPath.evaluate(
+                        "/web-app/context-param[param-name[contains(text(),'contextConfigLocation')]]/param-value/text()",
+                        doc.getDocumentElement());
+            }
             String cxfServletName = xPath.evaluate(
                     "/web-app/servlet[servlet-class[contains(text(),'org.apache.cxf.transport.servlet.CXFServlet')]]/servlet-name/text()",
                     doc.getDocumentElement());

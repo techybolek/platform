@@ -434,7 +434,7 @@
                                                style="margin-left: 0px;" width="100%">
                                             <thead>
                                             <tr>
-                                                <th><fmt:message key="services"/></th>
+                                                <th><fmt:message key="configurations"/></th>
                                             </tr>
                                             </thead>
                                             <tr>
@@ -444,6 +444,8 @@
                                                 <td>
 
                                                     <%  String cek = "";
+                                                        String enable = "style=\"display: none;\"";
+                                                        String disable = "style=\"display: none;\"";
                                                         boolean checked = false;
                                                         String webAppName = webappFileName;
                                                         WebappAdminClient adminClient = new WebappAdminClient(
@@ -461,12 +463,20 @@
                                                         }
 
                                                         if(checked){
-                                                            cek = "checked=\"checked\"";
+                                                            enable = "";
+                                                        } else {
+                                                            disable = "";
                                                         }
 
 
                                                     %>
-                                                    <input type="checkbox" name="bam_stats" value="1" id="bam_statistics" class="bam_statistics" <%= cek %>>  Enable BAM Statistics
+
+                                                    <div id="bam_statistic_enabled" <%= enable %> >
+                                                    BAM Statistic Monitoring  -   Activated : [<a id="bam_statistcs_enable_url" type=""><font style="color:red;">Deactivate</font></a>]
+                                                    </div>
+                                                    <div id="bam_statistic_disabled" <%= disable %> >
+                                                    BAM Statistic Monitoring  -    Diactivated : [<a id="bam_statistcs_disable_url" type=""><font style="color:green;">Activate</font></a>]
+                                                    </div>
 
 
                                                 </td>
@@ -756,15 +766,10 @@
     </div>
 </div>
 <script type="text/javascript">
-    jQuery(function(){
-        jQuery(".bam_statistics").click(function(){
-            //var webappFileName=
+
+        jQuery("#bam_statistcs_disable_url").live("click", function (){
             var dataVal = "webappFileName="+'<%= URLEncoder.encode(webappFileName, "UTF-8") %>';
-            if(jQuery(this).is(":checked")){
-                dataVal = dataVal + '&value=1'
-            } else{
-                dataVal = dataVal + '&value=0'
-            }
+            dataVal = dataVal + '&value=1'
             jQuery.ajax({
                 type: "POST",
                 url: "bam_activator.jsp",
@@ -773,7 +778,27 @@
                     //  CARBON.showConfirmationDialog( msg.trim());
                 }
             });
+            jQuery("#bam_statistic_disabled").hide();
+            jQuery("#bam_statistic_enabled").show();
         });
-    });
+
+        jQuery("#bam_statistcs_enable_url").live("click", function (){
+            var dataVal = "webappFileName="+'<%= URLEncoder.encode(webappFileName, "UTF-8") %>';
+            dataVal = dataVal + '&value=0'
+
+            jQuery.ajax({
+                type: "POST",
+                url: "bam_activator.jsp",
+                data: dataVal,
+                success: function(msg){
+                    //  CARBON.showConfirmationDialog( msg.trim());
+                }
+            });
+            jQuery("#bam_statistic_enabled").hide();
+            jQuery("#bam_statistic_disabled").show();
+        });
+
+
+
 </script>
 </fmt:bundle>

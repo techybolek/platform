@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -306,7 +307,7 @@ public class ClassloadingContextBuilder {
                 webappJarFile = new JarFile(webappFilePath);
                 contextXmlFileEntry = webappJarFile.getJarEntry(LoaderConstants.APP_CL_CONFIG_FILE);
                 if (contextXmlFileEntry != null) {
-                    return new URL("jar:file:" + webappFilePath + "!/" +
+                    return new URL("jar:file:" + URLEncoder.encode(webappFilePath, "UTF-8") + "!/" +
                             LoaderConstants.APP_CL_CONFIG_FILE);
                 }
             } catch (IOException e) {

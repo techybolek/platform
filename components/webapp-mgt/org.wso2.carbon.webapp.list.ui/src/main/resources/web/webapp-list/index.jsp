@@ -31,6 +31,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="java.util.TreeMap" %>
+<%@ page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.VersionedWebappMetadata" %>
 <jsp:include page="../dialog/display_messages.jsp"/>
 
 <%
@@ -57,7 +58,7 @@
     } catch (NumberFormatException ignored) {
     }
     WebappsWrapper webappsWrapper;
-    WebappMetadata[] webapps;
+    VersionedWebappMetadata[] webapps;
 
     String webappSearchString = request.getParameter("webappSearchString");
     if (webappSearchString == null) {
@@ -73,6 +74,8 @@
     if (webappType == null) {
         webappType = "all";
     }
+
+    boolean enableChangeDefaultAppVersion = Boolean.parseBoolean(System.getProperty("webapp.defaultversion"));
 
     try {
         client = new WebappAdminClient(cookie, backendServerURL, configContext, request.getLocale());
@@ -439,27 +442,6 @@
                           numberOfPages="<%=numberOfPages%>"
                           extraHtml="<%= extraHtml%>"/>
 <p>&nbsp;</p>
-    <%--<table id="deployedServiceReport">
-            <thead>
-            <tr>
-                <%
-                    boolean reportingContext = CarbonUIUtil.isContextRegistered(config, "/reporting/");
-
-                    if (reportingContext) {
-                %>
-                <td>
-
-                    <jsp:include page="../reporting/service_mgt.jsp" flush="true">
-                        <jsp:param name="template" value="service_group_data"/>
-                        <jsp:param name="component" value="service-mgt"/>
-                    </jsp:include>
-                </td>
-                <%
-                    }
-                %>
-            </tr>
-            </thead>
-    </table>--%>
 <form action="delete_webapps.jsp" name="webappsForm" method="post">
 <input type="hidden" name="pageNumber" value="<%= pageNumber%>"/>
 <input type="hidden" name="webappState" value="<%= webappState %>"/>
@@ -487,9 +469,14 @@
     <th>
         <nobr><fmt:message key="webapp.last.modified"/></nobr>
     </th>
-    <% if (webappState.equalsIgnoreCase("started") ||
+    <% if ((webappState.equalsIgnoreCase("started") ||
             webappState.equalsIgnoreCase("all")||
-            webappState.equalsIgnoreCase("stopped")) { %>
+            webappState.equalsIgnoreCase("stopped")) &&
+            enableChangeDefaultAppVersion) { %>
+    <th colspan="3"><fmt:message key="webapp.action"/></th>
+    <% } else if(webappState.equalsIgnoreCase("started") ||
+            webappState.equalsIgnoreCase("all")||
+            webappState.equalsIgnoreCase("stopped")){ %>
     <th colspan="2"><fmt:message key="webapp.action"/></th>
     <% } else { %>
     <th><fmt:message key="webapp.action"/></th>
@@ -510,60 +497,20 @@
                 webappsWrapper.getHttpsPort();
     }
 
-    for (int count = 0; count < webapps.length; count++) {
-        WebappMetadata webapp = webapps[count];
-
-        String contextPrefix;
-        if ("carbon.super".equals(tenantDomain)) {
-            String tmpContext = webapp.getContext();
-            contextPrefix = tmpContext.lastIndexOf('/') > 0 ?
-                    tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
-        } else {
-            String tmpContext = webapp.getContext().substring(tenantContext.length());
-            contextPrefix = tmpContext.lastIndexOf('/') > 0 ?
-                    tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
-            contextPrefix = tenantContext + contextPrefix;
-        }
-
-        int rowspan = 1;
-        int range = count;
-        while(range + 1 < webapps.length) {
-            if (range + 1 < webapps.length) {
-                WebappMetadata webapp2 =webapps [range + 1];
-                String contextPrefix2;
-                if ("carbon.super".equals(tenantDomain)) {
-                    String tmpContext = webapp2.getContext();
-                    contextPrefix2 = tmpContext.lastIndexOf('/') > 0 ?
-                            tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
-                } else {
-                    String tmpContext = webapp2.getContext().substring(tenantContext.length());
-                    contextPrefix2 = tmpContext.lastIndexOf('/') > 0 ?
-                            tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
-                    contextPrefix2 = tenantContext + contextPrefix2;
-                }
-
-                if (contextPrefix.equalsIgnoreCase(contextPrefix2)) {
-                    rowspan++;
-                    range++;
-                } else {
-                    break;
-                }
-            }
-        }
-
-        int noOfVersionedWebapps = rowspan;
+    for (VersionedWebappMetadata webapp : webapps) {
 
         boolean firstWebappFlag = true;
-        for (int vCount = count; vCount < count + noOfVersionedWebapps; vCount++) {
-            WebappMetadata vWebapp = webapps[vCount];
+
+        for (WebappMetadata vWebapp : webapp.getVersionGroups()) {
+
             String bgColor = ((position % 2) == 1) ? "#EEEFFB" : "white";
             position++;
             String currentWebappType = vWebapp.getWebappType();
-            String vContext = vWebapp.getContext().startsWith(tenantContext) ?
-                    vWebapp.getContext().substring(tenantContext.length()) : vWebapp.getContext();
 
-            String version = vContext.lastIndexOf('/') > 0 ?
-                    vContext.substring(vContext.substring(1).indexOf('/') + 1).trim() : "default";
+            String version = vWebapp.getAppVersion();
+            /*if ("/0".equals(version)) {
+                version = "default";
+            }*/
 
             String webappURL = urlPrefix + vWebapp.getContext();
             if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
@@ -582,6 +529,7 @@
     <%
 
         String rowspanHtmlAtt = "";
+        int rowspan = webapp.getVersionGroups().length;
         if (firstWebappFlag) {
             if (rowspan > 1) {
                 rowspanHtmlAtt = " rowspan = \"" + rowspan + "\"";
@@ -589,28 +537,25 @@
             firstWebappFlag = false;
     %>
     <td <%= rowspanHtmlAtt %> >
-       <% if (!"default".equals(version)) { %>
-           <%= contextPrefix %>
-       <% } else { %>
            <a href="../webapp-list/webapp_info.jsp?webappFileName=<%=
               URLEncoder.encode(vWebapp.getWebappFile(), "UTF-8")%>&webappState=<%= webappState %>&hostName=<%=
               webappsWrapper.getHostName()%>&httpPort=<%= webappsWrapper.getHttpPort()%>&webappType=<%=currentWebappType%>">
-              <%= contextPrefix %>
+              <%=vWebapp.getContext()%>
            </a>
-       <% } %>
     </td>
 
-    <% } %>
+    <%} %>
+
     <td> &nbsp;
-        <% if (!"default".equals(version)) { %>
+        <% if ("/default".equals(version)) { %>
+            <%=version%>
+        <% } else { %>
         <a href="../webapp-list/webapp_info.jsp?webappFileName=<%=
                     URLEncoder.encode(vWebapp.getWebappFile(), "UTF-8")%>&webappState=<%= webappState %>&hostName=<%=
                      webappsWrapper.getHostName()%>&httpPort=<%= webappsWrapper.getHttpPort()%>&webappType=<%=currentWebappType%>">
             <%= version %>
         </a>
-        <% } else { %>
-            <%= version %>
-        <% }%>
+        <% } %>
     </td>
     <td><%= (vWebapp.getDisplayName() != null ? vWebapp.getDisplayName() : "") %>
     </td>
@@ -688,25 +633,28 @@
         </a>
     </td>
     <% } else if (!webappState.equalsIgnoreCase("stopped")){ %>
+    <td>&nbsp;
+    </td>
+    <%} if (enableChangeDefaultAppVersion) {%>
     <td>
+        &nbsp;
+        <% if (!"/default".equals(version) && !(webapp.getVersionGroups().length == 1)) { %>
+            <a href="set_default_version.jsp?appGroupName=<%=webapp.getAppVersionRoot()%>&appFileName=<%=URLEncoder.encode(vWebapp.getWebappFile(), "UTF-8")%>">Make Default</a>
+        <% } %>
     </td>
     <%}%>
-    <td>
-            <%--<%if (vWebapp.getWebappFile().endsWith(".war")) {%>--%>
+    <td>  &nbsp;
         <a href="download-ajaxprocessor.jsp?name=<%=vWebapp.getWebappFile()%>&type=<%=vWebapp.getWebappType()%>"
            target="_self"
            style='background:url(images/download.gif) no-repeat;padding-left:20px;display:block;white-space: nowrap;height:16px;'>
             <fmt:message key="download"/>
         </a>
-            <%--<% } %>--%>
     </td>
 </tr>
 
-<% }
-    count += noOfVersionedWebapps - 1;
 
-%>
-<% } %>
+<% } %>      <% } %>
+
 </tbody>
 </table>
 </form>
@@ -729,6 +677,7 @@
                   prevKey="prev" nextKey="next"
                   parameters="<%= parameters%>"/>
 <%
+
 } else {
 %>
 <b><fmt:message key="no.webapps.found"/></b>
