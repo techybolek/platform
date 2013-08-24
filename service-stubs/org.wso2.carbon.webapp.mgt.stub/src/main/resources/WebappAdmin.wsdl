@@ -1,12 +1,13 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2427="http://mgt.webapp.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://mgt.webapp.carbon.wso2.org" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://mgt.webapp.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2427="http://metadata.persistence.core.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax2425="http://mgt.webapp.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://mgt.webapp.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://mgt.webapp.carbon.wso2.org">
     <wsdl:documentation>WebappAdmin</wsdl:documentation>
     <wsdl:types>
-        <xs:schema xmlns:ax2428="http://mgt.webapp.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+        <xs:schema xmlns:ax2428="http://metadata.persistence.core.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2426="http://mgt.webapp.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
             <xs:import namespace="http://mgt.webapp.carbon.wso2.org/xsd"></xs:import>
+            <xs:import namespace="http://metadata.persistence.core.carbon.wso2.org/xsd"></xs:import>
             <xs:element name="uploadWebapp">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="webappUploadDataList" nillable="true" type="ax2427:WebappUploadData"></xs:element>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="webappUploadDataList" nillable="true" type="ax2425:WebappUploadData"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -73,6 +74,18 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="isDefaultVersionManagementEnabled">
+                <xs:complexType>
+                    <xs:sequence></xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isDefaultVersionManagementEnabledResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="getStoppedWebapp">
                 <xs:complexType>
                     <xs:sequence>
@@ -83,7 +96,7 @@
             <xs:element name="getStoppedWebappResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2427:WebappMetadata"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2425:WebappMetadata"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -97,7 +110,7 @@
             <xs:element name="getStartedWebappResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2427:WebappMetadata"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2425:WebappMetadata"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -114,7 +127,7 @@
             <xs:element name="getPagedWebappsSummaryResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2427:WebappsWrapper"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2425:WebappsWrapper"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -130,7 +143,7 @@
             <xs:element name="getPagedFaultyWebappsSummaryResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2427:WebappsWrapper"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2425:WebappsWrapper"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -159,7 +172,7 @@
             <xs:element name="getActiveSessionsResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2427:SessionsWrapper"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2425:SessionsWrapper"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -263,6 +276,26 @@
                     <xs:sequence></xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="WebappAdminArtifactMetadataException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="ArtifactMetadataException" nillable="true" type="ax2427:ArtifactMetadataException"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="changeDefaultAppVersion">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="appGroupName" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="fileName" nillable="true" type="xs:string"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://metadata.persistence.core.carbon.wso2.org/xsd">
+            <xs:complexType name="ArtifactMetadataException">
+                <xs:sequence></xs:sequence>
+            </xs:complexType>
         </xs:schema>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://mgt.webapp.carbon.wso2.org/xsd">
             <xs:complexType name="WebappUploadData">
@@ -274,7 +307,9 @@
             </xs:complexType>
             <xs:complexType name="WebappMetadata">
                 <xs:sequence>
+                    <xs:element minOccurs="0" name="appVersion" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="contextPath" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="displayName" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="faultException" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="faulty" type="xs:boolean"></xs:element>
@@ -284,7 +319,7 @@
                     <xs:element minOccurs="0" name="servletContext" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="started" type="xs:boolean"></xs:element>
                     <xs:element minOccurs="0" name="state" nillable="true" type="xs:string"></xs:element>
-                    <xs:element minOccurs="0" name="statistics" nillable="true" type="ax2427:WebappStatistics"></xs:element>
+                    <xs:element minOccurs="0" name="statistics" nillable="true" type="ax2425:WebappStatistics"></xs:element>
                     <xs:element minOccurs="0" name="webappFile" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="webappType" nillable="true" type="xs:string"></xs:element>
                 </xs:sequence>
@@ -308,15 +343,21 @@
                     <xs:element minOccurs="0" name="numberOfCorrectWebapps" type="xs:int"></xs:element>
                     <xs:element minOccurs="0" name="numberOfFaultyWebapps" type="xs:int"></xs:element>
                     <xs:element minOccurs="0" name="numberOfPages" type="xs:int"></xs:element>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="webapps" nillable="true" type="ax2427:WebappMetadata"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="webapps" nillable="true" type="ax2425:VersionedWebappMetadata"></xs:element>
                     <xs:element minOccurs="0" name="webappsDir" nillable="true" type="xs:string"></xs:element>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="VersionedWebappMetadata">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="appVersionRoot" nillable="true" type="xs:string"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="versionGroups" nillable="true" type="ax2425:WebappMetadata"></xs:element>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="SessionsWrapper">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="numberOfActiveSessions" type="xs:int"></xs:element>
                     <xs:element minOccurs="0" name="numberOfPages" type="xs:int"></xs:element>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="sessions" nillable="true" type="ax2427:SessionMetadata"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="sessions" nillable="true" type="ax2425:SessionMetadata"></xs:element>
                     <xs:element minOccurs="0" name="webappFileName" nillable="true" type="xs:string"></xs:element>
                 </xs:sequence>
             </xs:complexType>
@@ -340,6 +381,12 @@
     <wsdl:message name="setBamConfigurationRequest">
         <wsdl:part name="parameters" element="ns1:setBamConfiguration"></wsdl:part>
     </wsdl:message>
+    <wsdl:message name="changeDefaultAppVersionRequest">
+        <wsdl:part name="parameters" element="ns1:changeDefaultAppVersion"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="WebappAdminArtifactMetadataException">
+        <wsdl:part name="parameters" element="ns1:WebappAdminArtifactMetadataException"></wsdl:part>
+    </wsdl:message>
     <wsdl:message name="startWebappsRequest">
         <wsdl:part name="parameters" element="ns1:startWebapps"></wsdl:part>
     </wsdl:message>
@@ -352,17 +399,23 @@
     <wsdl:message name="deleteStoppedWebappsRequest">
         <wsdl:part name="parameters" element="ns1:deleteStoppedWebapps"></wsdl:part>
     </wsdl:message>
+    <wsdl:message name="getPagedWebappsSummaryRequest">
+        <wsdl:part name="parameters" element="ns1:getPagedWebappsSummary"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getPagedWebappsSummaryResponse">
+        <wsdl:part name="parameters" element="ns1:getPagedWebappsSummaryResponse"></wsdl:part>
+    </wsdl:message>
     <wsdl:message name="getBamConfigurationRequest">
         <wsdl:part name="parameters" element="ns1:getBamConfiguration"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="getBamConfigurationResponse">
         <wsdl:part name="parameters" element="ns1:getBamConfigurationResponse"></wsdl:part>
     </wsdl:message>
-    <wsdl:message name="getPagedWebappsSummaryRequest">
-        <wsdl:part name="parameters" element="ns1:getPagedWebappsSummary"></wsdl:part>
+    <wsdl:message name="isDefaultVersionManagementEnabledRequest">
+        <wsdl:part name="parameters" element="ns1:isDefaultVersionManagementEnabled"></wsdl:part>
     </wsdl:message>
-    <wsdl:message name="getPagedWebappsSummaryResponse">
-        <wsdl:part name="parameters" element="ns1:getPagedWebappsSummaryResponse"></wsdl:part>
+    <wsdl:message name="isDefaultVersionManagementEnabledResponse">
+        <wsdl:part name="parameters" element="ns1:isDefaultVersionManagementEnabledResponse"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="expireSessionsInWebappsRequest">
         <wsdl:part name="parameters" element="ns1:expireSessionsInWebapps"></wsdl:part>
@@ -455,6 +508,10 @@
         <wsdl:operation name="setBamConfiguration">
             <wsdl:input message="tns:setBamConfigurationRequest" wsaw:Action="urn:setBamConfiguration"></wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="changeDefaultAppVersion">
+            <wsdl:input message="tns:changeDefaultAppVersionRequest" wsaw:Action="urn:changeDefaultAppVersion"></wsdl:input>
+            <wsdl:fault message="tns:WebappAdminArtifactMetadataException" name="WebappAdminArtifactMetadataException" wsaw:Action="urn:changeDefaultAppVersionWebappAdminArtifactMetadataException"></wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="startWebapps">
             <wsdl:input message="tns:startWebappsRequest" wsaw:Action="urn:startWebapps"></wsdl:input>
         </wsdl:operation>
@@ -465,13 +522,17 @@
         <wsdl:operation name="deleteStoppedWebapps">
             <wsdl:input message="tns:deleteStoppedWebappsRequest" wsaw:Action="urn:deleteStoppedWebapps"></wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="getPagedWebappsSummary">
+            <wsdl:input message="tns:getPagedWebappsSummaryRequest" wsaw:Action="urn:getPagedWebappsSummary"></wsdl:input>
+            <wsdl:output message="tns:getPagedWebappsSummaryResponse" wsaw:Action="urn:getPagedWebappsSummaryResponse"></wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="getBamConfiguration">
             <wsdl:input message="tns:getBamConfigurationRequest" wsaw:Action="urn:getBamConfiguration"></wsdl:input>
             <wsdl:output message="tns:getBamConfigurationResponse" wsaw:Action="urn:getBamConfigurationResponse"></wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getPagedWebappsSummary">
-            <wsdl:input message="tns:getPagedWebappsSummaryRequest" wsaw:Action="urn:getPagedWebappsSummary"></wsdl:input>
-            <wsdl:output message="tns:getPagedWebappsSummaryResponse" wsaw:Action="urn:getPagedWebappsSummaryResponse"></wsdl:output>
+        <wsdl:operation name="isDefaultVersionManagementEnabled">
+            <wsdl:input message="tns:isDefaultVersionManagementEnabledRequest" wsaw:Action="urn:isDefaultVersionManagementEnabled"></wsdl:input>
+            <wsdl:output message="tns:isDefaultVersionManagementEnabledResponse" wsaw:Action="urn:isDefaultVersionManagementEnabledResponse"></wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="expireSessionsInWebapps">
             <wsdl:input message="tns:expireSessionsInWebappsRequest" wsaw:Action="urn:expireSessionsInWebapps"></wsdl:input>
@@ -563,6 +624,15 @@
                 <soap:body use="literal"></soap:body>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="changeDefaultAppVersion">
+            <soap:operation soapAction="urn:changeDefaultAppVersion" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:fault name="WebappAdminArtifactMetadataException">
+                <soap:fault use="literal" name="WebappAdminArtifactMetadataException"></soap:fault>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="startWebapps">
             <soap:operation soapAction="urn:startWebapps" style="document"></soap:operation>
             <wsdl:input>
@@ -592,6 +662,15 @@
             <wsdl:input>
                 <soap:body use="literal"></soap:body>
             </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="isDefaultVersionManagementEnabled">
+            <soap:operation soapAction="urn:isDefaultVersionManagementEnabled" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"></soap:body>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getPagedWebappsSummary">
             <soap:operation soapAction="urn:getPagedWebappsSummary" style="document"></soap:operation>
@@ -767,6 +846,15 @@
                 <soap12:body use="literal"></soap12:body>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="changeDefaultAppVersion">
+            <soap12:operation soapAction="urn:changeDefaultAppVersion" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:fault name="WebappAdminArtifactMetadataException">
+                <soap12:fault use="literal" name="WebappAdminArtifactMetadataException"></soap12:fault>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="startWebapps">
             <soap12:operation soapAction="urn:startWebapps" style="document"></soap12:operation>
             <wsdl:input>
@@ -796,6 +884,15 @@
             <wsdl:input>
                 <soap12:body use="literal"></soap12:body>
             </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="isDefaultVersionManagementEnabled">
+            <soap12:operation soapAction="urn:isDefaultVersionManagementEnabled" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getPagedWebappsSummary">
             <soap12:operation soapAction="urn:getPagedWebappsSummary" style="document"></soap12:operation>
@@ -971,6 +1068,12 @@
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="changeDefaultAppVersion">
+            <http:operation location="changeDefaultAppVersion"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+        </wsdl:operation>
         <wsdl:operation name="startWebapps">
             <http:operation location="startWebapps"></http:operation>
             <wsdl:input>
@@ -1000,6 +1103,15 @@
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="isDefaultVersionManagementEnabled">
+            <http:operation location="isDefaultVersionManagementEnabled"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getPagedWebappsSummary">
             <http:operation location="getPagedWebappsSummary"></http:operation>
@@ -1157,13 +1269,13 @@
     </wsdl:binding>
     <wsdl:service name="WebappAdmin">
         <wsdl:port name="WebappAdminHttpsSoap11Endpoint" binding="tns:WebappAdminSoap11Binding">
-            <soap:address location="https://10.100.0.134:9443/services/WebappAdmin.WebappAdminHttpsSoap11Endpoint/"></soap:address>
+            <soap:address location="https://10.100.1.69:9443/services/WebappAdmin.WebappAdminHttpsSoap11Endpoint/"></soap:address>
         </wsdl:port>
         <wsdl:port name="WebappAdminHttpsSoap12Endpoint" binding="tns:WebappAdminSoap12Binding">
-            <soap12:address location="https://10.100.0.134:9443/services/WebappAdmin.WebappAdminHttpsSoap12Endpoint/"></soap12:address>
+            <soap12:address location="https://10.100.1.69:9443/services/WebappAdmin.WebappAdminHttpsSoap12Endpoint/"></soap12:address>
         </wsdl:port>
         <wsdl:port name="WebappAdminHttpsEndpoint" binding="tns:WebappAdminHttpBinding">
-            <http:address location="https://10.100.0.134:9443/services/WebappAdmin.WebappAdminHttpsEndpoint/"></http:address>
+            <http:address location="https://10.100.1.69:9443/services/WebappAdmin.WebappAdminHttpsEndpoint/"></http:address>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
