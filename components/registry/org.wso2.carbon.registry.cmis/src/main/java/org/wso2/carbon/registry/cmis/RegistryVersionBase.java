@@ -59,7 +59,7 @@ public abstract class RegistryVersionBase extends RegistryDocument {
         try {
             String[] versionArray = getRepository().getVersions(getNode().getPath());
             List<String> versions;
-            if(versionArray == null){
+            if(versionArray.length == 0) {
                 //Get the base node
                 versions = new ArrayList<String>();
                 versions.add(getNode().getPath());
@@ -292,7 +292,7 @@ public abstract class RegistryVersionBase extends RegistryDocument {
      */
     protected String getBaseNodeId() throws RegistryException {
         String[] versions = getRepository().getVersions(getNode().getPath());
-        return (versions != null ? versions[versions.length-1] : getNode().getPath());
+        return (versions.length != 0 ? versions[versions.length-1] : getNode().getPath());
     }
 
     /**

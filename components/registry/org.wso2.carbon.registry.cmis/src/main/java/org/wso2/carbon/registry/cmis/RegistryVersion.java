@@ -60,9 +60,9 @@ public class RegistryVersion extends RegistryVersionBase {
     @Override
     protected boolean isLatestVersion() throws RegistryException {
         String[] versions = getRepository().getVersions(getNode().getPath());
-        if(versions!=null) {
+        if(versions.length != 0) {
             return versions[0].equals(version);
-        } else{
+        } else {
             return getNode().getPath().equals(version);
         }
     }
