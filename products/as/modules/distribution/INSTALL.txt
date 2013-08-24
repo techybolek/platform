@@ -43,6 +43,8 @@ Standalone Mode
                 -DdisableHttpLog		    Disable HTTP access logging
                 -DworkerNode=true			Set this system property when starting as a worker node.
 					                        This is required in clustered setups with master and worker nodes.
+                -Dprofile=<profile-name>        Starting from AS 5.2.0, AS can be started with a subset of features. AS comes with following set of profiles 
+                                                webapp, axis2service, dataservice, jaggery, mashup. Ex. -Dprofile=webapp
 
 
 NOTE: The system property, applyPatches (-DapplyPatches), is no longer used. We have automated the patch application/reverting process. 
