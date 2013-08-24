@@ -145,8 +145,13 @@ public class PassThroughNHttpGetProcessor  implements HttpGetRequestProcessor{
             CarbonHttpResponse carbonHttpResponse = new CarbonHttpResponse(
                     temporaryData.getOutputStream());
 
-            (getRequestProcessors.get(item)).process(carbonHttpRequest,
-                    carbonHttpResponse, cfgCtx);
+            if ("/favicon.ico".equals(uri)) {
+                response.setStatusCode(HttpStatus.SC_MOVED_PERMANENTLY);
+                response.addHeader("Location", "http://wso2.org/favicon.ico");
+            } else {
+                (getRequestProcessors.get(item)).process(carbonHttpRequest,
+                carbonHttpResponse, cfgCtx);
+            }
             
              // adding headers
             Map<String, String> responseHeaderMap = carbonHttpResponse.getHeaders();
@@ -179,7 +184,7 @@ public class PassThroughNHttpGetProcessor  implements HttpGetRequestProcessor{
            
             
             try{
-            temporaryData.writeTo(outputStream);
+                temporaryData.writeTo(outputStream);
             }catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -230,9 +235,12 @@ public class PassThroughNHttpGetProcessor  implements HttpGetRequestProcessor{
 
         boolean loadBalancer = Boolean.parseBoolean(System.getProperty("wso2.loadbalancer", "false"));
         if (uri.equals("/favicon.ico")) {
-            response.setStatusCode(HttpStatus.SC_MOVED_PERMANENTLY);
-            response.addHeader("Location", "http://wso2.org/favicon.ico");
-            sourceHandler.commitResponseHideExceptions(conn, response);
+            try {
+                this.processWithGetProcessor(request, response, uri, uri, "", "", outputStream, conn);
+                isRequestHandled = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else if(uri.startsWith(servicePath) &&
                 (serviceName == null || serviceName.length() == 0)){
             //check if service listing request is blocked
