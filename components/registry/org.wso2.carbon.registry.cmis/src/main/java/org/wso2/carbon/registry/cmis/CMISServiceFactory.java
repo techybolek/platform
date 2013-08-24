@@ -123,7 +123,7 @@ public class CMISServiceFactory extends AbstractServiceFactory {
             //TODO check for session timeout
         } else{
             try {
-                repository = new CMISRepository(acquireGregRepository(gregConfig, context), pathManager, typeManager);
+                repository = new CMISRepository(acquireGregRepository(context), pathManager, typeManager);
                 //put to sessions for future reference
                 sessions.put(userInfoObj, repository);
 
@@ -165,19 +165,16 @@ public class CMISServiceFactory extends AbstractServiceFactory {
 
 
    /**
-     * @param gregConfig  configuration determining the GREG repository to be returned
+     * @param context context with user/request data
      * @return
      * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
      */
-    private Registry acquireGregRepository(Map<String, String> gregConfig, CallContext context) throws RegistryException, AxisFault {
+    private Registry acquireGregRepository(CallContext context) throws RegistryException, AxisFault {
 
 
         String username = context.getUsername();
         String password = context.getPassword();
 
-        //log.debug("Trying inside aquireGregRepository");
-
-        //log.debug("Got registry instance!!");
         UserRegistry userRegistry = null;
         try{
 
@@ -220,7 +217,6 @@ public class CMISServiceFactory extends AbstractServiceFactory {
         map.put(SERVER_URL, parameters.get(SERVER_URL));
 
         gregConfig = Collections.unmodifiableMap(map);
-        log.debug("Configuration: greg=" + gregConfig);
-   }
+  }
 
 }

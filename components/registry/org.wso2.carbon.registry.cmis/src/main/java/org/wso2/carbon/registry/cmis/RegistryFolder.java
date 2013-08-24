@@ -79,8 +79,9 @@ public class RegistryFolder extends RegistryObject {
                 try{
         		    resource = getRepository().get(child);
                 } catch (RegistryException e){
-                    log.debug(e.getMessage());
-                    throw new CmisObjectNotFoundException(e.getMessage(), e);
+		    String msg = "Failed to get the child " + child;
+                    log.error(msg, e);
+                    throw new CmisObjectNotFoundException(msg, e);
                 }
         		if (hasProperty(resource, CMISConstants.GREG_IS_CHECKED_OUT)){
         			if(resource.getProperty(CMISConstants.GREG_IS_CHECKED_OUT).equals("true")){
@@ -111,8 +112,9 @@ public class RegistryFolder extends RegistryObject {
                     try {
 						return create(getRepository().get(newListIterator.next()));
 					} catch (RegistryException e) {
-						log.debug(e.getMessage(), e);
-			            throw new CmisRuntimeException(e.getMessage(), e);
+						String msg = "Error while iterating the node list ";
+						log.error(msg, e);
+			            throw new CmisRuntimeException(msg, e);
 					}
                 }
 
@@ -130,8 +132,9 @@ public class RegistryFolder extends RegistryObject {
 
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+  	    String msg = "Failed to get the nodes ";
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
 
@@ -155,8 +158,9 @@ public class RegistryFolder extends RegistryObject {
             return gregObject;
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisStorageException(e.getMessage(), e);
+	    String msg = "Failed to add the node " + source.getId();
+            log.error(msg, e);
+            throw new CmisStorageException(msg, e);
         }
     }
     
@@ -176,8 +180,9 @@ public class RegistryFolder extends RegistryObject {
             }
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+  	    String msg = "Failed to delete the object " + getNode().getPath();
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
 
@@ -197,7 +202,7 @@ public class RegistryFolder extends RegistryObject {
             String path = getNode().getPath();
             getRepository().delete(path);
         } catch (RegistryException e) {
-        	log.debug(e.getMessage(), e); 
+        	log.error("Failed to delete the node with path " + getNode().getPath(), e); 
         }
 
         return result;
@@ -351,8 +356,9 @@ public class RegistryFolder extends RegistryObject {
             }
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisStorageException(e.getMessage(), e);
+ 	    String msg = "Failed to set the properties ";
+            log.error(msg, e);
+            throw new CmisStorageException(msg, e);
         }
     }
 

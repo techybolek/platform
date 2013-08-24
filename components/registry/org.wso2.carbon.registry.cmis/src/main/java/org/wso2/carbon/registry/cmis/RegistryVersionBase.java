@@ -94,8 +94,9 @@ public abstract class RegistryVersionBase extends RegistryDocument {
             };
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+	    String msg = "Failed to get versions";
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
     
@@ -149,8 +150,9 @@ public abstract class RegistryVersionBase extends RegistryDocument {
             }
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+	    String msg = "Failed to delete the node with path " + node.getPath();
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
 
@@ -169,8 +171,9 @@ public abstract class RegistryVersionBase extends RegistryDocument {
             return getPwc(checkout(getRepository(), node));
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+	    String msg = "Failed checkout the node with path " + node.getPath();
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
 
@@ -201,8 +204,9 @@ public abstract class RegistryVersionBase extends RegistryDocument {
             return new RegistryVersion(getRepository(), resource, pathOfLatestVersion, typeManager, pathManager);
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+	    String msg = "Failed checkin";
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
 
@@ -218,8 +222,9 @@ public abstract class RegistryVersionBase extends RegistryDocument {
             cancelCheckout(getRepository(),node);
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+	    String msg = "Failed cancelling the checkout";
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
 
@@ -274,8 +279,9 @@ public abstract class RegistryVersionBase extends RegistryDocument {
             return new RegistryVersion(getRepository(), node, gotVersion, typeManager, pathManager);
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+	    String msg = "Unable to get the version for " + name;
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
 
@@ -322,7 +328,7 @@ public abstract class RegistryVersionBase extends RegistryDocument {
                 setAction(result, Action.CAN_CHECK_OUT, true);
             }
         } catch (RegistryException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+             log.error("Failed compiling allowable actions ", e);   //To change body of catch statement use File | Settings | File Templates.
         }
         return result;
     }

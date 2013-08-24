@@ -115,7 +115,7 @@ public class RegistryVersion extends RegistryVersionBase {
 		try {
 			return documentTypeHandler.getGregNode(resource);
 		} catch (RegistryException e) {
-			log.debug(e.getMessage(), e);
+			log.error("Cannot create the object for the path " + resource.getPath(), e);
 		}
 		return null;
 	}
