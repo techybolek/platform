@@ -391,9 +391,6 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.apache.synapse.transport.nhttp.feature:${synapse.version}
                                 </featureArtifactDef>
-                                <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.as.runtimes.j2ee.feature:${carbon.platform.version}
-                                </featureArtifactDef>
 
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.apimgt.core.feature:${carbon.platform.version}
@@ -549,7 +546,6 @@
                                     org.wso2.appserver:org.wso2.appserver.runtime.nested.category.feature:${as.version}
                                 </featureArtifactDef>
 
-
                                 <featureArtifactDef>
                                     org.wso2.governance:org.wso2.governance.application-mgt.nested.category.feature:${greg.version}
                                 </featureArtifactDef>
@@ -636,6 +632,7 @@
                                 <featureArtifactDef>
                                     org.wso2.dss:org.wso2.dss.styling.nested.category.feature:${dss.version}
                                 </featureArtifactDef>
+
                                 <!--featureArtifactDef>
                                     org.wso2.bps:org.wso2.bps.attachment-mgt.nested.category.feature:${bps.version}
                                 </featureArtifactDef>
@@ -722,12 +719,26 @@
                                             <id>org.wso2.appserver.styling.nested.category</id>
                                             <version>${as.version}</version>
                                         </catFeature>
+                                    </features>
+                                </category>
+
+                                <category>
+                                    <id>org.wso2.appserver.runtimes.category</id>
+                                    <label>Application Server Runtimes (Optional)</label>
+                                    <description>This category contains features required for WSO2 Application Server Runtimes - CXF and J2EE. CXF feature is also included under Application Server category as well.
+                                    </description>
+                                    <features>
                                         <catFeature>
-                                            <id>org.wso2.appserver.runtime.nested.category</id>
-                                            <version>${as.version}</version>
+                                            <id>org.wso2.carbon.as.runtimes.cxf</id>
+                                            <version>${carbon.platform.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.carbon.as.runtimes.j2ee</id>
+                                            <version>${carbon.platform.version}</version>
                                         </catFeature>
                                     </features>
                                 </category>
+
                                 <category>
                                     <id>org.wso2.governance.category</id>
                                     <label>Governance Registry</label>
