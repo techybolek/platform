@@ -19,4 +19,39 @@
 package org.wso2.carbon.automation.core.context;
 
 public class AutomationContextBuilder {
+    AutomationContext automationContext;
+
+    public void AutomationContextBuilder() {
+        automationContext = new AutomationContext();
+
+    }
+
+    /**
+     * Builds the environment with the given domain with either as tenant admin or tenant user
+     *
+     * @param domain          The Domain configured in automation.xml
+     * @param runAsSuperAdmin Whether the test is running as a super tenant or not.
+     */
+    public void build(String domain, boolean runAsSuperAdmin) {
+
+    }
+
+    /**
+     * Run as a specific user defined in a tenant domain
+     *
+     * @param domain
+     * @param tenantUserKey
+     */
+    public void build(String domain, String tenantUserKey) {
+
+    }
+
+    /**
+     * Runs as random domain with random user selecting admin or not
+     *
+     * @param runAsSuperAdmin
+     */
+    public void build(boolean runAsSuperAdmin) {
+
+    }
 }

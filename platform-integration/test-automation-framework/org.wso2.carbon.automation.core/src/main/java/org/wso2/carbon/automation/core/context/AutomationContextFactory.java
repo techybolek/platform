@@ -19,4 +19,5 @@
 package org.wso2.carbon.automation.core.context;
 
 public class AutomationContextFactory {
+
 }

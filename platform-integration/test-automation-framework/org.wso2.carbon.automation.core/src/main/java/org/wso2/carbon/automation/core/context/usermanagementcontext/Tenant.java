@@ -21,52 +21,55 @@ package org.wso2.carbon.automation.core.context.usermanagementcontext;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * ]
+ * Data Structure for the tenant node in usermanagementcontext->tenant node in automation.xml file
+ */
 public class Tenant {
 
     private String key;
     private String domain;
-    private  User tenantAdmin;
+    private User tenantAdmin;
     private Map<String, User> tenantUsers = new HashMap<String, User>();
 
-    public void setKey(String value){
+    public void setKey(String value) {
 
-        this.key=value;
+        this.key = value;
     }
 
-    public void  setDomain(String value){
+    public void setDomain(String value) {
 
-        this.domain=value;
+        this.domain = value;
     }
 
-    public  void setTenantAdmin(User admin){
+    public void setTenantAdmin(User admin) {
 
-        this.tenantAdmin=admin;
+        this.tenantAdmin = admin;
     }
 
-    public  void setTenantUsers(Map<String, User> users){
+    public void setTenantUsers(Map<String, User> users) {
 
-        this.tenantUsers=users;
+        this.tenantUsers = users;
     }
 
-    public String getKey(){
+    public String getKey() {
 
         return key;
     }
 
-    public String getDomain(){
+    public String getDomain() {
 
-        return  domain;
+        return domain;
     }
 
-    public User getTenantAdmin(){
+    public User getTenantAdmin() {
 
-        return  tenantAdmin;
+        return tenantAdmin;
     }
 
-    public  Map<String, User> getTenantUsers(){
+    public Map<String, User> getTenantUsers() {
 
-        return  tenantUsers;
+        return tenantUsers;
     }
 
 

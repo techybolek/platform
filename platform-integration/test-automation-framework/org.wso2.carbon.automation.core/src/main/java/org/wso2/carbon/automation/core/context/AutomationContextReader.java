@@ -21,7 +21,6 @@ package org.wso2.carbon.automation.core.context;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.llom.OMElementImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.core.ProductConstant;
@@ -72,7 +71,7 @@ public class AutomationContextReader {
                 URL clusterXmlURL = new File("/home/dharshana/wso2source/carbon/platform/trunk/products/is/modules/integration/tests/src/test/resources/automation.xml").toURI().toURL();
                 handler = new DataHandler(clusterXmlURL);
                 xmlStream = XMLInputFactory.newInstance().createXMLStreamReader(handler.getInputStream());
-                listPlatforms(xmlStream);
+                getAutomationPlatform(xmlStream);
 
             } catch (XMLStreamException e) {
                 log.error(String.format("Cannot create Stream :-%s", e.getMessage()));
@@ -82,7 +81,7 @@ public class AutomationContextReader {
         }
     }
 
-    private List<OMNode> listPlatforms(XMLStreamReader xmlStreamReader) {
+    private List<OMNode> getAutomationPlatform(XMLStreamReader xmlStreamReader) {
         StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
         OMElement endPointElem = builder.getDocumentElement();
         List<OMNode> platformList = new ArrayList<OMNode>();

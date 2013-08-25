@@ -59,6 +59,14 @@ public class ContextConstants {
     public static final String FEATURE_MANAGEMENT_CONTEXT_REPOSITORY_ID = "id";
 
     public static final String USER_MANAGEMENT_CONTEXT_NODE = "userManagement";
+    public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_KEY="key";
+    public static final String USER_MANAGEMENT_CONTEXT_TENANT_KEY="key";
+    public static final String USER_MANAGEMENT_CONTEXT_TENANT_DOMAIN="domain";
+    public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_USERNAME="userName";
+    public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_PASSWORD="password";
+    public static final String USER_MANAGEMENT_CONTEXT_USER_TYPE_TENANT_USERS="tenantUsers";
+    public static final String USER_MANAGEMENT_CONTEXT_USER_TYPE_TENANT_ADMIN="tenantAdmin";
+
     public static final String PLATFORM_CONTEXT_NODE = "platform";
 
 

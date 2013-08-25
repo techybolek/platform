@@ -19,5 +19,23 @@
 package org.wso2.carbon.automation.core.context.environmentcontext;
 
 public class EnvironmentContextFactory {
+    EnvironmentContext context = new EnvironmentContext();
+    Environment environment = new Environment();
 
+    public void createEnvironmentContext() {
+        environment.setBackEndUrl("");
+        environment.setSecureServiceUrl("");
+        environment.setServiceUrl("");
+        environment.setSessionCookie("");
+        environment.setWebAppURL("");
+        context.setEnvironmentConfigurations(environment);
+
+    }
+
+
+
+    public EnvironmentContext getEnvironmentContext() {
+
+        return context;
+    }
 }

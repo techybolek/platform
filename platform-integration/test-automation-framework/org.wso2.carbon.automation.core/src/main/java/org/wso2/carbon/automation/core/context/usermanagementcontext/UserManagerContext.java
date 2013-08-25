@@ -21,22 +21,22 @@ package org.wso2.carbon.automation.core.context.usermanagementcontext;
 import org.wso2.carbon.automation.core.context.AutomationContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class UserManagerContext extends AutomationContext {
 
-    private List<Tenant> tenant = new ArrayList<Tenant>();
+    private HashMap<String, Tenant> tenant = new HashMap<String, Tenant>();
 
-    public void setTenant(List tenant){
+    public void setTenant(HashMap<String, Tenant> tenant) {
 
-        this.tenant=tenant;
+        this.tenant = tenant;
     }
 
-    public List getTenant(){
+    public HashMap<String, Tenant> getTenant() {
 
         return tenant;
     }
-
 
 
 }
