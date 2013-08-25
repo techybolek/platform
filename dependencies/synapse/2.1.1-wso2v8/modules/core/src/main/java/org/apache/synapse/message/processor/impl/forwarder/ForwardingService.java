@@ -328,13 +328,22 @@ public class ForwardingService implements InterruptableJob, Service {
     }
 
     public void sendThroughReplySeq(MessageContext outCtx) {
-        Mediator mediator = outCtx.getSequence(replySeq);
-        if (mediator != null) {
-            mediator.mediate(outCtx);
-        } else {
-            log.warn("Can't Send the Out Message , Sequence " + replySeq +
-                    " Does not Exist");
+        if (replySeq == null) {
+            this.messageProcessor.deactivate();
+            log.error("Can't Send the Out Message , Sequence " + replySeq + " Does not Exist. Deactivated the" +
+                    " message processor.");
+            return;
         }
+        Mediator mediator = outCtx.getSequence(replySeq);
+
+        if (mediator == null) {
+            this.messageProcessor.deactivate();
+            log.error("Can't Send the Out Message , Sequence " + replySeq + " Does not Exist. Deactivated the" +
+                    " message processor.");
+            return;
+        }
+
+        mediator.mediate(outCtx);
     }
 
     public boolean terminate() {
