@@ -19,6 +19,7 @@
 package org.wso2.carbon.automation.core.context.usermanagementcontext;
 
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 
 import org.apache.axiom.om.impl.llom.OMElementImpl;
@@ -174,5 +175,9 @@ public class UserManagerContextFactory {
         tenant.setDomain(tenantDomain);
         return tenant;
 
+    }
+
+    public void createConfiguration(OMElement nodeElement) {
+        //To change body of created methods use File | Settings | File Templates.
     }
 }

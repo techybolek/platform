@@ -34,13 +34,18 @@ public class ContextConstants {
     public static final String TOOLS_CONTEXT_NODE = "tools";
 
     public static final String DATABASE_CONTEXT_NODE = "databases";
+
+    public static final String SECURITY_CONTEXT_NODE = "security";
+
+    public static final String FEATURE_MANAGEMENT_CONTEXT_NODE = "featureManagement";
+
+    public static final String USER_MANAGEMENT_CONTEXT_NODE = "userManagement";
+    public static final String PLATFORM_CONTEXT_NODE = "platform";
     public static final String DATABASE_CONTEXT_NAME = "name";
     public static final String DATABASE_CONTEXT_URL = "url";
     public static final String DATABASE_CONTEXT_USERNAME = "username";
     public static final String DATABASE_CONTEXT_PASSWORD = "password";
     public static final String DATABASE_CONTEXT_DRIVERCLASSNAME = "driverClassName";
-
-    public static final String SECURITY_CONTEXT_NODE = "security";
     public static final String SECURITY_KEYSTORE_NAME = "name";
     public static final String SECURITY_KEYSTORE_FILENAME = "fileName";
     public static final String SECURITY_KEYSTORE_TYPE = "type";
@@ -54,22 +59,22 @@ public class ContextConstants {
     public static final String SECURITY_STORES_KETSTORE = "keystore";
     public static final String SECURITY_STORES_TRUSTSTORE = "truststore";
 
-    public static final String FEATURE_MANAGEMENT_CONTEXT_NODE = "featureManagement";
     public static final String FEATURE_MANAGEMENT_CONTEXT_P2RESITORIES_NAME = "name";
     public static final String FEATURE_MANAGEMENT_CONTEXT_REPOSITORY_ID = "id";
-
-    public static final String USER_MANAGEMENT_CONTEXT_NODE = "userManagement";
-    public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_KEY="key";
-    public static final String USER_MANAGEMENT_CONTEXT_TENANT_KEY="key";
-    public static final String USER_MANAGEMENT_CONTEXT_TENANT_DOMAIN="domain";
-    public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_USERNAME="userName";
-    public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_PASSWORD="password";
-    public static final String USER_MANAGEMENT_CONTEXT_USER_TYPE_TENANT_USERS="tenantUsers";
-    public static final String USER_MANAGEMENT_CONTEXT_USER_TYPE_TENANT_ADMIN="tenantAdmin";
-
-    public static final String PLATFORM_CONTEXT_NODE = "platform";
-
-
+    public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_KEY = "key";
+    public static final String USER_MANAGEMENT_CONTEXT_TENANT_KEY = "key";
+    public static final String USER_MANAGEMENT_CONTEXT_TENANT_DOMAIN = "domain";
+    public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_USERNAME = "userName";
+    public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_PASSWORD = "password";
+    public static final String USER_MANAGEMENT_CONTEXT_USER_TYPE_TENANT_USERS = "tenantUsers";
+    public static final String USER_MANAGEMENT_CONTEXT_USER_TYPE_TENANT_ADMIN = "tenantAdmin";
+    public static final String TOOL_CONTEXT_TOOL_SELENIUM = "selenium";
+    public static final String TOOL_CONTEXT_TOOL_SELENIUM_REMOTE_DRIVE_URL = "remoteDriverUrl";
+    public static final String TOOL_CONTEXT_TOOL_SELENIUM_REMOTE_DRIVE_URL_ENABLE = "enable";
+    public static final String TOOL_CONTEXT_TOOL_SELENIUM_BROWSER_TYPE = "browserType";
+    public static final String TOOL_CONTEXT_TOOL_SELENIUM_BROWSER_WEB_DRIVE_PATH = "webdriverPath";
+    public static final String TOOL_CONTEXT_TOOL_SELENIUM_BROWSER_WEB_DRIVER_PATH_ENABLE = "enable";
+    public static final String TOOL_CONTEXT_TOOL_SELENIUM_BROWSER = "browser";
 
 
 }

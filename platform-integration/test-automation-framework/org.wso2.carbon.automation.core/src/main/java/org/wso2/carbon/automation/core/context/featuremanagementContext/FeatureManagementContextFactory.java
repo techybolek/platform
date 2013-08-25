@@ -29,23 +29,24 @@ import java.util.Iterator;
 
 
 public class FeatureManagementContextFactory {
+    FeatureManagementContext featureManagementContext;
 
-    public FeatureManagementContext getFeatureManagementContext(OMElement element) {
+    public void FeatureManagementContextFactory() {
+        featureManagementContext = new FeatureManagementContext();
+    }
 
-        FeatureManagementContext featureManagementContext = new FeatureManagementContext();
-        featureManagementContext.setP2Repositories(listP2Repositories(element));
+    public FeatureManagementContext getFeatureManagementContext() {
         return featureManagementContext;
-
     }
 
     /**
      * List all P2repositories
      */
-    public HashMap<String, P2Repositories> listP2Repositories(OMElement element) {
+    public void createP2Repositories(OMNode element) {
 
         HashMap<String, P2Repositories> p2RepositoriesMap = new HashMap<String, P2Repositories>();
         OMNode node;
-        Iterator children = element.getChildElements();
+        Iterator children = ((OMElementImpl) element).getChildElements();
         String p2RepoName = null;
         while (children.hasNext()) {
 
@@ -73,7 +74,6 @@ public class FeatureManagementContextFactory {
             p2RepositoriesMap.put(p2RepoName, p2Repositories);
 
         }
-
-        return p2RepositoriesMap;
+        featureManagementContext.setP2Repositories(p2RepositoriesMap);
     }
 }

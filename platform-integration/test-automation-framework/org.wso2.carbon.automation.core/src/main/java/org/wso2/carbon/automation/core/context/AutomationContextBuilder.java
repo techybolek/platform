@@ -23,7 +23,9 @@ public class AutomationContextBuilder {
 
     public void AutomationContextBuilder() {
         automationContext = new AutomationContext();
-
+        AutomationContextReader automationContextReader = new AutomationContextReader();
+        automationContextReader.readAutomationContext();
+        automationContext = automationContextReader.getAutomationContext();
     }
 
     /**

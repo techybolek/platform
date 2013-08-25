@@ -29,12 +29,18 @@ import java.util.Iterator;
  * provides the configuration context
  */
 public class ConfigurationContextFactory {
+    ConfigurationContext configurationContext;
+
+    public void ConfigurationContextFactory() {
+        configurationContext = new ConfigurationContext();
+    }
 
     /**
      * this method creates and returns the internal data structure for the configuration node in automation.xml
+     *
      * @param nodeElement
      */
-    public Configuration createConfiguration(OMElement nodeElement) {
+    public void createConfiguration(OMElement nodeElement) {
         Configuration configuration = new Configuration();
         OMNode node;
         OMElement omElement = nodeElement;
@@ -73,19 +79,15 @@ public class ConfigurationContextFactory {
 
         }
 
-        return configuration;
+        configurationContext.setConfiguration(configuration);
 
     }
 
     /*
     this method interface: provides the configuration context providing the appropriate configuration xml node
      */
-    public ConfigurationContext getConfigurationContext(OMElement element) {
 
-        ConfigurationContext configurationContext = new ConfigurationContext();
-        configurationContext.setConfiguration(createConfiguration(element));
+    public ConfigurationContext getConfigurationContext() {
         return configurationContext;
-
-
     }
 }

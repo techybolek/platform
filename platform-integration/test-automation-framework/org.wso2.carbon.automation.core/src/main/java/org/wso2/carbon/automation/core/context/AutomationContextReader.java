@@ -26,6 +26,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.context.configurationcontext.ConfigurationContextFactory;
 import org.wso2.carbon.automation.core.context.databasecontext.DatabaseContextFactory;
+import org.wso2.carbon.automation.core.context.featuremanagementContext.FeatureManagementContextFactory;
+import org.wso2.carbon.automation.core.context.platformcontext.PlatformContextFactory;
+import org.wso2.carbon.automation.core.context.securitycontext.SecurityContextFactory;
+import org.wso2.carbon.automation.core.context.toolcontext.ToolContextFactory;
+import org.wso2.carbon.automation.core.context.usermanagementcontext.UserManagerContextFactory;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLInputFactory;
@@ -60,8 +65,7 @@ public class AutomationContextReader {
         return automationContext;
     }
 
-    private void readContext()
-    {
+    private void readContext() {
         {
             DataHandler handler;
             try {
@@ -81,52 +85,52 @@ public class AutomationContextReader {
         }
     }
 
-    private List<OMNode> getAutomationPlatform(XMLStreamReader xmlStreamReader) {
+    private AutomationContext getAutomationPlatform(XMLStreamReader xmlStreamReader) {
         StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
         OMElement endPointElem = builder.getDocumentElement();
-        List<OMNode> platformList = new ArrayList<OMNode>();
-
+        DatabaseContextFactory databaseContextFactory = new DatabaseContextFactory();
+        ConfigurationContextFactory configContextFactory = new ConfigurationContextFactory();
+        PlatformContextFactory platformContextFactory = new PlatformContextFactory();
+        SecurityContextFactory securityContextFactory = new SecurityContextFactory();
+        ToolContextFactory toolsContextFactory = new ToolContextFactory();
+        UserManagerContextFactory userManagerContextFactory = new UserManagerContextFactory();
+        FeatureManagementContextFactory featureManagementContextFactory = new FeatureManagementContextFactory();
         OMElement nodeElement;
         Iterator elemChildren = endPointElem.getChildElements();
         while (elemChildren.hasNext()) {
             nodeElement = (OMElement) elemChildren.next();
-            if(nodeElement.getLocalName().equals(ContextConstants.CONFIGURATION_CONTEXT_NODE))
-            {
-                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
-                contextFactory.createConfiguration(nodeElement);
+            if (nodeElement.getLocalName().equals(ContextConstants.CONFIGURATION_CONTEXT_NODE)) {
+
+                configContextFactory.createConfiguration(nodeElement);
             }
-            if(nodeElement.getLocalName().equals(ContextConstants.DATABASE_CONTEXT_NODE))
-            {
-                DatabaseContextFactory databaseContextFactory = new DatabaseContextFactory();
-                databaseContextFactory.listDatabases(nodeElement);
+            if (nodeElement.getLocalName().equals(ContextConstants.DATABASE_CONTEXT_NODE)) {
+
+                databaseContextFactory.createDatabases(nodeElement);
             }
-            if(nodeElement.getLocalName().equals(ContextConstants.PLATFORM_CONTEXT_NODE))
-            {
-                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
-                contextFactory.createConfiguration(nodeElement);
+            if (nodeElement.getLocalName().equals(ContextConstants.PLATFORM_CONTEXT_NODE)) {
+
+                platformContextFactory.createConfiguration(nodeElement);
             }
-            if(nodeElement.getLocalName().equals(ContextConstants.SECURITY_CONTEXT_NODE))
-            {
-                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
-                contextFactory.createConfiguration(nodeElement);
+            if (nodeElement.getLocalName().equals(ContextConstants.SECURITY_CONTEXT_NODE)) {
+                securityContextFactory.createSecurityContext(nodeElement);
             }
-            if(nodeElement.getLocalName().equals(ContextConstants.TOOLS_CONTEXT_NODE))
-            {
-                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
-                contextFactory.createConfiguration(nodeElement);
+            if (nodeElement.getLocalName().equals(ContextConstants.TOOLS_CONTEXT_NODE)) {
+
+                toolsContextFactory.createConfiguration(nodeElement);
             }
-            if(nodeElement.getLocalName().equals(ContextConstants.USER_MANAGEMENT_CONTEXT_NODE))
-            {
-                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
-                contextFactory.createConfiguration(nodeElement);
+            if (nodeElement.getLocalName().equals(ContextConstants.USER_MANAGEMENT_CONTEXT_NODE)) {
+                userManagerContextFactory.createConfiguration(nodeElement);
             }
-            if(nodeElement.getLocalName().equals(ContextConstants.FEATURE_MANAGEMENT_CONTEXT_NODE))
-            {
-                ConfigurationContextFactory contextFactory = new ConfigurationContextFactory();
-                contextFactory.createConfiguration(nodeElement);
+            if (nodeElement.getLocalName().equals(ContextConstants.FEATURE_MANAGEMENT_CONTEXT_NODE)) {
+                featureManagementContextFactory.createP2Repositories(nodeElement);
             }
-            platformList.add(nodeElement);
         }
-        return platformList;
+        automationContext.setConfigurationContext(configContextFactory.getConfigurationContext());
+        automationContext.setDatabaseContext(databaseContextFactory.getDatabaseContext());
+        automationContext.setFeatureManagementContext(featureManagementContextFactory.getFeatureManagementContext());
+        automationContext.setPlatformContext(platformContextFactory.getPlatformContext());
+        automationContext.setSecurityContext(securityContextFactory.getSecurityContext());
+
+        return automationContext;
     }
 }

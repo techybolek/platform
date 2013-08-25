@@ -21,8 +21,11 @@ package org.wso2.carbon.automation.core.context.securitycontext;
 /**
  * Represents the data structure for Security->Keystore node automation.xml
  */
-public class Keystore extends Store {
-
+public class KeyStore {
+    private String name;
+    private String fileName;
+    private String type;
+    private String password;
     private String keyAlias;
     private String keyPassword;
 
@@ -41,5 +44,37 @@ public class Keystore extends Store {
 
     public void setKeyPassword(String keyPassword) {
         this.keyPassword = keyPassword;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

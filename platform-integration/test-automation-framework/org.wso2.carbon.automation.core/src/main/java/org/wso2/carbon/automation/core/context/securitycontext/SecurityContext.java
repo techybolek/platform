@@ -25,14 +25,23 @@ import java.util.HashMap;
  */
 public class SecurityContext {
 
-    private HashMap<String, Object> storeList = new HashMap<String, Object>();
+    private HashMap<String, KeyStore> keyStoreList = new HashMap<String, KeyStore>();
+    private HashMap<String, TrustStore> trustStoreList = new HashMap<String, TrustStore>();
 
 
-    public HashMap<String, Object> getStoreList() {
-        return storeList;
+    public HashMap<String, KeyStore> getKeyStoreList() {
+        return keyStoreList;
     }
 
-    public void setStoreList(HashMap<String, Object> storeList) {
-        this.storeList = storeList;
+    public void setKeyStoreList(HashMap<String, KeyStore> keyStoreList) {
+        this.keyStoreList = keyStoreList;
+    }
+
+    public HashMap<String, TrustStore> getTrustStoreList() {
+        return trustStoreList;
+    }
+
+    public void setTrustStoreList(HashMap<String, TrustStore> trustStoreList) {
+        this.trustStoreList = trustStoreList;
     }
 }

@@ -33,10 +33,18 @@ import java.util.Iterator;
  */
 public class SecurityContextFactory {
     XMLStreamReader xmlStream = null;
+    private HashMap<String, KeyStore> keyStoreMap = new HashMap<String, KeyStore>();
+    private HashMap<String, TrustStore> trustStoreMap = new HashMap<String, TrustStore>();
+    SecurityContext securityContext;
 
-    public HashMap<String, Object> getStoreList(OMElement omElement) {
+    public void SecurityContextFactory()
+    {
+        securityContext = new SecurityContext();
+    }
 
-        HashMap<String, Object> map = new HashMap<String, Object>();
+    public void getStoreList(OMElement omElement) {
+
+
         Iterator children = omElement.getChildElements();
         OMNode node;
         while (children.hasNext()) {
@@ -48,18 +56,21 @@ public class SecurityContextFactory {
             //we have to explicitly add these two objects
             if (storeName.equals(ContextConstants.SECURITY_STORES_KETSTORE)) {
 
-                String keyStoreName = ((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants.SECURITY_KEYSTORE_NAME)).getAttributeValue();
-                map.put(keyStoreName, getKeyStore(node));
+                String keyStoreName = ((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants
+                        .SECURITY_KEYSTORE_NAME)).getAttributeValue();
+                // add the key store to the key store list
+                keyStoreMap.put(keyStoreName, getKeyStore(node));
 
             } else if (storeName.equals(ContextConstants.SECURITY_STORES_TRUSTSTORE)) {
-                String trustStoreName = ((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants.SECURITY_TRUSTSTORE_NAME)).getAttributeValue();
-                map.put(trustStoreName, getTrueStore(node));
+                String trustStoreName = ((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants
+                        .SECURITY_TRUSTSTORE_NAME)).getAttributeValue();
+
+                //add trust store to the trust store list
+                trustStoreMap.put(trustStoreName, getTrueStore(node));
 
             }
 
         }
-
-        return map;
 
 
     }
@@ -70,65 +81,78 @@ public class SecurityContextFactory {
     public SecurityContext getSecurityContext(OMElement omElement) {
 
         SecurityContext securityContext = new SecurityContext();
-        securityContext.setStoreList(getStoreList(omElement));
+        securityContext.setKeyStoreList(keyStoreMap);
+        securityContext.setTrustStoreList(trustStoreMap);
+
         return securityContext;
 
 
     }
 
     /**
-     * this method provide the keystore object with its internal structure
+     * this method provide the keyStore object with its internal structure
      */
-    public Keystore getKeyStore(OMNode node) {
+    public KeyStore getKeyStore(OMNode node) {
 
-        Keystore keystore = new Keystore();
+        KeyStore keyStore = new KeyStore();
         Iterator keyStoreAttributesIterator = ((OMElementImpl) node).getChildElements();
         while (keyStoreAttributesIterator.hasNext()) {
 
-            OMNode keystoreNode = (OMNode) keyStoreAttributesIterator.next();
-            String attribute = ((OMElementImpl) keystoreNode).getLocalName();
-            String attributeValue = ((OMElementImpl) keystoreNode).getText();
-            if (attribute.equals(ContextConstants.SECURITY_KEYSTORE_FILENAME))
-                keystore.setFileName(attributeValue);
+            OMNode keyStoreNode = (OMNode) keyStoreAttributesIterator.next();
+            String attribute = ((OMElementImpl) keyStoreNode).getLocalName();
+            String attributeValue = ((OMElementImpl) keyStoreNode).getText();
+            if (attribute.equals(ContextConstants.SECURITY_KEYSTORE_NAME)) {
+                keyStore.setName(attributeValue);
+            } else if (attribute.equals(ContextConstants.SECURITY_KEYSTORE_FILENAME))
+                keyStore.setFileName(attributeValue);
             else if (attribute.equals(ContextConstants.SECURITY_KEYSTORE_TYPE))
-                keystore.setType(attributeValue);
+                keyStore.setType(attributeValue);
             else if (attribute.equals(ContextConstants.SECURITY_KEYSTORE_PASSWORD))
-                keystore.setPassword(attributeValue);
+                keyStore.setPassword(attributeValue);
             else if (attribute.equals(ContextConstants.SECURITY_KEYSTORE_KEYALIAS))
-                keystore.setKeyAlias(attributeValue);
+                keyStore.setKeyAlias(attributeValue);
             else if (attribute.equals(ContextConstants.SECURITY_KEYSTORE_KEYPASSWORD))
-                keystore.setKeyPassword(attributeValue);
+                keyStore.setKeyPassword(attributeValue);
 
 
         }
-        return keystore;
+        return keyStore;
     }
 
     /**
-     * this method return the truststore object with its internal structure
+     * this method return the trustStore object with its internal structure
      */
 
-    public Truststore getTrueStore(OMNode node) {
+    public TrustStore getTrueStore(OMNode node) {
 
-        Truststore truststore = new Truststore();
+        TrustStore trustStore = new TrustStore();
         Iterator trustStoreAttributesIterator = ((OMElementImpl) node).getChildElements();
         while (trustStoreAttributesIterator.hasNext()) {
 
             OMNode trueStoreNode = (OMNode) trustStoreAttributesIterator.next();
             String attribute = ((OMElementImpl) trueStoreNode).getLocalName();
             String attributeValue = ((OMElementImpl) trueStoreNode).getText();
-            if (attribute.equals(ContextConstants.SECURITY_TRUSTSTORE_FILENAME))
-                truststore.setFileName(attributeValue);
+            if (attribute.equals(ContextConstants.SECURITY_TRUSTSTORE_NAME)) {
+                trustStore.setName(attributeValue);
+            } else if (attribute.equals(ContextConstants.SECURITY_TRUSTSTORE_FILENAME))
+                trustStore.setFileName(attributeValue);
             else if (attribute.equals(ContextConstants.SECURITY_TRUSTSTORE_TYPE))
-                truststore.setType(attributeValue);
+                trustStore.setType(attributeValue);
             else if (attribute.equals(ContextConstants.SECURITY_TRUSTSTORE_PASSWORD))
-                truststore.setPassword(attributeValue);
+                trustStore.setPassword(attributeValue);
 
 
         }
-        return truststore;
+        return trustStore;
 
     }
 
 
+    public void createSecurityContext(OMElement nodeElement) {
+        //To change body of created methods use File | Settings | File Templates.
+    }
+
+    public SecurityContext getSecurityContext() {
+       return securityContext;
+    }
 }

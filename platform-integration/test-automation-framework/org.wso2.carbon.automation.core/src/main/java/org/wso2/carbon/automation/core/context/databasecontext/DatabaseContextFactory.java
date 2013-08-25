@@ -31,16 +31,21 @@ import java.util.*;
  */
 public class DatabaseContextFactory {
 
+    DatabaseContext databaseContext;
+
+    public void DatabaseContextFactory() {
+        databaseContext = new DatabaseContext();
+    }
 
     /**
      * this method returns the list of databases ojects in the provided OMElement
      */
-    public HashMap<String, Database> listDatabases(OMElement endPointElem) {
+    public void createDatabases(OMElement dataBaseElement) {
 
 
         HashMap<String, Database> databaseMap = new HashMap<String, Database>();
         OMNode node;
-        Iterator children = endPointElem.getChildElements();
+        Iterator children = dataBaseElement.getChildElements();
         while (children.hasNext()) {
             Database database = new Database();
             node = (OMNode) children.next();
@@ -66,17 +71,13 @@ public class DatabaseContextFactory {
 
 
         }
-        return databaseMap;
+        databaseContext.setDatabaseConfigurations(databaseMap);
     }
 
     /**
      * this method return the databaseContext object providing the appropriate database node in autoconfig.xml
      */
-    public DatabaseContext getDatabaseContext(OMElement element) {
-
-
-        DatabaseContext databaseContext = new DatabaseContext();
-        databaseContext.setDatabaseConfigurations(listDatabases(element));
+    public DatabaseContext getDatabaseContext() {
         return databaseContext;
 
 

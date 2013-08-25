@@ -19,6 +19,21 @@
 package org.wso2.carbon.automation.core.context.toolcontext;
 
 import org.wso2.carbon.automation.core.context.AutomationContext;
+import org.wso2.carbon.automation.core.utils.frameworkutils.productvariables.Selenium;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ToolContext extends AutomationContext {
+
+    private Selenium selenium;
+
+
+    public Selenium getSelenium() {
+        return selenium;
+    }
+
+    public void setSelenium(Selenium selenium) {
+        this.selenium = selenium;
+    }
 }

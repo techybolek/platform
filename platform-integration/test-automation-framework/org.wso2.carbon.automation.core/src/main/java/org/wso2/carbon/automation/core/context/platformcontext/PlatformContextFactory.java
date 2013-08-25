@@ -18,5 +18,19 @@
 
 package org.wso2.carbon.automation.core.context.platformcontext;
 
-public class PlatformConextFactory {
+import org.apache.axiom.om.OMElement;
+
+public class PlatformContextFactory {
+    private PlatformContext platformContext;
+    public void PlatformContextFactory()
+    {
+            platformContext = new PlatformContext();
+    }
+    public void createConfiguration(OMElement nodeElement) {
+        //To change body of created methods use File | Settings | File Templates.
+    }
+
+    public PlatformContext getPlatformContext() {
+        return platformContext;
+    }
 }

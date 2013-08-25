@@ -26,7 +26,43 @@ package org.wso2.carbon.automation.core.context.securitycontext;
 
 // TrustStore has same feature set in store
 
-public class Truststore extends Store {
+public class TrustStore {
+    private String name;
+    private String fileName;
+    private String type;
+    private String password;
 
+    public String getFileName() {
+        return fileName;
+    }
 
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
+
+
