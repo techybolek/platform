@@ -89,7 +89,7 @@ public class Tags extends PaginationCalculation<Tag> {
 			boolean exist;
 			path = resourcePath;
 			try {
-				if (resourcePath.length() == 0) {
+				if (resourcePath == null || resourcePath.length() == 0) {
 					// retrieve all the tags
 					return getAllTags();
 				}
