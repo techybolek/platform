@@ -45,6 +45,7 @@ import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.impl.nio.reactor.SSLIOSession;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
@@ -164,6 +165,9 @@ public class ServerWorker implements Runnable {
             msgContext.setTransportIn(cfgCtx.getAxisConfiguration()
                 .getTransportIn(Constants.TRANSPORT_HTTPS));
             msgContext.setIncomingTransportName(Constants.TRANSPORT_HTTPS);
+            SSLIOSession session = (SSLIOSession) (conn.getContext()).getAttribute("SSL_SESSION");
+            msgContext.setProperty("ssl.client.auth.cert.X509",
+                    session.getAttribute("ssl.client.auth.cert.X509"));
 
         } else {
             msgContext.setTransportOut(cfgCtx.getAxisConfiguration()
