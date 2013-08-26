@@ -35,14 +35,6 @@
         -->
         <executionMode>user</executionMode>
         <!--
-         Change this to true if you want to enable cloud mode
-        -->
-        <cloudEnabled>true</cloudEnabled>
-        <!--
-         Change this to true if you want to enable to run tests on clustered environment
-        -->
-        <clustering>false</clustering>
-        <!--
          Change this to true if you want to generate coverage statistics
         -->
         <coverage>true</coverage>
@@ -122,15 +114,17 @@
     </security>
     <featureManagement>
         <p2Repositories>
-            <repository repo-id="online-repository">https://wso2.org/repo</repository>
-            <repository repo-id="file-repository">file:///home/krishantha/test</repository>
+            <repository name="localDefault">
+                <repository repo-id="online-repository">https://wso2.org/repo</repository>
+                <repository repo-id="file-repository">file:///home/krishantha/test</repository>
+            </repository>
         </p2Repositories>
     </featureManagement>
     <!--
                System wide users who to be registered at the test initiation
     -->
     <userManagement>
-        <tenant key="testten1" domain="carbon.super">
+        <tenant domain="carbon.super">
             <!-- superTenant element illustrates this tenant will act as a super tenet -->
             <tenantAdmin>
                 <userName>admin</userName>
@@ -147,7 +141,7 @@
                 </user>
             </tenantUsers>
         </tenant>
-        <tenant key="testten1" domain="test.domain">
+        <tenant domain="test.domain">
             <tenantAdmin>
                 <userName>testadmin</userName>
                 <password>admin123</password>
@@ -173,7 +167,7 @@
             <!--
             cluster instance details to be used to platform test execution
             -->
-            <cluster>
+            <instances clusteringEnabled="true">
                 <!--
                      List of workers which will assign id the suite is directed to execute
                          in a clustered environment with worker manager separation
@@ -220,34 +214,13 @@
                     <httpsport>9445</httpsport>
                     <webContext>/</webContext>
                 </instance>
-            </cluster>
+            </instances>
             <!--
             Product instance details to be used for integration test level
             -->
-            <instances>
-                <!--Types individual/lb-->
-                <instance type="individual" id="001">
-                    <host>localhost</host>
-                    <httpport>9764</httpport>
-                    <httpsport>9444</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance type="individual" id="002">
-                    <host>localhost</host>
-                    <httpport>9763</httpport>
-                    <httpsport>9443</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance type="lb" id="lb002">
-                    <host>localhost</host>
-                    <httpport>9763</httpport>
-                    <httpsport>9443</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-            </instances>
         </product>
         <product id="ESB">
-            <cluster>
+            <instances clusteringEnabled="false">
                 <instance name="esbw001" type="instance">
                     <host>localhost</host>
                     <httpport>9764</httpport>
@@ -260,45 +233,7 @@
                     <httpsport>9444</httpsport>
                     <webContext>/</webContext>
                 </instance>
-                <instance name="esbm001" type="manager">
-                    <host>localhost</host>
-                    <httpport>9764</httpport>
-                    <httpsport>9444</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance name="esbm002" type="manager">
-                    <host>localhost</host>
-                    <httpport>9764</httpport>
-                    <httpsport>9444</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance name="lbw001" type="lb_worker">
-                    <host>localhost</host>
-                    <httpport>9763</httpport>
-                    <httpsport>9443</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance name="lbm001" type="lb_manager">
-                    <host>localhost</host>
-                    <httpport>9765</httpport>
-                    <httpsport>9445</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-            </cluster>
-            <instances>
-                <instance type="individual" id="in001">
-                    <host>localhost</host>
-                    <httpport>9764</httpport>
-                    <httpsport>9444</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance type="individual" id="in002">
-                    <host>localhost</host>
-                    <httpport>9763</httpport>
-                    <httpsport>9443</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance type="lb" id="lb002">
+                <instance name="lb002" type="lb">
                     <host>localhost</host>
                     <httpport>9763</httpport>
                     <httpsport>9443</httpsport>
