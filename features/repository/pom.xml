@@ -934,6 +934,49 @@
                                         </catFeature>
                                     </features>
                                 </category-->
+ 				
+				<!--Start of App Factory feature categories-->
+                                <!--category>
+                                    <id>org.wso2.appfactory.category</id>
+                                    <label>App Factory</label>
+                                    <description>This category contains features required for WSO2 App Factory
+                                    </description>
+                                    <features>
+                                        <catFeature>
+                                            <id>org.wso2.appfactory.appfactory.nested.category</id>
+                                            <version>${af.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.appfactory.bpel-humanTask.nested.category</id>
+                                            <version>${af.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.appfactory.capp.nested.category</id>
+                                            <version>${af.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.appfactory.generic.nested.category</id>
+                                            <version>${af.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.appfactory.jaggery.nested.category</id>
+                                            <version>${af.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.appfactory.registry-governance.nested.category</id>
+                                            <version>${af.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.appfactory.saml2-sso.nested.category</id>
+                                            <version>${af.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.appfactory.webapp-mgt.nested.category</id>
+                                            <version>${af.version}</version>
+                                        </catFeature>
+                                    </features>
+                                </category-->
+
                             </categories>
 
                         </configuration>
@@ -951,6 +994,7 @@
         <apimserver.version>1.5.0-SNAPSHOT</apimserver.version>
         <dss.version>3.1.0-SNAPSHOT</dss.version>
         <bps.version>3.1.0-SNAPSHOT</bps.version>
+	<af.version>1.1.0-SNAPSHOT</af.version>
 
         <!-- Stratos Version -->
         <stratos.version>2.2.0-SNAPSHOT</stratos.version>
