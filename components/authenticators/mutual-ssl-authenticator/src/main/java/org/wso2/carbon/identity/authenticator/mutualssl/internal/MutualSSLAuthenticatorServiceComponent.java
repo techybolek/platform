@@ -33,7 +33,7 @@ public class MutualSSLAuthenticatorServiceComponent {
     private static final Log log = LogFactory.getLog(MutualSSLAuthenticatorServiceComponent.class);
     
     protected void activate(ComponentContext cxt) {
-        System.out.println("Bundle is activated *********************");
+        System.out.println("Bundle is activated ********************* uuuuuuuuuuuuuuuuuuuuuuuu");
         try {
             MutualSSLAuthenticator authenticator = new MutualSSLAuthenticator();
             Hashtable<String, String> props = new Hashtable<String, String>();
@@ -43,7 +43,7 @@ public class MutualSSLAuthenticatorServiceComponent {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("Bundle is activated *********************");
+        System.out.println("Bundle is activated ********************* oooooooooooooooooooooooooooo");
     }
 
     protected void deactivate(ComponentContext context) {

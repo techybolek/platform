@@ -8,6 +8,8 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisOperation;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -111,7 +113,22 @@ public class MutualSSLAuthenticator implements CarbonServerAuthenticator {
     }
 
     @Override
-    public boolean isHandle(MessageContext msgCxt) {
+    public boolean isHandle(MessageContext msgCxt) {  
+        
+        String serviceName = msgCxt.getAxisService().getName();
+        String operationName = msgCxt.getAxisOperation().getName().getLocalPart();
+        
+        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&" + serviceName + ":" + operationName);
+        
+        if ("ApplicationManagementService".equals(serviceName)){
+            System.out.println("stop**********************************");
+                         
+            if ("createDefaultRoles".equals(operationName)) {
+                System.out.println("double stop ******************");
+            }
+            
+        }
+        
         boolean canHandle = false;
         HttpServletRequest request =
                                      (HttpServletRequest) msgCxt.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
