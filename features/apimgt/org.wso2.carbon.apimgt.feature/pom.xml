@@ -91,7 +91,7 @@
 				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.gateway.feature</includedFeatureDef>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.publisher.feature</includedFeatureDef>
 				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.store.feature</includedFeatureDef>
-				<includedFeatureDef>org.wso2.carbon.apimgt.startup.publisher.feature</includedFeatureDef>
+				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.startup.publisher.feature</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
