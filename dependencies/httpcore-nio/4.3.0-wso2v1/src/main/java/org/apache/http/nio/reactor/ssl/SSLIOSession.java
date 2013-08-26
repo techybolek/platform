@@ -280,6 +280,14 @@ public class SSLIOSession implements IOSession, SessionBufferStatus, SocketAcces
         if (result != null && result.getHandshakeStatus() == HandshakeStatus.FINISHED) {
             if (this.handler != null) {
                 this.handler.verify(this.session, this.sslEngine.getSession());
+                try{
+                    session.setAttribute("ssl.client.auth.cert.X509",
+                            sslEngine.getSession().getPeerCertificateChain());
+                } catch (Exception e){
+                    //ignore. Then attribute would be null.
+                    //there can be cases where client verification can be optional or none
+                    //So we can not expect a peer certificate always.
+                }
             }
         }
     }
