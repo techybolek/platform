@@ -163,11 +163,10 @@
    the test suites.
 -->
     <platform>
-        <product id="AS">
             <!--
             cluster instance details to be used to platform test execution
             -->
-            <instances clusteringEnabled="true">
+            <instanceGroup name="AS" clusteringEnabled="true">
                 <!--
                      List of workers which will assign id the suite is directed to execute
                          in a clustered environment with worker manager separation
@@ -214,12 +213,11 @@
                     <httpsport>9445</httpsport>
                     <webContext>/</webContext>
                 </instance>
-            </instances>
+            </instanceGroup>
             <!--
             Product instance details to be used for integration test level
             -->
-        </product>
-        <product id="ESB">
+        <instanceGroup id="ESB">
             <instances clusteringEnabled="false">
                 <instance name="esbw001" type="instance">
                     <host>localhost</host>
@@ -240,6 +238,6 @@
                     <webContext>/</webContext>
                 </instance>
             </instances>
-        </product>
+        </instanceGroup>
     </platform>
 </automation>
