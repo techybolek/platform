@@ -7,7 +7,6 @@
     <artifactId>org.wso2.sample.user.store.manager</artifactId>
     <version>1.0</version>
     <packaging>bundle</packaging>
-
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
