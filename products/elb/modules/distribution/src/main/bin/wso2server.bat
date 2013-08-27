@@ -120,6 +120,9 @@ goto findJdk
 echo Please specify the debug port after the --debug option
 goto end
 
+rem ----- commandLifecycle -----------------------------------------------------
+:commandLifecycle
+goto findJdk
 
 :doneStart
 if "%OS%"=="Windows_NT" @setlocal
