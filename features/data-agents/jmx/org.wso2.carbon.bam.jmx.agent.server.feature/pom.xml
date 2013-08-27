@@ -35,7 +35,6 @@
 
     <description>This feature contains the core bundles required for BAM JMX agent Server functionality</description>
 
-
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -72,22 +71,12 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.jmx.agent</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.data.publisher.util</bundleDef>
-
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.databridge.agent.thrift.server:${wso2carbon.version.data-bridge}</importFeatureDef>
-                                
                                 <importFeatureDef>org.wso2.carbon.ntask.core:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.coordination.core:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.coordination.server:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.datareceiver:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.cassandra:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.streamdefn.cassandra:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
                          </configuration>
                     </execution>
