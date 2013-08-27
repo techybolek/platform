@@ -29,7 +29,7 @@ public class CustomUserStoreManagerConstants {
     public static final ArrayList<Property> OPTIONAL_CUSTOM_USERSTORE_PROPERTIES = new ArrayList<Property>();
     static {
         setMandatoryProperty(UserStoreConfigConstants.connectionName,"uid=admin,ou=system",UserStoreConfigConstants.connectionNameDescription);
-        setMandatoryProperty(UserStoreConfigConstants.connectionURL,"ldap://localhost:10389",UserStoreConfigConstants.connectionURLDescription);
+        setMandatoryProperty(UserStoreConfigConstants.connectionURL,"ldap://",UserStoreConfigConstants.connectionURLDescription);
         setMandatoryProperty(UserStoreConfigConstants.connectionPassword,"admin",UserStoreConfigConstants.connectionPasswordDescription);
         setMandatoryProperty(UserStoreConfigConstants.userSearchBase,"ou=system",UserStoreConfigConstants.userSearchBaseDescription);
         setMandatoryProperty(UserStoreConfigConstants.disabled,"false",UserStoreConfigConstants.disabledDescription);
