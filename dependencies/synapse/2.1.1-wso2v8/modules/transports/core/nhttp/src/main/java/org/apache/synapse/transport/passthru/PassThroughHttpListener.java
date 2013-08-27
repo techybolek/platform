@@ -393,11 +393,24 @@ public class PassThroughHttpListener implements TransportListener {
 
 
     public void stop() throws AxisFault {
+        if (state == BaseConstants.STOPPED) return;
         log.info("Stopping Pass-through " + namePrefix + " Listener..");
         try {
-            ioReactor.shutdown();
+            int wait = PassThroughConfiguration.getInstance().getListenerShutdownWaitTime();
+            if (wait > 0) {
+                ioReactor.pause();
+                log.info("Waiting " + wait/1000 + " seconds to cleanup active connections...");
+                Thread.sleep(wait);
+                ioReactor.shutdown(wait);
+            } else {
+                ioReactor.shutdown();
+            }
         } catch (IOException e) {
             handleException("Error shutting down " + namePrefix + " listening IO reactor", e);
+        } catch (InterruptedException e) {
+            handleException("Error waiting for connection drain", e);
+        } finally {
+            state = BaseConstants.STOPPED;
         }
     }
 

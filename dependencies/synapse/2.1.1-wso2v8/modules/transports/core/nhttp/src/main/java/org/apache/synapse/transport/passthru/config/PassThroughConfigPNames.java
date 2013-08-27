@@ -79,4 +79,6 @@ public interface PassThroughConfigPNames {
      * Defines the maximum number of connections per host port
      */
     public String MAX_CONNECTION_PER_HOST_PORT = "http.max.connection.per.host.port";
+
+    public String TRANSPORT_LISTENER_SHUTDOWN_WAIT_TIME_SEC = "transport.listener.shutdown.wait.sec";
 }

@@ -66,6 +66,9 @@ public final class NHttpConfiguration {
     private static final String REST_URI_API_REGEX = "rest_uri_api_regex";
     private static final String REST_URI_PROXY_REGEX = "rest_uri_proxy_regex";
 
+    public static final String TRANSPORT_LISTENER_SHUTDOWN_WAIT_TIME = "transport.listener.shutdown.wait.sec";
+    public static final int DEFAULT_LISTENER_SHUTDOWN_WAIT_TIME = 0;
+
     private static final Log log = LogFactory.getLog(NHttpConfiguration.class);
     private static NHttpConfiguration _instance = new NHttpConfiguration();
     private Properties props;
@@ -165,7 +168,11 @@ public final class NHttpConfiguration {
 
     public String getRestUriProxyRegex() {
         return getStringValue(REST_URI_PROXY_REGEX, "");
-    }    
+    }
+
+    public int getListenerShutdownWaitTime() {
+        return getProperty(TRANSPORT_LISTENER_SHUTDOWN_WAIT_TIME, DEFAULT_LISTENER_SHUTDOWN_WAIT_TIME)*1000;
+    }
 
     /**
      * Get properties that tune nhttp transport. Preference to system properties

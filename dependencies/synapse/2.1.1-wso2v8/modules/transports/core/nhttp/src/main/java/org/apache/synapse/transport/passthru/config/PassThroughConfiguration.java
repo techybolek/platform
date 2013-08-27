@@ -46,6 +46,7 @@ public class PassThroughConfiguration {
     private static final int DEFAULT_IO_THREADS_PER_REACTOR      =
                                                          Runtime.getRuntime().availableProcessors();
     private static final int DEFAULT_MAX_ACTIVE_CON = -1;
+    private static final int DEFAULT_LISTENER_SHUTDOWN_WAIT_TIME = 0;
 
     //additional rest dispatch handlers
     private static final String REST_DISPATCHER_SERVICE="rest.dispatcher.service";
@@ -105,6 +106,10 @@ public class PassThroughConfiguration {
 
     public int getMaxActiveConnections() {
         return getIntProperty(PassThroughConfigPNames.C_MAX_ACTIVE, DEFAULT_MAX_ACTIVE_CON);
+    }
+    public int getListenerShutdownWaitTime() {
+        return getIntProperty(PassThroughConfigPNames.TRANSPORT_LISTENER_SHUTDOWN_WAIT_TIME_SEC,
+                DEFAULT_LISTENER_SHUTDOWN_WAIT_TIME)*1000;
     }
 
     public boolean isPreserveUserAgentHeader() {

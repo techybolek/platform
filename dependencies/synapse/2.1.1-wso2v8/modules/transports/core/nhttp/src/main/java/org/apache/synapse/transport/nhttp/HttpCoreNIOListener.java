@@ -386,7 +386,15 @@ public class HttpCoreNIOListener implements TransportListener, ManagementSupport
     public void stop() throws AxisFault {
         if (state == BaseConstants.STOPPED) return;
         try {
-            ioReactor.shutdown();
+            int wait = NHttpConfiguration.getInstance().getListenerShutdownWaitTime();
+            if (wait > 0) {
+                ioReactor.pause();
+                log.info("Waiting " + wait/1000 + " seconds to cleanup active connections...");
+                Thread.sleep(wait);
+                ioReactor.shutdown(wait);
+            }  else {
+                ioReactor.shutdown();
+            }
             handler.stop();
             state = BaseConstants.STOPPED;
             for (Object obj : cfgCtx.getAxisConfiguration().getServices().values()) {
@@ -394,6 +402,8 @@ public class HttpCoreNIOListener implements TransportListener, ManagementSupport
             }
         } catch (IOException e) {
             handleException("Error shutting down IOReactor", e);
+        } catch (InterruptedException e) {
+            handleException("Error waiting for connection drain", e);
         }
     }
 
