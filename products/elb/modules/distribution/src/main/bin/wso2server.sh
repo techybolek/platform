@@ -287,8 +287,8 @@ exec "$JAVACMD" \
         -Dcarbon.registry.root=/ \
         -Dcarbon.home="$CARBON_HOME" \
         -Dloadbalancer.conf=file:repository/conf/loadbalancer.conf \
-        -Djava.util.logging.config.file="$CARBON_HOME/lib/log4j.properties" \
         -Dcarbon.config.dir.path="$CARBON_HOME/repository/conf" \
+        -Djava.util.logging.config.file="$CARBON_HOME/repository/conf/etc/logging-bridge.properties" \
         -Dconf.location="$CARBON_HOME/repository/conf" \
         -Dcomponents.repo="$CARBON_HOME/repository/components/plugins" \
         -Dcom.atomikos.icatch.file="$CARBON_HOME/lib/transactions.properties" \

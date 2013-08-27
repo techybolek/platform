@@ -287,10 +287,7 @@
                                     org.wso2.carbon:org.wso2.carbon.identity.xacml.filter.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.server.feature:${carbon.platform.version}
-                                </featureArtifactDef>
-                                <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature:${carbon.platform.version}
+                                    org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.feature:${carbon.platform.version}
                                 </featureArtifactDef>
 				<featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.idp.mgt.server.feature:${carbon.platform.version}
@@ -730,13 +727,7 @@
                                 </feature>
                                 <feature>
                                     <id>
-                                        org.wso2.carbon.identity.authenticator.saml2.sso.server.feature.group
-                                    </id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>
-                                        org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature.group
+                                        org.wso2.carbon.identity.authenticator.saml2.sso.feature.group
                                     </id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>

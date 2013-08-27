@@ -266,8 +266,8 @@ do
     -Dcarbon.home="$CARBON_HOME" \
     -Dscm.home="$CARBON_HOME/repository/scm" \
     -DJENKINS_HOME="$CARBON_HOME/repository/jenkins" \
-    -Djava.util.logging.config.file="$CARBON_HOME/repository/conf/log4j.properties" \
     -Dcarbon.config.dir.path="$CARBON_HOME/repository/conf" \
+    -Djava.util.logging.config.file="$CARBON_HOME/repository/conf/etc/logging-bridge.properties" \
     -Dcomponents.repo="$CARBON_HOME/repository/components/plugins" \
     -Dconf.location="$CARBON_HOME/repository/conf"\
     -Dcom.atomikos.icatch.file="$CARBON_HOME/lib/transactions.properties" \
