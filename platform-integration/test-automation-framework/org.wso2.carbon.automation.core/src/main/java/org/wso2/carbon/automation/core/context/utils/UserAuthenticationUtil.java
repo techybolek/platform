@@ -49,6 +49,17 @@ public class UserAuthenticationUtil {
         }
     }
 
+    /**
+     * Logs to the given server with the backend and return the session cookie
+     *
+     * @param userName User intended ti login
+     * @param password Password of the user
+     * @param host     Host name
+     * @return Session cookie of the login session
+     * @throws LoginAuthenticationExceptionException
+     *
+     * @throws RemoteException
+     */
     public String login(String userName, String password, String host)
             throws LoginAuthenticationExceptionException, RemoteException {
         Boolean loginStatus;
@@ -58,10 +69,12 @@ public class UserAuthenticationUtil {
         loginStatus = authenticationAdminStub.login(userName, password, host);
 
         if (!loginStatus) {
-            throw new LoginAuthenticationExceptionException("Login Unsuccessful. Return false as a login status by Server");
+            throw new LoginAuthenticationExceptionException("Login Unsuccessful. " +
+                    "Return false as a login status by Server");
         }
         log.info("Login Successful");
-        serviceContext = authenticationAdminStub._getServiceClient().getLastOperationContext().getServiceContext();
+        serviceContext = authenticationAdminStub._getServiceClient()
+                .getLastOperationContext().getServiceContext();
         sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
         if (log.isDebugEnabled()) {
             log.debug("SessionCookie :" + sessionCookie);

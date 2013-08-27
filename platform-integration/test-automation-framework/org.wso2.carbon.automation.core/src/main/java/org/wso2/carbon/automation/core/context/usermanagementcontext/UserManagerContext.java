@@ -38,5 +38,10 @@ public class UserManagerContext extends AutomationContext {
         return tenant;
     }
 
+    public Tenant getTenant(String tenantID) {
+
+        return tenant.get(tenantID);
+    }
+
 
 }

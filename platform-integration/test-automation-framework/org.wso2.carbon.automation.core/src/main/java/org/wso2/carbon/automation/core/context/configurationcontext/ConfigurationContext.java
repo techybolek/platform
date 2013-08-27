@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.automation.core.context.configurationcontext;
 
-/**
+/*
  * Provides the configuration context
  */
 public class ConfigurationContext {

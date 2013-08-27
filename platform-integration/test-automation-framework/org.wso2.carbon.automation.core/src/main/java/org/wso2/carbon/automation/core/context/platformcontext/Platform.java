@@ -16,29 +16,8 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.context.toolcontext;
+package org.wso2.carbon.automation.core.context.platformcontext;
 
-import org.wso2.carbon.automation.core.context.AutomationContext;
+public class Platform {
 
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class ToolContext extends AutomationContext {
-
-    private Selenium selenium;
-
-
-    public Selenium getSelenium() {
-        return selenium;
-    }
-
-    public void setSelenium(Selenium selenium) {
-        this.selenium = selenium;
-    }
 }

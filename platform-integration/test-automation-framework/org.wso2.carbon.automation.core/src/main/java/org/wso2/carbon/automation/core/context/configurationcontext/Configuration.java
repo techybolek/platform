@@ -17,7 +17,7 @@
 */
 package org.wso2.carbon.automation.core.context.configurationcontext;
 
-/**
+/*
  * this class represents the data structure of the configuration node in automation.xml file
  */
 public class Configuration {

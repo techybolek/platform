@@ -16,29 +16,19 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.context.toolcontext;
-
-import org.wso2.carbon.automation.core.context.AutomationContext;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class ToolContext extends AutomationContext {
-
-    private Selenium selenium;
+package org.wso2.carbon.automation.core.context.platformcontext;
 
 
-    public Selenium getSelenium() {
-        return selenium;
+public enum InstanceType {
+
+    WORKER("worker"), MANAGER("manager"), LB_WORKER("lb_worker"), LB_MANAGER("lb_manager"), INSTANCE("instance"), LB("lb");
+    private String typeCode;
+    private InstanceType(String s) {
+        typeCode = s;
     }
 
-    public void setSelenium(Selenium selenium) {
-        this.selenium = selenium;
+    public String getTypeCode() {
+        return typeCode;
     }
+
 }

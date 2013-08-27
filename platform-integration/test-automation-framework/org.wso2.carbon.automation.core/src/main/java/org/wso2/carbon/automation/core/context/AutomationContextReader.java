@@ -105,7 +105,7 @@ public class AutomationContextReader {
             }
             if (nodeElement.getLocalName().equals(ContextConstants.DATABASE_CONTEXT_NODE)) {
 
-                databaseContextFactory.createDatabases(nodeElement);
+                databaseContextFactory.createDatabaseContext(nodeElement);
             }
             if (nodeElement.getLocalName().equals(ContextConstants.PLATFORM_CONTEXT_NODE)) {
 
@@ -122,7 +122,7 @@ public class AutomationContextReader {
                 userManagerContextFactory.createConfiguration(nodeElement);
             }
             if (nodeElement.getLocalName().equals(ContextConstants.FEATURE_MANAGEMENT_CONTEXT_NODE)) {
-                featureManagementContextFactory.createP2Repositories(nodeElement);
+                featureManagementContextFactory.createFeatureManagementContext(nodeElement);
             }
         }
         automationContext.setConfigurationContext(configContextFactory.getConfigurationContext());

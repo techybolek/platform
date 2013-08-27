@@ -22,10 +22,7 @@ public class AutomationContextBuilder {
     AutomationContext automationContext;
 
     public void AutomationContextBuilder() {
-        automationContext = new AutomationContext();
-        AutomationContextReader automationContextReader = new AutomationContextReader();
-        automationContextReader.readAutomationContext();
-        automationContext = automationContextReader.getAutomationContext();
+
     }
 
     /**
@@ -41,8 +38,8 @@ public class AutomationContextBuilder {
     /**
      * Run as a specific user defined in a tenant domain
      *
-     * @param domain
-     * @param tenantUserKey
+     * @param domain The Domain configured in automation.xml
+     * @param tenantUserKey   The key of the user expect
      */
     public void build(String domain, String tenantUserKey) {
 
@@ -51,7 +48,7 @@ public class AutomationContextBuilder {
     /**
      * Runs as random domain with random user selecting admin or not
      *
-     * @param runAsSuperAdmin
+     * @param runAsSuperAdmin State whether test should run as a carbon.super admin
      */
     public void build(boolean runAsSuperAdmin) {
 

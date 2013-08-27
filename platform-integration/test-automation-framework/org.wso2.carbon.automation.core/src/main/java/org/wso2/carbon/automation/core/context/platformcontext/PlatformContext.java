@@ -16,9 +16,32 @@
 *under the License.
 */
 
+
 package org.wso2.carbon.automation.core.context.platformcontext;
 
 import org.wso2.carbon.automation.core.context.AutomationContext;
 
-public class PlatformContext extends AutomationContext{
+import java.util.HashMap;
+
+public class PlatformContext extends AutomationContext {
+
+    private HashMap<String, InstanceGroup> instanceGroupMap = new HashMap<String, InstanceGroup>();
+
+    public HashMap<String, InstanceGroup> getInstanceGroupMap() {
+        return instanceGroupMap;
+    }
+
+    public InstanceGroup getInstanceGroup(String instanceGroupName) {
+        return instanceGroupMap.get(instanceGroupName);
+    }
+
+    public void setInstanceGroupMap(HashMap<String, InstanceGroup> instanceGroupMap) {
+        this.instanceGroupMap = instanceGroupMap;
+    }
+
+    // this method to add new instance group to the instance group list
+    public void addInstanceGroup(InstanceGroup instanceGroup) {
+
+        instanceGroupMap.put(instanceGroup.getGroupName(), instanceGroup);
+    }
 }

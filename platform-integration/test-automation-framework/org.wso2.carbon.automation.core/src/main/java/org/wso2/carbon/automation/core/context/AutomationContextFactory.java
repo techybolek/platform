@@ -18,6 +18,21 @@
 
 package org.wso2.carbon.automation.core.context;
 
+import org.wso2.carbon.automation.core.context.environmentcontext.EnvironmentContextFactory;
+
 public class AutomationContextFactory {
+    AutomationContext automationContext;
+    public void createAutomationContext(String instanceGroupName,String instanceName,String tenantId)
+    {
+        automationContext = new AutomationContext();
+        AutomationContextReader automationContextReader = new AutomationContextReader();
+        automationContextReader.readAutomationContext();
+        automationContext = automationContextReader.getAutomationContext();
+        EnvironmentContextFactory environmentContextFactory = new EnvironmentContextFactory();
+        environmentContextFactory.createEnvironmentContext(automationContext,instanceGroupName,instanceName,tenantId);
+        automationContext.setEnvironmentContext(environmentContextFactory.getEnvironmentContext());
+    }
+
+
 
 }

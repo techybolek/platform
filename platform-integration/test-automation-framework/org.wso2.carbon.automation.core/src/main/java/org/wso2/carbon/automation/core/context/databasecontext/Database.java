@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.automation.core.context.databasecontext;
 
-/**
+/*
  *
  */
 public class Database {

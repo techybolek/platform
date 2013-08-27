@@ -28,8 +28,8 @@ import javax.xml.stream.XMLStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
 
-/**
- * This class provied the SecurityContext object related to the autoconfig.xml security node
+/*
+ * This class provided the SecurityContext object related to the autoconfig.xml security node
  */
 public class SecurityContextFactory {
     XMLStreamReader xmlStream = null;
@@ -37,12 +37,11 @@ public class SecurityContextFactory {
     private HashMap<String, TrustStore> trustStoreMap = new HashMap<String, TrustStore>();
     SecurityContext securityContext;
 
-    public void SecurityContextFactory()
-    {
+    public void SecurityContextFactory() {
         securityContext = new SecurityContext();
     }
 
-    public void getStoreList(OMElement omElement) {
+    public void createSecurityContext(OMElement omElement) {
 
 
         Iterator children = omElement.getChildElements();
@@ -56,14 +55,12 @@ public class SecurityContextFactory {
             //we have to explicitly add these two objects
             if (storeName.equals(ContextConstants.SECURITY_STORES_KETSTORE)) {
 
-                String keyStoreName = ((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants
-                        .SECURITY_KEYSTORE_NAME)).getAttributeValue();
+                String keyStoreName = ((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants.SECURITY_KEYSTORE_NAME)).getAttributeValue();
                 // add the key store to the key store list
                 keyStoreMap.put(keyStoreName, getKeyStore(node));
 
             } else if (storeName.equals(ContextConstants.SECURITY_STORES_TRUSTSTORE)) {
-                String trustStoreName = ((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants
-                        .SECURITY_TRUSTSTORE_NAME)).getAttributeValue();
+                String trustStoreName = ((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants.SECURITY_TRUSTSTORE_NAME)).getAttributeValue();
 
                 //add trust store to the trust store list
                 trustStoreMap.put(trustStoreName, getTrueStore(node));
@@ -71,28 +68,27 @@ public class SecurityContextFactory {
             }
 
         }
+        //set the Key store and Trust store to the security context object
+        securityContext.setKeyStoreList(keyStoreMap);
+        securityContext.setTrustStoreList(trustStoreMap);
 
 
     }
 
-    /**
+    /*
      * this method return the securityContext object providing the appropriate OMElement
      */
     public SecurityContext getSecurityContext(OMElement omElement) {
-
-        SecurityContext securityContext = new SecurityContext();
-        securityContext.setKeyStoreList(keyStoreMap);
-        securityContext.setTrustStoreList(trustStoreMap);
 
         return securityContext;
 
 
     }
 
-    /**
+    /*
      * this method provide the keyStore object with its internal structure
      */
-    public KeyStore getKeyStore(OMNode node) {
+    protected KeyStore getKeyStore(OMNode node) {
 
         KeyStore keyStore = new KeyStore();
         Iterator keyStoreAttributesIterator = ((OMElementImpl) node).getChildElements();
@@ -119,11 +115,11 @@ public class SecurityContextFactory {
         return keyStore;
     }
 
-    /**
+    /*
      * this method return the trustStore object with its internal structure
      */
 
-    public TrustStore getTrueStore(OMNode node) {
+    protected TrustStore getTrueStore(OMNode node) {
 
         TrustStore trustStore = new TrustStore();
         Iterator trustStoreAttributesIterator = ((OMElementImpl) node).getChildElements();
@@ -148,11 +144,7 @@ public class SecurityContextFactory {
     }
 
 
-    public void createSecurityContext(OMElement nodeElement) {
-        //To change body of created methods use File | Settings | File Templates.
-    }
-
     public SecurityContext getSecurityContext() {
-       return securityContext;
+        return securityContext;
     }
 }

@@ -30,15 +30,10 @@ public class ContextConstants {
     public static final String CONFIGURATION_CONTEXT_CLUSTERING = "clustering";
     public static final String CONFIGURATION_CONTEXT_COVERAGE = "coverage";
     public static final String CONFIGURATION_CONTEXT_FRAMEWORK_DASHBOARD = "frameworkDashboard";
-
     public static final String TOOLS_CONTEXT_NODE = "tools";
-
     public static final String DATABASE_CONTEXT_NODE = "databases";
-
     public static final String SECURITY_CONTEXT_NODE = "security";
-
     public static final String FEATURE_MANAGEMENT_CONTEXT_NODE = "featureManagement";
-
     public static final String USER_MANAGEMENT_CONTEXT_NODE = "userManagement";
     public static final String PLATFORM_CONTEXT_NODE = "platform";
     public static final String DATABASE_CONTEXT_NAME = "name";
@@ -75,6 +70,14 @@ public class ContextConstants {
     public static final String TOOL_CONTEXT_TOOL_SELENIUM_BROWSER_WEB_DRIVE_PATH = "webdriverPath";
     public static final String TOOL_CONTEXT_TOOL_SELENIUM_BROWSER_WEB_DRIVER_PATH_ENABLE = "enable";
     public static final String TOOL_CONTEXT_TOOL_SELENIUM_BROWSER = "browser";
+    public static final String PLATFORM_CONTEXT_INSTANCE_GROUP_NAME = "name";
+    public static final String PLATFORM_CONTEXT_INSTANCE_GROUP_CLUSTERING_ENABLED = "clusteringEnabled";
+    public static final String PLATFORM_CONTEXT_INSTANCE_NAME = "name";
+    public static final String PLATFORM_CONTEXT_INSTANCE_TYPE = "type";
+    public static final String PLATFORM_CONTEXT_INSTANCE_HOST = "host";
+    public static final String PLATFORM_CONTEXT_INSTANCE_HTTP_PORT = "httpport";
+    public static final String PLATFORM_CONTEXT_INSTANCE_HTTPS_PORT = "httpsport";
+    public static final String PLATFORM_CONTEXT_INSTANCE_WEB_CONTEXT = "webContext";
 
 
 }

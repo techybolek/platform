@@ -34,11 +34,19 @@ import java.util.List;
 
 public class UserManagerContextFactory {
 
-    /**
-     * this method is get the list of the tenant level objects from the configuration
+    UserManagerContext userManagerContext;
+
+    public UserManagerContextFactory() {
+
+
+        userManagerContext = new UserManagerContext();
+    }
+
+    /*
+      this method is get the list of the tenant level objects from the configuration
      */
 
-    public List<OMNode> listTenants(OMNode endPointElem) {
+    protected List<OMNode> listTenants(OMNode endPointElem) {
 
         List<OMNode> tenantList = new ArrayList<OMNode>();
 
@@ -52,12 +60,10 @@ public class UserManagerContextFactory {
     }
 
 
-    /**
-     * List all the Tenant users (Tenant_admin and Tenant_users
-     * <p/>
-     * *
+    /*
+      List all the Tenant users (Tenant_admin and Tenant_users
      */
-    public List<OMNode> listTenantUsers(OMNode node) {
+    protected List<OMNode> listTenantUsers(OMNode node) {
         List<OMNode> tenantUserList = new ArrayList<OMNode>();
         Iterator environmentNodeItr = ((OMElementImpl) node).getChildElements();
         while (environmentNodeItr.hasNext()) {
@@ -66,12 +72,10 @@ public class UserManagerContextFactory {
         return tenantUserList;
     }
 
-    /**
-     * List all the users in tenant users
-     * <p/>
-     * *
+    /*
+      List all the users in tenant users
      */
-    public List<OMNode> listUsers(OMNode node) {
+    protected List<OMNode> listUsers(OMNode node) {
         List<OMNode> userList = new ArrayList<OMNode>();
         Iterator userIterator = ((OMElementImpl) node).getChildElements();
         while (userIterator.hasNext()) {
@@ -80,12 +84,56 @@ public class UserManagerContextFactory {
         return userList;
     }
 
-    public UserManagerContext getUserManagementContext(OMNode omNode) {
+    public UserManagerContext getUserManagementContext() {
+
+        return userManagerContext;
+
+    }
+
+
+    protected User createUser(OMNode userNode) {
+        User user = new User();
+
+        String userKey = ((OMElementImpl) userNode).getAttributeValue(QName.valueOf(ContextConstants.USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_KEY));
+        user.setKey(userKey);
+        OMNode usrNode;
+        Iterator userProperties = ((OMElementImpl) userNode).getChildElements();
+        while (userProperties.hasNext()) {
+            usrNode = (OMNode) userProperties.next();
+            String attributeName = ((OMElementImpl) usrNode).getLocalName();
+            String attributeValue = ((OMElementImpl) usrNode).getText();
+            if (attributeName.equals(ContextConstants.USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_USERNAME)) {
+                user.setUserName(attributeValue);
+
+            } else if (attributeName.equals(ContextConstants.USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_PASSWORD)) {
+                user.setPassword(attributeValue);
+
+            }
+
+
+        }
+        return user;
+    }
+
+    /*
+    creates the tenants object
+     */
+    protected Tenant createTenant(OMNode omNode) {
+        Tenant tenant = new Tenant();
+        String tenantKey = ((OMElementImpl) omNode).getAttributeValue(QName.valueOf(ContextConstants.USER_MANAGEMENT_CONTEXT_TENANT_KEY));
+        String tenantDomain = ((OMElementImpl) omNode).getAttributeValue(QName.valueOf(ContextConstants.USER_MANAGEMENT_CONTEXT_TENANT_DOMAIN));
+        tenant.setKey(tenantKey);
+        tenant.setDomain(tenantDomain);
+        return tenant;
+
+    }
+
+    public void createUserManagementContext(OMElement nodeElement) {
 
         UserManagerContext userManagerContext = new UserManagerContext();
         HashMap<String, Tenant> tenantMap = new HashMap<String, Tenant>();
 
-        for (OMNode tenantNode : listTenants(omNode)) {
+        for (OMNode tenantNode : listTenants(nodeElement)) {
 
             Tenant tenant = new Tenant();
 
@@ -131,51 +179,16 @@ public class UserManagerContextFactory {
 
                 }
 
-                //add the current tenant to the tenat list
+                //add the current tenant to the tenant list
                 tenantMap.put(tenant.getKey(), tenant);
             }
         }
 
         userManagerContext.setTenant(tenantMap);
-        return userManagerContext;
 
     }
 
 
-    public User createUser(OMNode userNode) {
-        User user = new User();
-
-        String userKey = ((OMElementImpl) userNode).getAttributeValue(QName.valueOf(ContextConstants.USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_KEY));
-        user.setKey(userKey);
-        OMNode usrNode;
-        Iterator userProperties = ((OMElementImpl) userNode).getChildElements();
-        while (userProperties.hasNext()) {
-            usrNode = (OMNode) userProperties.next();
-            String attributeName = ((OMElementImpl) usrNode).getLocalName();
-            String attributeValue = ((OMElementImpl) usrNode).getText();
-            if (attributeName.equals(ContextConstants.USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_USERNAME)) {
-                user.setUserName(attributeValue);
-
-            } else if (attributeName.equals(ContextConstants.USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_PASSWORD)) {
-                user.setPassword(attributeValue);
-
-            }
-
-
-        }
-        return user;
-    }
-
-    //creates the tenants object
-    public Tenant createTenant(OMNode omNode) {
-        Tenant tenant = new Tenant();
-        String tenantKey = ((OMElementImpl) omNode).getAttributeValue(QName.valueOf(ContextConstants.USER_MANAGEMENT_CONTEXT_TENANT_KEY));
-        String tenantDomain = ((OMElementImpl) omNode).getAttributeValue(QName.valueOf(ContextConstants.USER_MANAGEMENT_CONTEXT_TENANT_DOMAIN));
-        tenant.setKey(tenantKey);
-        tenant.setDomain(tenantDomain);
-        return tenant;
-
-    }
 
     public void createConfiguration(OMElement nodeElement) {
         //To change body of created methods use File | Settings | File Templates.

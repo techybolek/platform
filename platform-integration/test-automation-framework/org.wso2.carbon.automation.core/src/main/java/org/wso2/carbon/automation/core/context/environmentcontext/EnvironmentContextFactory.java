@@ -18,28 +18,66 @@
 
 package org.wso2.carbon.automation.core.context.environmentcontext;
 
+import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
+import org.wso2.carbon.automation.core.context.AutomationContext;
+import org.wso2.carbon.automation.core.context.usermanagementcontext.Tenant;
+import org.wso2.carbon.automation.core.context.utils.UrlGenerationUtil;
+import org.wso2.carbon.automation.core.context.utils.UserAuthenticationUtil;
+
+import java.rmi.RemoteException;
+
 public class EnvironmentContextFactory {
+    private static final Log log = LogFactory.getLog(EnvironmentContextFactory.class);
     EnvironmentContext context;
     Environment environment = new Environment();
-    public void EnvironmentContextFactory()
-    {
+
+    public void EnvironmentContextFactory() {
         context = new EnvironmentContext();
     }
 
-    public void createEnvironmentContext() {
-        environment.setBackEndUrl("");
-        environment.setSecureServiceUrl("");
-        environment.setServiceUrl("");
-        environment.setSessionCookie("");
-        environment.setWebAppURL("");
+    /**
+     * Creates Environment context based on the selected platform instance and selected tenant
+     * @param automationContext Current Automation context
+     * @param instanceGroupName Instance Group
+     * @param instanceName      Instance of the group needed to perform
+     * @param tenantId          Id of the tenant which platform is created
+     */
+    public void createEnvironmentContext(AutomationContext automationContext,
+                                         String instanceGroupName,
+                                         String instanceName,
+                                         String tenantId) {
+        UrlGenerationUtil urlGenerationUtil =
+                new UrlGenerationUtil(automationContext, instanceGroupName
+                , instanceName, tenantId);
+        try {
+            UserAuthenticationUtil authenticationUtil =
+                    new UserAuthenticationUtil(urlGenerationUtil.getBackendUrl());
+            Tenant tenant = automationContext.getUserManagerContext().getTenant(tenantId);
+            environment.setSessionCookie(authenticationUtil.login(tenant.getTenantAdmin().getUserName()
+                    , tenant.getTenantAdmin().getPassword(), automationContext.getPlatformContext()
+                    .getInstanceGroup(instanceGroupName).getInstance(instanceName).getHost()));
+        } catch (AxisFault axisFault) {
+            log.error("Authentication of the user " + tenantId + " failed:-" + axisFault.getMessage());
+        } catch (RemoteException e) {
+            log.error("Authentication of the user " + tenantId + " failed:-" + e.getMessage());
+        } catch (LoginAuthenticationExceptionException e) {
+            log.error("Authentication of the user " + tenantId + " failed:-" + e.getMessage());
+        }
+        environment.setBackEndUrl(urlGenerationUtil.getBackendUrl());
+        environment.setSecureServiceUrl(urlGenerationUtil.getHttpsServiceURL());
+        environment.setServiceUrl(urlGenerationUtil.getHttpServiceURL());
+        environment.setWebAppURL(urlGenerationUtil.getWebAppURL());
         context.setEnvironmentConfigurations(environment);
 
     }
-
 
 
     public EnvironmentContext getEnvironmentContext() {
 
         return context;
     }
+
 }

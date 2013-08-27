@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.automation.core.context.securitycontext;
 
-/**
+/*
  * parent class for the representations keystore and trustStore
  */
 

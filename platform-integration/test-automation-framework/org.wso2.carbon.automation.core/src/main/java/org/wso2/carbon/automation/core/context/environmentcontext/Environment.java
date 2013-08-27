@@ -19,7 +19,6 @@
 package org.wso2.carbon.automation.core.context.environmentcontext;
 
 
-
 public class Environment {
     private String sessionCookie;
     private String backEndUrl;

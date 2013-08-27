@@ -25,7 +25,7 @@ import org.wso2.carbon.automation.core.context.ContextConstants;
 
 import java.util.Iterator;
 
-/**
+/*
  * provides the configuration context
  */
 public class ConfigurationContextFactory {

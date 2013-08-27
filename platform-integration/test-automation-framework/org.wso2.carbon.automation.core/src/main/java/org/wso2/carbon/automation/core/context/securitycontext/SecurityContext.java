@@ -20,7 +20,7 @@ package org.wso2.carbon.automation.core.context.securitycontext;
 
 import java.util.HashMap;
 
-/**
+/*
  * Represents the data structure for Cluster node in automation.xml
  */
 public class SecurityContext {
@@ -43,5 +43,15 @@ public class SecurityContext {
 
     public void setTrustStoreList(HashMap<String, TrustStore> trustStoreList) {
         this.trustStoreList = trustStoreList;
+    }
+
+    public KeyStore getKeyStore(String keyStoreId) {
+
+        return keyStoreList.get(keyStoreId);
+    }
+
+    public TrustStore getTrustStore(String trustStoreId) {
+
+        return trustStoreList.get(trustStoreId);
     }
 }

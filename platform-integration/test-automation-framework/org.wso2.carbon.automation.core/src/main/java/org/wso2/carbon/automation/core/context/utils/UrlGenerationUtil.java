@@ -20,6 +20,8 @@ package org.wso2.carbon.automation.core.context.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.automation.core.context.AutomationContext;
+import org.wso2.carbon.automation.core.context.platformcontext.Instance;
 import org.wso2.carbon.automation.core.environmentcontext.environmentvariables.Context;
 import org.wso2.carbon.automation.core.globalcontext.GlobalContextInitiator;
 import org.wso2.carbon.automation.core.globalcontext.frameworkcontextvariables.FrameworkContext;
@@ -27,41 +29,66 @@ import org.wso2.carbon.automation.core.utils.UserInfo;
 
 public class UrlGenerationUtil {
     private static final Log log = LogFactory.getLog(UrlGenerationUtil.class);
+    AutomationContext automationContext;
+    String nhttpsPort;
+    String nhttpPort;
+    String httpsPort;
+    String httpPort;
+    String hostName;
+    String webContextRoot;
+    String tenantDomain;
+    boolean webContextEnabled;
+    boolean portEnabled = true;
+    boolean isRunningOnCloud = false;
 
-    public String getHttpServiceURL(Context context,
-                                    FrameworkContext frameworkContext, UserInfo userInfo) {
-        if (frameworkContext.getEnvironmentSettings().isRunningOnStratos()) {
-            return getHttpServiceURLOfStratos(context, frameworkContext, userInfo);
+    public UrlGenerationUtil
+            (AutomationContext context, String instanceGroupName, String instanceName,
+             String tenantId) {
+        this.automationContext = context;
+        Instance automationInstance = automationContext.getPlatformContext()
+                .getInstanceGroup(instanceGroupName).getInstance(instanceName);
+        nhttpsPort = automationInstance.getNhttpsPort();
+        nhttpPort = automationInstance.getNhttpPort();
+        httpsPort = automationInstance.getHttpsPort();
+        httpPort = automationInstance.getHttpPort();
+        hostName = automationInstance.getHost();
+        webContextRoot = automationInstance.getWebContext();
+        automationContext.getUserManagerContext().getTenant(tenantId);
+        if ((nhttpPort == null && nhttpsPort == null) || httpPort == null && httpsPort == null) {
+            portEnabled = false;
+        }
+        if (automationContext.getConfigurationContext().getConfiguration().getExecutionMode().equals("tenant")) {
+            isRunningOnCloud = true;
+        }
+        tenantDomain = automationContext.getUserManagerContext().getTenant(tenantId).getDomain();
+    }
+
+    public String getHttpServiceURL() {
+        if (isRunningOnCloud) {
+            return getHttpServiceURLOfStratos();
         } else {
-            return getHttpServiceURLOfProduct(context, frameworkContext);
+            return getHttpServiceURLOfProduct();
         }
     }
 
-    public String getHttpsServiceURL(Context context,
-                                     FrameworkContext frameworkContext, UserInfo userInfo) {
-        if (frameworkContext.getEnvironmentSettings().isRunningOnStratos()) {
-            return getHttpsServiceURLOfStratos(context, frameworkContext, userInfo);
+    public String getHttpsServiceURL() {
+        if (isRunningOnCloud) {
+            return getHttpsServiceURLOfStratos();
         } else {
-            return getHttpsServiceURLOfProduct(context, frameworkContext);
+            return getHttpsServiceURLOfProduct();
         }
     }
 
-    public String getHttpServiceURLOfProduct(Context context,
-                                             FrameworkContext frameworkContext) {
+    public String getHttpServiceURLOfProduct() {
         String serviceURL;
-        String nhttpPort = context.getInstanceVariables().getNhttpPort();
-        String httpPort = context.getInstanceVariables().getHttpPort();
-        String hostName = context.getInstanceVariables().getHostName();
-        String webContextRoot = context.getInstanceVariables().getWebContextRoot();
-        boolean webContextEnabled = frameworkContext.getEnvironmentSettings().isEnableCarbonWebContext();
-        boolean portEnabled = frameworkContext.getEnvironmentSettings().isEnablePort();
         if (nhttpPort != null) {
             httpPort = nhttpPort;
         }
 
         if (portEnabled && webContextEnabled) {
             if (webContextRoot != null && httpPort != null) {
-                serviceURL = "http://" + hostName + ":" + httpPort + "/" + webContextRoot + "/" + "services";
+                serviceURL = "http://" + hostName + ":" + httpPort + "/" + webContextRoot
+                        + "/" + "services";
             } else if (webContextRoot == null && httpPort != null) {
                 serviceURL = "http://" + hostName + ":" + httpPort + "/" + "services";
             } else if (webContextRoot == null) {
@@ -81,68 +108,54 @@ public class UrlGenerationUtil {
     }
 
 
-    public String getHttpServiceURLOfStratos(Context context,
-                                             FrameworkContext frameworkContext,
-                                             UserInfo info) {
+    public String getHttpServiceURLOfStratos() {
         String serviceURL;
-        String nhttpPort = context.getInstanceVariables().getNhttpPort();
-        String httpPort = context.getInstanceVariables().getHttpPort();
-        String hostName = context.getInstanceVariables().getHostName();
-        String webContextRoot = context.getInstanceVariables().getWebContextRoot();
-        boolean webContextEnabled = frameworkContext.getEnvironmentSettings().isEnableCarbonWebContext();
-        boolean portEnabled = frameworkContext.getEnvironmentSettings().isEnablePort();
 
-        String superTenantID = "0";
-        String tenantDomain;
 
-        if (info.getUserId().equals(superTenantID)) { /*skip the domain if user is super admin */
-            tenantDomain = null;
-        } else {
-            tenantDomain = info.getUserName().split("@")[1];
-        }
         if (nhttpPort == null) {
             if (portEnabled && webContextEnabled) {
                 if (webContextRoot != null && httpPort != null) {
-                    serviceURL = "http://" + hostName + ":" + httpPort + "/" + webContextRoot + "/" + "services/t/" + tenantDomain;
+                    serviceURL = "http://" + hostName + ":" + httpPort + "/" + webContextRoot
+                            + "/" + "services/t/" + tenantDomain;
                 } else if (webContextRoot == null && httpPort != null) {
-                    serviceURL = "http://" + hostName + ":" + httpPort + "/" + "services/t/" + tenantDomain;
+                    serviceURL = "http://" + hostName + ":" + httpPort + "/" + "services/t/"
+                            + tenantDomain;
                 } else if (webContextRoot == null) {
                     serviceURL = "http://" + hostName + "/" + "services/t/" + tenantDomain;
                 } else {
-                    serviceURL = "http://" + hostName + "/" + webContextRoot + "/" + "services/t/" + tenantDomain;
+                    serviceURL = "http://" + hostName + "/" + webContextRoot + "/" + "services/t/"
+                            + tenantDomain;
                 }
             } else if (!portEnabled && webContextEnabled) {
-                serviceURL = "http://" + hostName + "/" + webContextRoot + "/" + "services/t/" + tenantDomain;
+                serviceURL = "http://" + hostName + "/" + webContextRoot + "/" + "services/t/"
+                        + tenantDomain;
             } else if (portEnabled && !webContextEnabled) {
-                serviceURL = "http://" + hostName + ":" + httpPort + "/" + "services/t/" + tenantDomain;
+                serviceURL = "http://" + hostName + ":" + httpPort + "/" + "services/t/"
+                        + tenantDomain;
             } else {
                 serviceURL = "http://" + hostName + "/" + "services/t/" + tenantDomain;
             }
         } else {
             if (webContextEnabled) {
                 if (webContextRoot == null) {
-                    serviceURL = "http://" + hostName + ":" + nhttpPort + "/" + "services/t/" + tenantDomain;
+                    serviceURL = "http://" + hostName + ":" + nhttpPort + "/" + "services/t/"
+                            + tenantDomain;
                 } else {
-                    serviceURL = "http://" + hostName + ":" + nhttpPort + "/" + webContextRoot + "/" + "services/t/" + tenantDomain;
+                    serviceURL = "http://" + hostName + ":" + nhttpPort + "/" + webContextRoot
+                            + "/" + "services/t/" + tenantDomain;
 
                 }
 
             } else {
-                serviceURL = "http://" + hostName + ":" + nhttpPort + "/" + "services/t/" + tenantDomain;
+                serviceURL = "http://" + hostName + ":" + nhttpPort + "/" + "services/t/"
+                        + tenantDomain;
             }
         }
         return serviceURL;
     }
 
-    public String getHttpsServiceURLOfProduct(Context context,
-                                              FrameworkContext frameworkContext) {
+    public String getHttpsServiceURLOfProduct() {
         String serviceURL;
-        String nhttpsPort = context.getInstanceVariables().getNhttpsPort();
-        String httpsPort = context.getInstanceVariables().getHttpsPort();
-        String hostName = context.getInstanceVariables().getHostName();
-        String webContextRoot = context.getInstanceVariables().getWebContextRoot();
-        boolean webContextEnabled = frameworkContext.getEnvironmentSettings().isEnableCarbonWebContext();
-        boolean portEnabled = frameworkContext.getEnvironmentSettings().isEnablePort();
 
         if (nhttpsPort != null) {
             httpsPort = nhttpsPort;
@@ -150,7 +163,8 @@ public class UrlGenerationUtil {
 
         if (portEnabled && webContextEnabled) {
             if (webContextRoot != null && httpsPort != null) {
-                serviceURL = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot + "/" + "services";
+                serviceURL = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot
+                        + "/" + "services";
             } else if (webContextRoot == null && httpsPort != null) {
                 serviceURL = "https://" + hostName + ":" + httpsPort + "/" + "services";
             } else if (webContextRoot == null) {
@@ -170,69 +184,58 @@ public class UrlGenerationUtil {
     }
 
 
-    public String getHttpsServiceURLOfStratos(Context context,
-                                              FrameworkContext frameworkContext,
-                                              UserInfo info) {
+    public String getHttpsServiceURLOfStratos() {
         String serviceURL;
-        String nhttpsPort = context.getInstanceVariables().getNhttpsPort();
-        String httpsPort = context.getInstanceVariables().getHttpsPort();
-        String hostName = context.getInstanceVariables().getHostName();
-        String webContextRoot = context.getInstanceVariables().getWebContextRoot();
-        boolean webContextEnabled = frameworkContext.getEnvironmentSettings().isEnableCarbonWebContext();
-        boolean portEnabled = frameworkContext.getEnvironmentSettings().isEnablePort();
-        String superTenantID = "0";
-        String tenantDomain;
 
-        if (info.getUserId().equals(superTenantID)) { /*skip the domain if user is super admin */
-            tenantDomain = null;
-        } else {
-            tenantDomain = info.getUserName().split("@")[1];
-        }
         if (nhttpsPort == null) {
             if (portEnabled && webContextEnabled) {
                 if (webContextRoot != null && httpsPort != null) {
-                    serviceURL = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot + "/" + "services/t/" + tenantDomain;
+                    serviceURL = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot
+                            + "/" + "services/t/" + tenantDomain;
                 } else if (webContextRoot == null && httpsPort != null) {
-                    serviceURL = "https://" + hostName + ":" + httpsPort + "/" + "services/t/" + tenantDomain;
+                    serviceURL = "https://" + hostName + ":" + httpsPort + "/" + "services/t/"
+                            + tenantDomain;
                 } else if (webContextRoot == null) {
                     serviceURL = "https://" + hostName + "/" + "services/t/" + tenantDomain;
                 } else {
-                    serviceURL = "https://" + hostName + "/" + webContextRoot + "/" + "services/t/" + tenantDomain;
+                    serviceURL = "https://" + hostName + "/" + webContextRoot + "/" + "services/t/"
+                            + tenantDomain;
                 }
             } else if (!portEnabled && webContextEnabled) {
-                serviceURL = "https://" + hostName + "/" + webContextRoot + "/" + "services/t/" + tenantDomain;
+                serviceURL = "https://" + hostName + "/" + webContextRoot + "/" + "services/t/"
+                        + tenantDomain;
             } else if (portEnabled && !webContextEnabled) {
-                serviceURL = "https://" + hostName + ":" + httpsPort + "/" + "services/t/" + tenantDomain;
+                serviceURL = "https://" + hostName + ":" + httpsPort + "/" + "services/t/"
+                        + tenantDomain;
             } else {
                 serviceURL = "https://" + hostName + "/" + "services/t/" + tenantDomain;
             }
         } else {
             if (webContextEnabled) {
                 if (webContextRoot == null) {
-                    serviceURL = "https://" + hostName + ":" + nhttpsPort + "/" + "services/t/" + tenantDomain;
+                    serviceURL = "https://" + hostName + ":" + nhttpsPort + "/" + "services/t/"
+                            + tenantDomain;
                 } else {
-                    serviceURL = "https://" + hostName + ":" + nhttpsPort + "/" + webContextRoot + "/" + "services/t/" + tenantDomain;
+                    serviceURL = "https://" + hostName + ":" + nhttpsPort + "/" + webContextRoot
+                            + "/" + "services/t/" + tenantDomain;
 
                 }
 
             } else {
-                serviceURL = "https://" + hostName + ":" + nhttpsPort + "/" + "services/t/" + tenantDomain;
+                serviceURL = "https://" + hostName + ":" + nhttpsPort + "/" + "services/t/"
+                        + tenantDomain;
             }
         }
         return serviceURL;
     }
 
 
-    public String getBackendUrl(Context context,FrameworkContext frameworkContext) {
+    public String getBackendUrl() {
         String backendUrl;
-        boolean webContextEnabled = frameworkContext.getEnvironmentSettings().isEnableCarbonWebContext();
-        boolean portEnabled = frameworkContext.getEnvironmentSettings().isEnablePort();
-        String httpsPort = context.getInstanceVariables().getHttpsPort();
-        String hostName = context.getInstanceVariables().getHostName();
-        String webContextRoot = context.getInstanceVariables().getWebContextRoot();
         if (portEnabled && webContextEnabled) {
             if (webContextRoot != null && httpsPort != null) {
-                backendUrl = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot + "/" + "services/";
+                backendUrl = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot
+                        + "/" + "services/";
             } else if (webContextRoot == null && httpsPort != null) {
                 backendUrl = "https://" + hostName + ":" + httpsPort + "/" + "services/";
             } else if (webContextRoot == null) {
@@ -254,13 +257,15 @@ public class UrlGenerationUtil {
         String backendUrl;
         FrameworkContext frameworkContext = new FrameworkContext();
         GlobalContextInitiator globalContextInitiator = new GlobalContextInitiator();
-        frameworkContext=globalContextInitiator.getContext().getFrameworkContext();
-        boolean webContextEnabled = frameworkContext.getEnvironmentSettings().isEnableCarbonWebContext();
+        frameworkContext = globalContextInitiator.getContext().getFrameworkContext();
+        boolean webContextEnabled = frameworkContext.getEnvironmentSettings()
+                .isEnableCarbonWebContext();
         boolean portEnabled = frameworkContext.getEnvironmentSettings().isEnablePort();
 
         if (portEnabled && webContextEnabled) {
             if (webContextRoot != null && httpsPort != null) {
-                backendUrl = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot + "/" + "services/";
+                backendUrl = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot
+                        + "/" + "services/";
             } else if (webContextRoot == null && httpsPort != null) {
                 backendUrl = "https://" + hostName + ":" + httpsPort + "/" + "services/";
             } else if (webContextRoot == null) {
@@ -278,18 +283,13 @@ public class UrlGenerationUtil {
         return backendUrl;
     }
 
-    public String getWebAppURL(Context context,
-                               FrameworkContext frameworkContext, UserInfo user) {
+    public String getWebAppURL() {
         String webAppURL;
-        String httpPort = context.getInstanceVariables().getHttpPort();
-        String hostName = context.getInstanceVariables().getHostName();
-        boolean portEnabled = frameworkContext.getEnvironmentSettings().isEnablePort();
-
-        if (frameworkContext.getEnvironmentSettings().isRunningOnStratos()) {
+        if (isRunningOnCloud) {
             if (portEnabled && httpPort != null) {
-                webAppURL = "http://" + hostName + ":" + httpPort + "/t/" + user.getUserName().split("@")[1] + "/webapps";
+                webAppURL = "http://" + hostName + ":" + httpPort + "/t/" + tenantDomain + "/webapps";
             } else {
-                webAppURL = "http://" + hostName + "/t/" + user.getUserName().split("@")[1] + "/webapps";
+                webAppURL = "http://" + hostName + "/t/" + tenantDomain + "/webapps";
             }
         } else {
             if (portEnabled && httpPort != null) {
@@ -301,18 +301,12 @@ public class UrlGenerationUtil {
         return webAppURL;
     }
 
-    public String getRemoteRegistryURLOfProducts(Context context,FrameworkContext frameworkContext) {
+    public String getRemoteRegistryURLOfProducts() {
         String remoteRegistryURL;
-        String nhttpsPort = context.getInstanceVariables().getNhttpsPort();
-        String httpsPort = context.getInstanceVariables().getHttpsPort();
-        String hostName = context.getInstanceVariables().getHostName();
-        String webContextRoot = context.getInstanceVariables().getWebContextRoot();
-        boolean webContextEnabled = frameworkContext.getEnvironmentSettings().isEnableCarbonWebContext();
-        boolean portEnabled = frameworkContext.getEnvironmentSettings().isEnablePort();
-
         if (portEnabled && webContextEnabled) {
             if (webContextRoot != null && httpsPort != null) {
-                remoteRegistryURL = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot + "/" + "registry/";
+                remoteRegistryURL = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot
+                        + "/" + "registry/";
             } else if (webContextRoot == null && httpsPort != null) {
                 remoteRegistryURL = "https://" + hostName + ":" + httpsPort + "/" + "registry/";
             } else if (webContextRoot == null) {
@@ -326,44 +320,6 @@ public class UrlGenerationUtil {
             remoteRegistryURL = "https://" + hostName + ":" + httpsPort + "/" + "registry/";
         } else {
             remoteRegistryURL = "https://" + hostName + "/" + "registry/";
-        }
-        return remoteRegistryURL;
-    }
-
-    public static String getRemoteRegistryURLOfStratos(Context context, FrameworkContext frameworkContext,
-                                                       UserInfo info) {
-        String remoteRegistryURL;
-        String httpsPort = context.getInstanceVariables().getHttpsPort();
-        String hostName = context.getInstanceVariables().getHostName();
-        String webContextRoot = context.getInstanceVariables().getWebContextRoot();
-        boolean webContextEnabled = frameworkContext.getEnvironmentSettings().isEnableCarbonWebContext();
-        boolean portEnabled = frameworkContext.getEnvironmentSettings().isEnablePort();
-
-        String superTenantID = "0";
-        String tenantDomain;
-
-        if (info.getUserId().equals(superTenantID)) { /*skip the domain if user is super admin */
-            tenantDomain = null;
-        } else {
-            tenantDomain = info.getUserName().split("@")[1];
-        }
-
-        if (portEnabled && webContextEnabled) {
-            if (webContextRoot != null && httpsPort != null) {
-                remoteRegistryURL = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot + "/t/" + tenantDomain + "/registry/";
-            } else if (webContextRoot == null && httpsPort != null) {
-                remoteRegistryURL = "https://" + hostName + ":" + httpsPort + "/" + "t/" + tenantDomain + "/registry/";
-            } else if (webContextRoot == null) {
-                remoteRegistryURL = "https://" + hostName + "/" + "t/" + tenantDomain + "/registry";
-            } else {
-                remoteRegistryURL = "https://" + hostName + "/" + webContextRoot + "/" + "t/" + tenantDomain + "/registry/";
-            }
-        } else if (!portEnabled && webContextEnabled) {
-            remoteRegistryURL = "https://" + hostName + "/" + webContextRoot + "/" + "t/" + tenantDomain + "/registry/";
-        } else if (portEnabled && !webContextEnabled) {
-            remoteRegistryURL = "https://" + hostName + ":" + httpsPort + "/" + "t/" + tenantDomain + "/registry/";
-        } else {
-            remoteRegistryURL = "https://" + hostName + "/" + "t/" + tenantDomain + "/registry/";
         }
         return remoteRegistryURL;
     }

@@ -39,10 +39,10 @@ public class FeatureManagementContextFactory {
         return featureManagementContext;
     }
 
-    /**
+    /*
      * List all P2repositories
      */
-    public void createP2Repositories(OMNode element) {
+    public void createFeatureManagementContext(OMNode element) {
 
         HashMap<String, P2Repositories> p2RepositoriesMap = new HashMap<String, P2Repositories>();
         OMNode node;

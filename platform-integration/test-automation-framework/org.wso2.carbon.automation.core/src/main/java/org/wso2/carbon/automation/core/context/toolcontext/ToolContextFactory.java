@@ -17,14 +17,13 @@
 */
 
 
-
 package org.wso2.carbon.automation.core.context.toolcontext;
+
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.llom.OMElementImpl;
 import org.wso2.carbon.automation.core.context.ContextConstants;
-import org.wso2.carbon.automation.core.utils.frameworkutils.productvariables.Selenium;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -53,11 +52,10 @@ public class ToolContextFactory {
 
     public void createConfiguration(OMElement nodeElement) {
     }
-/*
-*//**
-     * create the tool list
-     *//*
 
+    /**
+     * create the tool list
+     */
     public void getToolList(OMNode omNode) {
 
         Iterator children = ((OMElementImpl) omNode).getChildElements();
@@ -73,28 +71,20 @@ public class ToolContextFactory {
 
                 selenium = createSelenium(element);
 
-
             }
-
-
         }
-
-
     }
 
-*//*
-*
+    /**
      * Create selenium tool object
-
-*//*
-
+     */
     public Selenium createSelenium(OMNode seleniumNode) {
 
         Iterator seleniumProperties = ((OMElementImpl) seleniumNode).getChildElements();
         OMNode property;
         Selenium seleniumTool = new Selenium();
 
-        //this map contains the list of the browsers                  s
+        //this map contains the list of the browsers                  
         HashMap<String, Browser> browserList = new HashMap<String, Browser>();
         while (seleniumProperties.hasNext()) {
 
@@ -105,8 +95,11 @@ public class ToolContextFactory {
             if (attribute.equals(ContextConstants.TOOL_CONTEXT_TOOL_SELENIUM_REMOTE_DRIVE_URL)) {
 
                 seleniumTool.setRemoteDriverURL(attributeValue);
-                seleniumTool.setRemoteDriverEnable(Boolean.parseBoolean(((OMElementImpl) property).getAttribute(QName.valueOf(ContextConstant.TOOL_CONTEXT_TOOL_SELENIUM_REMOTE_DRIVE_URL_ENABLE)).getAttributeValue()));
-            } else if (attribute.equals(ContextConstant.TOOL_CONTEXT_TOOL_SELENIUM_BROWSER)) {
+                seleniumTool.setRemoteDriverEnable(Boolean.parseBoolean(((OMElementImpl) property)
+                        .getAttribute(QName.valueOf(ContextConstants
+                                .TOOL_CONTEXT_TOOL_SELENIUM_REMOTE_DRIVE_URL_ENABLE))
+                        .getAttributeValue()));
+            } else if (attribute.equals(ContextConstants.TOOL_CONTEXT_TOOL_SELENIUM_BROWSER)) {
                 Browser browser = createSeleniumBrowser(property);
                 browserList.put(browser.getBrowserType(), browser);
 
@@ -120,12 +113,9 @@ public class ToolContextFactory {
     }
 
 
-*//*
-*
+    /**
      * create browser object for the selenium tool
-
-*//*
-
+     */
 
     public Browser createSeleniumBrowser(OMNode omNode) {
 
@@ -142,11 +132,16 @@ public class ToolContextFactory {
             if (attribute.equals(ContextConstants.TOOL_CONTEXT_TOOL_SELENIUM_BROWSER_TYPE)) {
                 browser.setBrowserType(attributeValue);
 
-            } else if (attribute.equals(ContextConstants.TOOL_CONTEXT_TOOL_SELENIUM_BROWSER_WEB_DRIVE_PATH)) {
+            } else if (attribute.equals(ContextConstants
+                    .TOOL_CONTEXT_TOOL_SELENIUM_BROWSER_WEB_DRIVE_PATH)) {
 
                 browser.setWebDriverPath(attributeValue);
 
-                Boolean webDriverPathEnable = Boolean.parseBoolean(((OMElementImpl) property).getAttribute(QName.valueOf(ContextConstants.TOOL_CONTEXT_TOOL_SELENIUM_BROWSER_WEB_DRIVER_PATH_ENABLE)).getAttributeValue());
+                Boolean webDriverPathEnable = Boolean
+                        .parseBoolean(((OMElementImpl) property)
+                                .getAttribute(QName.valueOf(ContextConstants
+                                        .TOOL_CONTEXT_TOOL_SELENIUM_BROWSER_WEB_DRIVER_PATH_ENABLE))
+                                .getAttributeValue());
                 browser.setWebDriverEnabled(webDriverPathEnable);
 
             }
@@ -158,5 +153,6 @@ public class ToolContextFactory {
 
     public Selenium getSelenium() {
         return selenium;
-    }*/
+    }
+
 }

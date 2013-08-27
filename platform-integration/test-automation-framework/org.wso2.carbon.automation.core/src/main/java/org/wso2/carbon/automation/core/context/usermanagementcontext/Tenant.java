@@ -21,8 +21,8 @@ package org.wso2.carbon.automation.core.context.usermanagementcontext;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * ]
+/*
+ *
  * Data Structure for the tenant node in usermanagementcontext->tenant node in automation.xml file
  */
 public class Tenant {

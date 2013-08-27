@@ -26,7 +26,7 @@ import org.wso2.carbon.automation.core.context.ContextConstants;
 import javax.xml.namespace.QName;
 import java.util.*;
 
-/**
+/*
  * this class return the database context object
  */
 public class DatabaseContextFactory {
@@ -37,10 +37,10 @@ public class DatabaseContextFactory {
         databaseContext = new DatabaseContext();
     }
 
-    /**
+    /*
      * this method returns the list of databases ojects in the provided OMElement
      */
-    public void createDatabases(OMElement dataBaseElement) {
+    public void createDatabaseContext(OMElement dataBaseElement) {
 
 
         HashMap<String, Database> databaseMap = new HashMap<String, Database>();
@@ -49,7 +49,9 @@ public class DatabaseContextFactory {
         while (children.hasNext()) {
             Database database = new Database();
             node = (OMNode) children.next();
-            String databaseName = (((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants.DATABASE_CONTEXT_NAME))).getAttributeValue();
+            String databaseName = (((OMElementImpl) node)
+                    .getAttribute(QName.valueOf(ContextConstants
+                            .DATABASE_CONTEXT_NAME))).getAttributeValue();
             database.setName(databaseName);
             Iterator configPropertiesIterator = ((OMElementImpl) node).getChildElements();
             while (configPropertiesIterator.hasNext()) {
@@ -74,7 +76,7 @@ public class DatabaseContextFactory {
         databaseContext.setDatabaseConfigurations(databaseMap);
     }
 
-    /**
+    /*
      * this method return the databaseContext object providing the appropriate database node in autoconfig.xml
      */
     public DatabaseContext getDatabaseContext() {
