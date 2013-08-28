@@ -51,8 +51,9 @@ public class DataSourceInitializer extends AbstractAxis2ConfigurationContextObse
         try {
             String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
-            PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,
+                                                                                             true);
 
         //creating a separate datasource repository for the tenant
         DataSourceInformationRepository repository = new DataSourceInformationRepository();
