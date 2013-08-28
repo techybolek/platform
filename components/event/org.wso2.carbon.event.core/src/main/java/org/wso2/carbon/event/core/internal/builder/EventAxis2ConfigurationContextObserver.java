@@ -25,7 +25,7 @@ public class EventAxis2ConfigurationContextObserver extends AbstractAxis2Configu
     public void creatingConfigurationContext(int tenantId) {
         try {
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId, true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
             if (!this.loadedTenants.contains(tenantId)) {
                 this.eventBroker.initializeTenant();
                 this.loadedTenants.add(tenantId);
