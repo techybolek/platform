@@ -141,11 +141,15 @@ public class RelaySecuirtyMessageBuilderDispatchandler  extends AbstractDispatch
                 || messageContext.isDoingREST()
                 || isSOAPWithBasicAuth) {
             try {
+                String headerStr = header.toString();
+                if(log.isDebugEnabled()){
+                    log.debug("Header element to create new SOAPHeader:" + headerStr);
+                }
                 OMElement element = AXIOMUtil.stringToOM(header.toString());
                 OMNamespace omNamespace =
                         OMAbstractFactory.getOMFactory().createOMNamespace(WSS_WSSECURITY_SECEXT_1_0_XSD, WSSE);
                 SOAPHeaderBlock soapBloackingHeader = OMAbstractFactory.getSOAP12Factory().createSOAPHeaderBlock("Security", omNamespace);
-                OMElement securityHeader = (OMElement) element.getFirstOMChild();
+                OMElement securityHeader = element.getFirstElement();
                 if (securityHeader != null) {
                     while (securityHeader.getChildElements().hasNext()) {
                         soapBloackingHeader.addChild((OMNode) securityHeader.getChildElements().next());
