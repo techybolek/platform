@@ -17,7 +17,6 @@
 */
 package org.wso2.carbon.bps;
 
-import org.apache.axis2.AxisFault;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.automation.api.clients.authenticators.AuthenticatorClient;
 import org.wso2.carbon.automation.api.clients.business.processes.BpelUploaderClient;
@@ -25,7 +24,7 @@ import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentVariables;
 import org.wso2.carbon.bpel.stub.mgt.PackageManagementException;
-
+import org.wso2.carbon.bps.util.HumanTaskUploaderClient;
 import java.io.File;
 import java.rmi.RemoteException;
 
@@ -36,6 +35,7 @@ public class BPSMasterTest {
     protected String serviceUrl = null;
     protected AuthenticatorClient adminServiceAuthentication;
     protected BpelUploaderClient bpelUploader;
+    protected HumanTaskUploaderClient htUploader;
 
     protected void init() throws RemoteException, LoginAuthenticationExceptionException {
         EnvironmentBuilder builder = new EnvironmentBuilder().bps(3);
@@ -45,11 +45,17 @@ public class BPSMasterTest {
         sessionCookie = environment.getSessionCookie();
         adminServiceAuthentication = environment.getAdminServiceAuthentication();
         bpelUploader = new BpelUploaderClient(backEndUrl, sessionCookie);
+        htUploader = new HumanTaskUploaderClient(backEndUrl,sessionCookie);
     }
 
     protected void uploadBpelForTest(String bpelName) throws RemoteException, InterruptedException, PackageManagementException {
         bpelUploader.deployBPEL(bpelName, ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION +"artifacts"
                 + File.separator + "bpel");
+    }
+
+    protected void uploadHumanTaskForTest(String humantaskName) throws InterruptedException, RemoteException, org.wso2.carbon.humantask.stub.mgt.PackageManagementException {
+        htUploader.deployHumantask(humantaskName, ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts"
+                + File.separator + "humantask");
     }
 
     protected void uploadBpelVersionedSample(String bpelName) throws InterruptedException, RemoteException, PackageManagementException {
