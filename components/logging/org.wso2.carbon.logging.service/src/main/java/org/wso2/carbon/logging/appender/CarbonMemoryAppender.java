@@ -18,8 +18,10 @@ package org.wso2.carbon.logging.appender;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
+import org.wso2.carbon.bootstrap.logging.LoggingBridge;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.logging.appenders.CircularBuffer;
+import org.wso2.carbon.logging.appenders.LoggingUtils;
 import org.wso2.carbon.logging.internal.LoggingServiceComponent;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -27,12 +29,14 @@ import org.wso2.carbon.utils.logging.TenantAwareLoggingEvent;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.logging.handler.TenantDomainSetter;
 
+import java.util.logging.LogRecord;
+
 /**
  * This appender will be used to capture the logs and later send to clients, if
  * requested via the logging web service. This maintains a circular buffer, of
  * some fixed amount (say 100).
  */
-public class CarbonMemoryAppender extends AppenderSkeleton {
+    public class CarbonMemoryAppender extends AppenderSkeleton  implements LoggingBridge {
 
     private CircularBuffer circularBuffer;
     private int bufferSize = -1;
@@ -53,7 +57,7 @@ public class CarbonMemoryAppender extends AppenderSkeleton {
         this.circularBuffer = circularBuffer;
     }
 
-    protected void append(LoggingEvent loggingEvent) {
+    protected synchronized void append(LoggingEvent loggingEvent) {
         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         int tenantId = carbonContext.getTenantId();
         if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
@@ -136,5 +140,10 @@ public class CarbonMemoryAppender extends AppenderSkeleton {
 
     public void setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
+    }
+
+    public void push(LogRecord logRecord) {
+        LoggingEvent loggingEvent = LoggingUtils.getLogEvent(logRecord);
+        append(loggingEvent);
     }
 }
