@@ -43,6 +43,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class ClusterGroupCommunicator implements MembershipListener {
 
+    private static final String NTASK_P2P_COMM_EXECUTOR = "__NTASK_P2P_COMM_EXECUTOR__";
+
     private static final String TASK_SERVER_STARTUP_COUNTER = "__TASK_SERVER_STARTUP_COUNTER__";
 
     private static final int MISSING_TASKS_ON_ERROR_RETRY_COUNT = 3;
@@ -89,7 +91,7 @@ public class ClusterGroupCommunicator implements MembershipListener {
         this.membersQueue = this.getHazelcast().getQueue(CARBON_TASKS_MEMBER_ID_QUEUE);
         this.membersQueue.add(this.getMemberId());
         /* increment the task server count */
-        this.getHazelcast().getAtomicNumber(TASK_SERVER_STARTUP_COUNTER).incrementAndGet();
+        this.getHazelcast().getAtomicLong(TASK_SERVER_STARTUP_COUNTER).incrementAndGet();
     }
 
     private String getIdFromMember(Member member) {
@@ -109,7 +111,7 @@ public class ClusterGroupCommunicator implements MembershipListener {
                  * and tasks scheduled, if two nodes go away, and one comes up, it will be allowed to start,
                  * even though there aren't 3 live nodes, which would be the correct approach, if the whole
                  * cluster goes down, then, you need again for all 3 of them to come up */
-                while (this.getHazelcast().getAtomicNumber(TASK_SERVER_STARTUP_COUNTER).get() < serverCount) {
+                while (this.getHazelcast().getAtomicLong(TASK_SERVER_STARTUP_COUNTER).get() < serverCount) {
                     Thread.sleep(1000);
                 }
             } catch (Exception e) {
@@ -151,7 +153,7 @@ public class ClusterGroupCommunicator implements MembershipListener {
     }
 
     public <V> V sendReceive(String memberId, TaskCall<V> taskCall) throws TaskException {
-        ExecutorService es = this.getHazelcast().getExecutorService();
+        ExecutorService es = this.getHazelcast().getExecutorService(NTASK_P2P_COMM_EXECUTOR);
         DistributedTask<V> task = new DistributedTask<V>(taskCall, this.getMemberFromId(memberId));
         es.execute(task);
         try {
