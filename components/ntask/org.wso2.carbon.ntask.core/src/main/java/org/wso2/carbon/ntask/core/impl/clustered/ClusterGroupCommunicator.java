@@ -134,11 +134,12 @@ public class ClusterGroupCommunicator implements MembershipListener {
         return null;
     }
 
-    public List<String> getMemberIds() throws TaskException {
+    public synchronized List<String> getMemberIds() throws TaskException {
         /* refresh the member id map here also, will be needed for failure situations
          * where multiple servers go down once, and when a notification for only a single
          * member departure comes, but actually when we get all the members, many may have left */
-        for (Member member : this.getHazelcast().getCluster().getMembers()) {
+         this.membersMap.clear();
+         for (Member member : this.getHazelcast().getCluster().getMembers()) {
             this.membersMap.put(this.getIdFromMember(member), member);
         }
         return new ArrayList<String>(this.membersMap.keySet());
