@@ -2,17 +2,17 @@
 
     <!-- 
       The currently running server mode; possible values are:-
-      STANDALONE, CLUSTERED, REMOTE.
-      NOTE: in CLUSTERED mode, the coordination service must be enabled
-      at /repository/conf/etc/coordination-client-config.xml.
+      STANDALONE, CLUSTERED, REMOTE, AUTO.
+      In AUTO mode, the server startup checks whether clustering is enabled in the system, 
+      if so, CLUSTERED mode will be used, or else, the the server mode will be STANDALONE.
     -->
-    <taskServerMode>STANDALONE</taskServerMode>
+    <taskServerMode>AUTO</taskServerMode>
     
     <!-- 
       To be used in CLUSTERED mode to notify how many servers are there in 
       the task server cluster, the servers wait till this amount of servers
       are activated before the tasks are scheduled -->
-    <taskServerCount>3</taskServerCount>
+    <taskServerCount>2</taskServerCount>
     
     <!-- The address to which the remote task server should dispatch the trigger messages to, 
       usually this would be an endpoint to a load balancer -->
