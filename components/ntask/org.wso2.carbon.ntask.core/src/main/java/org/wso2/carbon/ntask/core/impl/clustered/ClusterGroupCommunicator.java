@@ -24,8 +24,8 @@ import org.wso2.carbon.ntask.core.impl.clustered.rpc.TaskCall;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
 import org.wso2.carbon.ntask.core.service.TaskService;
 
-import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  * This class represents the cluster group communicator used by clustered task
@@ -154,11 +154,10 @@ public class ClusterGroupCommunicator implements MembershipListener {
     }
 
     public <V> V sendReceive(String memberId, TaskCall<V> taskCall) throws TaskException {
-        ExecutorService es = this.getHazelcast().getExecutorService(NTASK_P2P_COMM_EXECUTOR);
-        DistributedTask<V> task = new DistributedTask<V>(taskCall, this.getMemberFromId(memberId));
-        es.execute(task);
+        IExecutorService es = this.getHazelcast().getExecutorService(NTASK_P2P_COMM_EXECUTOR);
+        Future<V> taskExec = es.submitToMember(taskCall, this.getMemberFromId(memberId));
         try {
-            return task.get();
+            return taskExec.get();
         } catch (Exception e) {
             throw new TaskException("Error in cluster message send-receive: " + e.getMessage(),
                     Code.UNKNOWN, e);
