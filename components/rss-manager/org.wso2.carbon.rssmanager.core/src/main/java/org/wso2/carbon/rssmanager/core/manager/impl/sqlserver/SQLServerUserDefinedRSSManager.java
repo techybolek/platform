@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,62 +17,61 @@
  *
  */
 
-package org.wso2.carbon.rssmanager.core.manager.oracle;
+package org.wso2.carbon.rssmanager.core.manager.impl.sqlserver;
 
-import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
+import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.*;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
-public class OracleUserDefinedRSSManager extends UserDefinedRSSManager {
+public class SQLServerUserDefinedRSSManager extends UserDefinedRSSManager {
 
-    public OracleUserDefinedRSSManager(RSSEnvironment rssEnvironment) {
-        super(rssEnvironment);
+    public SQLServerUserDefinedRSSManager(RSSConfiguration config) throws RSSManagerException {
+        super(config);
     }
 
     @Override
-    public Database createDatabase(Database database) throws RSSManagerException {
+    public Database createDatabase(RSSEnvironmentContext ctx,
+                                   Database database) throws RSSManagerException {
         return null;  
     }
 
     @Override
-    public void dropDatabase(String rssInstanceName,
+    public void dropDatabase(RSSEnvironmentContext ctx, String rssInstanceName,
                              String databaseName) throws RSSManagerException {
         
     }
 
     @Override
-    public DatabaseUser createDatabaseUser(DatabaseUser user) throws RSSManagerException {
+    public DatabaseUser createDatabaseUser(RSSEnvironmentContext ctx,
+                                           DatabaseUser user) throws RSSManagerException {
         return null;  
     }
 
     @Override
-    public void dropDatabaseUser(String rssInstanceName,
+    public void dropDatabaseUser(RSSEnvironmentContext ctx, String rssInstanceName,
                                  String username) throws RSSManagerException {
         
     }
 
     @Override
-    public void editDatabaseUserPrivileges(DatabasePrivilegeSet privileges,
+    public void editDatabaseUserPrivileges(RSSEnvironmentContext ctx,
+                                           DatabasePrivilegeSet privileges,
                                            DatabaseUser databaseUser,
                                            String databaseName) throws RSSManagerException {
         
     }
 
     @Override
-    public void attachUserToDatabase(UserDatabaseEntry ude,
+    public void attachUserToDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude,
                                      String templateName) throws RSSManagerException {
         
     }
 
     @Override
-    public void detachUserFromDatabase(UserDatabaseEntry ude) throws RSSManagerException {
+    public void detachUserFromDatabase(RSSEnvironmentContext ctx,
+                                       UserDatabaseEntry ude) throws RSSManagerException {
         
-    }
-
-    @Override
-    public RSSInstance resolveRSSInstance(String rssInstanceName,
-                                          String databaseName) throws RSSManagerException {
-        return null;  
     }
 }

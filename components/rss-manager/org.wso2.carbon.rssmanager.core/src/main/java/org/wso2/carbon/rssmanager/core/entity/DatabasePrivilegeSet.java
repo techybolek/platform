@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -22,43 +22,24 @@ package org.wso2.carbon.rssmanager.core.entity;
 public class DatabasePrivilegeSet {
 
     private String selectPriv = "N";
-
     private String insertPriv = "N";
-
     private String updatePriv = "N";
-
     private String deletePriv = "N";
-
     private String createPriv = "N";
-
     private String dropPriv = "N";
-
     private String grantPriv = "N";
-
     private String referencesPriv = "N";
-
     private String indexPriv = "N";
-
     private String alterPriv = "N";
-
     private String createTmpTablePriv = "N";
-
     private String lockTablesPriv = "N";
-
     private String executePriv = "N";
-
     private String createViewPriv = "N";
-
     private String showViewPriv = "N";
-
     private String createRoutinePriv = "N";
-
     private String alterRoutinePriv = "N";
-
     private String triggerPriv = "N";
-
     private String eventPriv = "N";
-    
     public DatabasePrivilegeSet() {}
 
     public String getSelectPriv() {

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -18,17 +18,20 @@
  */
 package org.wso2.carbon.rssmanager.core.dao;
 
-import org.wso2.carbon.rssmanager.core.config.DSXMLConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSManagementRepository;
+import org.wso2.carbon.rssmanager.core.config.datasource.DSXMLConfiguration;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 import org.wso2.carbon.rssmanager.core.dao.impl.RSSDAOImpl;
+import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
 
 /**
  * DAO factory class for creating RSS DAO objects.
  */
 public class RSSDAOFactory {
 
-    public static RSSDAO getRSSDAO(DSXMLConfiguration config) throws RSSDAOException {
-        return new RSSDAOImpl(config);
+    public static RSSDAO getRSSDAO(RSSManagementRepository repo,
+                                   EntityManager entityManager) throws RSSDAOException {
+        return new RSSDAOImpl(repo, entityManager);
     }
 	
 }

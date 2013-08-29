@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,8 +17,9 @@
  *
  */
 
-package org.wso2.carbon.rssmanager.core.manager.oracle;
+package org.wso2.carbon.rssmanager.core.manager.impl.oracle;
 
+import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.manager.RSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
@@ -26,12 +27,18 @@ import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
 public class OracleRSSManagerFactory implements RSSManagerFactory {
 
+    private RSSConfiguration config;
+
+    public OracleRSSManagerFactory(RSSConfiguration config) {
+        this.config = config;
+    }
+
     public SystemRSSManager getSystemRSSManager() throws RSSManagerException {
-        return new OracleSystemRSSManager();
+        return new OracleSystemRSSManager(config);
     }
 
     public UserDefinedRSSManager getUserDefinedRSSManager() throws RSSManagerException {
-        return new OracleUserDefinedRSSManager(null);
+        return new OracleUserDefinedRSSManager(config);
     }
     
 }

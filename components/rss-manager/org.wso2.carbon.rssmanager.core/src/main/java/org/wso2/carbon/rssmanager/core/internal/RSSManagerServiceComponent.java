@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -25,7 +25,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
-import org.wso2.carbon.rssmanager.core.config.RSSConfig;
+import org.wso2.carbon.rssmanager.core.config.RSSConfigurationManager;
 import org.wso2.carbon.rssmanager.core.service.RSSManagerService;
 import org.wso2.carbon.securevault.SecretCallbackHandlerService;
 import org.wso2.carbon.transaction.manager.TransactionManagerDummyService;
@@ -93,11 +93,8 @@ public class RSSManagerServiceComponent {
                     new TransactionManagerDummyService(), null);
             /* Looks up for the JNDI registered transaction manager */
             RSSManagerDataHolder.getInstance().setTransactionManager(this.lookupTransactionManager());
-            /* Initializes the RSS configuration */
-            RSSConfig.getInstance().init();
-            /* Initializing RSSDAO Factory */
-            //RSSDAOFactory.init(RSSConfig.getInstance().getRSSManagementRepository());
-
+            /* Initializing RSS Configuration */
+            RSSConfigurationManager.getInstance().initConfig();
         } catch (Throwable e) {
             String msg = "Error occurred while initializing RSS Manager core bundle";
             log.error(msg, e);

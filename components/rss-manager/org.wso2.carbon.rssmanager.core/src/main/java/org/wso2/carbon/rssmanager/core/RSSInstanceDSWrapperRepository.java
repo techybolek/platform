@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -44,6 +44,7 @@ public class RSSInstanceDSWrapperRepository {
 
     public void removeRSSInstanceDSWrapper(String name) {
         getDSWrappers().get(name).closeDataSource();
+        getDSWrappers().get(name).closeAllDBDataSources();
         getDSWrappers().remove(name);
     }
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -18,14 +18,17 @@
  */
 package org.wso2.carbon.rssmanager.core.dao;
 
-import org.wso2.carbon.ndatasource.rdbms.RDBMSConfiguration;
-import org.wso2.carbon.rssmanager.core.config.DSXMLConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSManagementRepository;
+import org.wso2.carbon.rssmanager.core.config.datasource.DSXMLConfiguration;
+import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
+import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Data Access Object interface for WSO2 RSS based database operations.
@@ -33,32 +36,50 @@ import java.sql.SQLException;
 public abstract class RSSDAO {
 
     private static DataSource dataSource = null;
+    private static EntityManager entityManager;
 
-        public RSSDAO(DSXMLConfiguration config) {
-            dataSource = RSSManagerUtil.createDataSource((RDBMSConfiguration) config);
-        }
-
-        public static Connection createConnection() throws RSSDAOException {
-            if (dataSource == null) {
-                throw new RSSDAOException("RSS meta data repository data source is not " +
-                        "initialized and is null");
+    public RSSDAO(RSSManagementRepository repository, EntityManager entityManager) {
+        RSSManagementRepository.RepositoryDataSource dataSourceDef = repository.getDataSource();
+        if(dataSourceDef != null){
+            List<RSSManagementRepository.RepositoryDataSource.JNDILookupDef.JNDIProperty> jndiPropertyList = dataSourceDef.getJndiLookupDef().getJndiProperties();
+            if(jndiPropertyList != null){
+                final Hashtable<Object,Object> jndiProperties = new Hashtable<Object,Object>();
+                for(RSSManagementRepository.RepositoryDataSource.JNDILookupDef.JNDIProperty prop : jndiPropertyList){
+                    jndiProperties.put(prop.getName(),prop.getValue());
+                }
+                RSSDAO.dataSource = RSSManagerUtil.lookupDataSource(dataSourceDef.getJndiLookupDef().getJndiName(),jndiProperties);
+            }else{
+                RSSDAO.dataSource = RSSManagerUtil.lookupDataSource(dataSourceDef.getJndiLookupDef().getJndiName(), null);
             }
-            try {
-                return dataSource.getConnection();
-            } catch (SQLException e) {
-                throw new RSSDAOException("Error occurred while creating data source " +
-                        "connection : " + e.getMessage(), e);
-            }
+        } else{
+            RDBMSConfiguration config = repository.getDataSourceConfig();
+            RSSDAO.dataSource = RSSManagerUtil.createDataSource(RSSManagerUtil.loadDataSourceProperties(config),
+                    config.getDataSourceClassName());
         }
+        RSSDAO.entityManager = entityManager;
+    }
 
-        public abstract RSSInstanceDAO getRSSInstanceDAO();
+    public static EntityManager getEntityManager() {
+        return entityManager;
+    }
 
-        public abstract DatabaseDAO getDatabaseDAO();
+    public static DataSource getDataSource() throws RSSDAOException {
+        if (dataSource == null) {
+            throw new RSSDAOException("RSSDAO data source is not initialized properly");
+        }
+        return dataSource;
+    }
 
-        public abstract DatabaseUserDAO getDatabaseUserDAO();
+    public abstract EnvironmentDAO getEnvironmentDAO();
 
-        public abstract DatabasePrivilegeTemplateDAO getDatabasePrivilegeTemplateDAO();
+    public abstract RSSInstanceDAO getRSSInstanceDAO();
 
-        public abstract UserDatabaseEntryDAO getUserDatabaseEntryDAO();
+    public abstract DatabaseDAO getDatabaseDAO();
+
+    public abstract DatabaseUserDAO getDatabaseUserDAO();
+
+    public abstract DatabasePrivilegeTemplateDAO getDatabasePrivilegeTemplateDAO();
+
+    public abstract UserDatabaseEntryDAO getUserDatabaseEntryDAO();
 
 }

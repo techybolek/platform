@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -24,28 +24,28 @@ import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeTemplate;
 
 public interface DatabasePrivilegeTemplateDAO {
 
-    void addDatabasePrivilegesTemplate(DatabasePrivilegeTemplate template,
+    void addDatabasePrivilegesTemplate(String environmentName, DatabasePrivilegeTemplate template,
                                        int tenantId) throws RSSDAOException;
 
-    void removeDatabasePrivilegesTemplate(String templateName,
+    void removeDatabasePrivilegesTemplate(String environmentName, String templateName,
                                           int tenantId) throws RSSDAOException;
 
-    void updateDatabasePrivilegesTemplate(DatabasePrivilegeTemplate template,
+    void updateDatabasePrivilegesTemplate(String environmentName, DatabasePrivilegeTemplate template,
                                           int tenantId) throws RSSDAOException;
 
-    DatabasePrivilegeTemplate getDatabasePrivilegesTemplate(String name,
+    DatabasePrivilegeTemplate getDatabasePrivilegesTemplate(String environmentName, String name,
                                                             int tenantId) throws RSSDAOException;
 
     DatabasePrivilegeTemplate[] getDatabasePrivilegesTemplates(
-            int tenantId) throws RSSDAOException;
+            String environmentName, int tenantId) throws RSSDAOException;
 
-    void setPrivilegeTemplateProperties(DatabasePrivilegeTemplate template,
+    void setPrivilegeTemplateProperties(String environmentName, DatabasePrivilegeTemplate template,
                                         int tenantId) throws RSSDAOException;
 
-    void removeDatabasePrivilegesTemplateEntries(String templateName,
+    void removeDatabasePrivilegesTemplateEntries(String environmentName, String templateName,
                                                  int tenantId) throws RSSDAOException;
 
-    boolean isDatabasePrivilegeTemplateExist(String templateName,
+    boolean isDatabasePrivilegeTemplateExist(String environmentName, String templateName,
                                              int tenantId) throws RSSDAOException;
 
 }

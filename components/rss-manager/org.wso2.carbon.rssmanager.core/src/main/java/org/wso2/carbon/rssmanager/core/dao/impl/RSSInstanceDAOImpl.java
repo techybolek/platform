@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,10 +20,11 @@
 package org.wso2.carbon.rssmanager.core.dao.impl;
 
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
-import org.wso2.carbon.rssmanager.core.config.RDBMSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration;
 import org.wso2.carbon.rssmanager.core.dao.RSSDAO;
 import org.wso2.carbon.rssmanager.core.dao.RSSInstanceDAO;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
+import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
 import org.wso2.carbon.rssmanager.core.dao.util.RSSDAOUtil;
 import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -37,13 +38,20 @@ import java.util.List;
 
 public class RSSInstanceDAOImpl implements RSSInstanceDAO {
 
-    
-    public void addRSSInstance(RSSInstance rssInstance, int tenantId) throws RSSDAOException {
+    private EntityManager entityManager;
+
+    public RSSInstanceDAOImpl(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public void addRSSInstance(String environmentName, RSSInstance rssInstance,
+                               int tenantId) throws RSSDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = RSSDAO.createConnection();
-            String sql = "INSERT INTO RM_SERVER_INSTANCE (NAME, SERVER_URL, DBMS_TYPE, INSTANCE_TYPE, SERVER_CATEGORY, ADMIN_USERNAME, ADMIN_PASSWORD, TENANT_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
+            String sql = "INSERT INTO RM_SERVER_INSTANCE ( NAME , SERVER_URL , DBMS_TYPE , INSTANCE_TYPE , SERVER_CATEGORY , ADMIN_USERNAME , ADMIN_PASSWORD , TENANT_ID , ENVIRONMENT_ID) VALUES( ?,?,?,?,?,?,?,?,(SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?))";
+
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, rssInstance.getName());
             stmt.setString(2, rssInstance.getDataSourceConfig().getUrl());
@@ -53,6 +61,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
             stmt.setString(6, rssInstance.getDataSourceConfig().getUsername());
             stmt.setString(7, rssInstance.getDataSourceConfig().getPassword());
             stmt.setInt(8, tenantId);
+            stmt.setString(9, environmentName);
             stmt.execute();
         } catch (SQLException e) {
             throw new RSSDAOException(
@@ -64,23 +73,25 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         }
     }
 
-    
-    public void removeRSSInstance(String name, int tenantId) throws RSSDAOException {
+
+    public void removeRSSInstance(String environmentName, String name,
+                                  int tenantId) throws RSSDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
-        RSSInstance rssInstance = getRSSInstance(name, tenantId);
+        RSSInstance rssInstance = getRSSInstance(environmentName, name, tenantId);
         try {
-            conn = RSSDAO.createConnection();
+            conn = entityManager.createConnection(RSSDAO.getDataSource());
 //            List<DatabaseUser> users = getDatabaseUsersByRSSInstance(conn, rssInstance);
 //            if (users.size() > 0) {
 //                for (DatabaseUser user : users) {
 //                    dropDatabaseUser(rssInstance, user.getUsername(), tenantId);
 //                }
 //            }
-            String sql = "DELETE FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ?";
+            String sql = "DELETE FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, name);
             stmt.setInt(2, tenantId);
+            stmt.setString(3, environmentName);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RSSDAOException(
@@ -91,13 +102,14 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         }
     }
 
-    
-    public void updateRSSInstance(RSSInstance rssInstance, int tenantId) throws RSSDAOException {
+
+    public void updateRSSInstance(String environmentName, RSSInstance rssInstance,
+                                  int tenantId) throws RSSDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = RSSDAO.createConnection();
-            String sql = "UPDATE RM_SERVER_INSTANCE SET SERVER_URL = ?, DBMS_TYPE = ?, INSTANCE_TYPE = ?, SERVER_CATEGORY = ?, ADMIN_USERNAME = ?, ADMIN_PASSWORD = ? WHERE NAME = ? AND TENANT_ID = ?";
+            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            String sql = "UPDATE RM_SERVER_INSTANCE SET SERVER_URL = ?, DBMS_TYPE = ?, INSTANCE_TYPE = ?, SERVER_CATEGORY = ?, ADMIN_USERNAME = ?, ADMIN_PASSWORD = ? WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, rssInstance.getDataSourceConfig().getUrl());
             stmt.setString(2, rssInstance.getDbmsType());
@@ -107,8 +119,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
             stmt.setString(6, rssInstance.getDataSourceConfig().getPassword());
             stmt.setString(7, rssInstance.getName());
             stmt.setInt(8, tenantId);
-            stmt.executeUpdate();
-            stmt.close();
+            stmt.setString(9, environmentName);
         } catch (SQLException e) {
             throw new RSSDAOException(
                     "Error occurred while editing the RSS instance '"
@@ -119,21 +130,23 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         }
     }
 
-    
-    public RSSInstance getRSSInstance(String name, int tenantId) throws RSSDAOException {
+
+    public RSSInstance getRSSInstance(String environmentName, String name,
+                                      int tenantId) throws RSSDAOException {
         RSSInstance rssInstance = null;
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = RSSDAO.createConnection();
-            String sql = "SELECT * FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ?";
+            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            String sql = "SELECT * FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, name);
             stmt.setInt(2, tenantId);
+            stmt.setString(3, environmentName);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                rssInstance = createRSSInstanceFromRS(rs);
+                rssInstance = this.createRSSInstanceFromRS(rs);
             }
             return rssInstance;
         } catch (SQLException e) {
@@ -144,16 +157,18 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         }
     }
 
-    
-    public RSSInstance[] getSystemRSSInstances(int tenantId) throws RSSDAOException {
+
+    public RSSInstance[] getSystemRSSInstances(String environmentName,
+                                               int tenantId) throws RSSDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = RSSDAO.createConnection();
-            stmt = conn.prepareStatement("SELECT * FROM RM_SERVER_INSTANCE WHERE INSTANCE_TYPE = ? AND TENANT_ID = ?");
+            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            stmt = conn.prepareStatement("SELECT * FROM RM_SERVER_INSTANCE WHERE INSTANCE_TYPE = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)");
             stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
             stmt.setInt(2, MultitenantConstants.SUPER_TENANT_ID);
+            stmt.setString(3, environmentName);
             rs = stmt.executeQuery();
             List<RSSInstance> result = new ArrayList<RSSInstance>();
             while (rs.next()) {
@@ -169,16 +184,18 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         }
     }
 
-    
-    public RSSInstance[] getRSSInstances(int tenantId) throws RSSDAOException {
+
+    public RSSInstance[] getRSSInstances(String environmentName,
+                                         int tenantId) throws RSSDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = RSSDAO.createConnection();
-            String sql = "SELECT * FROM RM_SERVER_INSTANCE WHERE TENANT_ID = ?";
+            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            String sql = "SELECT * FROM RM_SERVER_INSTANCE WHERE TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
+            stmt.setString(2, environmentName);
             rs = stmt.executeQuery();
             List<RSSInstance> result = new ArrayList<RSSInstance>();
             while (rs.next()) {
@@ -194,6 +211,72 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         }
     }
 
+    public RSSInstance resolveRSSInstanceByDatabase(String environmentName,
+                                                        String rssInstanceName, String databaseName,
+                                                        int tenantId) throws RSSDAOException {
+        RSSInstance rssInstance = null;
+        ResultSet rs = null;
+        PreparedStatement stmt = null;
+        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
+            Connection conn = entityManager.createConnection(RSSDAO.getDataSource());
+            String sql = "SELECT s.ID, s.NAME, s.SERVER_URL, s.DBMS_TYPE, s.INSTANCE_TYPE, s.SERVER_CATEGORY, s.TENANT_ID, s.ADMIN_USERNAME, s.ADMIN_PASSWORD FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND d.TYPE = ? AND d.TENANT_ID = ? AND d.NAME = ? AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
+            try {
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+                stmt.setInt(2, tenantId);
+                stmt.setString(3, databaseName);
+                stmt.setString(4, environmentName);
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    rssInstance = this.createRSSInstanceFromRS(rs);
+                }
+            } catch (SQLException e) {
+                throw new RSSDAOException("Error occurred while retrieving the RSS instance " +
+                        "to which the database '" + databaseName + "' belongs to : " +
+                        e.getMessage(), e);
+            } finally {
+                RSSDAOUtil.cleanupResources(rs, stmt, conn);
+            }
+        } else {
+            rssInstance = this.getRSSInstance(environmentName, rssInstanceName, tenantId);
+        }
+        return rssInstance;
+    }
+
+    public RSSInstance resolveRSSInstanceByUser(String environmentName, String rssInstanceName,
+                                                    String username,
+                                                    int tenantId) throws RSSDAOException {
+        RSSInstance rssInstance = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
+            Connection conn = entityManager.createConnection(RSSDAO.getDataSource());
+            String sql = "SELECT s.ID, s.NAME, s.SERVER_URL, s.DBMS_TYPE, s.INSTANCE_TYPE, s.SERVER_CATEGORY, s.ADMIN_USERNAME, s.ADMIN_PASSWORD, s.TENANT_ID FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND u.TYPE = ? AND u.TENANT_ID = ? AND u.USERNAME = ? AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
+            try {
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+                stmt.setInt(2, tenantId);
+                stmt.setString(3, username);
+                stmt.setString(4, environmentName);
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    rssInstance = this.createRSSInstanceFromRS(rs);
+                }
+                rs.close();
+                stmt.close();
+            } catch (SQLException e) {
+                throw new RSSDAOException("Error occurred while retrieving the RSS instance " +
+                        "to which the database user '" + username + "'belongs to : " +
+                        e.getMessage(), e);
+            } finally {
+                RSSDAOUtil.cleanupResources(rs, stmt, conn);
+            }
+        } else {
+            rssInstance = this.getRSSInstance(environmentName, rssInstanceName, tenantId);
+        }
+        return rssInstance;
+    }
+
     private RSSInstance createRSSInstanceFromRS(ResultSet rs)
             throws SQLException {
         int id = rs.getInt("ID");
@@ -204,12 +287,12 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         String adminUsername = rs.getString("ADMIN_USERNAME");
         String adminPassword = rs.getString("ADMIN_PASSWORD");
         String dbmsType = rs.getString("DBMS_TYPE");
-        
+
         RDBMSConfiguration config = new RDBMSConfiguration();
         config.setUrl(serverURL);
         config.setUsername(adminUsername);
         config.setPassword(adminPassword);
         return new RSSInstance(id, name, dbmsType, instanceType, serverCategory, config);
     }
-    
+
 }

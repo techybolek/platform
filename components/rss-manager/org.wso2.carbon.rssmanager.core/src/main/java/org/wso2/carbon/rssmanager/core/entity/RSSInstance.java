@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,7 @@
  */
 package org.wso2.carbon.rssmanager.core.entity;
 
-import org.wso2.carbon.rssmanager.core.config.RDBMSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -26,19 +26,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * Class to represent an RSS Server Instance.
  */
-@XmlRootElement(name = "rss-instance")
+@XmlRootElement(name = "RSSInstance")
 public class RSSInstance {
 
     private int id;
-
     private String name;
-
     private String dbmsType;
-
     private String instanceType;
-
     private String serverCategory;
-
     private RDBMSConfiguration dataSourceConfig;
 
     public RSSInstance(int id, String name, String dbmsType, String instanceType,
@@ -51,10 +46,9 @@ public class RSSInstance {
         this.dataSourceConfig = dataSourceConfig;
     }
 
-    public RSSInstance() {
-    }
+    public RSSInstance() {}
 
-    @XmlElement(name = "name")
+    @XmlElement(name = "Name")
     public String getName() {
         return name;
     }
@@ -63,7 +57,7 @@ public class RSSInstance {
         this.name = name;
     }
 
-    @XmlElement (name = "dbms-type")
+    @XmlElement (name = "DbmsType")
     public String getDbmsType() {
         return dbmsType;
     }
@@ -72,7 +66,7 @@ public class RSSInstance {
         this.dbmsType = dbmsType;
     }
 
-    @XmlElement (name = "instance-type")
+    @XmlElement (name = "InstanceType")
     public String getInstanceType() {
         return instanceType;
     }
@@ -81,7 +75,7 @@ public class RSSInstance {
         this.instanceType = instanceType;
     }
 
-    @XmlElement(name = "server-category")
+    @XmlElement(name = "ServerCategory")
     public String getServerCategory() {
         return serverCategory;
     }
@@ -90,7 +84,7 @@ public class RSSInstance {
         this.serverCategory = serverCategory;
     }
 
-    @XmlElement (name = "datasource-config")
+    @XmlElement (name = "DataSourceConfig")
     public RDBMSConfiguration getDataSourceConfig() {
         return dataSourceConfig;
     }

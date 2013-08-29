@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -24,33 +24,32 @@ package org.wso2.carbon.rssmanager.core.entity;
 public class UserDatabaseEntry {
 
     private int id;
-
     private int userId;
-
 	private String username;
-
     private int databaseId;
-	
 	private String databaseName;
-
     private int rssInstanceId;
-
     private String rssInstanceName;
-
 	private DatabasePrivilegeSet privileges;
 
-    public UserDatabaseEntry(){}
+    public UserDatabaseEntry() {}
 
-    public UserDatabaseEntry(int id, int userId, String username, int databaseId,
-                             String databaseName, int rssInstanceId, String rssInstanceName) {
+    public UserDatabaseEntry(int id, String username, String databaseName, String rssInstanceName) {
         this.id = id;
-        this.userId = userId;
 		this.username = username;
-        this.databaseId = databaseId;
 		this.databaseName = databaseName;
-        this.rssInstanceId = rssInstanceId;
         this.rssInstanceName = rssInstanceName;
 	}
+
+    public UserDatabaseEntry(int userId, String username, int databaseId, String databaseName,
+                             int rssInstanceId, String rssInstanceName) {
+        this.userId = userId;
+        this.username = username;
+        this.databaseId = databaseId;
+        this.databaseName = databaseName;
+        this.rssInstanceId = rssInstanceId;
+        this.rssInstanceName = rssInstanceName;
+    }
 
     public String getUsername() {
         return username;
@@ -84,14 +83,6 @@ public class UserDatabaseEntry {
         this.rssInstanceName = rssInstanceName;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public int getUserId() {
         return userId;
     }
@@ -115,4 +106,9 @@ public class UserDatabaseEntry {
     public void setRssInstanceId(int rssInstanceId) {
         this.rssInstanceId = rssInstanceId;
     }
+
+    public int getId() {
+        return id;
+    }
+    
 }

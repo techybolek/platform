@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,7 +20,6 @@
 package org.wso2.carbon.rssmanager.core.internal;
 
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.coordination.core.services.CoordinationService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.rssmanager.common.exception.RSSManagerCommonException;
 import org.wso2.carbon.securevault.SecretCallbackHandlerService;
@@ -36,8 +35,6 @@ public class RSSManagerDataHolder {
     private DataSourceService dataSourceService;
 
     private RealmService realmService;
-
-    private CoordinationService coordinationService;
 
     private TransactionManager transactionManager;
 
@@ -69,15 +66,7 @@ public class RSSManagerDataHolder {
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
     }
-
-    public CoordinationService getCoordinationService() {
-        return coordinationService;
-    }
-
-    public void setCoordinationService(CoordinationService coordinationService) {
-        this.coordinationService = coordinationService;
-    }
-
+    
     public TransactionManager getTransactionManager() {
         return transactionManager;
     }

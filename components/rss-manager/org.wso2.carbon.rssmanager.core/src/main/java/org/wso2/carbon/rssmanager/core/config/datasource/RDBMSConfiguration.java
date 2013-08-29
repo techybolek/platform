@@ -1,9 +1,5 @@
-package org.wso2.carbon.rssmanager.core.config;
-
-import javax.xml.bind.annotation.*;
-import java.util.List;
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,90 +16,58 @@ import java.util.List;
  *  under the License.
  *
  */
+package org.wso2.carbon.rssmanager.core.config.datasource;
 
-@XmlRootElement(name = "datasource-config")
-public class RDBMSConfiguration {
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.annotation.*;
+import java.util.List;
+
+@XmlRootElement(name = "DataSourceConfig")
+public class RDBMSConfiguration implements DSXMLConfiguration {
 
     private String url;
-
     private String driverClassName;
-
     private String username;
-
     private String password;
-
     private Boolean defaultAutoCommit;
-
     private Boolean defaultReadOnly;
-
     private String defaultTransactionIsolation;
-
     private String defaultCatalog;
-
     private Integer maxActive;
-
     private Integer maxIdle;
-
     private Integer minIdle;
-
     private Integer initialSize;
-
     private Integer maxWait;
-
     private Boolean testOnBorrow;
-
     private Boolean testOnReturn;
-
     private Boolean testWhileIdle;
-
     private String validationQuery;
-
     private String validatorClassName;
-
     private Integer timeBetweenEvictionRunsMillis;
-
     private Integer numTestsPerEvictionRun;
-
     private Integer minEvictableIdleTimeMillis;
-
     private Boolean accessToUnderlyingConnectionAllowed;
-
     private Boolean removeAbandoned;
-
     private Integer removeAbandonedTimeout;
-
     private Boolean logAbandoned;
-
     private String connectionProperties;
-
     private String initSQL;
-
     private String jdbcInterceptors;
-
     private Long validationInterval;
-
     private Boolean jmxEnabled;
-
     private Boolean fairQueue;
-
     private Integer abandonWhenPercentageFull;
-
     private Long maxAge;
-
     private Boolean useEquals;
-
     private Integer suspectTimeout;
-
     private Boolean alternateUsernameAllowed;
-
     private String dataSourceClassName;
-
     private List<DataSourceProperty> dataSourceProps;
 
     public RDBMSConfiguration() {}
 
 
-    @XmlElement(name = "url", nillable = false)
+    @XmlElement(name = "Url", nillable = false)
     public String getUrl() {
         return url;
     }
@@ -112,7 +76,7 @@ public class RDBMSConfiguration {
         this.url = url;
     }
 
-    @XmlElement(name = "driverClassName", nillable = false)
+    @XmlElement(name = "DriverClassName", nillable = false)
     public String getDriverClassName() {
         return driverClassName;
     }
@@ -121,7 +85,7 @@ public class RDBMSConfiguration {
         this.driverClassName = driverClassName;
     }
 
-    @XmlElement(name = "username", nillable = false)
+    @XmlElement(name = "Username", nillable = false)
     public String getUsername() {
         return username;
     }
@@ -130,7 +94,7 @@ public class RDBMSConfiguration {
         this.username = username;
     }
 
-    @XmlElement(name = "password", nillable = false)
+    @XmlElement(name = "Password", nillable = false)
     public String getPassword() {
         return password;
     }
@@ -395,7 +359,7 @@ public class RDBMSConfiguration {
         this.alternateUsernameAllowed = alternateUsernameAllowed;
     }
 
-    @XmlElement(name = "dataSourceClassName", nillable = false)
+    @XmlElement(name = "DataSourceClassName", nillable = false)
     public String getDataSourceClassName() {
         return dataSourceClassName;
     }
@@ -404,8 +368,8 @@ public class RDBMSConfiguration {
         this.dataSourceClassName = dataSourceClassName;
     }
 
-    @XmlElementWrapper(name = "dataSourceProps", nillable = false)
-    @XmlElement(name = "property", nillable = false)
+    @XmlElementWrapper(name = "DataSourceProps", nillable = false)
+    @XmlElement(name = "Property", nillable = false)
     public List<DataSourceProperty> getDataSourceProps() {
         return dataSourceProps;
     }
@@ -414,7 +378,11 @@ public class RDBMSConfiguration {
         this.dataSourceProps = dataSourceProps;
     }
 
-    @XmlRootElement(name = "property")
+    public Marshaller getDSMarshaller() {
+        return null;
+    }
+
+    @XmlRootElement(name = "Property")
     public static class DataSourceProperty {
 
         private String name;

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -26,14 +26,16 @@ import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RSSInstanceDSWrapper {
 
     private String name;
-
-    private RSSInstance rssInstance;
-
     private DataSource dataSource;
+    private RSSInstance rssInstance;
+    
+    private ConcurrentHashMap<String, RSSDatabaseDSWrapper> dbDSMap = new ConcurrentHashMap<String,RSSDatabaseDSWrapper>();
 
     public RSSInstanceDSWrapper(RSSInstance rssInstance) {
         this.name = rssInstance.getName();
@@ -44,6 +46,15 @@ public class RSSInstanceDSWrapper {
     public Connection getConnection() throws RSSManagerException {
         try {
             return getDataSource().getConnection();
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error while acquiring datasource connection : " +
+                    e.getMessage(), e);
+        }
+    }
+    
+    public Connection getConnection(String dbName) throws RSSManagerException {
+        try {
+            return getDataSource(dbName).getConnection();
         } catch (SQLException e) {
             throw new RSSManagerException("Error while acquiring datasource connection : " +
                     e.getMessage(), e);
@@ -64,9 +75,34 @@ public class RSSInstanceDSWrapper {
     public void closeDataSource() {
         ((org.apache.tomcat.jdbc.pool.DataSource) getDataSource()).close();
     }
+    
+    public void closeAllDBDataSources(){
+    	if(!dbDSMap.isEmpty()){
+    		Collection<RSSDatabaseDSWrapper>  wrappers = dbDSMap.values();
+    		for(RSSDatabaseDSWrapper wrapper : wrappers){
+    			((org.apache.tomcat.jdbc.pool.DataSource) wrapper.getDataSource()).close();
+    		}
+    	}
+    }
 
     private DataSource getDataSource() {
         return dataSource;
+    }
+    
+    private DataSource getDataSource(String dbName) {
+    	DataSource dbDataSource = null;
+    	if(!dbDSMap.contains(dbName)){
+    		synchronized(dbDSMap){
+    			RSSDatabaseDSWrapper wrapper = new RSSDatabaseDSWrapper(dbName);
+    			dbDSMap.putIfAbsent(dbName, wrapper);
+    			RSSDatabaseDSWrapper returnWrapper = dbDSMap.get(dbName);
+    			dbDataSource = returnWrapper.getDataSource();
+    		}    		
+    	}else{
+    		RSSDatabaseDSWrapper returnWrapper = dbDSMap.get(dbName);
+			dbDataSource = returnWrapper.getDataSource();
+    	}    	
+        return dbDataSource;
     }
 
     public RSSInstance getRssInstance() {
@@ -75,6 +111,52 @@ public class RSSInstanceDSWrapper {
 
     public String getName() {
         return name;
+    }
+    
+    public class RSSDatabaseDSWrapper {
+    	
+    	private String dbName;
+    	private DataSource dataSource;
+    	
+    	public RSSDatabaseDSWrapper(String dbName){
+    		this.dbName = dbName;
+    		this.dataSource = initDataSource(dbName);
+    	}
+    	
+    	private DataSource initDataSource(String dbName) {
+            org.wso2.carbon.ndatasource.rdbms.RDBMSConfiguration config = new RDBMSConfiguration();
+            config.setUrl(createDBURL(dbName, getRssInstance().getDataSourceConfig().getUrl()));
+            config.setUsername(getRssInstance().getDataSourceConfig().getUsername());
+            config.setPassword(getRssInstance().getDataSourceConfig().getPassword());
+            config.setDriverClassName(getRssInstance().getDataSourceConfig().getDriverClassName());
+            config.setTestOnBorrow(true);
+            config.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;org.wso2.carbon.ndatasource.rdbms.ConnectionRollbackOnReturnInterceptor");
+            return RSSManagerUtil.createDataSource(config);
+        }
+    	
+    	private String createDBURL(String dbName, String url){    		
+    		StringBuilder dbURL = new StringBuilder();
+    		String trimedURL = url.trim();
+    		dbURL.append(trimedURL);
+    		boolean endWithSlash = trimedURL.endsWith("/");
+    		if(endWithSlash){
+    			dbURL.append(dbName);
+    		}else{
+    			dbURL.append("/").append(dbName.trim());
+    		}    		
+    		
+    		return dbURL.toString();
+    	}
+
+		public String getDbName() {
+			return dbName;
+		}
+
+		public DataSource getDataSource() {
+			return dataSource;
+		}    	
+    	
+    	
     }
 
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -19,63 +19,39 @@
 
 package org.wso2.carbon.rssmanager.core.config.environment;
 
-import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
+import org.wso2.carbon.rssmanager.core.RSSInstanceDSWrapperRepository;
 import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
-import org.wso2.carbon.rssmanager.core.manager.RSSManager;
-import org.wso2.carbon.rssmanager.core.manager.RSSManagerFactory;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "rss-environment")
+@XmlRootElement(name = "RSSEnvironment")
 public class RSSEnvironment {
 
     private int id;
-
     private String name;
-
-    private String rssProvider;
-
-    private RSSManager systemRSSManager;
-
-    private RSSManager userDefinedRSSManager;
-
     private RSSInstance[] rssInstances;
+    private RSSInstanceDSWrapperRepository repository;
 
     public void init() throws RSSManagerException {
-        RSSManagerFactory factory =
-                AbstractRSSManagerFactory.getRSSManagerFactory(getRSSProvider());
-        this.systemRSSManager = factory.getSystemRSSManager();
-        this.userDefinedRSSManager = factory.getUserDefinedRSSManager();
-        this.initRSSEnvironment();
-        //this.initSystemRSSInstances();
+        this.repository = new RSSInstanceDSWrapperRepository(rssInstances);
     }
 
-    @XmlElement(name = "name", nillable = false, required = true)
+    @XmlElement(name = "Name", nillable = false, required = true)
     public String getName() {
         return name;
     }
 
-    @XmlElement(name = "rss-provider", nillable = false)
-    public String getRSSProvider() {
-        return rssProvider;
-    }
-
-    @XmlElementWrapper(name = "rss-instances", nillable = false)
-    @XmlElement(name = "rss-instance", nillable = false)
+    @XmlElementWrapper(name = "RSSInstances", nillable = false)
+    @XmlElement(name = "RSSInstance", nillable = false)
     public RSSInstance[] getRSSInstances() {
         return rssInstances;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setRSSProvider(String rssProvider) {
-        this.rssProvider = rssProvider;
     }
 
     public void setRSSInstances(RSSInstance[] rssInstances) {
@@ -105,30 +81,13 @@ public class RSSEnvironment {
         return -1;
     }
 
-    private RSSManager getSystemRSSManager() {
-        return systemRSSManager;
-    }
-
-    private RSSManager getUserDefinedRSSManager() {
-        return userDefinedRSSManager;
-    }
-
-    public RSSManager getRSSManager(String type) throws RSSManagerException {
-        if (type == null || "".equals(type)) {
-            throw new IllegalArgumentException("RSS Manager type '" + type + "' is not allowed");
-        }
-        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(type)) {
-            return getSystemRSSManager();
-        }
-        if (RSSManagerConstants.USER_DEFINED_INSTANCE_TYPE.equals(type)) {
-            return getUserDefinedRSSManager();
-        }
-        throw new RSSManagerException("Error occurred while retrieving RSS Manager attached to " +
-                "the RSS environment '" + getName() + "'. Invalid RSS manager type '" + type + "'");
-    }
-
     private void initRSSEnvironment() throws RSSManagerException {
-        getSystemRSSManager().createRSSEnvironment();
+//        try {
+//            getSystemRSSManager().getRSSDAO().getEnvironmentDAO().addEnvironment(this);
+//        } catch (RSSDAOException e) {
+//            throw new RSSManagerException("Error occurred while initializing RSS Environment '" +
+//                    this.getName() + ": " + e.getMessage(), e);
+//        }
     }
 
     /**
@@ -176,5 +135,9 @@ public class RSSEnvironment {
 //                    getName() + "' : " + e.getMessage(), e);
 //        }
 //    }
+
+    public RSSInstanceDSWrapperRepository getDSWrapperRepository() {
+        return repository;
+    }
 
 }

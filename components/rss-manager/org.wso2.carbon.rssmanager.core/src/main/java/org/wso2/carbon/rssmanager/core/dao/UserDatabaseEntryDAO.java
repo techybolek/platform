@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -24,18 +24,24 @@ import org.wso2.carbon.rssmanager.core.entity.UserDatabaseEntry;
 
 public interface UserDatabaseEntryDAO {
 
-    int addUserDatabaseEntry(UserDatabaseEntry entry, int tenantId) throws RSSDAOException;
+    int addUserDatabaseEntry(String environmentName, UserDatabaseEntry entry,
+                             int tenantId) throws RSSDAOException;
 
-    void removeUserDatabaseEntry(String rssInstanceName, String username,
-                                 int tenantId) throws RSSDAOException;
+    void removeUserDatabaseEntry(String environmentName, int rssInstanceId, String username,
+                                 String type, int tenantId) throws RSSDAOException;
 
-    void removeUserDatabaseEntriesByDatabase(String rssInstanceName, String databaseName,
+    void removeUserDatabaseEntriesByDatabase(String environmentName, int rssInstanceId,
+                                             String databaseName, String type,
                                              int tenantId) throws RSSDAOException;
 
-    UserDatabaseEntry getUserDatabaseEntry(UserDatabaseEntry entry,
+    void removeUserDatabaseEntriesByUser(String environmentName, int rssInstanceId,
+                                         String username, String type,
+                                         int tenantId) throws RSSDAOException;
+
+    UserDatabaseEntry getUserDatabaseEntry(String environmentName, UserDatabaseEntry entry,
                                            int tenantId) throws RSSDAOException;
 
-    UserDatabaseEntry[] getUserDatabaseEntries(UserDatabaseEntry entries,
+    UserDatabaseEntry[] getUserDatabaseEntries(String environmentName, UserDatabaseEntry entries,
                                                int tenantId) throws RSSDAOException;
 
 }

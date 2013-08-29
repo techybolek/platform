@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -31,8 +31,6 @@ import org.wso2.carbon.ndatasource.rdbms.RDBMSDataSource;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.common.RSSManagerHelper;
 import org.wso2.carbon.rssmanager.common.exception.RSSManagerCommonException;
-import org.wso2.carbon.rssmanager.core.config.RSSConfig;
-import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.entity.Database;
 import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
@@ -41,37 +39,27 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
-import org.xml.sax.SAXException;
 
+import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public final class RSSManagerUtil {
 
     private static SecretResolver secretResolver;
 
-    public static TransactionManager transactionManager;
-    
     /**
      * Retrieves the tenant domain name for a given tenant ID
      *
@@ -84,10 +72,7 @@ public final class RSSManagerUtil {
         try {
             TenantManager tenantMgr = RSSManagerDataHolder.getInstance().getTenantManager();
             return tenantMgr.getDomain(tenantId);
-        } catch (UserStoreException e) {
-            throw new RSSManagerException("Error occurred while retrieving tenant domain for " +
-                    "the given tenant ID");
-        } catch (RSSManagerCommonException e) {
+        } catch (Exception e) {
             throw new RSSManagerException("Error occurred while retrieving tenant domain for " +
                     "the given tenant ID");
         }
@@ -98,8 +83,9 @@ public final class RSSManagerUtil {
      * underscore and the tenant's domain name to the database to make it unique for that particular
      * tenant. It will return the database name as it is, if it is created in Super tenant mode.
      *
-     * @param databaseName Name of the database
-     * @return Fully qualified name of the database
+     * @param databaseName          Name of the database
+     * @return                      Fully qualified name of the database
+     * @throws RSSManagerException  Is thrown if the functionality is interrupted
      */
     public static String getFullyQualifiedDatabaseName(
             String databaseName) throws RSSManagerException {
@@ -164,67 +150,6 @@ public final class RSSManagerUtil {
         return createDataSource(config);
     }
 
-//    public static DatabaseMetaData convertToDatabaseMetaData(
-//            Database database, int tenantId) throws RSSManagerException {
-//        DatabaseMetaData metadata = new DatabaseMetaData();
-//        String fullyQualifiedDatabaseName =
-//                RSSManagerUtil.getFullyQualifiedDatabaseName(database.getName());
-//        metadata.setName(fullyQualifiedDatabaseName);
-//        metadata.setRssInstanceName(metadata.getRssInstanceName());
-//        metadata.setUrl(database.getUrl());
-//        String tenantDomain = RSSManagerUtil.getTenantDomainFromTenantId(tenantId);
-//        metadata.setRssTenantDomain(tenantDomain);
-//
-//        return metadata;
-//    }
-
-//    public static RSSInstanceMetaData convertToRSSInstanceMetadata(
-//            RSSInstance rssInstance, int tenantId) throws RSSManagerException {
-//        if (rssInstance == null) {
-//            return null;
-//        }
-//        RSSInstanceMetaData metadata = new RSSInstanceMetaData();
-//        metadata.setName(rssInstance.getName());
-//        metadata.setServerUrl(rssInstance.getDataSourceConfig().getUrl());
-//        metadata.setInstanceType(rssInstance.getDbmsType());
-//        metadata.setServerCategory(rssInstance.getServerCategory());
-//        metadata.setTenantDomainName(getTenantDomainFromTenantId(tenantId));
-//        return metadata;
-//    }
-
-//    public static DatabaseMetaData convertToDatabaseMetadata(
-//            Database database, int tenantId) throws RSSManagerException {
-//        if (database == null) {
-//            return null;
-//        }
-//        DatabaseMetaData metadata = new DatabaseMetaData();
-//        metadata.setName(database.getName());
-//        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(database.getType())) {
-//            metadata.setRssInstanceName(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
-//        } else {
-//            metadata.setRssInstanceName(database.getRssInstanceName());
-//        }
-//        metadata.setUrl(database.getUrl());
-//        metadata.setRssTenantDomain(getTenantDomainFromTenantId(tenantId));
-//        return metadata;
-//    }
-
-//    public static DatabaseUserMetaData convertToDatabaseUserMetadata(
-//            DatabaseUser user, int tenantId) throws RSSManagerException {
-//        if (user == null) {
-//            return null;
-//        }
-//        DatabaseUserMetaData metadata = new DatabaseUserMetaData();
-//        metadata.setUsername(user.getName());
-//        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(user.getType())) {
-//            metadata.setRssInstanceName(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
-//        } else {
-//            metadata.setRssInstanceName(user.getRssInstanceName());
-//        }
-//        metadata.setTenantDomain(getTenantDomainFromTenantId(tenantId));
-//        return metadata;
-//    }
-
     public static String composeDatabaseUrl(RSSInstance rssInstance, String databaseName) {
         return rssInstance.getDataSourceConfig().getUrl() + "/" + databaseName;
     }
@@ -266,21 +191,6 @@ public final class RSSManagerUtil {
         return metaInfo;
     }
 
-    public static String validateRSSInstanceUrl(String url) throws Exception {
-        if (url != null && !"".equals(url)) {
-            URI uri;
-            try {
-                uri = new URI(url.split("jdbc:")[1]);
-                return RSSManagerConstants.JDBC_PREFIX + ":" + uri.getScheme() + "://" +
-                        uri.getHost() + ":" + ((uri.getPort() != -1) ? uri.getPort() : "");
-            } catch (URISyntaxException e) {
-                throw new Exception("JDBC URL '" + url + "' is invalid. Please enter a " +
-                        "valid JDBC URL.");
-            }
-        }
-        return "";
-    }
-
     private static Marshaller createMarshaller() throws RSSManagerException {
         JAXBContext ctx;
         try {
@@ -298,35 +208,19 @@ public final class RSSManagerUtil {
         try {
             DocumentBuilder docBuilder = factory.newDocumentBuilder();
             return docBuilder.parse(file);
-        } catch (ParserConfigurationException e) {
-            throw new RSSManagerException("Error occurred while creating document builder to " +
-                    "convert file to a org.w3c.dom.Document : " + e.getMessage(), e);
-        } catch (SAXException e) {
-            throw new RSSManagerException("Error occurred while parsing file, while converting " +
-                    "to a org.w3c.dom.Document : " + e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RSSManagerException("Error occurred while parsing file, while converting " +
                     "to a org.w3c.dom.Document : " + e.getMessage(), e);
         }
     }
 
-    public static Properties loadDataSourceProperties(org.wso2.carbon.rssmanager.core.config.RDBMSConfiguration config) {
+    public static Properties loadDataSourceProperties(org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration config) {
         Properties props = new Properties();
-        List<org.wso2.carbon.rssmanager.core.config.RDBMSConfiguration.DataSourceProperty> dsProps = config.getDataSourceProps();
-        for (org.wso2.carbon.rssmanager.core.config.RDBMSConfiguration.DataSourceProperty dsProp : dsProps) {
+        List<org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration.DataSourceProperty> dsProps = config.getDataSourceProps();
+        for (org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration.DataSourceProperty dsProp : dsProps) {
             props.setProperty(dsProp.getName(), dsProp.getValue());
         }
         return props;
-    }
-
-    public static String[] getRSSEnvironmentNames(
-            RSSEnvironment[] environments) throws RSSManagerException {
-        RSSEnvironment[] envs = RSSConfig.getInstance().getRSSEnvironments();
-        String[] envNames = new String[envs.length];
-        for (int i = 0; i < envs.length; i++) {
-            envNames[i] = envs[i].getName();
-        }
-        return envNames;
     }
 
     private static synchronized String loadFromSecureVault(String alias) {
@@ -411,6 +305,28 @@ public final class RSSManagerUtil {
             }
         }
         return tenantId;
+    }
+
+    public static void checkIfParameterSecured(final String st) throws RSSManagerException{
+        boolean hasSpaces = true;
+        if(!st.trim().contains(" ")){
+            hasSpaces = false;
+        }
+        if(hasSpaces){
+            throw new RSSManagerException("Parameter is not secure enough to execute SQL query.");
+        }
+    }
+
+    public static DataSource lookupDataSource(String dataSourceName, final Hashtable<Object,Object> jndiProperties) {
+        try {
+            if(jndiProperties == null || jndiProperties.isEmpty()){
+                return (DataSource) InitialContext.doLookup(dataSourceName);
+            }
+            final InitialContext context = new InitialContext(jndiProperties);
+            return (DataSource) context.doLookup(dataSourceName);
+        } catch (Exception e) {
+            throw new RuntimeException("Error in looking up data source: " + e.getMessage(), e);
+        }
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -24,26 +24,20 @@ package org.wso2.carbon.rssmanager.core.entity;
 public class Database {
 
     private int id;
-
-    private String name;
-
     private String url;
-
-    private String rssInstanceName;
-
+    private String name;
     private String type;
+    private String rssInstanceName;
 
     public Database(int id, String name, String rssInstanceName, String url, String type) {
         this.id = id;
-        this.name = name;
-        this.rssInstanceName = rssInstanceName;
         this.url = url;
         this.type = type;
+        this.name = name;
+        this.rssInstanceName = rssInstanceName;
     }
 
-    public Database() {
-    }
-
+    public Database() {}
 
     public String getName() {
         return name;

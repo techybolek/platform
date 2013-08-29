@@ -16,28 +16,24 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.rssmanager.core.entity;
 
-import java.util.HashMap;
-import java.util.Map;
+package org.wso2.carbon.rssmanager.core.dao;
 
-/**
- * This class represents the database privileges assigned to a particular user.
- */
-public class DatabasePermissions {
+import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
+import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 
-    private Map<String, Object> privilegeMap = new HashMap<String, Object>();
+public interface EnvironmentDAO {
 
-    public Object getPermission(String permissionName) {
-         return this.privilegeMap.get(permissionName);
-    }
+    void addEnvironment(RSSEnvironment environment) throws RSSDAOException;
 
-    public void setPermission(String permissionName, Object value) {
-         this.privilegeMap.put(permissionName, value);
-    }
+    void removeEnvironment(String environmentName) throws RSSDAOException;
 
-    public Map<String, Object> getPrivilegeMap() {
-        return privilegeMap;
-    }
+    void updateEnvironment(RSSEnvironment environment) throws RSSDAOException;
+
+    RSSEnvironment getEnvironment(String environmentName) throws RSSDAOException;
+
+    RSSEnvironment[] getEnvironments() throws RSSDAOException;
+
+    boolean isEnvironmentExists(String environmentName) throws RSSDAOException;
 
 }

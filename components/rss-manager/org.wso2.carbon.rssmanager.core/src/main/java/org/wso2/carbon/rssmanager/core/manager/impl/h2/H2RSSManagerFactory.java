@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,17 +17,25 @@
  *
  */
 
-package org.wso2.carbon.rssmanager.core.manager.sqlserver;
+package org.wso2.carbon.rssmanager.core.manager.impl.h2;
 
+import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.manager.RSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
+import org.wso2.carbon.rssmanager.core.manager.impl.mysql.MySQLUserDefinedRSSManager;
 
-public class SQLServerRSSManagerFactory implements RSSManagerFactory {
+public class H2RSSManagerFactory implements RSSManagerFactory {
+
+    private RSSConfiguration config;
+
+    public H2RSSManagerFactory(RSSConfiguration config) {
+        this.config = config;
+    }
 
     public SystemRSSManager getSystemRSSManager() throws RSSManagerException {
-        return null;
+        return new H2SystemRSSManager(config);
     }
 
     public UserDefinedRSSManager getUserDefinedRSSManager() throws RSSManagerException {

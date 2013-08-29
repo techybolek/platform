@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -18,42 +18,51 @@
  */
 package org.wso2.carbon.rssmanager.core.dao.impl;
 
-import org.wso2.carbon.rssmanager.core.config.DSXMLConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSManagementRepository;
 import org.wso2.carbon.rssmanager.core.dao.*;
+import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
 
 
 /**
  * DAO implementation for RSSDAO interface.
  */
 public class RSSDAOImpl extends RSSDAO {
+	
+	private EntityManager entityManager;
 
-    public RSSDAOImpl(DSXMLConfiguration config) {
-        super(config);
+    public RSSDAOImpl(RSSManagementRepository repo, EntityManager entityManager) {
+        super(repo, entityManager);
+        this.entityManager = entityManager;
+    }
+
+    @Override
+    public EnvironmentDAO getEnvironmentDAO() {
+        return new EnvironmentDAOImpl(entityManager);
     }
 
     @Override
     public RSSInstanceDAO getRSSInstanceDAO() {
-        return new RSSInstanceDAOImpl();
+        return new RSSInstanceDAOImpl(entityManager);
     }
 
     @Override
     public DatabaseDAO getDatabaseDAO() {
-        return new DatabaseDAOImpl();
+        return new DatabaseDAOImpl(entityManager);
     }
 
     @Override
     public DatabaseUserDAO getDatabaseUserDAO() {
-        return new DatabaseUserDAOImpl();
+        return new DatabaseUserDAOImpl(entityManager);
     }
 
     @Override
     public DatabasePrivilegeTemplateDAO getDatabasePrivilegeTemplateDAO() {
-        return new DatabasePrivilegeTemplateDAOImpl();
+        return new DatabasePrivilegeTemplateDAOImpl(entityManager);
     }
 
     @Override
     public UserDatabaseEntryDAO getUserDatabaseEntryDAO() {
-        return new UserDatabaseEntryDAOImpl();
+        return new UserDatabaseEntryDAOImpl(entityManager);
     }
 
 }

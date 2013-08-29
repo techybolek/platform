@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -22,13 +22,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.core.DataSourceMetaInfo;
-import org.wso2.carbon.rssmanager.core.config.RSSConfig;
+import org.wso2.carbon.rssmanager.core.config.RSSConfigurationManager;
+import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.*;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.internal.RSSManagerDataHolder;
 import org.wso2.carbon.rssmanager.core.manager.RSSManager;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 
 public class RSSManagerService {
@@ -38,7 +40,7 @@ public class RSSManagerService {
     public void createRSSInstance(RSSEnvironmentContext ctx,
                                   RSSInstance rssInstance) throws RSSManagerException {
         try {
-            this.getRSSManager(ctx).createRSSInstance(rssInstance);
+            getRSSManager().createRSSInstance(ctx, rssInstance);
         } catch (RSSManagerException e) {
             String msg =
                     "Error occurred while creating RSS instance '" + rssInstance.getName() + "'";
@@ -48,7 +50,7 @@ public class RSSManagerService {
 
     public void dropRSSInstance(RSSEnvironmentContext ctx) throws RSSManagerException {
         try {
-            this.getRSSManager(ctx).dropRSSInstance(ctx.getRssInstanceName());
+            getRSSManager().dropRSSInstance(ctx, ctx.getRssInstanceName());
         } catch (RSSManagerException e) {
             String msg = "Error occurred while dropping the RSS instance '" +
                     ctx.getRssInstanceName() + "'";
@@ -59,7 +61,7 @@ public class RSSManagerService {
     public void editRSSInstance(RSSEnvironmentContext ctx,
                                 RSSInstance rssInstance) throws RSSManagerException {
         try {
-            this.getRSSManager(ctx).editRSSInstanceConfiguration(rssInstance);
+            getRSSManager().editRSSInstanceConfiguration(ctx, rssInstance);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while editing the configuration of RSS instance '" +
                     rssInstance.getName() + "'";
@@ -70,9 +72,7 @@ public class RSSManagerService {
     public RSSInstance getRSSInstance(RSSEnvironmentContext ctx) throws RSSManagerException {
         RSSInstance metadata = null;
         try {
-            RSSInstance rssInstance =
-                    this.getRSSManager(ctx).getRSSInstance(ctx.getRssInstanceName());
-            return rssInstance;
+            metadata = getRSSManager().getRSSInstance(ctx, ctx.getRssInstanceName());
         } catch (RSSManagerException e) {
             String msg = "Error occurred while retrieving the configuration of RSS instance '" +
                     ctx.getRssInstanceName() + "'";
@@ -85,7 +85,7 @@ public class RSSManagerService {
             RSSEnvironmentContext ctx) throws RSSManagerException {
         RSSInstance[] rssInstances = new RSSInstance[0];
         try {
-            rssInstances = getRSSManager(ctx).getRSSInstances();
+            rssInstances = getRSSManager().getRSSInstances(ctx);
         } catch (RSSManagerException e) {
             String msg = "Error occurred in retrieving the RSS instance list";
             handleException(msg, e);
@@ -96,7 +96,7 @@ public class RSSManagerService {
     public Database createDatabase(RSSEnvironmentContext ctx,
                                    Database database) throws RSSManagerException {
         try {
-            return getRSSManager(ctx).createDatabase(database);
+            return getRSSManager().createDatabase(ctx, database);
         } catch (RSSManagerException e) {
             String msg = "Error in creating the database '" + database.getName() + "'";
             handleException(msg, e);
@@ -107,7 +107,7 @@ public class RSSManagerService {
     public void dropDatabase(RSSEnvironmentContext ctx, String databaseName) throws
             RSSManagerException {
         try {
-            this.getRSSManager(ctx).dropDatabase(ctx.getRssInstanceName(), databaseName);
+            getRSSManager().dropDatabase(ctx, ctx.getRssInstanceName(), databaseName);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while dropping the database '" + databaseName + "'";
             handleException(msg, e);
@@ -117,12 +117,61 @@ public class RSSManagerService {
     public Database[] getDatabases(RSSEnvironmentContext ctx) throws RSSManagerException {
         Database[] databases = new Database[0];
         try {
-            databases = getRSSManager(ctx).getDatabases();
+            databases = getRSSManager().getDatabases(ctx);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while retrieving the database list of the tenant";
             handleException(msg, e);
         }
         return databases;
+    }
+    
+    public Database[] getDatabases(RSSEnvironmentContext ctx,
+                                   int tenantId) throws RSSManagerException {
+
+		Database[] databases = null;
+        if (!isSuperTenant()) { 
+        	throw new RSSManagerException(" Unahuthorization access ");
+        }
+		try {
+			databases = getRSSManager().getDatabasesRestricted(ctx, tenantId);
+		} catch (RSSManagerException e) {
+			String tenantDomain = null;
+			try {
+				tenantDomain = RSSManagerUtil.getTenantDomainFromTenantId(tenantId);
+			} catch (RSSManagerException e1) {
+				log.error(e1);
+			}
+			String msg =
+			             "Error occurred while retrieving the database list of the tenant '" +
+			                     tenantDomain + "'";
+			handleException(msg, e);
+		}
+		return databases;
+	}
+    
+    public RSSEnvironment[] getRSSEnvironments() throws RSSManagerException {
+    	RSSEnvironment[] environments = new RSSEnvironment[0];
+        try {
+        	 if (!isSuperTenant()) { 
+        		 throw new RSSManagerException(" Unahuthorization access ");
+             }
+            //environments =  RSSConfiguration.getInstance().getRSSEnvironments();
+        } catch (RSSManagerException e) {
+            String msg = "Error occurred while retrieving the list of available RSS environments";
+            handleException(msg, e);
+        }
+        return environments;
+    }
+    
+    private boolean isSuperTenant() throws RSSManagerException{
+    	boolean superTenant = false;
+    	int superTenantId = RSSManagerUtil.getTenantId();
+        if (superTenantId == MultitenantConstants.SUPER_TENANT_ID) {        	      	
+        	superTenant = true;
+        }else if(log.isDebugEnabled()){
+    		log.info(" Not super tenant so operation not allowed ");
+    	}
+        return superTenant;
     }
 
     public Database getDatabase(RSSEnvironmentContext ctx,
@@ -130,8 +179,7 @@ public class RSSManagerService {
         Database database = null;
 
         try {
-            database =
-                    this.getRSSManager(ctx).getDatabase(ctx.getRssInstanceName(), databaseName);
+            database = getRSSManager().getDatabase(ctx, ctx.getRssInstanceName(), databaseName);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while retrieving the configuration of the database '" +
                     databaseName + "'";
@@ -143,7 +191,7 @@ public class RSSManagerService {
     public DatabaseUser createDatabaseUser(RSSEnvironmentContext ctx,
                                            DatabaseUser user) throws RSSManagerException {
         try {
-            return getRSSManager(ctx).createDatabaseUser(user);
+            return getRSSManager().createDatabaseUser(ctx, user);
         } catch (RSSManagerException e) {
             String msg =
                     "Error occurred while creating the database user '" + user.getName() + "'";
@@ -155,7 +203,7 @@ public class RSSManagerService {
     public void dropDatabaseUser(RSSEnvironmentContext ctx,
                                  String username) throws RSSManagerException {
         try {
-            this.getRSSManager(ctx).dropDatabaseUser(ctx.getRssInstanceName(), username);
+            getRSSManager().dropDatabaseUser(ctx, ctx.getRssInstanceName(), username);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while dropping the user '" + username + "'";
             handleException(msg, e);
@@ -166,15 +214,15 @@ public class RSSManagerService {
                                            DatabasePrivilegeSet privileges,
                                            DatabaseUser user,
                                            String databaseName) throws RSSManagerException {
-        this.getRSSManager(ctx).editDatabaseUserPrivileges(privileges, user, databaseName);
+        getRSSManager().editDatabaseUserPrivileges(ctx, privileges, user, databaseName);
     }
 
 
     public DatabaseUser getDatabaseUser(RSSEnvironmentContext ctx,
-                                                String username) throws RSSManagerException {
+                                        String username) throws RSSManagerException {
         DatabaseUser user = null;
         try {
-            user = this.getRSSManager(ctx).getDatabaseUser(ctx.getRssInstanceName(), username);
+            user = getRSSManager().getDatabaseUser(ctx, ctx.getRssInstanceName(), username);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while editing the database privileges of the user '" +
                     username + "'";
@@ -187,7 +235,7 @@ public class RSSManagerService {
             RSSEnvironmentContext ctx) throws RSSManagerException {
         DatabaseUser[] users = new DatabaseUser[0];
         try {
-            users = this.getRSSManager(ctx).getDatabaseUsers();
+            users = getRSSManager().getDatabaseUsers(ctx);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while retrieving database user list";
             handleException(msg, e);
@@ -199,7 +247,7 @@ public class RSSManagerService {
             RSSEnvironmentContext ctx,
             DatabasePrivilegeTemplate template) throws RSSManagerException {
         try {
-            this.getRSSManager(ctx).createDatabasePrivilegesTemplate(template);
+            getRSSManager().createDatabasePrivilegesTemplate(ctx, template);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while creating the database privilege template '" +
                     template.getName() + "'";
@@ -210,7 +258,7 @@ public class RSSManagerService {
     public void dropDatabasePrivilegesTemplate(RSSEnvironmentContext ctx,
                                                String templateName) throws RSSManagerException {
         try {
-            this.getRSSManager(ctx).dropDatabasePrivilegesTemplate(templateName);
+            getRSSManager().dropDatabasePrivilegesTemplate(ctx, templateName);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while dropping the database privilege template '" +
                     templateName + "'";
@@ -222,7 +270,7 @@ public class RSSManagerService {
             RSSEnvironmentContext ctx,
             DatabasePrivilegeTemplate template) throws RSSManagerException {
         try {
-            this.getRSSManager(ctx).editDatabasePrivilegesTemplate(template);
+            getRSSManager().editDatabasePrivilegesTemplate(ctx, template);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while editing the database privilege template " +
                     template.getName() + "'";
@@ -232,12 +280,12 @@ public class RSSManagerService {
 
     public DatabasePrivilegeTemplate[] getDatabasePrivilegesTemplates(
             RSSEnvironmentContext ctx) throws RSSManagerException {
-        return this.getRSSManager(ctx).getDatabasePrivilegeTemplates();
+        return getRSSManager().getDatabasePrivilegeTemplates(ctx);
     }
 
     public DatabasePrivilegeTemplate getDatabasePrivilegesTemplate(
             RSSEnvironmentContext ctx, String templateName) throws RSSManagerException {
-        return this.getRSSManager(ctx).getDatabasePrivilegeTemplate(templateName);
+        return getRSSManager().getDatabasePrivilegeTemplate(ctx, templateName);
     }
 
 //    public void createCarbonDataSource(String databaseName, String username) throws
@@ -286,7 +334,7 @@ public class RSSManagerService {
     public int getSystemRSSInstanceCount(RSSEnvironmentContext ctx) throws RSSManagerException {
         int count = 0;
         try {
-            count = getRSSManager(ctx).getSystemRSSInstanceCount();
+            count = getRSSManager().getSystemRSSInstanceCount(ctx);
             return count;
         } catch (RSSManagerException e) {
             String msg = "Error occurred while retrieving the system RSS instance count";
@@ -298,7 +346,7 @@ public class RSSManagerService {
     public void attachUserToDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude,
                                      String templateName) throws RSSManagerException {
         try {
-            getRSSManager(ctx).attachUserToDatabase(ude, templateName);
+            getRSSManager().attachUserToDatabase(ctx, ude, templateName);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while attaching database user '" + ude.getUsername() +
                     "' to the database '" + ude.getDatabaseName() + "' with the database user " +
@@ -310,7 +358,7 @@ public class RSSManagerService {
     public void detachUserFromDatabase(RSSEnvironmentContext ctx,
                                        UserDatabaseEntry ude) throws RSSManagerException {
         try {
-            this.getRSSManager(ctx).detachUserFromDatabase(ude);
+            getRSSManager().detachUserFromDatabase(ctx, ude);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while detaching the database user '" + ude.getUsername() +
                     "' from the database '" + ude.getDatabaseName() + "'";
@@ -322,7 +370,7 @@ public class RSSManagerService {
             RSSEnvironmentContext ctx, String databaseName) throws RSSManagerException {
         DatabaseUser[] users = new DatabaseUser[0];
         try {
-            users = this.getRSSManager(ctx).getUsersAttachedToDatabase(ctx.getRssInstanceName(),
+            users = getRSSManager().getUsersAttachedToDatabase(ctx, ctx.getRssInstanceName(),
                     databaseName);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while retrieving database users attached to " +
@@ -336,7 +384,7 @@ public class RSSManagerService {
             RSSEnvironmentContext ctx, String databaseName) throws RSSManagerException {
         DatabaseUser[] users = new DatabaseUser[0];
         try {
-            users = this.getRSSManager(ctx).getAvailableUsersToAttachToDatabase(
+            users = getRSSManager().getAvailableUsersToAttachToDatabase(ctx,
                     ctx.getRssInstanceName(), databaseName);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while retrieving database users available to be " +
@@ -347,18 +395,20 @@ public class RSSManagerService {
     }
 
 
-    private RSSManager getRSSManager(RSSEnvironmentContext ctx) throws RSSManagerException {
-        RSSConfig config = RSSConfig.getInstance();
-        if (config == null) {
-            throw new RSSManagerException("RSSConfig is not properly initialized and is null");
+    private RSSManager getRSSManager() throws RSSManagerException {
+        RSSManager rssManager = RSSConfigurationManager.getInstance().getRSSManager();
+        if (rssManager == null) {
+            throw new RSSManagerException("RSS Manager is not properly initialized and " +
+                    "thus, is null");
         }
-        return config.getRSSManager(ctx);
+        return rssManager;
     }
 
     public void createCarbonDataSource(RSSEnvironmentContext ctx,
                                        UserDatabaseEntry entry) throws RSSManagerException {
-        Database database = this.getRSSManager(ctx).getDatabase(entry.getRssInstanceName(),
-                entry.getDatabaseName());
+        Database database =
+                getRSSManager().getDatabase(ctx, entry.getRssInstanceName(),
+                        entry.getDatabaseName());
         DataSourceMetaInfo metaInfo =
                 RSSManagerUtil.createDSMetaInfo(database, entry.getUsername());
         try {
@@ -375,7 +425,8 @@ public class RSSManagerService {
             String username) throws RSSManagerException {
         DatabasePrivilegeSet privileges = null;
         try {
-            privileges = this.getRSSManager(ctx).getUserDatabasePrivileges(ctx.getRssInstanceName(),
+            privileges =
+                    getRSSManager().getUserDatabasePrivileges(ctx, ctx.getRssInstanceName(),
                     databaseName, username);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while retrieving the permissions granted to the user '" +
