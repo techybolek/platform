@@ -31,7 +31,7 @@ import java.util.Iterator;
 public class FeatureManagementContextFactory {
     FeatureManagementContext featureManagementContext;
 
-    public void FeatureManagementContextFactory() {
+    public FeatureManagementContextFactory() {
         featureManagementContext = new FeatureManagementContext();
     }
 

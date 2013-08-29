@@ -27,12 +27,12 @@ public class InstanceGroup {
     private Boolean clusteringEnabled;
 
     //separate instance lists  based on the type of the instances
-    private HashMap<String, Instance> instanceTypeInstances = new HashMap<String, Instance>();
-    private HashMap<String, Instance> loadBalanceTypeInstances = new HashMap<String, Instance>();
-    private HashMap<String, Instance> managerTypeInstances = new HashMap<String, Instance>();
-    private HashMap<String, Instance> workerTypeInstances = new HashMap<String, Instance>();
-    private HashMap<String, Instance> loadBalanceWorkerTypeInstances = new HashMap<String, Instance>();
-    private HashMap<String, Instance> loadBalanceManagerTypeInstances = new HashMap<String, Instance>();
+    private HashMap<String, Instance> instances = new HashMap<String, Instance>();
+    private HashMap<String, Instance> loadBalancerInstances = new HashMap<String, Instance>();
+    private HashMap<String, Instance> managerInstances = new HashMap<String, Instance>();
+    private HashMap<String, Instance> workerInstances = new HashMap<String, Instance>();
+    private HashMap<String, Instance> loadBalanceWorkerInstances = new HashMap<String, Instance>();
+    private HashMap<String, Instance> loadBalanceManagerInstances = new HashMap<String, Instance>();
 
     //this list holds the complete list of instances
 
@@ -61,52 +61,77 @@ public class InstanceGroup {
         specificMap.put(instance.getName(), instance);
     }
 
-    public HashMap<String, Instance> getInstanceTypeInstances() {
-        return instanceTypeInstances;
+
+    public void addInstance(String name, Instance instance) {
+        instances.put(name, instance);
     }
 
-    public void setInstanceTypeInstances(HashMap<String, Instance> instanceTypeInstances) {
-        this.instanceTypeInstances = instanceTypeInstances;
+    public HashMap<String, Instance> getInstances() {
+        return instances;
     }
 
-    public HashMap<String, Instance> getLoadBalanceTypeInstances() {
-        return loadBalanceTypeInstances;
+    public void setInstances(HashMap<String, Instance> instances) {
+        this.instances = instances;
     }
 
-    public void setLoadBalanceTypeInstances(HashMap<String, Instance> loadBalanceTypeInstances) {
-        this.loadBalanceTypeInstances = loadBalanceTypeInstances;
+    public HashMap<String, Instance> getLoadBalancerInstances() {
+        return loadBalancerInstances;
     }
 
-    public HashMap<String, Instance> getManagerTypeInstances() {
-        return managerTypeInstances;
+    public void setLoadBalancerInstances(HashMap<String, Instance> loadBalancerInstances) {
+        this.loadBalancerInstances = loadBalancerInstances;
     }
 
-    public void setManagerTypeInstances(HashMap<String, Instance> managerTypeInstances) {
-        this.managerTypeInstances = managerTypeInstances;
+    public void addLoadBalancerInstance(String name, Instance instance) {
+        this.loadBalancerInstances.put(name, instance);
     }
 
-    public HashMap<String, Instance> getWorkerTypeInstances() {
-        return workerTypeInstances;
+    public HashMap<String, Instance> getManagerInstances() {
+        return managerInstances;
     }
 
-    public void setWorkerTypeInstances(HashMap<String, Instance> workerTypeInstances) {
-        this.workerTypeInstances = workerTypeInstances;
+    public void setManagerInstances(HashMap<String, Instance> managerInstances) {
+        this.managerInstances = managerInstances;
     }
 
-    public HashMap<String, Instance> getLoadBalanceWorkerTypeInstances() {
-        return loadBalanceWorkerTypeInstances;
+    public void addManagerInstance(String name, Instance instance) {
+        this.managerInstances.put(name, instance);
     }
 
-    public void setLoadBalanceWorkerTypeInstances(HashMap<String, Instance> loadBalanceWorkerTypeInstances) {
-        this.loadBalanceWorkerTypeInstances = loadBalanceWorkerTypeInstances;
+    public HashMap<String, Instance> getWorkerInstances() {
+        return workerInstances;
     }
 
-    public HashMap<String, Instance> getLoadBalanceManagerTypeInstances() {
-        return loadBalanceManagerTypeInstances;
+    public void setWorkerInstances(HashMap<String, Instance> workerInstances) {
+        this.workerInstances = workerInstances;
     }
 
-    public void setLoadBalanceManagerTypeInstances(HashMap<String, Instance> loadBalanceManagerTypeInstances) {
-        this.loadBalanceManagerTypeInstances = loadBalanceManagerTypeInstances;
+    public void addWorkerInstance(String name, Instance instance) {
+        this.workerInstances.put(name, instance);
+    }
+
+    public HashMap<String, Instance> getLoadBalanceWorkerInstances() {
+        return loadBalanceWorkerInstances;
+    }
+
+    public void setLoadBalanceWorkerInstances(HashMap<String, Instance> loadBalanceWorkerInstances) {
+        this.loadBalanceWorkerInstances = loadBalanceWorkerInstances;
+    }
+
+    public void addLoadBalanceWorkerInstance(String name, Instance instance) {
+        this.loadBalanceWorkerInstances.put(name, instance);
+    }
+
+    public HashMap<String, Instance> getLoadBalanceManagerInstances() {
+        return loadBalanceManagerInstances;
+    }
+
+    public void setLoadBalanceManagerInstances(HashMap<String, Instance> loadBalanceManagerInstances) {
+        this.loadBalanceManagerInstances = loadBalanceManagerInstances;
+    }
+
+    public void addLoadBalanceManagerInstance(String name, Instance instance) {
+        this.loadBalanceManagerInstances.put(name, instance);
     }
 
     public Instance getInstance(String instanceId) {

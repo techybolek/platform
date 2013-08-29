@@ -31,7 +31,7 @@ import java.util.Iterator;
 public class ConfigurationContextFactory {
     ConfigurationContext configurationContext;
 
-    public void ConfigurationContextFactory() {
+    public ConfigurationContextFactory() {
         configurationContext = new ConfigurationContext();
     }
 

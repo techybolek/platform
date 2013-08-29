@@ -37,7 +37,7 @@ public class SecurityContextFactory {
     private HashMap<String, TrustStore> trustStoreMap = new HashMap<String, TrustStore>();
     SecurityContext securityContext;
 
-    public void SecurityContextFactory() {
+    public SecurityContextFactory() {
         securityContext = new SecurityContext();
     }
 

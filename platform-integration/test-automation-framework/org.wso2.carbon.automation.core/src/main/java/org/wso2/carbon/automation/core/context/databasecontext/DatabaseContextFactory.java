@@ -33,7 +33,7 @@ public class DatabaseContextFactory {
 
     DatabaseContext databaseContext;
 
-    public void DatabaseContextFactory() {
+    public DatabaseContextFactory() {
         databaseContext = new DatabaseContext();
     }
 

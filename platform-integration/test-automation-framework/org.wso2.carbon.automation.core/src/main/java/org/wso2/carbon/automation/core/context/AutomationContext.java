@@ -30,8 +30,6 @@ import org.wso2.carbon.automation.core.context.toolcontext.ToolContext;
 import org.wso2.carbon.automation.core.context.usermanagementcontext.UserManagerContext;
 
 public class AutomationContext {
-    public void testMethod() {
-    }
 
     private ConfigurationContext configurationContext;
     private DatabaseContext databaseContext;

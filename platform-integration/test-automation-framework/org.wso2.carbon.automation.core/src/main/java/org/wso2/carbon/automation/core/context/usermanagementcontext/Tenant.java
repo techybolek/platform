@@ -72,6 +72,11 @@ public class Tenant {
         return tenantUsers;
     }
 
+    public User getTenantUser(String tenantId) {
+
+        return tenantUsers.get(tenantId);
+    }
+
 
 }
 

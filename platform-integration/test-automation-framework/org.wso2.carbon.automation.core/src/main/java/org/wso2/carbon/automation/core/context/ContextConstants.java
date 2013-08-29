@@ -80,4 +80,8 @@ public class ContextConstants {
     public static final String PLATFORM_CONTEXT_INSTANCE_WEB_CONTEXT = "webContext";
 
 
+
+    public static final String TENANT_ADMIN_KEY = "super";
+
+
 }

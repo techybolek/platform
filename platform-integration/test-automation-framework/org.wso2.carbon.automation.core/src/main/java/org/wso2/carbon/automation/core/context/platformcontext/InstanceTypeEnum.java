@@ -18,17 +18,14 @@
 
 package org.wso2.carbon.automation.core.context.platformcontext;
 
-
-public enum InstanceType {
-
-    WORKER("worker"), MANAGER("manager"), LB_WORKER("lb_worker"), LB_MANAGER("lb_manager"), INSTANCE("instance"), LB("lb");
-    private String typeCode;
-    private InstanceType(String s) {
-        typeCode = s;
-    }
-
-    public String getTypeCode() {
-        return typeCode;
-    }
-
+/*
+ * This enum class contains the type values of the instances
+ */
+public enum InstanceTypeEnum {
+    instance,
+    worker,
+    manager,
+    lb,
+    lb_worker,
+    lb_manager
 }

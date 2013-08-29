@@ -88,6 +88,7 @@ public class AutomationContextReader {
     private AutomationContext getAutomationPlatform(XMLStreamReader xmlStreamReader) {
         StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
         OMElement endPointElem = builder.getDocumentElement();
+        automationContext=new AutomationContext();
         DatabaseContextFactory databaseContextFactory = new DatabaseContextFactory();
         ConfigurationContextFactory configContextFactory = new ConfigurationContextFactory();
         PlatformContextFactory platformContextFactory = new PlatformContextFactory();
@@ -109,7 +110,7 @@ public class AutomationContextReader {
             }
             if (nodeElement.getLocalName().equals(ContextConstants.PLATFORM_CONTEXT_NODE)) {
 
-                platformContextFactory.createConfiguration(nodeElement);
+                platformContextFactory.createPlatformContext(nodeElement);
             }
             if (nodeElement.getLocalName().equals(ContextConstants.SECURITY_CONTEXT_NODE)) {
                 securityContextFactory.createSecurityContext(nodeElement);
@@ -124,6 +125,7 @@ public class AutomationContextReader {
             if (nodeElement.getLocalName().equals(ContextConstants.FEATURE_MANAGEMENT_CONTEXT_NODE)) {
                 featureManagementContextFactory.createFeatureManagementContext(nodeElement);
             }
+
         }
         automationContext.setConfigurationContext(configContextFactory.getConfigurationContext());
         automationContext.setDatabaseContext(databaseContextFactory.getDatabaseContext());

@@ -22,14 +22,14 @@ import org.wso2.carbon.automation.core.context.environmentcontext.EnvironmentCon
 
 public class AutomationContextFactory {
     AutomationContext automationContext;
-    public void createAutomationContext(String instanceGroupName,String instanceName,String tenantId)
+    public void createAutomationContext(String instanceGroupName,String instanceName,String domain,String tenantId)
     {
         automationContext = new AutomationContext();
         AutomationContextReader automationContextReader = new AutomationContextReader();
         automationContextReader.readAutomationContext();
         automationContext = automationContextReader.getAutomationContext();
         EnvironmentContextFactory environmentContextFactory = new EnvironmentContextFactory();
-        environmentContextFactory.createEnvironmentContext(automationContext,instanceGroupName,instanceName,tenantId);
+        environmentContextFactory.createEnvironmentContext(automationContext,instanceGroupName,instanceName,domain,tenantId);
         automationContext.setEnvironmentContext(environmentContextFactory.getEnvironmentContext());
     }
 

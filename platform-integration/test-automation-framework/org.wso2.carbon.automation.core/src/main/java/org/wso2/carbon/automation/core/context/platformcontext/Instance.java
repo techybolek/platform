@@ -24,7 +24,7 @@ package org.wso2.carbon.automation.core.context.platformcontext;
 public class Instance {
 
     private String name;
-    private InstanceType type;
+    private String type;
     private String host;
     private String httpPort;
     private String httpsPort;
@@ -38,7 +38,7 @@ public class Instance {
         this.name = name;
     }
 
-    public void setType(InstanceType type) {
+    public void setType(String type) {
 
         this.type = type;
     }
@@ -78,7 +78,7 @@ public class Instance {
         return name;
     }
 
-    public InstanceType getType() {
+    public String getType() {
 
         return type;
     }

@@ -18,17 +18,11 @@
 
 package org.wso2.carbon.automation.core.context.utils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.core.context.AutomationContext;
 import org.wso2.carbon.automation.core.context.platformcontext.Instance;
-import org.wso2.carbon.automation.core.environmentcontext.environmentvariables.Context;
-import org.wso2.carbon.automation.core.globalcontext.GlobalContextInitiator;
-import org.wso2.carbon.automation.core.globalcontext.frameworkcontextvariables.FrameworkContext;
-import org.wso2.carbon.automation.core.utils.UserInfo;
 
 public class UrlGenerationUtil {
-    private static final Log log = LogFactory.getLog(UrlGenerationUtil.class);
+
     AutomationContext automationContext;
     String nhttpsPort;
     String nhttpPort;
@@ -37,15 +31,17 @@ public class UrlGenerationUtil {
     String hostName;
     String webContextRoot;
     String tenantDomain;
-    boolean webContextEnabled;
+    boolean webContextEnabled=true;
     boolean portEnabled = true;
     boolean isRunningOnCloud = false;
 
     public UrlGenerationUtil
             (AutomationContext context, String instanceGroupName, String instanceName,
-             String tenantId) {
-        this.automationContext = context;
-        Instance automationInstance = automationContext.getPlatformContext()
+             String domain, String tenantUserId) {
+        automationContext = new AutomationContext();
+        automationContext = context;
+        Instance automationInstance = new Instance();
+              automationInstance=  automationContext.getPlatformContext()
                 .getInstanceGroup(instanceGroupName).getInstance(instanceName);
         nhttpsPort = automationInstance.getNhttpsPort();
         nhttpPort = automationInstance.getNhttpPort();
@@ -53,14 +49,18 @@ public class UrlGenerationUtil {
         httpPort = automationInstance.getHttpPort();
         hostName = automationInstance.getHost();
         webContextRoot = automationInstance.getWebContext();
-        automationContext.getUserManagerContext().getTenant(tenantId);
+        automationContext.getUserManagerContext().getTenant(domain).getTenantUser(tenantUserId);
         if ((nhttpPort == null && nhttpsPort == null) || httpPort == null && httpsPort == null) {
             portEnabled = false;
         }
         if (automationContext.getConfigurationContext().getConfiguration().getExecutionMode().equals("tenant")) {
             isRunningOnCloud = true;
         }
-        tenantDomain = automationContext.getUserManagerContext().getTenant(tenantId).getDomain();
+        tenantDomain = domain;
+        if(webContextRoot==null)
+        {
+            webContextEnabled= false;
+        }
     }
 
     public String getHttpServiceURL() {
@@ -253,36 +253,6 @@ public class UrlGenerationUtil {
         return backendUrl;
     }
 
-    public String getBackendUrl(String httpsPort, String hostName, String webContextRoot) {
-        String backendUrl;
-        FrameworkContext frameworkContext = new FrameworkContext();
-        GlobalContextInitiator globalContextInitiator = new GlobalContextInitiator();
-        frameworkContext = globalContextInitiator.getContext().getFrameworkContext();
-        boolean webContextEnabled = frameworkContext.getEnvironmentSettings()
-                .isEnableCarbonWebContext();
-        boolean portEnabled = frameworkContext.getEnvironmentSettings().isEnablePort();
-
-        if (portEnabled && webContextEnabled) {
-            if (webContextRoot != null && httpsPort != null) {
-                backendUrl = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot
-                        + "/" + "services/";
-            } else if (webContextRoot == null && httpsPort != null) {
-                backendUrl = "https://" + hostName + ":" + httpsPort + "/" + "services/";
-            } else if (webContextRoot == null) {
-                backendUrl = "https://" + hostName + "/" + "services/";
-            } else {
-                backendUrl = "https://" + hostName + "/" + webContextRoot + "/" + "services/";
-            }
-        } else if (!portEnabled && webContextEnabled) {
-            backendUrl = "https://" + hostName + "/" + webContextRoot + "/" + "services/";
-        } else if (portEnabled && !webContextEnabled) {
-            backendUrl = "https://" + hostName + ":" + httpsPort + "/" + "services/";
-        } else {
-            backendUrl = "https://" + hostName + "/" + "services/";
-        }
-        return backendUrl;
-    }
-
     public String getWebAppURL() {
         String webAppURL;
         if (isRunningOnCloud) {
@@ -299,28 +269,5 @@ public class UrlGenerationUtil {
             }
         }
         return webAppURL;
-    }
-
-    public String getRemoteRegistryURLOfProducts() {
-        String remoteRegistryURL;
-        if (portEnabled && webContextEnabled) {
-            if (webContextRoot != null && httpsPort != null) {
-                remoteRegistryURL = "https://" + hostName + ":" + httpsPort + "/" + webContextRoot
-                        + "/" + "registry/";
-            } else if (webContextRoot == null && httpsPort != null) {
-                remoteRegistryURL = "https://" + hostName + ":" + httpsPort + "/" + "registry/";
-            } else if (webContextRoot == null) {
-                remoteRegistryURL = "https://" + hostName + "/" + "services/";
-            } else {
-                remoteRegistryURL = "https://" + hostName + "/" + webContextRoot + "/" + "registry/";
-            }
-        } else if (!portEnabled && webContextEnabled) {
-            remoteRegistryURL = "https://" + hostName + "/" + webContextRoot + "/" + "registry/";
-        } else if (portEnabled && !webContextEnabled) {
-            remoteRegistryURL = "https://" + hostName + ":" + httpsPort + "/" + "registry/";
-        } else {
-            remoteRegistryURL = "https://" + hostName + "/" + "registry/";
-        }
-        return remoteRegistryURL;
     }
 }
