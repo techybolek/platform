@@ -92,7 +92,8 @@
                     columns = new Column[0];
                 }
                 for (int j = 0; j < columns.length; j++) {
-                    valueArray.add(StringEscapeUtils.escapeXml(columns[j].getValue()));
+                    valueArray.add("<pre>KEY: " + StringEscapeUtils.escapeXml(columns[j].getName()) + "\nVALUE: " +
+                        StringEscapeUtils.escapeXml(columns[j].getValue()) + "</pre>");
                 }
                 if (columns.length < 3) {
                     for (int k = 0; k < 3 - columns.length; k++) {
