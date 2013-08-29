@@ -83,8 +83,10 @@ public class CachingOutHandler extends CachingHandler {
             }
         }
 
-        CachingUtils.getCacheForService(msgContext.getAxisService().getName()).put(
+        if (response !=null ) {
+            CachingUtils.getCacheForService(msgContext.getAxisService().getName()).put(
                 response.getRequestHash(), response);
+        }
         return InvocationResponse.CONTINUE;
     }
 }
