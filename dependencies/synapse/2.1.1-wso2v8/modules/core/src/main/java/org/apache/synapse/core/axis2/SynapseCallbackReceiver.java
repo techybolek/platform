@@ -374,6 +374,10 @@ public class SynapseCallbackReceiver extends CallbackReceiver {
 
             synapseInMessageContext.setResponse(true);
 
+            for(Object faultHandler : faultStack){
+                synapseInMessageContext.pushFaultHandler((FaultHandler)faultHandler);
+            }
+
             Object obj = synapseOutMsgCtx.getProperty(SynapseConstants.FORCE_ERROR_PROPERTY);
             String errorOnSOAPFault = (String) obj;
 
@@ -396,24 +400,12 @@ public class SynapseCallbackReceiver extends CallbackReceiver {
                                 successfulEndpoint.getName()+" to fail");
                     }
                     
-                    //setup new pipe configuration..if failure happens (this will be setup as the source writer and during the TargetContext
-                    //clean up operation the writer will be reset and pull to the buffer
-                	MessageContext axis2OUTMC =((Axis2MessageContext) synapseOutMsgCtx).getAxis2MessageContext();
-                    NHttpServerConnection conn = (NHttpServerConnection) axis2OUTMC.getProperty("pass-through.Source-Connection");
-					if (conn != null) {
-						SourceConfiguration sourceConfiguration = (SourceConfiguration) axis2OUTMC.getProperty("PASS_THROUGH_SOURCE_CONFIGURATION");
-						Pipe pipe = new Pipe(conn, sourceConfiguration.getBufferFactory().getBuffer(), "source",
-						                     sourceConfiguration);
-						axis2OUTMC.setProperty(PassThroughConstants.PASS_THROUGH_PIPE, pipe);
-					}
-                    
-                    
-                   
-                    StatisticsReporter.reportFaultForAll(synapseOutMsgCtx,
+                    StatisticsReporter.reportFaultForAll(synapseInMessageContext,
                             ErrorLogFactory.createErrorLog(response));
-                    synapseOutMsgCtx.setProperty(SynapseConstants.SENDING_FAULT, Boolean.TRUE);
-                    synapseOutMsgCtx.setProperty(SynapseConstants.ERROR_CODE, SynapseConstants.ENDPOINT_CUSTOM_ERROR);
-                    ((FaultHandler) successfulEndpoint).handleFault(synapseOutMsgCtx, null);
+                    synapseInMessageContext.setProperty(SynapseConstants.SENDING_FAULT, Boolean.TRUE);
+                    synapseInMessageContext.setProperty(SynapseConstants.ERROR_CODE,
+                            SynapseConstants.ENDPOINT_CUSTOM_ERROR);
+                    ((FaultHandler) successfulEndpoint).handleFault(synapseInMessageContext, null);
                     return;
                 } else {
                     successfulEndpoint.onSuccess();
