@@ -27,12 +27,15 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ArtifactUnloader;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.service.mgt.internal.DataHolder;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.deployment.GhostDeployer;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.util.Collection;
@@ -65,7 +68,7 @@ public class ServiceUnloader implements ArtifactUnloader {
                 unloadInactiveServices(entry.getValue(), tenantDomain);
             }
             // unload from super tenant as well..
-            unloadInactiveServices(mainConfigCtx, "Super Tenant");
+            unloadInactiveServices(mainConfigCtx, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         } catch (AxisFault axisFault) {
             log.error("Error while unloading inactive services..", axisFault);
         }
@@ -75,57 +78,73 @@ public class ServiceUnloader implements ArtifactUnloader {
     private void unloadInactiveServices(ConfigurationContext configCtx,
                                         String tenantDomain) throws AxisFault {
         AxisConfiguration axisConfig = configCtx.getAxisConfiguration();
-        if (axisConfig != null) {
-            // iterate through all services in the current tenant
-            Collection<AxisService> services = axisConfig.getServices().values();
-            for (AxisService service : services) {
-                if (isSkippedServiceType(service)) {
-                    continue;
-                }
-                // get the last usage parameter from the service
-                Parameter lastUsageParam = service
-                        .getParameter(CarbonConstants.SERVICE_LAST_USED_TIME);
-                if (lastUsageParam != null && isInactive((Long) lastUsageParam.getValue())) {
-                    // service is inactive. now we have to unload it..
-                    GhostDeployer ghostDeployer = GhostDeployerUtils.getGhostDeployer(axisConfig);
-                    if (ghostDeployer != null && service.getFileName() != null) {
-                        AxisServiceGroup existingSG = (AxisServiceGroup) service.getParent();
-                        // remove the existing actual service
-                        log.info("Unloading actual Service Group : " + existingSG
-                                .getServiceGroupName() + " and adding a Ghost Service Group. " +
-                                 "Tenant Domain: " + tenantDomain);
-                        // add this parameter to keep track of this service at ghost dispatcher
-                        existingSG.addParameter(CarbonConstants.IS_ARTIFACT_BEING_UNLOADED, "true");
-                        GhostDeployerUtils.addServiceGroupToTransitMap(existingSG, axisConfig);
-                        // we can't delete the configs in the registry. so keep history..
-                        existingSG.addParameter(CarbonConstants.KEEP_SERVICE_HISTORY_PARAM, "true");
-                        axisConfig.removeServiceGroup(existingSG.getServiceGroupName());
-                        if (log.isDebugEnabled()) {
-                            log.debug("Successfully removed actual Service Group : " +
-                                    existingSG.getServiceGroupName() + " Tenant Domain: " +
-                                    tenantDomain);
-                        }
-                        // Create the Ghost service group using the file name
-                        File ghostFile = GhostDeployerUtils.getGhostFile(service.getFileName()
-                                                                                 .getPath(), axisConfig);
-                        AxisServiceGroup ghostServiceGroup =
-                                GhostDeployerUtils.createGhostServiceGroup(axisConfig,
-                                                                           ghostFile, service.getFileName());
-                        if (ghostServiceGroup != null) {
-                            // add the ghost service
-                            axisConfig.addServiceGroup(ghostServiceGroup);
-                            // remove the service group from transit map
-                            GhostDeployerUtils.removeServiceGroupFromTransitMap(ghostServiceGroup,
-                                                                         axisConfig);
+        int tenantId = MultitenantUtils.getTenantId(configCtx);
+
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                ctx.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+                ctx.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            } else {
+                ctx.setTenantId(tenantId);
+                ctx.setTenantDomain(tenantDomain);
+            }
+
+            if (axisConfig != null) {
+                // iterate through all services in the current tenant
+                Collection<AxisService> services = axisConfig.getServices().values();
+                for (AxisService service : services) {
+                    if (isSkippedServiceType(service)) {
+                        continue;
+                    }
+                    // get the last usage parameter from the service
+                    Parameter lastUsageParam = service
+                            .getParameter(CarbonConstants.SERVICE_LAST_USED_TIME);
+                    if (lastUsageParam != null && isInactive((Long) lastUsageParam.getValue())) {
+                        // service is inactive. now we have to unload it..
+                        GhostDeployer ghostDeployer = GhostDeployerUtils.getGhostDeployer(axisConfig);
+                        if (ghostDeployer != null && service.getFileName() != null) {
+                            AxisServiceGroup existingSG = (AxisServiceGroup) service.getParent();
+                            // remove the existing actual service
+                            log.info("Unloading actual Service Group : " + existingSG
+                                    .getServiceGroupName() + " and adding a Ghost Service Group. " +
+                                    "Tenant Domain: " + tenantDomain);
+                            // add this parameter to keep track of this service at ghost dispatcher
+                            existingSG.addParameter(CarbonConstants.IS_ARTIFACT_BEING_UNLOADED, "true");
+                            GhostDeployerUtils.addServiceGroupToTransitMap(existingSG, axisConfig);
+                            // we can't delete the configs in the registry. so keep history..
+                            existingSG.addParameter(CarbonConstants.KEEP_SERVICE_HISTORY_PARAM, "true");
+                            axisConfig.removeServiceGroup(existingSG.getServiceGroupName());
                             if (log.isDebugEnabled()) {
-                                log.debug("Successfully added Ghost Service Group : " +
-                                        ghostServiceGroup.getServiceGroupName() + " Tenant Domain: " +
+                                log.debug("Successfully removed actual Service Group : " +
+                                        existingSG.getServiceGroupName() + " Tenant Domain: " +
                                         tenantDomain);
+                            }
+                            // Create the Ghost service group using the file name
+                            File ghostFile = GhostDeployerUtils.getGhostFile(service.getFileName()
+                                    .getPath(), axisConfig);
+                            AxisServiceGroup ghostServiceGroup =
+                                    GhostDeployerUtils.createGhostServiceGroup(axisConfig,
+                                            ghostFile, service.getFileName());
+                            if (ghostServiceGroup != null) {
+                                // add the ghost service
+                                axisConfig.addServiceGroup(ghostServiceGroup);
+                                // remove the service group from transit map
+                                GhostDeployerUtils.removeServiceGroupFromTransitMap(ghostServiceGroup,
+                                        axisConfig);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Successfully added Ghost Service Group : " +
+                                            ghostServiceGroup.getServiceGroupName() + " Tenant Domain: " +
+                                            tenantDomain);
+                                }
                             }
                         }
                     }
                 }
             }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
