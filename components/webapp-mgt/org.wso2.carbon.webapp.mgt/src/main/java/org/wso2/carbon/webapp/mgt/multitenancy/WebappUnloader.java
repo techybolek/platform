@@ -27,6 +27,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ArtifactUnloader;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.utils.deployment.GhostDeployer;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.webapp.mgt.DataHolder;
 import org.wso2.carbon.webapp.mgt.TomcatGenericWebappsDeployer;
@@ -62,23 +63,27 @@ public class WebappUnloader implements ArtifactUnloader {
             unloadInactiveWebapps(entry.getValue(), tenantDomain);
         }
         // unload from super tenant as well..
-        unloadInactiveWebapps(mainConfigCtx, "Super Tenant");
+        unloadInactiveWebapps(mainConfigCtx, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
     private void unloadInactiveWebapps(ConfigurationContext configCtx,
-                                       String tenantDomain) {
+                                       String
+
+                                               tenantDomain) {
         WebApplicationsHolder webApplicationsHolder = (WebApplicationsHolder)
                 configCtx.getProperty(CarbonConstants.WEB_APPLICATIONS_HOLDER);
         int tenantId = MultitenantUtils.getTenantId(configCtx);
 
         try {
-            if (tenantId > 0) {
-                PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                ctx.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+                ctx.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            } else {
+                ctx.setTenantId(tenantId);
+                ctx.setTenantDomain(tenantDomain);
             }
-            PrivilegedCarbonContext privilegedCarbonContext =
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext();
-            privilegedCarbonContext.setTenantId(tenantId);
-            privilegedCarbonContext.setTenantDomain(tenantDomain);
 
             if (webApplicationsHolder != null) {
                 for (WebApplication webApplication :
@@ -129,9 +134,7 @@ public class WebappUnloader implements ArtifactUnloader {
                 }
             }
         } finally {
-            if (tenantId > 0) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
