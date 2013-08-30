@@ -18,12 +18,10 @@
  */
 package org.wso2.carbon.rssmanager.core.manager;
 
-import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
-
 public interface RSSManagerFactory {
 
-    SystemRSSManager getSystemRSSManager() throws RSSManagerException;
+    SystemRSSManager getSystemRSSManager();
 
-    UserDefinedRSSManager getUserDefinedRSSManager() throws RSSManagerException;
+    UserDefinedRSSManager getUserDefinedRSSManager();
 
 }

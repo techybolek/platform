@@ -35,9 +35,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class SystemRSSManager extends RSSManager {
+public abstract class SystemRSSManager extends AbstractRSSManager {
 
-    public SystemRSSManager(RSSConfiguration config) throws RSSManagerException {
+    public SystemRSSManager(RSSConfiguration config) {
         super(config);
     }
 

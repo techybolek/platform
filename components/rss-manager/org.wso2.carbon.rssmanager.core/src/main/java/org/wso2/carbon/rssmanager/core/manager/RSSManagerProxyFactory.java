@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -21,16 +21,10 @@ package org.wso2.carbon.rssmanager.core.manager;
 
 import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
 
-public abstract class AbstractRSSManagerFactory implements RSSManagerFactory {
+public class RSSManagerProxyFactory {
 
-    private RSSConfiguration config;
-
-    public AbstractRSSManagerFactory(RSSConfiguration config) {
-        this.config = config;
+    public static RSSManagerProxy getRSSManagerProxy(String type, RSSConfiguration config) {
+        return new RSSManagerProxy(type, config);
     }
 
-    public RSSConfiguration getConfig() {
-        return config;
-    }
-    
 }

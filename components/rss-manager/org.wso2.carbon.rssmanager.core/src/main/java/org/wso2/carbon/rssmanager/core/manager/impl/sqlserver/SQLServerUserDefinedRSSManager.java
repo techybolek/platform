@@ -27,7 +27,7 @@ import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
 public class SQLServerUserDefinedRSSManager extends UserDefinedRSSManager {
 
-    public SQLServerUserDefinedRSSManager(RSSConfiguration config) throws RSSManagerException {
+    public SQLServerUserDefinedRSSManager(RSSConfiguration config) {
         super(config);
     }
 

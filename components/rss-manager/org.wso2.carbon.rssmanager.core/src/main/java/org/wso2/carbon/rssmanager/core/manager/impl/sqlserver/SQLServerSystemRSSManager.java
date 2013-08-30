@@ -43,7 +43,7 @@ public class SQLServerSystemRSSManager extends SystemRSSManager {
 
     private static final Log log = LogFactory.getLog(SQLServerSystemRSSManager.class);
 
-    public SQLServerSystemRSSManager(RSSConfiguration config) throws RSSManagerException {
+    public SQLServerSystemRSSManager(RSSConfiguration config) {
         super(config);
     }
 

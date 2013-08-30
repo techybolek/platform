@@ -27,7 +27,7 @@ import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
 public class MySQLUserDefinedRSSManager extends UserDefinedRSSManager {
 
-    public MySQLUserDefinedRSSManager(RSSConfiguration config) throws RSSManagerException {
+    public MySQLUserDefinedRSSManager(RSSConfiguration config) {
         super(config);
     }
 

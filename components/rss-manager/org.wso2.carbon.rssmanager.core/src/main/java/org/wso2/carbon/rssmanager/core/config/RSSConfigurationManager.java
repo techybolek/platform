@@ -22,9 +22,8 @@ package org.wso2.carbon.rssmanager.core.config;
 import org.w3c.dom.Document;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.RSSManager;
-import org.wso2.carbon.rssmanager.core.manager.RSSManagerFactory;
+import org.wso2.carbon.rssmanager.core.manager.RSSManagerProxyFactory;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -71,16 +70,12 @@ public class RSSConfigurationManager {
             Unmarshaller unmarshaller = ctx.createUnmarshaller();
             this.currentRSSConfig = (RSSConfiguration) unmarshaller.unmarshal(doc);
 
-            this.rssManager = initRSSManager();
+            this.rssManager =
+                    RSSManagerProxyFactory.getRSSManagerProxy(
+                            getRSSConfiguration().getRSSProvider(), getRSSConfiguration());
         } catch (Exception e) {
             throw new RSSManagerException("Error occurred while initializing RSS config", e);
         }
-    }
-
-    private RSSManager initRSSManager() throws RSSManagerException {
-        RSSManagerFactory factory =
-                AbstractRSSManagerFactory.getRSSManagerFactory(getRSSConfiguration());
-        return factory.getSystemRSSManager();
     }
 
     private RSSConfiguration getRSSConfiguration() {

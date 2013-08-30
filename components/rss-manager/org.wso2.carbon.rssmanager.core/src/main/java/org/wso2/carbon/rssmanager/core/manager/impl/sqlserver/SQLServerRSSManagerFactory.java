@@ -20,25 +20,22 @@
 package org.wso2.carbon.rssmanager.core.manager.impl.sqlserver;
 
 import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
-import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.manager.RSSManagerFactory;
+import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
-public class SQLServerRSSManagerFactory implements RSSManagerFactory {
-
-    private RSSConfiguration config;
+public class SQLServerRSSManagerFactory extends AbstractRSSManagerFactory {
 
     public SQLServerRSSManagerFactory(RSSConfiguration config) {
-        this.config = config;
+        super(config);
     }
 
-    public SystemRSSManager getSystemRSSManager() throws RSSManagerException {
-        return new SQLServerSystemRSSManager(config);
+    public SystemRSSManager getSystemRSSManager() {
+        return new SQLServerSystemRSSManager(getConfig());
     }
 
-    public UserDefinedRSSManager getUserDefinedRSSManager() throws RSSManagerException {
-        return new SQLServerUserDefinedRSSManager(config);
+    public UserDefinedRSSManager getUserDefinedRSSManager() {
+        return new SQLServerUserDefinedRSSManager(getConfig());
     }
     
 }

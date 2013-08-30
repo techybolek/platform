@@ -119,10 +119,27 @@ public final class RSSManagerConstants {
         private SecureValueProperties() {
             throw new AssertionError();
         }
-
         public static final String SECRET_ALIAS_ATTRIBUTE_NAME_WITH_NAMESPACE = "secretAlias";
         public static final String SECURE_VAULT_NS = "http://org.wso2.securevault/configuration";
+    }
 
+    public static final class RSSManagerProviderTypes {
+        private RSSManagerProviderTypes() {
+            throw new AssertionError();
+        }
+        public static final String RM_PROVIDER_TYPE_MYSQL = "MYSQL";
+        public static final String RM_PROVIDER_TYPE_ORACLE = "ORACLE";
+        public static final String RM_PROVIDER_TYPE_SQLSERVER = "SQLSERVER";
+        public static final String RM_PROVIDER_TYPE_POSTGRES = "POSTGRES";
+        public static final String RM_PROVIDER_TYPE_H2 = "H2";
+    }
+
+    public static final class RSSManagerTypes {
+        private RSSManagerTypes() {
+            throw new AssertionError();
+        }
+        public static final String RM_TYPE_SYSTEM = "SYSTEM";
+        public static final String RM_TYPE_USER_DEFINED = "USER_DEFINED";
     }
 
 }

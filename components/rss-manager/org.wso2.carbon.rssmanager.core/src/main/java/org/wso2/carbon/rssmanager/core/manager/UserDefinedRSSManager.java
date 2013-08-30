@@ -35,9 +35,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class UserDefinedRSSManager extends RSSManager {
+public abstract class UserDefinedRSSManager extends AbstractRSSManager {
 
-    public UserDefinedRSSManager(RSSConfiguration config) throws RSSManagerException {
+    public UserDefinedRSSManager(RSSConfiguration config) {
         super(config);
     }
 

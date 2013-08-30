@@ -43,7 +43,7 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
 
     private static final Log log = LogFactory.getLog(PostgresSystemRSSManager.class);
 
-    public PostgresSystemRSSManager(RSSConfiguration config) throws RSSManagerException {
+    public PostgresSystemRSSManager(RSSConfiguration config) {
         super(config);
     }
 

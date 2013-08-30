@@ -20,64 +20,64 @@ package org.wso2.carbon.rssmanager.core.manager.impl.h2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
-import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
-import org.wso2.carbon.rssmanager.core.entity.*;
-import org.wso2.carbon.rssmanager.core.exception.EntityAlreadyExistsException;
-import org.wso2.carbon.rssmanager.core.exception.EntityNotFoundException;
+import org.wso2.carbon.rssmanager.core.entity.Database;
+import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeSet;
+import org.wso2.carbon.rssmanager.core.entity.DatabaseUser;
+import org.wso2.carbon.rssmanager.core.entity.UserDatabaseEntry;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
-import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
-import java.io.ByteArrayInputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class H2SystemRSSManager extends SystemRSSManager {
 
     private static final Log log = LogFactory.getLog(H2SystemRSSManager.class);
 
-    public H2SystemRSSManager(RSSConfiguration config) throws RSSManagerException {
+    public H2SystemRSSManager(RSSConfiguration config) {
         super(config);
     }
 
     @Override
-    public Database createDatabase(RSSEnvironmentContext ctx, Database database) throws RSSManagerException {
+    public Database createDatabase(RSSEnvironmentContext ctx,
+                                   Database database) throws RSSManagerException {
         return null;
     }
 
     @Override
-    public void dropDatabase(RSSEnvironmentContext ctx, String rssInstanceName, String databaseName) throws RSSManagerException {
+    public void dropDatabase(RSSEnvironmentContext ctx, String rssInstanceName,
+                             String databaseName) throws RSSManagerException {
 
     }
 
     @Override
-    public DatabaseUser createDatabaseUser(RSSEnvironmentContext ctx, DatabaseUser user) throws RSSManagerException {
+    public DatabaseUser createDatabaseUser(RSSEnvironmentContext ctx,
+                                           DatabaseUser user) throws RSSManagerException {
         return null;
     }
 
     @Override
-    public void dropDatabaseUser(RSSEnvironmentContext ctx, String rssInstanceName, String username) throws RSSManagerException {
+    public void dropDatabaseUser(RSSEnvironmentContext ctx, String rssInstanceName,
+                                 String username) throws RSSManagerException {
 
     }
 
     @Override
-    public void editDatabaseUserPrivileges(RSSEnvironmentContext ctx, DatabasePrivilegeSet privileges, DatabaseUser databaseUser, String databaseName) throws RSSManagerException {
+    public void editDatabaseUserPrivileges(RSSEnvironmentContext ctx,
+                                           DatabasePrivilegeSet privileges,
+                                           DatabaseUser databaseUser,
+                                           String databaseName) throws RSSManagerException {
 
     }
 
     @Override
-    public void attachUserToDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude, String templateName) throws RSSManagerException {
+    public void attachUserToDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude,
+                                     String templateName) throws RSSManagerException {
 
     }
 
     @Override
-    public void detachUserFromDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude) throws RSSManagerException {
+    public void detachUserFromDatabase(RSSEnvironmentContext ctx,
+                                       UserDatabaseEntry ude) throws RSSManagerException {
 
     }
 

@@ -42,7 +42,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
 
     private static final Log log = LogFactory.getLog(MySQLSystemRSSManager.class);
 
-    public MySQLSystemRSSManager(RSSConfiguration config) throws RSSManagerException {
+    public MySQLSystemRSSManager(RSSConfiguration config) {
         super(config);
     }
 

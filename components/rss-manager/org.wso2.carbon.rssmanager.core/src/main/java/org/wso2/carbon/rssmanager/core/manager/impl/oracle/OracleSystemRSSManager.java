@@ -26,7 +26,7 @@ import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 
 public class OracleSystemRSSManager extends SystemRSSManager {
     
-    public OracleSystemRSSManager(RSSConfiguration config) throws RSSManagerException {
+    public OracleSystemRSSManager(RSSConfiguration config) {
         super(config);
     }
 

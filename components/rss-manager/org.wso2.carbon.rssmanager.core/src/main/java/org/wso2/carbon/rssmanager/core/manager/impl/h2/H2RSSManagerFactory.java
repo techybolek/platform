@@ -20,25 +20,21 @@
 package org.wso2.carbon.rssmanager.core.manager.impl.h2;
 
 import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
-import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.manager.RSSManagerFactory;
+import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
-import org.wso2.carbon.rssmanager.core.manager.impl.mysql.MySQLUserDefinedRSSManager;
 
-public class H2RSSManagerFactory implements RSSManagerFactory {
-
-    private RSSConfiguration config;
+public class H2RSSManagerFactory extends AbstractRSSManagerFactory {
 
     public H2RSSManagerFactory(RSSConfiguration config) {
-        this.config = config;
+        super(config);
     }
 
-    public SystemRSSManager getSystemRSSManager() throws RSSManagerException {
-        return new H2SystemRSSManager(config);
+    public SystemRSSManager getSystemRSSManager() {
+        return new H2SystemRSSManager(getConfig());
     }
 
-    public UserDefinedRSSManager getUserDefinedRSSManager() throws RSSManagerException {
+    public UserDefinedRSSManager getUserDefinedRSSManager() {
         return null;
     }
     

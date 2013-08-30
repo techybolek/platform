@@ -27,7 +27,7 @@ import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
 public class PostgresUserDefinedRSSManager extends UserDefinedRSSManager {
     
-    public PostgresUserDefinedRSSManager(RSSConfiguration config) throws RSSManagerException {
+    public PostgresUserDefinedRSSManager(RSSConfiguration config) {
         super(config);
     }
 
