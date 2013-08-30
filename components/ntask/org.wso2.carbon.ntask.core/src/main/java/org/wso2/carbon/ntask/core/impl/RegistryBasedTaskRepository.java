@@ -330,6 +330,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
     @Override
     public String getTaskMetadataProp(String taskName, String key) throws TaskException {
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
             return this.getTaskMetadataPropResource(taskName).getProperty(key);
         } catch (TaskException e) {
             if (Code.NO_TASK_EXISTS.equals(e.getCode())) {
@@ -341,6 +344,8 @@ public class RegistryBasedTaskRepository implements TaskRepository {
         } catch (RegistryException e) {
             throw new TaskException("Error in getting task metadata properties: " + e.getMessage(),
                     Code.UNKNOWN, e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 

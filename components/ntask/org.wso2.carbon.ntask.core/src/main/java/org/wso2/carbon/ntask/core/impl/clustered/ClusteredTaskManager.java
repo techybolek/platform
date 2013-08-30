@@ -191,7 +191,16 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 
     @Override
     public void registerTask(TaskInfo taskInfo) throws TaskException {
+        /* if the task registration already exists, we have to make sure we save the current location
+         * of the task, since this is a task registration update, we will want to schedule the task
+         * in the same server as earlier */
+        String locationId = this.getTaskRepository().getTaskMetadataProp(
+                taskInfo.getName(), TASK_MEMBER_LOCATION_META_PROP_ID);
         this.registerLocalTask(taskInfo);
+        if (locationId != null) {
+            this.getTaskRepository().setTaskMetadataProp(taskInfo.getName(),
+                    TASK_MEMBER_LOCATION_META_PROP_ID, locationId);
+        }
     }
 
     @Override
