@@ -24,6 +24,8 @@ import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
 import org.wso2.carbon.rssmanager.core.manager.impl.h2.H2RSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.impl.mysql.MySQLRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.impl.oracle.OracleRSSManagerFactory;
+import org.wso2.carbon.rssmanager.core.manager.impl.postgres.PostgresRSSManagerFactory;
+import org.wso2.carbon.rssmanager.core.manager.impl.sqlserver.SQLServerRSSManagerFactory;
 
 public final class RSSManagerFactoryLoader {
 
@@ -36,10 +38,10 @@ public final class RSSManagerFactoryLoader {
             return new OracleRSSManagerFactory(config);
         } else if (RSSManagerConstants.RSSManagerProviderTypes.
                 RM_PROVIDER_TYPE_SQLSERVER.equals(type)) {
-            return new OracleRSSManagerFactory(config);
+            return new SQLServerRSSManagerFactory(config);
         } else if (RSSManagerConstants.RSSManagerProviderTypes.
                 RM_PROVIDER_TYPE_POSTGRES.equals(type)) {
-            return new OracleRSSManagerFactory(config);
+            return new PostgresRSSManagerFactory(config);
         } else if (RSSManagerConstants.RSSManagerProviderTypes.
                 RM_PROVIDER_TYPE_H2.equals(type)) {
             return new H2RSSManagerFactory(config);

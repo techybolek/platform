@@ -325,7 +325,7 @@ public class RSSAdmin extends AbstractAdmin {
                 throw new RSSManagerException(msg);
             }
         } catch (Exception e) {
-            String msg = "Error occurred while testing the JDBC connection";
+            String msg = "Error occurred while testing database connectivity : " + e.getMessage();
             handleException(msg, e);
         } finally {
             if (conn != null) {
