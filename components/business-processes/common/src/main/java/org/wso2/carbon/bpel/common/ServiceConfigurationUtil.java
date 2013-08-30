@@ -28,11 +28,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bpel.common.config.EndpointConfiguration;
+import org.wso2.carbon.bpel.common.internal.BPELCommonServiceComponent;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.unifiedendpoint.core.UnifiedEndpointConstants;
 
 import javax.xml.namespace.QName;
@@ -147,34 +148,46 @@ public class ServiceConfigurationUtil {
         OMElement serviceElement = null;
         Registry registry;
         String location;
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        RegistryService registryService = BPELCommonServiceComponent.getRegistryService();
 
         if (registryLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_CONF_REG)) {
-            registry =
-                    CarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_CONFIGURATION);
-            location = registryLocation.substring(registryLocation.indexOf(
-                    UnifiedEndpointConstants.VIRTUAL_CONF_REG) +
-                                                  UnifiedEndpointConstants.VIRTUAL_CONF_REG.length());
-            serviceElement = loadServiceElement(registry, location);
+            try {
+                registry = registryService.getConfigSystemRegistry(tenantId);
+                location = registryLocation.substring(registryLocation.indexOf(
+                        UnifiedEndpointConstants.VIRTUAL_CONF_REG) +
+                        UnifiedEndpointConstants.VIRTUAL_CONF_REG.length());
+                serviceElement = loadServiceElement(registry, location);
+            } catch (RegistryException ex) {
+                String errMsg = "Error occurred while getting registry service" + ex.getLocalizedMessage();
+                log.warn(errMsg, ex);
+            }
         } else if (registryLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_GOV_REG)) {
-            registry =
-                    CarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_GOVERNANCE);
-            location = registryLocation.substring(registryLocation.indexOf(
-                    UnifiedEndpointConstants.VIRTUAL_GOV_REG) +
-                                                  UnifiedEndpointConstants.VIRTUAL_GOV_REG.length());
-            serviceElement = loadServiceElement(registry, location);
+            try {
+                registry = registryService.getConfigSystemRegistry(tenantId);
+                location = registryLocation.substring(registryLocation.indexOf(
+                        UnifiedEndpointConstants.VIRTUAL_GOV_REG) +
+                        UnifiedEndpointConstants.VIRTUAL_GOV_REG.length());
+                serviceElement = loadServiceElement(registry, location);
+            } catch (RegistryException ex) {
+                String errMsg = "Error occurred while getting registry service" + ex.getLocalizedMessage();
+                log.warn(errMsg, ex);
+            }
         } else if (registryLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_REG)) {
-            registry =
-                    CarbonContext.getCurrentContext().getRegistry(RegistryType.LOCAL_REPOSITORY);
-            location = registryLocation.substring(registryLocation.indexOf(
-                    UnifiedEndpointConstants.VIRTUAL_REG) +
-                                                  UnifiedEndpointConstants.VIRTUAL_REG.length());
-            serviceElement = loadServiceElement(registry, location);
+            try {
+                registry = registryService.getConfigSystemRegistry(tenantId);
+                location = registryLocation.substring(registryLocation.indexOf(
+                        UnifiedEndpointConstants.VIRTUAL_REG) +
+                        UnifiedEndpointConstants.VIRTUAL_REG.length());
+                serviceElement = loadServiceElement(registry, location);
+            } catch (RegistryException ex) {
+                String errMsg = "Error occurred while getting registry service" + ex.getLocalizedMessage();
+                log.warn(errMsg, ex);
+            }
         } else {
             String errMsg = "Invalid service.xml file location: " + registryLocation;
             log.warn(errMsg);
         }
-
-
         return serviceElement;
     }
 
