@@ -67,7 +67,7 @@
     String comparator = CassandraAdminClientHelper.getAliasForComparatorTypeClass(cfInformation.getComparatorType());
     String subComparator = CassandraAdminClientHelper.getAliasForComparatorTypeClass(cfInformation.getSubComparatorType());
     String validationClass =
-            CassandraAdminClientHelper.getAliasForComparatorTypeClass(cfInformation.getDefaultValidationClass());
+            CassandraAdminClientHelper.getAliasForValidatorTypeClass(cfInformation.getDefaultValidationClass());
 %>
 <div id="middle">
 <h2><fmt:message key="cassandra.cf.dashboard"/> ( <%=clusterName%> > <%=keyspace%>
@@ -198,7 +198,7 @@
                 <fmt:message
                         key="cassandra.field.comparator.ascii"/>
                 <% } else if (CassandraAdminClientConstants.UTF8TYPE.equals(validationClass)) {%>
-                ><fmt:message
+                <fmt:message
                     key="cassandra.field.comparator.utf8"/>
                 <% } else if (CassandraAdminClientConstants.LEXICALUUIDTYPE.equals(validationClass)) {%>
 
@@ -213,6 +213,9 @@
                 <% } else if (CassandraAdminClientConstants.INTEGERTYPE.equals(validationClass)) {%>
                 <fmt:message
                         key="cassandra.field.comparator.integer"/>
+                <% } else if (CassandraAdminClientConstants.COUNTERCOLUMNTYPE.equals(validationClass)) {%>
+                <fmt:message
+                        key="cassandra.field.validator.countercolumn"/>
                 <% } else {%>
 
                 <fmt:message

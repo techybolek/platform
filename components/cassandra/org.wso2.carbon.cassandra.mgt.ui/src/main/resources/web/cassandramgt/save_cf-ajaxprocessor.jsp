@@ -111,7 +111,7 @@
         columnFamilyInformation.setComparatorType(comparator);
         columnFamilyInformation.setSubComparatorType(subComparator);
         columnFamilyInformation.setDefaultValidationClass(
-                CassandraAdminClientHelper.getComparatorTypeClassForAlias(validationClass));
+                CassandraAdminClientHelper.getValidatorTypeClassForAlias(validationClass));
         CassandraKeyspaceAdminClient cassandraKeyspaceAdminClient =
                 new CassandraKeyspaceAdminClient(config.getServletContext(), session);
         if ("add".equals(mode)) {

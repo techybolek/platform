@@ -72,7 +72,7 @@
     int id = cfInformation.getId();
     boolean isEditMode = "edit".equals(mode);
     String validationClass =
-            CassandraAdminClientHelper.getAliasForComparatorTypeClass(cfInformation.getDefaultValidationClass());
+            CassandraAdminClientHelper.getAliasForValidatorTypeClass(cfInformation.getDefaultValidationClass());
 %>
 
 <fmt:bundle basename="org.wso2.carbon.cassandra.mgt.ui.i18n.Resources">
@@ -466,6 +466,8 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
+            <option value="<%=CassandraAdminClientConstants.COUNTERCOLUMNTYPE%>"><fmt:message
+                    key="cassandra.field.validator.countercolumn"/></option>
             <% } else if (CassandraAdminClientConstants.UTF8TYPE.equals(validationClass)) {%>
             <option value="<%=CassandraAdminClientConstants.UTF8TYPE%>" selected="selected"><fmt:message
                     key="cassandra.field.comparator.utf8"/></option>
@@ -481,6 +483,8 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
+            <option value="<%=CassandraAdminClientConstants.COUNTERCOLUMNTYPE%>"><fmt:message
+                    key="cassandra.field.validator.countercolumn"/></option>
             <% } else if (CassandraAdminClientConstants.LEXICALUUIDTYPE.equals(validationClass)) {%>
             <option value="<%=CassandraAdminClientConstants.LEXICALUUIDTYPE%>" selected="selected">
                 <fmt:message
@@ -497,6 +501,8 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
+            <option value="<%=CassandraAdminClientConstants.COUNTERCOLUMNTYPE%>"><fmt:message
+                    key="cassandra.field.validator.countercolumn"/></option>
             <% } else if (CassandraAdminClientConstants.TIMEUUIDTYPE.equals(validationClass)) {%>
             <option value="<%=CassandraAdminClientConstants.TIMEUUIDTYPE%>" selected="selected">
                 <fmt:message
@@ -513,6 +519,8 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
+            <option value="<%=CassandraAdminClientConstants.COUNTERCOLUMNTYPE%>"><fmt:message
+                    key="cassandra.field.validator.countercolumn"/></option>
             <% } else if (CassandraAdminClientConstants.LONGTYPE.equals(validationClass)) {%>
             <option value="<%=CassandraAdminClientConstants.LONGTYPE%>" selected="selected"><fmt:message
                     key="cassandra.field.comparator.long"/></option>
@@ -528,6 +536,8 @@
                     key="cassandra.field.comparator.timeUUID"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
+            <option value="<%=CassandraAdminClientConstants.COUNTERCOLUMNTYPE%>"><fmt:message
+                    key="cassandra.field.validator.countercolumn"/></option>
             <% } else if (CassandraAdminClientConstants.INTEGERTYPE.equals(validationClass)) {%>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>" selected=""><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
@@ -543,6 +553,25 @@
                     key="cassandra.field.comparator.timeUUID"/></option>
             <option value="<%=CassandraAdminClientConstants.LONGTYPE%>"><fmt:message
                     key="cassandra.field.comparator.long"/></option>
+            <option value="<%=CassandraAdminClientConstants.COUNTERCOLUMNTYPE%>"><fmt:message
+                    key="cassandra.field.validator.countercolumn"/></option>
+            <% } else if (CassandraAdminClientConstants.COUNTERCOLUMNTYPE.equals(validationClass)) {%>
+            <option value="<%=CassandraAdminClientConstants.COUNTERCOLUMNTYPE%>" selected=""><fmt:message
+                    key="cassandra.field.validator.countercolumn"/></option>
+            <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
+                    key="cassandra.field.comparator.bytes"/></option>
+            <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
+                    key="cassandra.field.comparator.ascii"/></option>
+            <option value="<%=CassandraAdminClientConstants.UTF8TYPE%>"><fmt:message
+                    key="cassandra.field.comparator.utf8"/></option>
+            <option value="<%=CassandraAdminClientConstants.LEXICALUUIDTYPE%>"><fmt:message
+                    key="cassandra.field.comparator.lexicalUUID"/></option>
+            <option value="<%=CassandraAdminClientConstants.TIMEUUIDTYPE%>"><fmt:message
+                    key="cassandra.field.comparator.timeUUID"/></option>
+            <option value="<%=CassandraAdminClientConstants.LONGTYPE%>"><fmt:message
+                    key="cassandra.field.comparator.long"/></option>
+            <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
+                    key="cassandra.field.comparator.integer"/></option>
             <% } else {%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>" selected="selected">
                 <fmt:message
@@ -559,6 +588,8 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
+            <option value="<%=CassandraAdminClientConstants.COUNTERCOLUMNTYPE%>"><fmt:message
+                    key="cassandra.field.validator.countercolumn"/></option>
             <% }%>
         </select>
     </td>

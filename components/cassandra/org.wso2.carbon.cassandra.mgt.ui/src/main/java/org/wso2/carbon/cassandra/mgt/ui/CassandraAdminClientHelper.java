@@ -150,6 +150,66 @@ public class CassandraAdminClientHelper {
     }
 
     /**
+     * Gets the alias for the class name of the ValidatorType
+     *
+     * @param className the class name of the ValidatorType
+     * @return alias
+     */
+    public static String getAliasForValidatorTypeClass(String className) {
+        if (className == null || "".equals(className)) {
+            return CassandraAdminClientConstants.BYTESTYPE_CLASS;
+        }
+        className = className.trim();
+        if (CassandraAdminClientConstants.ASCIITYPE_CLASS.equals(className)) {
+            return CassandraAdminClientConstants.ASCIITYPE;
+        } else if (CassandraAdminClientConstants.UTF8TYPE_CLASS.equals(className)) {
+            return CassandraAdminClientConstants.UTF8TYPE;
+        } else if (CassandraAdminClientConstants.LEXICALUUIDTYPE_CLASS.equals(className)) {
+            return CassandraAdminClientConstants.LEXICALUUIDTYPE;
+        } else if (CassandraAdminClientConstants.TIMEUUIDTYPE_CLASS.equals(className)) {
+            return CassandraAdminClientConstants.TIMEUUIDTYPE;
+        } else if (CassandraAdminClientConstants.LONGTYPE_CLASS.equals(className)) {
+            return CassandraAdminClientConstants.LONGTYPE;
+        } else if (CassandraAdminClientConstants.INTEGERTYPE_CLASS.equals(className)) {
+            return CassandraAdminClientConstants.INTEGERTYPE;
+        } else if (CassandraAdminClientConstants.COUNTERCOLUMNTYPE_CLASS.equals(className)) {
+            return CassandraAdminClientConstants.COUNTERCOLUMNTYPE;
+        } else {
+            return CassandraAdminClientConstants.BYTESTYPE;
+        }
+    }
+
+    /**
+     * Gets the class name of the ValidatorType for the alias
+     *
+     * @param alias the alias of the Validator Type
+     * @return class name
+     */
+    public static String getValidatorTypeClassForAlias(String alias) {
+        if (alias == null || "".equals(alias)) {
+            return CassandraAdminClientConstants.BYTESTYPE;
+        }
+        alias = alias.trim();
+        if (CassandraAdminClientConstants.ASCIITYPE.equals(alias)) {
+            return CassandraAdminClientConstants.ASCIITYPE_CLASS;
+        } else if (CassandraAdminClientConstants.UTF8TYPE.equals(alias)) {
+            return CassandraAdminClientConstants.UTF8TYPE_CLASS;
+        } else if (CassandraAdminClientConstants.LEXICALUUIDTYPE.equals(alias)) {
+            return CassandraAdminClientConstants.LEXICALUUIDTYPE_CLASS;
+        } else if (CassandraAdminClientConstants.TIMEUUIDTYPE.equals(alias)) {
+            return CassandraAdminClientConstants.TIMEUUIDTYPE_CLASS;
+        } else if (CassandraAdminClientConstants.LONGTYPE.equals(alias)) {
+            return CassandraAdminClientConstants.LONGTYPE_CLASS;
+        } else if (CassandraAdminClientConstants.INTEGERTYPE.equals(alias)) {
+            return CassandraAdminClientConstants.INTEGERTYPE_CLASS;
+        } else if (CassandraAdminClientConstants.COUNTERCOLUMNTYPE.equals(alias)) {
+            return CassandraAdminClientConstants.COUNTERCOLUMNTYPE_CLASS;
+        } else {
+            return CassandraAdminClientConstants.BYTESTYPE;
+        }
+    }
+
+    /**
      * Fill the <code>ColumnFamilyInformation</code> with the default values to be used in UI
      *
      * @param information meta-data about a CF

@@ -70,7 +70,7 @@
     CassandraAdminClientHelper.fillDefaultValuesForCL(clInformation);
 
     String validationClass =
-            CassandraAdminClientHelper.getAliasForComparatorTypeClass(clInformation.getValidationClass());
+            CassandraAdminClientHelper.getAliasForValidatorTypeClass(clInformation.getValidationClass());
 %>
 
 <fmt:bundle basename="org.wso2.carbon.cassandra.mgt.ui.i18n.Resources">

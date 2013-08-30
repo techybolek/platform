@@ -38,6 +38,7 @@ public final class CassandraAdminClientConstants {
     public final static String TIMEUUIDTYPE_CLASS = "org.apache.cassandra.db.marshal.TimeUUIDType";
     public final static String LONGTYPE_CLASS = "org.apache.cassandra.db.marshal.LongType";
     public final static String INTEGERTYPE_CLASS = "org.apache.cassandra.db.marshal.IntegerType";
+    public final static String COUNTERCOLUMNTYPE_CLASS = "org.apache.cassandra.db.marshal.CounterColumnType";
     public final static String BYTESTYPE = "BytesType";
     public final static String ASCIITYPE = "AsciiType";
     public final static String UTF8TYPE = "UTF8Type";
@@ -45,6 +46,7 @@ public final class CassandraAdminClientConstants {
     public final static String TIMEUUIDTYPE = "TimeUUIDType";
     public final static String LONGTYPE = "LongType";
     public final static String INTEGERTYPE = "IntegerType";
+    public final static String COUNTERCOLUMNTYPE = "CounterColumnType";
     public final static String CURRENT_CF = "CurrentCF";
     public final static String CURRENT_KEYSPACE = "CurrentKeyspace";
     public final static String CURRENT_CLS = "CurrentCLS";
