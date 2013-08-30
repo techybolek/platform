@@ -28,6 +28,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -147,7 +148,7 @@ public class Util
     {
         IMutation first = rms.get(0);
         String tablename = first.getTable();
-        Integer cfid = first.getColumnFamilyIds().iterator().next();
+        UUID cfid = first.getColumnFamilyIds().iterator().next();
 
         for (IMutation rm : rms)
             rm.apply();

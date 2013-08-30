@@ -27,6 +27,8 @@ import java.util.*;
 
 import com.google.common.collect.Iterables;
 
+import org.apache.cassandra.config.Schema;
+import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.ColumnFamilyStore;
 import org.apache.cassandra.db.Table;
 import org.apache.cassandra.dht.AbstractBounds;
@@ -40,6 +42,7 @@ import org.apache.cassandra.net.MessageProducer;
 import org.apache.cassandra.net.MessagingService;
 import org.apache.cassandra.service.StorageService;
 import org.apache.cassandra.utils.FBUtilities;
+import org.apache.cassandra.utils.UUIDGen;
 
 /**
 * This class encapsulates the message that needs to be sent to nodes
@@ -163,7 +166,9 @@ class StreamRequestMessage implements MessageProducer
                 {
                     dos.writeInt(Iterables.size(srm.columnFamilies));
                     for (ColumnFamilyStore cfs : srm.columnFamilies)
-                        dos.writeInt(cfs.metadata.cfId);
+                    {
+                        ColumnFamily.serializer().serializeCfId(cfs.metadata.cfId, dos, version);
+                    }
                 }
             }
         }
@@ -196,7 +201,7 @@ class StreamRequestMessage implements MessageProducer
                 {
                     int cfsSize = dis.readInt();
                     for (int i = 0; i < cfsSize; ++i)
-                        stores.add(Table.open(table).getColumnFamilyStore(dis.readInt()));
+                        stores.add(Table.open(table).getColumnFamilyStore(ColumnFamily.serializer().deserializeCfId(dis, version)));
                 }
 
                 return new StreamRequestMessage(target, ranges, table, stores, sessionId, type);
