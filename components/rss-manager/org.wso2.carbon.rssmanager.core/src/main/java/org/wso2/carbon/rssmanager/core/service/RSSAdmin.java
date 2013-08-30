@@ -324,19 +324,10 @@ public class RSSAdmin extends AbstractAdmin {
                 String msg = "Unable to establish a JDBC connection with the database server";
                 throw new RSSManagerException(msg);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             String msg = "Error occurred while testing the JDBC connection";
             handleException(msg, e);
-        } catch (ClassNotFoundException e) {
-            throw new RSSManagerException("Error occurred while testing database connectivity : " +
-                    e.getMessage(), e);
-        } catch (InstantiationException e) {
-        	throw new RSSManagerException("Error occurred while testing database connectivity : " +
-                    e.getMessage(), e);
-		} catch (IllegalAccessException e) {
-			throw new RSSManagerException("Error occurred while testing database connectivity : " +
-                    e.getMessage(), e);
-		} finally {
+        } finally {
             if (conn != null) {
                 try {
                     conn.close();
@@ -346,11 +337,6 @@ public class RSSAdmin extends AbstractAdmin {
             }
             PrivilegedCarbonContext.endTenantFlow();
         }
-    }
-
-    private void handleException(String msg, Exception e) throws RSSManagerException {
-        log.error(msg, e);
-        throw new RSSManagerException(msg, e);
     }
 
     private boolean isSuperTenantUser() throws RSSManagerException {
@@ -370,6 +356,11 @@ public class RSSAdmin extends AbstractAdmin {
                     "thus, is null");
         }
         return rssManager;
+    }
+
+    private void handleException(String msg, Exception e) throws RSSManagerException {
+        log.error(msg, e);
+        throw new RSSManagerException(msg, e);
     }
 
 }
