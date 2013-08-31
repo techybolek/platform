@@ -27,6 +27,7 @@ public class Constants {
     public static final String DEFAULTS_ELEMENT = "defaults";
     public static final String HOSTS_ELEMENT = "hosts";
     public static final String HOSTS_DELIMITER = ",";
+    public static final String MEMBER_DELIMITER = ":";
     public static final String DOMAIN_ELEMENT = "domains";
     public static final String TENANT_RANGE_ELEMENT = "tenant_range";
     public static final String SUB_DOMAIN_ELEMENT = "sub_domain";

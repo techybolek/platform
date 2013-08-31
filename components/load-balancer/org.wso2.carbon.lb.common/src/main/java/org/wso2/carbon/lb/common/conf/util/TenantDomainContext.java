@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.lb.common.conf.util;
 
+import java.util.Map;
+
 /**
  * This object will hold all the data related to a tenant.
  */
@@ -38,6 +40,8 @@ public class TenantDomainContext {
     private String subDomain;
 
     private int groupMgtPort;
+
+    private Map<String, String> members;
     
     public TenantDomainContext(int tenantId, String domain, String subDomain) {
         this.tenantId = tenantId;
@@ -78,6 +82,15 @@ public class TenantDomainContext {
     public void setGroupMgtPort(int groupMgtPort) {
         this.groupMgtPort = groupMgtPort;
     }
+
+    public Map<String, String> getMembers(){
+        return members;
+    }
+
+    public void setMembers(Map<String, String> members){
+        this.members = members;
+    }
+
 
     /** End of Getters and Setters **/
     

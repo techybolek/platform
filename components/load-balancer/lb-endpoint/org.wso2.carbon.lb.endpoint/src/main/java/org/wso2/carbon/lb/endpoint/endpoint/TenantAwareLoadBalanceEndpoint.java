@@ -137,6 +137,17 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                             } else {
                                 groupManagementAgent = new HazelcastGroupManagementAgent();
                             }
+
+                            // Adding WKA members
+                            Map<String, String> memberMap = tenantCtxt.getMembers();
+                            for(String memberHostname: memberMap.keySet()){
+                                Member member = new Member(memberHostname, Integer.parseInt(memberMap.get(memberHostname)));
+                                groupManagementAgent.addMember(member);
+                                if(log.isDebugEnabled()){
+                                    log.debug("Added member " + member.getHostName() + ":" + member.getPort());
+                                }
+                            }
+
                             clusteringAgent.addGroupManagementAgent(groupManagementAgent,
                                                                     domain, subDomain,tenantCtxt.getGroupMgtPort());
                             if (log.isDebugEnabled()) {
@@ -304,7 +315,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         if (sessionInformation != null && currentMember != null	) {
             //send message on current session
             sessionInformation.updateExpiryTime();
-          
+
             sendToApplicationMember(synCtx, currentMember, faultHandler, false);
         } else {
 //            prepare for a new session
@@ -327,11 +338,11 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                 if(domainMapping != null) {
 
                     actualHost = domainMapping.getActualHost();
-                    
+
                     log.debug("************* Actual Host: "+actualHost +" ****** Target Host: "+targetHost);
                     faultHandler.setHost(actualHost != null ? actualHost : targetHost);
                     if (actualHost.contains("/") && containsPort ) {
-                    	 transportHeaders.put(HTTP.TARGET_HOST,actualHost.substring(0,actualHost.indexOf("/"))+ ":" + port+actualHost.substring(actualHost.indexOf("/"))) ;     
+                    	 transportHeaders.put(HTTP.TARGET_HOST,actualHost.substring(0,actualHost.indexOf("/"))+ ":" + port+actualHost.substring(actualHost.indexOf("/"))) ;
                     } else if (containsPort) {
                         transportHeaders.put(HTTP.TARGET_HOST, actualHost + ":" + port);
                     } else {
@@ -474,7 +485,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                 if (errorCode.equals(NhttpConstants.CONNECTION_FAILED) ||
                         errorCode.equals(NhttpConstants.CONNECT_CANCEL) ||
                         errorCode.equals(NhttpConstants.CONNECT_TIMEOUT)) {
-                    
+
                     if (!synCtx.getFaultStack().isEmpty()) {
                         synCtx.getFaultStack().pop();
                     }
@@ -499,7 +510,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                         Thread.sleep(1000);  // Sleep for sometime before retrying
                     } catch (InterruptedException ignored) {
                     }
-                    
+
                     if(synCtx == null || to == null) {
                         return;
                     }

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Utility methods for Autoscale mediator
@@ -214,6 +215,7 @@ public final class LoadBalancerConfigUtil {
     public static List<TenantDomainContext> getTenantDomainContexts(String tenantRange,
                                                                     String domain,
                                                                     String subDomain,
+                                                                    Map<String, String> members,
                                                                     int groupMgtPort) {
         
         List<TenantDomainContext> ctxts = new ArrayList<TenantDomainContext>();
@@ -225,6 +227,7 @@ public final class LoadBalancerConfigUtil {
             // create a new TenantDomainContext
             TenantDomainContext tenantCtxt = new TenantDomainContext(tId, domain, subDomain);
             tenantCtxt.setGroupMgtPort(groupMgtPort);
+            tenantCtxt.setMembers(members);
             // add it to the list
             ctxts.add(tenantCtxt);
         }

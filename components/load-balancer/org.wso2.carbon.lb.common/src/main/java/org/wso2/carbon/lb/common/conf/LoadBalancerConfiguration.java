@@ -26,7 +26,6 @@ import org.wso2.carbon.lb.common.conf.structure.NodeBuilder;
 import org.wso2.carbon.lb.common.conf.util.Constants;
 import org.wso2.carbon.lb.common.conf.util.HostContext;
 import org.wso2.carbon.lb.common.conf.util.LoadBalancerConfigUtil;
-import org.wso2.carbon.lb.common.conf.util.TenantDomainContext;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -533,10 +532,10 @@ public class LoadBalancerConfiguration implements Serializable {
                                 String domain = parentMap.getKey();
                                 String subDomain = childMap.getKey();
                                           
-                                ctxt.addTenantDomainContexts(LoadBalancerConfigUtil.getTenantDomainContexts(tenantRange,
-                                                                                                            domain,
-                                                                                                            subDomain,
-                                                                                                            serviceConfiguration.getGroupMgtPort()));
+                                ctxt.addTenantDomainContexts(
+                                        LoadBalancerConfigUtil.getTenantDomainContexts(tenantRange,domain,subDomain,
+                                                serviceConfiguration.getMembers(),
+                                                serviceConfiguration.getGroupMgtPort()));
 
                                 break;
                             }
@@ -947,6 +946,8 @@ public class LoadBalancerConfiguration implements Serializable {
         private Map<String, String> urlSuffixes = new HashMap<String, String>();
         private boolean hostsSet;
 
+        private Map<String, String> members = new HashMap<String, String>();
+
         private String domain;
 
         private String tenantRange;
@@ -976,6 +977,10 @@ public class LoadBalancerConfiguration implements Serializable {
                 return defaultServiceConfig.hosts;
             }
             return hosts;
+        }
+
+        public Map<String, String> getMembers() {
+            return members;
         }
 
         public int getMinAppInstances() {
@@ -1124,6 +1129,32 @@ public class LoadBalancerConfiguration implements Serializable {
                 }
             }
 
+        }
+
+        /**
+         * Popuplate the members map from the memberStr String.
+         * //TODO improve error handling and validate inputs.
+         * @param memberStr
+         */
+        public void setMembers(String memberStr){
+            members = new HashMap<String, String>();
+            if (memberStr == null || memberStr.length() == 0){
+                return;
+            }
+            // Splitting the memberStr and populating the map.
+            // members 127.0.0.1:4000, 127.0.0.1:5000;
+            String[] memberStrArray = memberStr.split(Constants.HOSTS_DELIMITER);
+
+            for(String hostIPStr: memberStrArray) {
+                String[] parts = hostIPStr.trim().split(Constants.MEMBER_DELIMITER);
+                if(parts.length != 2) {
+                    LoadBalancerConfigUtil.handleException("Invalid wka member: " + hostIPStr);
+                }
+                members.put(parts[0], parts[1]);
+                if(log.isDebugEnabled()){
+                    log.debug("Adding member " + hostIPStr + " to the domain configuration.");
+                }
+            }
         }
 
         public void setUrl_suffix(String suffix) {
