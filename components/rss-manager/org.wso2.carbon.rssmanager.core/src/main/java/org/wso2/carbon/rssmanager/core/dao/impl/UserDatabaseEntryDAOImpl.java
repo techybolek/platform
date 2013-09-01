@@ -23,18 +23,11 @@ import org.wso2.carbon.rssmanager.core.dao.RSSDAO;
 import org.wso2.carbon.rssmanager.core.dao.UserDatabaseEntryDAO;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 import org.wso2.carbon.rssmanager.core.dao.util.RSSDAOUtil;
-import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
 import org.wso2.carbon.rssmanager.core.entity.UserDatabaseEntry;
 
 import java.sql.*;
 
 public class UserDatabaseEntryDAOImpl implements UserDatabaseEntryDAO {
-
-	private EntityManager entityManager;
-
-	public UserDatabaseEntryDAOImpl(EntityManager entityManager){
-		this.entityManager = entityManager;
-	}
 
     public int addUserDatabaseEntry(String environmentName, UserDatabaseEntry entry,
                                     int tenantId) throws RSSDAOException {
@@ -42,7 +35,7 @@ public class UserDatabaseEntryDAOImpl implements UserDatabaseEntryDAO {
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
 
             String sql = "INSERT INTO RM_USER_DATABASE_ENTRY(DATABASE_USER_ID, DATABASE_ID) VALUES(?, ?)";
             stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -75,7 +68,7 @@ public class UserDatabaseEntryDAOImpl implements UserDatabaseEntryDAO {
         PreparedStatement stmt = null;
         try {
             /* now delete the user-database-entry */
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
 
             final int databaseUserId =
                     this.getDatabaseUserId(conn, rssInstanceId, username, type, tenantId);
@@ -100,7 +93,7 @@ public class UserDatabaseEntryDAOImpl implements UserDatabaseEntryDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             final int databaseId =
                     this.getDatabaseId(conn, rssInstanceId, databaseName, type, tenantId);
 
@@ -124,7 +117,7 @@ public class UserDatabaseEntryDAOImpl implements UserDatabaseEntryDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             final int userId =
                     this.getDatabaseUserId(conn, rssInstanceId, username, type, tenantId);
 

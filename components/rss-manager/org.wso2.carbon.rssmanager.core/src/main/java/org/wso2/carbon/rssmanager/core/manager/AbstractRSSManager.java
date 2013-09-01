@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.RSSTransactionManager;
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.dao.RSSDAO;
@@ -43,12 +43,12 @@ import java.util.Map;
 
 public abstract class AbstractRSSManager implements RSSManager {
 
-    private RSSConfiguration config;
+    private RSSConfig config;
     private RSSDAO rssDAO;
     private EntityManager entityManager;
     private static final Log log = LogFactory.getLog(RSSManager.class);
 
-    public AbstractRSSManager(RSSConfiguration config) {
+    public AbstractRSSManager(RSSConfig config) {
         this.config = config;
 
         /* Initializing RSS transaction manager wrapper */

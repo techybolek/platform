@@ -31,6 +31,7 @@ import org.wso2.carbon.ndatasource.rdbms.RDBMSDataSource;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.common.RSSManagerHelper;
 import org.wso2.carbon.rssmanager.common.exception.RSSManagerCommonException;
+import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfig;
 import org.wso2.carbon.rssmanager.core.entity.Database;
 import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
@@ -214,10 +215,10 @@ public final class RSSManagerUtil {
         }
     }
 
-    public static Properties loadDataSourceProperties(org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration config) {
+    public static Properties loadDataSourceProperties(RDBMSConfig config) {
         Properties props = new Properties();
-        List<org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration.DataSourceProperty> dsProps = config.getDataSourceProps();
-        for (org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration.DataSourceProperty dsProp : dsProps) {
+        List<RDBMSConfig.DataSourceProperty> dsProps = config.getDataSourceProps();
+        for (RDBMSConfig.DataSourceProperty dsProp : dsProps) {
             props.setProperty(dsProp.getName(), dsProp.getValue());
         }
         return props;

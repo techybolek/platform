@@ -19,7 +19,7 @@
 
 package org.wso2.carbon.rssmanager.core.manager.impl.oracle;
 
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.*;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
@@ -27,7 +27,7 @@ import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
 public class OracleUserDefinedRSSManager extends UserDefinedRSSManager {
 
-    public OracleUserDefinedRSSManager(RSSConfiguration config) {
+    public OracleUserDefinedRSSManager(RSSConfig config) {
         super(config);
     }
 

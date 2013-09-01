@@ -23,7 +23,6 @@ import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.dao.DatabaseDAO;
 import org.wso2.carbon.rssmanager.core.dao.RSSDAO;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
-import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
 import org.wso2.carbon.rssmanager.core.dao.util.RSSDAOUtil;
 import org.wso2.carbon.rssmanager.core.entity.Database;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -37,22 +36,16 @@ import java.util.List;
 
 public class DatabaseDAOImpl implements DatabaseDAO {
 
-    private EntityManager entityManager;
-
-    public DatabaseDAOImpl(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
     public void addDatabase(String environmentName, Database database,
                             int tenantId) throws RSSDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             int rssInstanceTenantId = (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(database.getType())) ? MultitenantConstants.SUPER_TENANT_ID : tenantId;
 
             //String sql = "INSERT INTO RM_DATABASE SET NAME = ?, RSS_INSTANCE_ID = (SELECT ID FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)), TENANT_ID = ?, TYPE = ?";
-            String sql = "INSERT INTO RM_DATABASE (NAME,RSS_INSTANCE_ID,TENANT_ID,TYPE) VALUES (?,(SELECT ID FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)),?,?) ";
+            String sql = "INSERT INTO RM_DATABASE (NAME, RSS_INSTANCE_ID, TENANT_ID, TYPE) VALUES (?, (SELECT ID FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)), ?, ?) ";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, database.getName());
@@ -77,7 +70,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "DELETE FROM RM_DATABASE WHERE NAME = ? AND TENANT_ID = ? AND RSS_INSTANCE_ID = (SELECT ID FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?))";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, databaseName);
@@ -97,7 +90,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
 
     public boolean isDatabaseExist(String environmentName, String rssInstanceName,
                                    String databaseName, int tenantId) throws RSSDAOException {
-        Connection conn = entityManager.createConnection(RSSDAO.getDataSource());
+        Connection conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
         ResultSet rs = null;
         PreparedStatement stmt = null;
         boolean isExist = false;
@@ -121,9 +114,6 @@ public class DatabaseDAOImpl implements DatabaseDAO {
                 throw new RSSDAOException("Error occurred while retrieving the RSS instance " +
                         "to which the database '" + databaseName + "' belongs to : " +
                         e.getMessage(), e);
-                /*} catch (RSSManagerCommonException e) {
-      throw new RSSDAOException("Error occurred while retrieving tenant id of the " +
-              "current tenant", e);*/
             } finally {
                 RSSDAOUtil.cleanupResources(rs, stmt, conn);
             }
@@ -148,9 +138,6 @@ public class DatabaseDAOImpl implements DatabaseDAO {
                 throw new RSSDAOException("Error occurred while retrieving the RSS instance " +
                         "to which the database '" + databaseName + "' belongs to : " +
                         e.getMessage(), e);
-                /*} catch (RSSManagerCommonException e) {
-      throw new RSSDAOException("Error occurred while retrieving tenant id of the " +
-              "current tenant", e);*/
             } finally {
                 RSSDAOUtil.cleanupResources(rs, stmt, conn);
             }
@@ -165,7 +152,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
         ResultSet rs = null;
         Database database = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT d.ID AS DATABASE_ID, d.NAME, d.TENANT_ID, s.NAME AS RSS_INSTANCE_NAME, s.SERVER_URL, s.TENANT_ID AS RSS_INSTANCE_TENANT_ID, d.TYPE FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND d.NAME = ? AND d.TENANT_ID = ? AND s.NAME = ? AND s.TENANT_ID = ? AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, databaseName);
@@ -192,7 +179,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT d.ID AS DATABASE_ID, d.NAME, d.TENANT_ID, s.NAME AS RSS_INSTANCE_NAME, s.SERVER_URL, s.TENANT_ID AS RSS_INSTANCE_TENANT_ID, d.TYPE" +
                     "  FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND d.TENANT_ID = ? AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
@@ -221,7 +208,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource(), txIsolationalLevel);
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource(), txIsolationalLevel);
             //conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             String sql = "SELECT * FROM RM_SYSTEM_DATABASE_COUNT WHERE ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
@@ -253,7 +240,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT COUNT FROM RM_SYSTEM_DATABASE_COUNT WHERE ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, environmentName);
@@ -293,7 +280,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT d.ID AS DATABASE_ID, d.NAME, d.TENANT_ID, s.NAME AS RSS_INSTANCE_NAME, s.SERVER_URL, s.TENANT_ID AS RSS_INSTANCE_TENANT_ID, d.TYPE  FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND d.TENANT_ID = ? AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);

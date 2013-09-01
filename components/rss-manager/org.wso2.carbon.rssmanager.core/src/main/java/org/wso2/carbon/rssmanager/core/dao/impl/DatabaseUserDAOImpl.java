@@ -23,7 +23,6 @@ import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.dao.DatabaseUserDAO;
 import org.wso2.carbon.rssmanager.core.dao.RSSDAO;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
-import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
 import org.wso2.carbon.rssmanager.core.dao.util.RSSDAOUtil;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeSet;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeTemplate;
@@ -43,19 +42,13 @@ import java.util.List;
 import java.util.Set;
 
 public class DatabaseUserDAOImpl implements DatabaseUserDAO {
-	
-	private EntityManager entityManager;
-
-	public DatabaseUserDAOImpl(EntityManager entityManager){
-		this.entityManager = entityManager;
-	}
 
     public void addDatabaseUser(String environmentName, RSSInstance rssInstance, DatabaseUser user,
                                 int tenantId) throws RSSDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "INSERT INTO RM_DATABASE_USER (USERNAME,RSS_INSTANCE_ID,TYPE,TENANT_ID) VALUES(?,(SELECT ID FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)),?,?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, user.getName());
@@ -81,7 +74,7 @@ public class DatabaseUserDAOImpl implements DatabaseUserDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "DELETE FROM RM_DATABASE_USER WHERE USERNAME = ? AND RSS_INSTANCE_ID = (SELECT RSS_INSTANCE_ID FROM RM_SERVER_INSTANCE WHERE NAME = ?) AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
@@ -104,7 +97,7 @@ public class DatabaseUserDAOImpl implements DatabaseUserDAO {
         PreparedStatement stmt = null;
         try {
         	int tenantId = RSSManagerUtil.getTenantId();
-        	conn = entityManager.createConnection(RSSDAO.getDataSource());
+        	conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "UPDATE RM_USER_DATABASE_PRIVILEGE SET SELECT_PRIV = ?, INSERT_PRIV = ?, UPDATE_PRIV = ?, DELETE_PRIV = ?, CREATE_PRIV = ?, DROP_PRIV = ?, GRANT_PRIV = ?, REFERENCES_PRIV = ?, INDEX_PRIV = ?, ALTER_PRIV = ?, CREATE_TMP_TABLE_PRIV = ?, LOCK_TABLES_PRIV = ?, CREATE_VIEW_PRIV = ?, SHOW_VIEW_PRIV = ?, CREATE_ROUTINE_PRIV = ?, ALTER_ROUTINE_PRIV = ?, EXECUTE_PRIV = ?, EVENT_PRIV = ?, TRIGGER_PRIV = ? WHERE USER_DATABASE_ENTRY_ID = (SELECT ID FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_ID = (SELECT ID FROM RM_DATABASE WHERE NAME = ? AND TENANT_ID = ? AND RSS_INSTANCE_ID = ?) AND DATABASE_USER_ID = (SELECT ID FROM RM_DATABASE_USER WHERE USERNAME = ? AND TENANT_ID = ? AND RSS_INSTANCE_ID = ?))";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, privileges.getSelectPriv());
@@ -152,7 +145,7 @@ public class DatabaseUserDAOImpl implements DatabaseUserDAO {
     public boolean isDatabaseUserExist(String environmentName, String rssInstanceName,
                                        String username, int tenantId) throws RSSDAOException {
         boolean isExist = false;
-        Connection conn = entityManager.createConnection(RSSDAO.getDataSource());
+        Connection conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
         if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
         	String sql = "SELECT u.ID AS DATABASE_USER_ID FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND u.TYPE = ? AND u.TENANT_ID = ? AND u.USERNAME = ? AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             PreparedStatement stmt = null;
@@ -219,7 +212,7 @@ public class DatabaseUserDAOImpl implements DatabaseUserDAO {
         ResultSet rs = null;
         DatabaseUser user = new DatabaseUser();
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT u.ID, u.USERNAME, s.NAME AS RSS_INSTANCE_NAME, u.TENANT_ID, u.TYPE FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND s.NAME = ? AND s.TENANT_ID = ? AND u.USERNAME = ? AND u.TENANT_ID = ? AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, rssInstanceName);
@@ -251,7 +244,7 @@ public class DatabaseUserDAOImpl implements DatabaseUserDAO {
         ResultSet rs = null;
         List<DatabaseUser> result = new ArrayList<DatabaseUser>();
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT u.ID, u.USERNAME, s.NAME AS RSS_INSTANCE_NAME, u.TENANT_ID, u.TYPE FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND u.TENANT_ID = ?  AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
@@ -292,7 +285,7 @@ public class DatabaseUserDAOImpl implements DatabaseUserDAO {
         ResultSet rs = null;
         List<DatabaseUser> result = new ArrayList<DatabaseUser>();
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
 			String sql = "SELECT p.USERNAME FROM RM_USER_DATABASE_ENTRY e, (SELECT t.ID AS DATABASE_ID, u.ID AS DATABASE_USER_ID, u.USERNAME FROM RM_DATABASE_USER u," +
 					" (SELECT d.RSS_INSTANCE_ID, d.NAME, d.ID FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND s.NAME = ? AND s.TENANT_ID = ? AND d.NAME = ? AND d.TENANT_ID = ? AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)) t " +
 					" WHERE u.RSS_INSTANCE_ID = t.RSS_INSTANCE_ID AND TENANT_ID = ?) p WHERE e.DATABASE_USER_ID = p.DATABASE_USER_ID AND e.DATABASE_ID = p.DATABASE_ID";
@@ -331,7 +324,7 @@ public class DatabaseUserDAOImpl implements DatabaseUserDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             /* delete permissions first */
             String sql = "DELETE FROM RM_USER_DATABASE_PRIVILEGE WHERE USER_DATABASE_ENTRY_ID IN (SELECT ID FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_USER_ID = (SELECT ID FROM RM_DATABASE_USER WHERE RSS_INSTANCE_ID = ? AND USERNAME = ? AND TENANT_ID = ?))";
             stmt = conn.prepareStatement(sql);
@@ -357,7 +350,7 @@ public class DatabaseUserDAOImpl implements DatabaseUserDAO {
         ResultSet rs = null;
         DatabasePrivilegeSet privileges = new DatabasePrivilegeSet();
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT * FROM RM_USER_DATABASE_PRIVILEGE WHERE USER_DATABASE_ENTRY_ID = (SELECT ID FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_ID = (SELECT ID FROM RM_DATABASE WHERE NAME = ? AND RSS_INSTANCE_ID = ? AND TENANT_ID = ?) AND DATABASE_USER_ID = (SELECT ID FROM RM_DATABASE_USER WHERE USERNAME = ? AND RSS_INSTANCE_ID = ? AND TENANT_ID = ?))";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, databaseName);
@@ -394,7 +387,7 @@ public class DatabaseUserDAOImpl implements DatabaseUserDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "INSERT INTO RM_USER_DATABASE_PRIVILEGE(USER_DATABASE_ENTRY_ID, SELECT_PRIV, INSERT_PRIV, UPDATE_PRIV, DELETE_PRIV, CREATE_PRIV, DROP_PRIV, GRANT_PRIV, REFERENCES_PRIV, INDEX_PRIV, ALTER_PRIV, CREATE_TMP_TABLE_PRIV, LOCK_TABLES_PRIV, CREATE_VIEW_PRIV, SHOW_VIEW_PRIV, CREATE_ROUTINE_PRIV, ALTER_ROUTINE_PRIV, EXECUTE_PRIV, EVENT_PRIV, TRIGGER_PRIV) "
             		+ " VALUES(?, "
 					+ parameterized(privileges.getSelectPriv(), true)
@@ -468,10 +461,10 @@ public class DatabaseUserDAOImpl implements DatabaseUserDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
 		PreparedStatement delStmt = null;
-		ResultSet rs = null;
+		ResultSet rs;
         try {
             /* delete permissions first */
-        	conn = entityManager.createConnection(RSSDAO.getDataSource());
+        	conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT ID FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_ID IN (SELECT ID FROM RM_DATABASE WHERE RSS_INSTANCE_ID = ? AND NAME = ? AND TENANT_ID = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, rssInstance.getId());

@@ -19,14 +19,14 @@
 
 package org.wso2.carbon.rssmanager.core.manager.impl.oracle;
 
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
 public class OracleRSSManagerFactory extends AbstractRSSManagerFactory {
 
-    public OracleRSSManagerFactory(RSSConfiguration config) {
+    public OracleRSSManagerFactory(RSSConfig config) {
         super(config);
     }
 

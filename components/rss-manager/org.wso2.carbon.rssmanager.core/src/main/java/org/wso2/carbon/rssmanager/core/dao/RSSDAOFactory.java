@@ -19,7 +19,6 @@
 package org.wso2.carbon.rssmanager.core.dao;
 
 import org.wso2.carbon.rssmanager.core.config.RSSManagementRepository;
-import org.wso2.carbon.rssmanager.core.config.datasource.DSXMLConfiguration;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 import org.wso2.carbon.rssmanager.core.dao.impl.RSSDAOImpl;
 import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;

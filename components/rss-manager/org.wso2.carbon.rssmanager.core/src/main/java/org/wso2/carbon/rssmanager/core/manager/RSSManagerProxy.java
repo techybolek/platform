@@ -22,7 +22,7 @@ package org.wso2.carbon.rssmanager.core.manager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.*;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
@@ -33,7 +33,7 @@ public class RSSManagerProxy implements RSSManager {
     private UserDefinedRSSManager userDefinedRM;
     private static final Log log = LogFactory.getLog(RSSManagerProxy.class);
 
-    public RSSManagerProxy(String type, RSSConfiguration config) {
+    public RSSManagerProxy(String type, RSSConfig config) {
         RSSManagerFactory rmFactory = RSSManagerFactoryLoader.getRMFactory(type, config);
         this.systemRM = rmFactory.getSystemRSSManager();
         this.userDefinedRM = rmFactory.getUserDefinedRSSManager();

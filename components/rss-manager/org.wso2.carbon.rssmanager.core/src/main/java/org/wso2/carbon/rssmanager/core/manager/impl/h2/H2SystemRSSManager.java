@@ -20,7 +20,7 @@ package org.wso2.carbon.rssmanager.core.manager.impl.h2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.Database;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeSet;
@@ -33,7 +33,7 @@ public class H2SystemRSSManager extends SystemRSSManager {
 
     private static final Log log = LogFactory.getLog(H2SystemRSSManager.class);
 
-    public H2SystemRSSManager(RSSConfiguration config) {
+    public H2SystemRSSManager(RSSConfig config) {
         super(config);
     }
 

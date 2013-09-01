@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "RSSEnvironment")
+@XmlRootElement(name = "Environment")
 public class RSSEnvironment {
 
     private int id;

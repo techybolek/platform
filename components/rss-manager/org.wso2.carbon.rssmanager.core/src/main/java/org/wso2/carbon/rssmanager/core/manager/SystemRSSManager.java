@@ -20,7 +20,7 @@
 package org.wso2.carbon.rssmanager.core.manager;
 
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 import org.wso2.carbon.rssmanager.core.entity.Database;
@@ -37,7 +37,7 @@ import java.util.Set;
 
 public abstract class SystemRSSManager extends AbstractRSSManager {
 
-    public SystemRSSManager(RSSConfiguration config) {
+    public SystemRSSManager(RSSConfig config) {
         super(config);
     }
 

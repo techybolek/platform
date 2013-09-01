@@ -34,7 +34,7 @@ import java.io.File;
 public class RSSConfigurationManager {
 
     private RSSManager rssManager;
-    private RSSConfiguration currentRSSConfig;
+    private RSSConfig currentRSSConfig;
     private static RSSConfigurationManager rssConfigManager = new RSSConfigurationManager();
 
     private RSSConfigurationManager() {
@@ -66,9 +66,9 @@ public class RSSConfigurationManager {
             RSSManagerUtil.secureResolveDocument(doc);
 
             /* Un-marshaling RSS configuration */
-            JAXBContext ctx = JAXBContext.newInstance(RSSConfiguration.class);
+            JAXBContext ctx = JAXBContext.newInstance(RSSConfig.class);
             Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            this.currentRSSConfig = (RSSConfiguration) unmarshaller.unmarshal(doc);
+            this.currentRSSConfig = (RSSConfig) unmarshaller.unmarshal(doc);
 
             this.rssManager =
                     RSSManagerProxyFactory.getRSSManagerProxy(
@@ -78,7 +78,7 @@ public class RSSConfigurationManager {
         }
     }
 
-    private RSSConfiguration getRSSConfiguration() {
+    private RSSConfig getRSSConfiguration() {
         return currentRSSConfig;
     }
 

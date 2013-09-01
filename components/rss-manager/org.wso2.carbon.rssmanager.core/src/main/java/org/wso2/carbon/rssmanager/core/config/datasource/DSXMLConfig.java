@@ -21,7 +21,7 @@ package org.wso2.carbon.rssmanager.core.config.datasource;
 
 import javax.xml.bind.Marshaller;
 
-public interface DSXMLConfiguration {
+public interface DSXMLConfig {
 
     public Marshaller getDSMarshaller();
 

@@ -30,7 +30,8 @@ public interface DatabaseUserDAO {
     void removeDatabaseUser(String environmentName, String rssInstanceName, String username,
                             int tenantId) throws RSSDAOException;
 
-    void updateDatabaseUser(String environmentName, DatabasePrivilegeSet privileges, RSSInstance rssInstance, DatabaseUser user,
+    void updateDatabaseUser(String environmentName, DatabasePrivilegeSet privileges,
+                            RSSInstance rssInstance, DatabaseUser user,
                             String databaseName) throws RSSDAOException;
 
     boolean isDatabaseUserExist(String environmentName, String rssInstanceName, String username,
@@ -64,8 +65,8 @@ public interface DatabaseUserDAO {
                                    DatabasePrivilegeTemplate template,
                                    int tenantId) throws RSSDAOException;
 
-    public void deleteUserDatabasePrivilegeEntriesByDatabase(RSSInstance rssInstance, String dbName, int tenantId)
-            throws RSSDAOException;
+    void deleteUserDatabasePrivilegeEntriesByDatabase(RSSInstance rssInstance, String dbName,
+                                                      int tenantId) throws RSSDAOException;
 
 
 }

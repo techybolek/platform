@@ -19,98 +19,23 @@
 
 package org.wso2.carbon.rssmanager.core.config;
 
-import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.datasource.DataSourceConfig;
 
-import javax.xml.bind.annotation.*;
-import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement (name = "RSSManagementRepository")
 public class RSSManagementRepository {
 
-    private RepositoryDataSource dataSource;
-    private RDBMSConfiguration dataSourceConfig;
+    private DataSourceConfig dataSourceConfig;
 
-    @XmlElement(name = "DataSource", nillable = false)
-    public RepositoryDataSource getDataSource() {
-        return dataSource;
-    }
-
-    @XmlElement(name = "DataSourceConfig", nillable = false)
-    public RDBMSConfiguration getDataSourceConfig() {
+    @XmlElement(name = "DataSourceConfiguration", nillable = false)
+    public DataSourceConfig getDataSourceConfig() {
         return dataSourceConfig;
     }
 
-    public void setDataSource(RepositoryDataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public void setDataSourceConfig(RDBMSConfiguration dataSourceConfig) {
+    public void setDataSourceConfig(DataSourceConfig dataSourceConfig) {
         this.dataSourceConfig = dataSourceConfig;
-    }
-
-    @XmlRootElement(name = "DataSource")
-    public static class RepositoryDataSource{
-        private JNDILookupDef jndiLookupDef;
-
-        @XmlElement(name = "JndiLookupDef", nillable = false)
-        public JNDILookupDef getJndiLookupDef() {
-            return jndiLookupDef;
-        }
-
-        public void setJndiLookupDef(JNDILookupDef jndiLookupDef){
-            this.jndiLookupDef = jndiLookupDef;
-        }
-
-        @XmlRootElement(name = "JndiLookupDef")
-        public static class JNDILookupDef{
-            private String jndiName;
-            private List<JNDIProperty> jndiProperties;
-
-            @XmlElement(name = "Name", nillable = false)
-            public String getJndiName(){
-                return jndiName;
-            }
-
-            public void setJndiName(String jndiName) {
-                this.jndiName = jndiName;
-            }
-
-            @XmlElementWrapper(name = "Environment", nillable = false)
-            @XmlElement(name = "Property", nillable = false)
-            public List<JNDIProperty> getJndiProperties() {
-                return jndiProperties;
-            }
-
-            public void setJndiProperties(List<JNDIProperty> jndiProperties) {
-                this.jndiProperties = jndiProperties;
-            }
-
-            @XmlRootElement(name = "Property")
-            public static class JNDIProperty {
-
-                private String name;
-
-                private String value;
-
-                @XmlAttribute(name = "Name")
-                public String getName() {
-                    return name;
-                }
-
-                public void setName(String name) {
-                    this.name = name;
-                }
-
-                @XmlValue
-                public String getValue() {
-                    return value;
-                }
-
-                public void setValue(String value) {
-                    this.value = value;
-                }
-            }
-        }
     }
 
 }

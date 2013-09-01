@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Represents RSS configuration.
  */
 @XmlRootElement(name = "RSSConfiguration")
-public final class RSSConfiguration {
+public final class RSSConfig {
 
     private String rssProvider;
     private RSSEnvironment[] rssEnvironments;
@@ -43,8 +43,8 @@ public final class RSSConfiguration {
         this.rssMgtRepository = rssMgtRepository;
     }
 
-    @XmlElementWrapper(name = "RSSEnvironments", nillable = false)
-    @XmlElement(name = "RSSEnvironment", nillable = false)
+    @XmlElementWrapper(name = "Environments", nillable = false)
+    @XmlElement(name = "Environment", nillable = false)
     public RSSEnvironment[] getRSSEnvironments() {
         return rssEnvironments;
     }
@@ -53,7 +53,7 @@ public final class RSSConfiguration {
         this.rssEnvironments = rssEnvironments;
     }
 
-    @XmlElement(name = "RSSProvider", nillable = false)
+    @XmlElement(name = "Provider", nillable = false)
     public String getRSSProvider() {
         return rssProvider;
     }

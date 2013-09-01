@@ -18,9 +18,12 @@
  */
 package org.wso2.carbon.rssmanager.core.dao;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.rssmanager.core.config.RSSManagementRepository;
-import org.wso2.carbon.rssmanager.core.config.datasource.DSXMLConfiguration;
-import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.datasource.DataSourceConfig;
+import org.wso2.carbon.rssmanager.core.config.datasource.JNDILookupDefinition;
+import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfig;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
@@ -28,7 +31,6 @@ import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import javax.sql.DataSource;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Data Access Object interface for WSO2 RSS based database operations.
@@ -37,37 +39,11 @@ public abstract class RSSDAO {
 
     private static DataSource dataSource = null;
     private static EntityManager entityManager;
+    private static final Log log = LogFactory.getLog(RSSDAO.class);
 
     public RSSDAO(RSSManagementRepository repository, EntityManager entityManager) {
-        RSSManagementRepository.RepositoryDataSource dataSourceDef = repository.getDataSource();
-        if(dataSourceDef != null){
-            List<RSSManagementRepository.RepositoryDataSource.JNDILookupDef.JNDIProperty> jndiPropertyList = dataSourceDef.getJndiLookupDef().getJndiProperties();
-            if(jndiPropertyList != null){
-                final Hashtable<Object,Object> jndiProperties = new Hashtable<Object,Object>();
-                for(RSSManagementRepository.RepositoryDataSource.JNDILookupDef.JNDIProperty prop : jndiPropertyList){
-                    jndiProperties.put(prop.getName(),prop.getValue());
-                }
-                RSSDAO.dataSource = RSSManagerUtil.lookupDataSource(dataSourceDef.getJndiLookupDef().getJndiName(),jndiProperties);
-            }else{
-                RSSDAO.dataSource = RSSManagerUtil.lookupDataSource(dataSourceDef.getJndiLookupDef().getJndiName(), null);
-            }
-        } else{
-            RDBMSConfiguration config = repository.getDataSourceConfig();
-            RSSDAO.dataSource = RSSManagerUtil.createDataSource(RSSManagerUtil.loadDataSourceProperties(config),
-                    config.getDataSourceClassName());
-        }
+        RSSDAO.dataSource = this.resolveDataSource(repository);
         RSSDAO.entityManager = entityManager;
-    }
-
-    public static EntityManager getEntityManager() {
-        return entityManager;
-    }
-
-    public static DataSource getDataSource() throws RSSDAOException {
-        if (dataSource == null) {
-            throw new RSSDAOException("RSSDAO data source is not initialized properly");
-        }
-        return dataSource;
     }
 
     public abstract EnvironmentDAO getEnvironmentDAO();
@@ -81,5 +57,58 @@ public abstract class RSSDAO {
     public abstract DatabasePrivilegeTemplateDAO getDatabasePrivilegeTemplateDAO();
 
     public abstract UserDatabaseEntryDAO getUserDatabaseEntryDAO();
+
+    public static EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    public static DataSource getDataSource() throws RSSDAOException {
+        if (dataSource == null) {
+            throw new RSSDAOException("RSSDAO data source is not initialized properly");
+        }
+        return dataSource;
+    }
+
+    private DataSource resolveDataSource(RSSManagementRepository repository) {
+        DataSource dataSource;
+        DataSourceConfig dataSourceDef = repository.getDataSourceConfig();
+        if (dataSourceDef == null) {
+            throw new RuntimeException("RSS Management Repository data source configuration is " +
+                    "null and thus, is not initialized");
+        }
+        JNDILookupDefinition jndiConfig = dataSourceDef.getJndiLookupDefintion();
+        if (jndiConfig != null) {
+            List<JNDILookupDefinition.JNDIProperty> jndiPropertyList =
+                    jndiConfig.getJndiProperties();
+            if (jndiPropertyList != null) {
+                Hashtable<Object, Object> jndiProperties = new Hashtable<Object, Object>();
+                for (JNDILookupDefinition.JNDIProperty prop : jndiPropertyList) {
+                    jndiProperties.put(prop.getName(), prop.getValue());
+                }
+                dataSource =
+                        RSSManagerUtil.lookupDataSource(jndiConfig.getJndiName(),
+                                jndiProperties);
+            } else {
+                dataSource =
+                        RSSManagerUtil.lookupDataSource(jndiConfig.getJndiName(), null);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No JNDI Lookup Definition found in the RSS Management Repository " +
+                        "data source configuration. Thus, continuing with in-line data source " +
+                        "configuration processing.");
+            }
+            RDBMSConfig rdbmsConfig = dataSourceDef.getRdbmsConfiguration();
+            if (rdbmsConfig == null) {
+                throw new RuntimeException("No JNDI/In-line data source configuration found. " +
+                        "Thus, RSS Management Repository DAO is not initialized");
+            }
+            dataSource =
+                    RSSManagerUtil.createDataSource(
+                            RSSManagerUtil.loadDataSourceProperties(rdbmsConfig),
+                            rdbmsConfig.getDataSourceClassName());
+        }
+        return dataSource;
+    }
 
 }

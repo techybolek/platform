@@ -27,42 +27,39 @@ import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
  * DAO implementation for RSSDAO interface.
  */
 public class RSSDAOImpl extends RSSDAO {
-	
-	private EntityManager entityManager;
 
-    public RSSDAOImpl(RSSManagementRepository repo, EntityManager entityManager) {
-        super(repo, entityManager);
-        this.entityManager = entityManager;
+    public RSSDAOImpl(RSSManagementRepository repository, EntityManager entityManager) {
+        super(repository, entityManager);
     }
 
     @Override
     public EnvironmentDAO getEnvironmentDAO() {
-        return new EnvironmentDAOImpl(entityManager);
+        return new EnvironmentDAOImpl();
     }
 
     @Override
     public RSSInstanceDAO getRSSInstanceDAO() {
-        return new RSSInstanceDAOImpl(entityManager);
+        return new RSSInstanceDAOImpl();
     }
 
     @Override
     public DatabaseDAO getDatabaseDAO() {
-        return new DatabaseDAOImpl(entityManager);
+        return new DatabaseDAOImpl();
     }
 
     @Override
     public DatabaseUserDAO getDatabaseUserDAO() {
-        return new DatabaseUserDAOImpl(entityManager);
+        return new DatabaseUserDAOImpl();
     }
 
     @Override
     public DatabasePrivilegeTemplateDAO getDatabasePrivilegeTemplateDAO() {
-        return new DatabasePrivilegeTemplateDAOImpl(entityManager);
+        return new DatabasePrivilegeTemplateDAOImpl();
     }
 
     @Override
     public UserDatabaseEntryDAO getUserDatabaseEntryDAO() {
-        return new UserDatabaseEntryDAOImpl(entityManager);
+        return new UserDatabaseEntryDAOImpl();
     }
 
 }

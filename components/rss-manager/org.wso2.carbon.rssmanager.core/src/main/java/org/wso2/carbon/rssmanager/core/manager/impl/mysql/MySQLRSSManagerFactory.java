@@ -19,15 +19,14 @@
 
 package org.wso2.carbon.rssmanager.core.manager.impl.mysql;
 
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
-import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
 public class MySQLRSSManagerFactory extends AbstractRSSManagerFactory {
 
-    public MySQLRSSManagerFactory(RSSConfiguration config) {
+    public MySQLRSSManagerFactory(RSSConfig config) {
         super(config);
     }
 

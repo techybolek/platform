@@ -19,17 +19,17 @@
 
 package org.wso2.carbon.rssmanager.core.manager;
 
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 
 public abstract class AbstractRSSManagerFactory implements RSSManagerFactory {
 
-    private RSSConfiguration config;
+    private RSSConfig config;
 
-    public AbstractRSSManagerFactory(RSSConfiguration config) {
+    public AbstractRSSManagerFactory(RSSConfig config) {
         this.config = config;
     }
 
-    public RSSConfiguration getConfig() {
+    public RSSConfig getConfig() {
         return config;
     }
     

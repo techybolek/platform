@@ -19,14 +19,14 @@
 
 package org.wso2.carbon.rssmanager.core.manager.impl.h2;
 
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
 public class H2RSSManagerFactory extends AbstractRSSManagerFactory {
 
-    public H2RSSManagerFactory(RSSConfiguration config) {
+    public H2RSSManagerFactory(RSSConfig config) {
         super(config);
     }
 

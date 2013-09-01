@@ -18,7 +18,7 @@
  */
 package org.wso2.carbon.rssmanager.core.entity;
 
-import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfig;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -34,10 +34,10 @@ public class RSSInstance {
     private String dbmsType;
     private String instanceType;
     private String serverCategory;
-    private RDBMSConfiguration dataSourceConfig;
+    private RDBMSConfig dataSourceConfig;
 
     public RSSInstance(int id, String name, String dbmsType, String instanceType,
-                       String serverCategory, RDBMSConfiguration dataSourceConfig) {
+                       String serverCategory, RDBMSConfig dataSourceConfig) {
         this.id = id;
         this.name = name;
         this.dbmsType = dbmsType;
@@ -85,11 +85,11 @@ public class RSSInstance {
     }
 
     @XmlElement (name = "DataSourceConfig")
-    public RDBMSConfiguration getDataSourceConfig() {
+    public RDBMSConfig getDataSourceConfig() {
         return dataSourceConfig;
     }
 
-    public void setDataSourceConfig(RDBMSConfiguration dataSourceConfig) {
+    public void setDataSourceConfig(RDBMSConfig dataSourceConfig) {
         this.dataSourceConfig = dataSourceConfig;
     }
 

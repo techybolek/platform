@@ -19,14 +19,14 @@
 
 package org.wso2.carbon.rssmanager.core.manager.impl.sqlserver;
 
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
 public class SQLServerRSSManagerFactory extends AbstractRSSManagerFactory {
 
-    public SQLServerRSSManagerFactory(RSSConfiguration config) {
+    public SQLServerRSSManagerFactory(RSSConfig config) {
         super(config);
     }
 

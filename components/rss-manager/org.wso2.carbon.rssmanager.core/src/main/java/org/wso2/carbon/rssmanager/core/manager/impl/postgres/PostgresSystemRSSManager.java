@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 import org.wso2.carbon.rssmanager.core.entity.*;
@@ -43,7 +43,7 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
 
     private static final Log log = LogFactory.getLog(PostgresSystemRSSManager.class);
 
-    public PostgresSystemRSSManager(RSSConfiguration config) {
+    public PostgresSystemRSSManager(RSSConfig config) {
         super(config);
     }
 

@@ -19,14 +19,14 @@
 
 package org.wso2.carbon.rssmanager.core.manager.impl.postgres;
 
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.manager.UserDefinedRSSManager;
 
 public class PostgresRSSManagerFactory extends AbstractRSSManagerFactory {
 
-    public PostgresRSSManagerFactory(RSSConfiguration config) {
+    public PostgresRSSManagerFactory(RSSConfig config) {
         super(config);
     }
 

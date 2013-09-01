@@ -27,11 +27,12 @@ public interface DatabaseDAO {
     /**
         * Method to add database information to the RSS meta data repository.
         *
-        * @param database              Database configuration
-        * @param tenantId              Tenant ID
+        * @param environmentName        Name of the RSS environment
+        * @param database               Database configuration
+        * @param tenantId               Tenant ID
         *
-        * @throws RSSDAOException  If some error occurs while adding database configuration
-        *                              information to RSS meta data repository
+        * @throws RSSDAOException       If some error occurs while adding database configuration
+        *                               information to RSS meta data repository
         */
        void addDatabase(String environmentName, Database database,
                         int tenantId) throws RSSDAOException;
@@ -39,12 +40,13 @@ public interface DatabaseDAO {
        /**
         * Method to remove database configuration information from RSS metadata repository.
         *
-        * @param rssInstanceName       Name of the RSS instance in which the database has been created
-        * @param databaseName          Name of the database to be removed
-        * @param tenantId              Tenant ID
+        * @param environmentName        Name of the RSS environment
+        * @param rssInstanceName        Name of the RSS instance in which the database has been created
+        * @param databaseName           Name of the database to be removed
+        * @param tenantId               Tenant ID
         *
-        * @throws RSSDAOException  If some error occurs while removing database configuration
-        *                              information from RSS meta data repository
+        * @throws RSSDAOException       If some error occurs while removing database configuration
+        *                               information from RSS meta data repository
         */
        void removeDatabase(String environmentName, String rssInstanceName, String databaseName,
                            int tenantId) throws RSSDAOException;
@@ -52,13 +54,14 @@ public interface DatabaseDAO {
        /**
         * Method to check whether a database with the given name exists in a particular RSS instance.
         *
-        * @param rssInstanceName       Name of the RSS instance
-        * @param databaseName          Name of the database
-        * @param tenantId              Tenant ID
+        * @param environmentName        Name of the RSS environment
+        * @param rssInstanceName        Name of the RSS instance
+        * @param databaseName           Name of the database
+        * @param tenantId               Tenant ID
         *
-        * @return                      true | false depending on the existence of the database
-        * @throws RSSDAOException  If some error occurs while checking the existence of a database
-        *                              configuration in a particular RSS instance
+        * @return                       true | false depending on the existence of the database
+        * @throws RSSDAOException       If some error occurs while checking the existence of a database
+        *                               configuration in a particular RSS instance
         */
        boolean isDatabaseExist(String environmentName, String rssInstanceName, String databaseName,
                                int tenantId) throws RSSDAOException;
@@ -66,13 +69,14 @@ public interface DatabaseDAO {
        /**
         * Method to get configuration information of a particular database.
         *
-        * @param rssInstanceName       Name of the RSS instance in which the database exists
-        * @param databaseName          Name of the database
-        * @param tenantId              Tenant ID
+        * @param environmentName        Name of the RSS environment
+        * @param rssInstanceName        Name of the RSS instance in which the database exists
+        * @param databaseName           Name of the database
+        * @param tenantId               Tenant ID
         *
-        * @return                      Configuration information of the requested database
-        * @throws RSSDAOException  If some error occurs while retrieving the configuration
-        *                              information of a given database
+        * @return                       Configuration information of the requested database
+        * @throws RSSDAOException       If some error occurs while retrieving the configuration
+        *                               information of a given database
         */
        Database getDatabase(String environmentName, String rssInstanceName, String databaseName,
                             int tenantId) throws RSSDAOException;
@@ -80,11 +84,12 @@ public interface DatabaseDAO {
        /**
         * Method to retrieve all the database configurations belong to a particular tenant.
         *
-        * @param tenantId              Tenant ID
+        * @param environmentName        Name of the RSS environment
+        * @param tenantId               Tenant ID
         *
-        * @return                      Array of database configurations belong to a tenant
-        * @throws RSSDAOException  If some error occurs while retrieving the configurations of
-        *                              the database belong to a tenant
+        * @return                       Array of database configurations belong to a tenant
+        * @throws RSSDAOException       If some error occurs while retrieving the configurations of
+        *                               the database belong to a tenant
         */
        Database[] getDatabases(String environmentName, int tenantId) throws RSSDAOException;
 
@@ -92,21 +97,25 @@ public interface DatabaseDAO {
         * Method to increment the System RSS database count which is being maintained to determine the
         * RSS instance in which the next database in-line should be created.
         *
-        * @throws RSSDAOException  If some error occurs while incrementing the system RSS database
-        *                              count
+        * @param environmentName    Name of the RSS environment
+        * @param txIsolationLevel Transaction isolation level
+        * @throws RSSDAOException   If some error occurs while incrementing the system RSS database
+        *                           count
         */
-       void incrementSystemRSSDatabaseCount(String environmentName, int txIsolationalLevel) throws RSSDAOException;
+       void incrementSystemRSSDatabaseCount(String environmentName,
+                                            int txIsolationLevel) throws RSSDAOException;
 
        /**
         * Method to retrieve the system RSS database count which is being maintained to determine the
         * RSS instance in which the next database in-line should be created.
         *
-        * @return                      Current system RSS database count
-        * @throws RSSDAOException  If some error occurs while retrieving the current system RSS
-        *                              database count
+        * @param environmentName        Name of the RSS environment
+        * @return                       Current system RSS database count
+        * @throws RSSDAOException       If some error occurs while retrieving the current system RSS
+        *                               database count
         */
        int getSystemRSSDatabaseCount(String environmentName) throws RSSDAOException;
     
-       public Database[] getAllDatabases(String environmentName, int tenantId) throws RSSDAOException;
+       Database[] getAllDatabases(String environmentName, int tenantId) throws RSSDAOException;
 
 }

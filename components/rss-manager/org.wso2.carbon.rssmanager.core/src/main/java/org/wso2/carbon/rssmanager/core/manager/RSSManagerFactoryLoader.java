@@ -20,7 +20,7 @@
 package org.wso2.carbon.rssmanager.core.manager;
 
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.manager.impl.h2.H2RSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.impl.mysql.MySQLRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.impl.oracle.OracleRSSManagerFactory;
@@ -29,7 +29,7 @@ import org.wso2.carbon.rssmanager.core.manager.impl.sqlserver.SQLServerRSSManage
 
 public final class RSSManagerFactoryLoader {
 
-    public static RSSManagerFactory getRMFactory(String type, RSSConfiguration config) {
+    public static RSSManagerFactory getRMFactory(String type, RSSConfig config) {
         if (RSSManagerConstants.RSSManagerProviderTypes.
                 RM_PROVIDER_TYPE_MYSQL.equals(type)) {
             return new MySQLRSSManagerFactory(config);

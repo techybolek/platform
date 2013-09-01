@@ -22,8 +22,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.*;
 import java.util.List;
 
-@XmlRootElement(name = "DataSourceConfig")
-public class RDBMSConfiguration implements DSXMLConfiguration {
+@XmlRootElement(name = "Definition")
+public class RDBMSConfig implements DSXMLConfig {
 
     private String url;
     private String driverClassName;
@@ -64,7 +64,7 @@ public class RDBMSConfiguration implements DSXMLConfiguration {
     private String dataSourceClassName;
     private List<DataSourceProperty> dataSourceProps;
 
-    public RDBMSConfiguration() {}
+    public RDBMSConfig() {}
 
 
     @XmlElement(name = "Url", nillable = false)

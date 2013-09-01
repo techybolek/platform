@@ -20,11 +20,10 @@
 package org.wso2.carbon.rssmanager.core.dao.impl;
 
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
-import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfig;
 import org.wso2.carbon.rssmanager.core.dao.RSSDAO;
 import org.wso2.carbon.rssmanager.core.dao.RSSInstanceDAO;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
-import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
 import org.wso2.carbon.rssmanager.core.dao.util.RSSDAOUtil;
 import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -37,12 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RSSInstanceDAOImpl implements RSSInstanceDAO {
-
-    private EntityManager entityManager;
-
-    public RSSInstanceDAOImpl(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
 
     public void addRSSInstance(String environmentName, RSSInstance rssInstance,
                                int tenantId) throws RSSDAOException {
@@ -80,7 +73,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         PreparedStatement stmt = null;
         RSSInstance rssInstance = getRSSInstance(environmentName, name, tenantId);
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
 //            List<DatabaseUser> users = getDatabaseUsersByRSSInstance(conn, rssInstance);
 //            if (users.size() > 0) {
 //                for (DatabaseUser user : users) {
@@ -108,7 +101,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "UPDATE RM_SERVER_INSTANCE SET SERVER_URL = ?, DBMS_TYPE = ?, INSTANCE_TYPE = ?, SERVER_CATEGORY = ?, ADMIN_USERNAME = ?, ADMIN_PASSWORD = ? WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, rssInstance.getDataSourceConfig().getUrl());
@@ -138,7 +131,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT * FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, name);
@@ -164,7 +157,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             stmt = conn.prepareStatement("SELECT * FROM RM_SERVER_INSTANCE WHERE INSTANCE_TYPE = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)");
             stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
             stmt.setInt(2, MultitenantConstants.SUPER_TENANT_ID);
@@ -191,7 +184,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT * FROM RM_SERVER_INSTANCE WHERE TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
@@ -218,7 +211,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         ResultSet rs = null;
         PreparedStatement stmt = null;
         if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
-            Connection conn = entityManager.createConnection(RSSDAO.getDataSource());
+            Connection conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT s.ID, s.NAME, s.SERVER_URL, s.DBMS_TYPE, s.INSTANCE_TYPE, s.SERVER_CATEGORY, s.TENANT_ID, s.ADMIN_USERNAME, s.ADMIN_PASSWORD FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND d.TYPE = ? AND d.TENANT_ID = ? AND d.NAME = ? AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             try {
                 stmt = conn.prepareStatement(sql);
@@ -250,7 +243,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
-            Connection conn = entityManager.createConnection(RSSDAO.getDataSource());
+            Connection conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT s.ID, s.NAME, s.SERVER_URL, s.DBMS_TYPE, s.INSTANCE_TYPE, s.SERVER_CATEGORY, s.ADMIN_USERNAME, s.ADMIN_PASSWORD, s.TENANT_ID FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND u.TYPE = ? AND u.TENANT_ID = ? AND u.USERNAME = ? AND s.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             try {
                 stmt = conn.prepareStatement(sql);
@@ -288,7 +281,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
         String adminPassword = rs.getString("ADMIN_PASSWORD");
         String dbmsType = rs.getString("DBMS_TYPE");
 
-        RDBMSConfiguration config = new RDBMSConfiguration();
+        RDBMSConfig config = new RDBMSConfig();
         config.setUrl(serverURL);
         config.setUsername(adminUsername);
         config.setPassword(adminPassword);

@@ -31,18 +31,12 @@ import java.sql.*;
 
 public class EnvironmentDAOImpl implements EnvironmentDAO {
 
-    private EntityManager entityManager;
-
-    public EnvironmentDAOImpl(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
     public void addEnvironment(RSSEnvironment environment) throws RSSDAOException {
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "INSERT INTO RM_ENVIRONMENT (NAME, TENANT_ID) VALUES (?, ?)";
             stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, environment.getName());
@@ -69,7 +63,7 @@ public class EnvironmentDAOImpl implements EnvironmentDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "DELETE FROM RM_ENVIRONMENT WHERE NAME = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, environmentName);
@@ -101,7 +95,7 @@ public class EnvironmentDAOImpl implements EnvironmentDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT 1 AS IS_EXIST FROM RM_ENVIRONMENT WHERE NAME = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, environmentName);

@@ -155,7 +155,7 @@ public class RSSManagerService {
         	 if (!isSuperTenant()) { 
         		 throw new RSSManagerException(" Unahuthorization access ");
              }
-            //environments =  RSSConfiguration.getInstance().getRSSEnvironments();
+            //environments =  RSSConfig.getInstance().getRSSEnvironments();
         } catch (RSSManagerException e) {
             String msg = "Error occurred while retrieving the list of available RSS environments";
             handleException(msg, e);

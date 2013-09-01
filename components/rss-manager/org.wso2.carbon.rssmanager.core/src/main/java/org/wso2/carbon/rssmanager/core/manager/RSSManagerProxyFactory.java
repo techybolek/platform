@@ -19,11 +19,11 @@
 
 package org.wso2.carbon.rssmanager.core.manager;
 
-import org.wso2.carbon.rssmanager.core.config.RSSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 
 public class RSSManagerProxyFactory {
 
-    public static RSSManagerProxy getRSSManagerProxy(String type, RSSConfiguration config) {
+    public static RSSManagerProxy getRSSManagerProxy(String type, RSSConfig config) {
         return new RSSManagerProxy(type, config);
     }
 

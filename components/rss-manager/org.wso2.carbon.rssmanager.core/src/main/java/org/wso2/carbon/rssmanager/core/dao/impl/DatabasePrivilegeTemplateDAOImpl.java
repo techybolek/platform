@@ -22,7 +22,6 @@ package org.wso2.carbon.rssmanager.core.dao.impl;
 import org.wso2.carbon.rssmanager.core.dao.DatabasePrivilegeTemplateDAO;
 import org.wso2.carbon.rssmanager.core.dao.RSSDAO;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
-import org.wso2.carbon.rssmanager.core.dao.util.EntityManager;
 import org.wso2.carbon.rssmanager.core.dao.util.RSSDAOUtil;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeSet;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeTemplate;
@@ -33,12 +32,6 @@ import java.util.List;
 
 public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTemplateDAO {
 
-
-	private EntityManager entityManager;
-	public DatabasePrivilegeTemplateDAOImpl(EntityManager entityManager){
-		this.entityManager = entityManager;
-	}
-	
     public void addDatabasePrivilegesTemplate(String environmentName,
                                               DatabasePrivilegeTemplate template,
                                               int tenantId) throws RSSDAOException {
@@ -46,7 +39,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "INSERT INTO RM_DB_PRIVILEGE_TEMPLATE (NAME,TENANT_ID,ENVIRONMENT_ID) VALUES(?,?,(SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)) ";
 
             stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -77,7 +70,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "DELETE FROM RM_DB_PRIVILEGE_TEMPLATE_ENTRY WHERE TEMPLATE_ID = (SELECT ID FROM RM_DB_PRIVILEGE_TEMPLATE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?))";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, templateName);
@@ -100,7 +93,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
         PreparedStatement stmt = null;
         DatabasePrivilegeSet privileges = template.getPrivileges();
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "UPDATE RM_DB_PRIVILEGE_TEMPLATE_ENTRY SET SELECT_PRIV = ?, INSERT_PRIV = ?, UPDATE_PRIV = ?, DELETE_PRIV = ?, CREATE_PRIV = ?, DROP_PRIV = ?, GRANT_PRIV = ?, REFERENCES_PRIV = ?, INDEX_PRIV = ?, ALTER_PRIV = ?, CREATE_TMP_TABLE_PRIV = ?, LOCK_TABLES_PRIV = ?, CREATE_VIEW_PRIV = ?, SHOW_VIEW_PRIV = ?, CREATE_ROUTINE_PRIV = ?, ALTER_ROUTINE_PRIV = ?, EXECUTE_PRIV = ?, EVENT_PRIV = ?, TRIGGER_PRIV = ? WHERE TEMPLATE_ID = (SELECT ID FROM RM_DB_PRIVILEGE_TEMPLATE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?))";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, privileges.getSelectPriv());
@@ -142,7 +135,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT p.ID, p.NAME, p.TENANT_ID, e.SELECT_PRIV, e.INSERT_PRIV, e.UPDATE_PRIV, e.DELETE_PRIV, e.CREATE_PRIV, e.DROP_PRIV, e.GRANT_PRIV, e.REFERENCES_PRIV, e.INDEX_PRIV, e.ALTER_PRIV, e.CREATE_TMP_TABLE_PRIV, e.LOCK_TABLES_PRIV, e.CREATE_VIEW_PRIV, e.SHOW_VIEW_PRIV, e.CREATE_ROUTINE_PRIV, e.ALTER_ROUTINE_PRIV, e.EXECUTE_PRIV, e.EVENT_PRIV, e.TRIGGER_PRIV" +
             		" FROM RM_DB_PRIVILEGE_TEMPLATE p, RM_DB_PRIVILEGE_TEMPLATE_ENTRY e WHERE p.ID = e.TEMPLATE_ID AND p.NAME = ? AND p.TENANT_ID = ? AND p.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
@@ -169,7 +162,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT p.ID, p.NAME, p.TENANT_ID, e.SELECT_PRIV, e.INSERT_PRIV, e.UPDATE_PRIV, e.DELETE_PRIV, e.CREATE_PRIV, e.DROP_PRIV, e.GRANT_PRIV, e.REFERENCES_PRIV, e.INDEX_PRIV, e.ALTER_PRIV, e.CREATE_TMP_TABLE_PRIV, e.LOCK_TABLES_PRIV, e.CREATE_VIEW_PRIV, e.SHOW_VIEW_PRIV, e.CREATE_ROUTINE_PRIV, e.ALTER_ROUTINE_PRIV, e.EXECUTE_PRIV, e.EVENT_PRIV, e.TRIGGER_PRIV" +
             		" FROM RM_DB_PRIVILEGE_TEMPLATE p, RM_DB_PRIVILEGE_TEMPLATE_ENTRY e WHERE p.ID = e.TEMPLATE_ID AND p.TENANT_ID = ?  AND p.ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
@@ -204,7 +197,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "INSERT INTO RM_DB_PRIVILEGE_TEMPLATE_ENTRY "
 					+ " (TEMPLATE_ID, SELECT_PRIV, INSERT_PRIV, UPDATE_PRIV, DELETE_PRIV, CREATE_PRIV, DROP_PRIV, GRANT_PRIV, REFERENCES_PRIV, INDEX_PRIV, ALTER_PRIV, CREATE_TMP_TABLE_PRIV, LOCK_TABLES_PRIV, CREATE_VIEW_PRIV, SHOW_VIEW_PRIV, CREATE_ROUTINE_PRIV, ALTER_ROUTINE_PRIV, EXECUTE_PRIV, EVENT_PRIV, TRIGGER_PRIV) "
 					+ " VALUES(?, "
@@ -244,7 +237,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "DELETE FROM RM_DB_PRIVILEGE_TEMPLATE_ENTRY WHERE TEMPLATE_ID = (SELECT ID FROM RM_DB_PRIVILEGE_TEMPLATE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?))";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, templateName);
@@ -267,7 +260,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
         ResultSet rs = null;
         boolean isExist = false;
         try {
-            conn = entityManager.createConnection(RSSDAO.getDataSource());
+            conn = RSSDAO.getEntityManager().createConnection(RSSDAO.getDataSource());
             String sql = "SELECT ID FROM RM_DB_PRIVILEGE_TEMPLATE WHERE NAME = ? AND TENANT_ID = ? AND ENVIRONMENT_ID = (SELECT ID FROM RM_ENVIRONMENT WHERE NAME = ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, templateName);
