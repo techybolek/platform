@@ -78,6 +78,10 @@ public abstract class RSSDAO {
         }
         JNDILookupDefinition jndiConfig = dataSourceDef.getJndiLookupDefintion();
         if (jndiConfig != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Initializing RSS Management Repository data source using the JNDI " +
+                        "Lookup Definition");
+            }
             List<JNDILookupDefinition.JNDIProperty> jndiPropertyList =
                     jndiConfig.getJndiProperties();
             if (jndiPropertyList != null) {

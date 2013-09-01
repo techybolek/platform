@@ -24,7 +24,7 @@ import org.wso2.carbon.rssmanager.core.config.datasource.DataSourceConfig;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement (name = "RSSManagementRepository")
+@XmlRootElement (name = "ManagementRepository")
 public class RSSManagementRepository {
 
     private DataSourceConfig dataSourceConfig;

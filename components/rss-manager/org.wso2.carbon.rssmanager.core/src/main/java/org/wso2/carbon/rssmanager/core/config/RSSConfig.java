@@ -34,7 +34,7 @@ public final class RSSConfig {
     private RSSEnvironment[] rssEnvironments;
     private RSSManagementRepository rssMgtRepository;
 
-    @XmlElement(name = "RSSManagementRepository", nillable = false)
+    @XmlElement(name = "ManagementRepository", nillable = false)
     public RSSManagementRepository getRSSManagementRepository() {
         return rssMgtRepository;
     }
