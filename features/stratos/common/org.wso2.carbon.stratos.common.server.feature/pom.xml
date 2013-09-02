@@ -224,10 +224,10 @@
 				<!--<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent.stub</bundleDef>-->
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.agent</bundleDef>-->
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.stratos.landing.page.deployer</bundleDef>
-                                <bundleDef>org.quartz-scheduler.wso2:quartz</bundleDef>                               
+                                <!--bundleDef>org.quartz-scheduler.wso2:quartz</bundleDef-->                               
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.activity</bundleDef>-->
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.task</bundleDef>
-                                <bundleDef>org.apache.synapse:synapse-tasks</bundleDef>
+                                <!--bundleDef>org.wso2.carbon:org.wso2.carbon.task</bundleDef-->
+                                <!--bundleDef>org.apache.synapse:synapse-tasks</bundleDef-->
                                 
                                 
                                 <!-- Tenant Mgmt -->
