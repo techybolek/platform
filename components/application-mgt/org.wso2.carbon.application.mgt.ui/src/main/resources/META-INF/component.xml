@@ -38,7 +38,7 @@
 			<order>5</order>
 			<style-class>manage</style-class>
             <icon>../carbonapps/images/list.gif</icon>
-            <require-permission>/permission/admin/manage</require-permission>
+            <require-permission>/permission/admin/manage/capp/list</require-permission>
         </menu>
 		 <menu>
             <id>apps_add_menu</id>
@@ -50,7 +50,7 @@
             <order>10</order>
             <style-class>manage</style-class>
             <icon>../carbonapps/images/add.gif</icon>
-            <require-permission>/permission/admin/manage/add/application</require-permission>
+            <require-permission>/permission/admin/manage/capp/manage</require-permission>
         </menu>
 	</menus>
 
