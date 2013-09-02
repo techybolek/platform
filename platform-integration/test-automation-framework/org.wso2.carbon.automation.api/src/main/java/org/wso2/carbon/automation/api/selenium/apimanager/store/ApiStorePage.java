@@ -18,25 +18,25 @@
 
 package org.wso2.carbon.automation.api.selenium.apimanager.store;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.wso2.carbon.automation.api.selenium.apimanager.subscription.SubscriptionPage;
-import org.wso2.carbon.automation.api.selenium.appfactory.home.AppLogin;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
 import java.io.IOException;
 
 public class ApiStorePage {
-    private static final Log log = LogFactory.getLog(AppLogin.class);
     private WebDriver driver;
     private UIElementMapper uiElementMapper;
+    private WebDriverWait wait;
 
     public ApiStorePage(WebDriver driver) throws IOException {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
+        wait = new WebDriverWait(this.driver, 30000);
         // Check that we're on the right page.
         if (!driver.findElement(By.className(uiElementMapper.getElement("app.api.manager.class.name.text"))).
                 getText().contains("APIs")) {
@@ -44,31 +44,42 @@ public class ApiStorePage {
         }
     }
 
-    //this method is used to subscript to api manager
+    /**
+     * this method uses to subscribe to Api Manager
+     *
+     * @param appName name of the application
+     * @return SubscriptionPage
+     * @throws IOException input output exception
+     */
     public SubscriptionPage subscribeToApiManager(String appName)
-            throws IOException, InterruptedException {
+            throws IOException {
         driver.findElement(By.cssSelector(uiElementMapper.getElement
-                ("app.factory.subscribe.api.element"))).click();
-        //This thread waits until Api details gets load
-        Thread.sleep(15000);
+                ("app.factory.subscribe.api.css.Value"))).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id
+                (uiElementMapper.getElement("app.api.select.app.name"))));
         new Select(driver.findElement(By.id(uiElementMapper.getElement("app.api.select.app.name")))).
                 selectByVisibleText(appName);
         driver.findElement(By.id(uiElementMapper.getElement
-                ("app.api.subscribe.button"))).click();
-        //this thread waits for the subscription
-        Thread.sleep(10000);
+                ("app.api.subscribe.button.id"))).click();
         driver.findElement(By.linkText(uiElementMapper.getElement
-                ("app.go.to.subscriptions.text"))).click();
+                ("app.go.to.subscriptions.link.text"))).click();
 
         return new SubscriptionPage(driver);
     }
-
+    /**
+     * navigates to Subscribe API Page
+     *
+     * @return SubscriptionPage
+     * @throws IOException          input output exceptions
+     * @throws InterruptedException for thread sleeps
+     */
     public SubscriptionPage gotoSubscribeAPiPage() throws IOException, InterruptedException {
 
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.subscription.page")))
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.subscription.page.link.text")))
                 .click();
         //This Thread waits until Subscription Page gets loaded.
-        Thread.sleep(30000);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id
+                (uiElementMapper.getElement("api.subscription.header.css.value"))));
         return new SubscriptionPage(driver);
     }
 }

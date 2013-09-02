@@ -18,14 +18,14 @@
 
 package org.wso2.carbon.automation.api.selenium.appfactory.appmanagement;
 
+/**
+ * This class is a singleton class which holds the sandbox and production details
+ * of an application
+ */
 public class AppFactoryDataHolder {
 
     private static AppFactoryDataHolder value = new AppFactoryDataHolder();
-    private static String sandBox;
     private static String sandboxAndProductionDetails;
-    private static String production;
-    private static String dbName;
-
     private AppFactoryDataHolder() {
     }
 
@@ -33,26 +33,10 @@ public class AppFactoryDataHolder {
         return value;
     }
 
-    public static void setSandBoxDetails(String sandBoxDetails) {
-        sandBox = sandBoxDetails;
-    }
-
-    public static String getSandBoxDetails() {
-        return sandBox;
-    }
-
-
-    public static void setProductionDetails(String productionDetails) {
-        production = productionDetails;
-    }
-
-    public static String getProductionDetails() {
-        return production;
-    }
-
     public static void setSandBoxAndProductionDetails(String details) {
         sandboxAndProductionDetails = details;
     }
+
 
     public static String getSandboxAndProductionDetails() {
         return sandboxAndProductionDetails;

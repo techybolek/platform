@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
 import java.io.IOException;
@@ -30,10 +32,12 @@ public class DataSourcePage {
     private static final Log log = LogFactory.getLog(ResourceOverviewPage.class);
     private WebDriver driver;
     private UIElementMapper uiElementMapper;
+    private WebDriverWait wait;
 
     public DataSourcePage(WebDriver driver) throws IOException {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
+        wait = new WebDriverWait(this.driver, 30000);
         // Check that we're on the right page.
 
         if (!(driver.getCurrentUrl().contains("listDatasources.jag"))) {
@@ -42,14 +46,22 @@ public class DataSourcePage {
     }
 
     public NewDataSourcePage gotoNewDataSourcePage() throws IOException {
-        driver.findElement(By.xpath(uiElementMapper.getElement("app.factory.new.data.source.page.button"))).click();
+        driver.findElement(By.xpath(uiElementMapper.getElement
+                ("app.factory.new.data.source.page.button.xpath"))).click();
         return new NewDataSourcePage(driver);
     }
-
+    /**
+     * navigate to Resource Overview Page
+     *
+     * @return ResourceOverviewPage
+     * @throws IOException          input output exception
+     * @throws InterruptedException for thread sleeps
+     */
     public ResourceOverviewPage gotoResourceOverviewPage() throws IOException, InterruptedException {
-        driver.findElement(By.xpath(uiElementMapper.getElement("app.overview.link.css"))).click();
-        Thread.sleep(5000);
-        log.info("loaidng the resource overview page");
+        driver.findElement(By.xpath(uiElementMapper.getElement("app.overview.link.css.value"))).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText
+                (uiElementMapper.getElement("app.overview.button.link.text"))));
+        log.info("loading the resource overview page");
         return new ResourceOverviewPage(driver);
     }
 }

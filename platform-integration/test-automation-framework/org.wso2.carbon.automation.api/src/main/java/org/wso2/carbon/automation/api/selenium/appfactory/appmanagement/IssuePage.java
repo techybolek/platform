@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.wso2.carbon.automation.api.selenium.appfactory.redmine.RedMineLoginPage;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
@@ -33,18 +35,26 @@ public class IssuePage {
     private static final Log log = LogFactory.getLog(RedMineLoginPage.class);
     private WebDriver driver;
     private UIElementMapper uiElementMapper;
+    private WebDriverWait wait;
 
     public IssuePage(WebDriver driver) throws IOException {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
+        wait = new WebDriverWait(this.driver, 30000);
         // Check that we're on the right page.
         if (!(driver.getCurrentUrl().contains("issuetracker.jag"))) {
             throw new IllegalStateException("This is not the Issue  page");
         }
     }
-
-    public RedMineLoginPage gotoRedMineTab() throws IOException, InterruptedException {
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.issue.redMine.tab.link"))).click();
+    /**
+     * this method is used to navigate to RedMine Page
+     *
+     * @return RedMinePage
+     * @throws Exception            on Exception
+     * @throws InterruptedException for Thread Sleeps
+     */
+    public RedMineLoginPage gotoRedMineTab() throws Exception {
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.issue.redMine.tab.link.text"))).click();
         Thread.sleep(10000);
         try {
             Set handles = driver.getWindowHandles();
@@ -53,18 +63,24 @@ public class IssuePage {
             String newTab = (String) handles.iterator().next();
             driver.switchTo().window(newTab);
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error("problem navigating to RedMine tab", e);
+            throw e;
         }
-
         log.info("shifted to the new Tab");
         return new RedMineLoginPage(driver);
     }
 
-
+    /**
+     * this method is used to check the issue details created are available in the App Factory
+     *
+     * @return issue details status of the app factory
+     * @throws InterruptedException for thread sleeps
+     */
     public boolean isIssueDetailsAreAvailable() throws InterruptedException {
         //checking the total bug count is equal to 1 
         driver.navigate().refresh();
-        Thread.sleep(30000);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id
+                (uiElementMapper.getElement("app.factory.issue.item.header.id"))));
         String itemHeader = driver.findElement(By.id(uiElementMapper.getElement
                 ("app.factory.issue.item.header.id"))).getText();
         String bugCount = driver.findElement(By.xpath(uiElementMapper.getElement

@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.wso2.carbon.automation.api.selenium.login.LoginPage;
 import org.wso2.carbon.automation.api.selenium.metadata.ApiPage;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
@@ -34,10 +36,12 @@ public class ConfigureApiPage {
     private static final Log log = LogFactory.getLog(LoginPage.class);
     private WebDriver driver;
     private UIElementMapper uiElementMapper;
+    private WebDriverWait wait;
 
     public ConfigureApiPage(WebDriver driver) throws IOException {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
+        wait = new WebDriverWait(this.driver, 30000);
         // Check that we're on the right page.
         driver.findElement(By.id(uiElementMapper.getElement("configure.tab.id"))).click();
         driver.findElement(By.linkText(uiElementMapper.getElement("api.configure.add.link"))).click();
@@ -49,17 +53,28 @@ public class ConfigureApiPage {
             throw new IllegalStateException("This is not the correct Page");
         }
     }
-
-    public ApiPage configureApi(String newApiConfiguration)
+    /**
+     * saves the configuration
+     *
+     * @return ApiPage
+     * @throws IOException for input output exceptions
+     */
+    public ApiPage configureApi()
             throws InterruptedException, IOException {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("SaveConfiguration()");
-        Thread.sleep(5000);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id
+                (uiElementMapper.getElement("api.subscription.header.css.value"))));
         return new ApiPage(driver);
     }
-
+    /**
+     * this method is used to log out from the page
+     *
+     * @return LoginPage
+     * @throws IOException for input output exceptions.
+     */
     public LoginPage logout() throws IOException {
-        driver.findElement(By.linkText(uiElementMapper.getElement("home.greg.sign.out.xpath"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("home.sign.out.link.text"))).click();
         return new LoginPage(driver);
     }
 }

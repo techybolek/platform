@@ -42,23 +42,44 @@ public class ResourceOverviewPage {
             throw new IllegalStateException("This is not the Resources Overview page");
         }
     }
-
+    /**
+     * navigate to DataBase Config page
+     *
+     * @return DatabaseConfigurationPage
+     * @throws IOException for input output exception
+     */
     public DatabaseConfigurationPage gotoDataBaseConfigPage() throws IOException {
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.database.configure.page.link"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.database.configure.page.link.text"))).click();
         return new DatabaseConfigurationPage(driver);
     }
-
+    /**
+     * navigate to Data Source Page
+     *
+     * @return DataSourcePage
+     * @throws IOException for input output exception
+     */
     public DataSourcePage gotoDataSourcePage() throws IOException {
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.data.source.page.link"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.data.source.page.link.text"))).click();
         return new DataSourcePage(driver);
     }
-
+    /**
+     * navigates to EndPoint and Registry Page
+     *
+     * @return EndPointAndRegistryPage
+     * @throws IOException for input output exception
+     */
     public EndPointAndRegistryPage gotoEndpointAndRegistryPage() throws IOException {
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.registry.page.link"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.registry.page.link.text"))).click();
         return new EndPointAndRegistryPage(driver);
     }
 
-
+    /**
+     * this method checks Data source Availability
+     *
+     * @param dataSourceName data source name
+     * @return data source availability status
+     * @throws IOException for input output exception
+     */
     public boolean isDataSourceAvailable(String dataSourceName) throws IOException {
         String dataSource = driver.findElement(By.linkText((dataSourceName))).getText();
         if (dataSourceName.equals(dataSource)) {
@@ -67,7 +88,13 @@ public class ResourceOverviewPage {
         }
         return false;
     }
-
+    /**
+     * this method checks Api Details Availability
+     *
+     * @param value value of the Api
+     * @return availability status of the API
+     * @throws InterruptedException for thread sleeps
+     */
     public boolean isApiDetailsAvailable(String value) throws InterruptedException {
         //This Threads waits until application Details loads to the Overview Page
         Thread.sleep(20000);
@@ -84,17 +111,25 @@ public class ResourceOverviewPage {
         }
         return false;
     }
-
+    /**
+     * this method used to sign out from the Resource Overview Page
+     */
     public void signOut() {
         log.info("Ready to sign out from the system");
         driver.findElement(By.cssSelector(uiElementMapper.getElement
-                ("app.factory.sign.out.email"))).click();
+                ("app.factory.sign.out.email.css.value"))).click();
         driver.findElement(By.linkText(uiElementMapper.getElement
-                ("app.factory.sing.out.text"))).click();
+                ("app.factory.sing.out.link.text"))).click();
 
         log.info("log out from the app factory");
     }
-
+    /**
+     * this method moves to the APi Manger store
+     *
+     * @return ApiStorePage
+     * @throws InterruptedException for  thread sleeps
+     * @throws IOException          input output exceptions
+     */
     public ApiStorePage apiManagerStore() throws InterruptedException, IOException {
         log.info("subscribing");
         driver.findElement(By.linkText(uiElementMapper.getElement
@@ -110,14 +145,21 @@ public class ResourceOverviewPage {
         } catch (Exception e) {
             log.info(e.getMessage());
         }
-        log.info("shifted to the api manager");
+        log.info("shifted to the apimanager manager");
         return new ApiStorePage(driver);
     }
-
+    /**
+     * navigates to Api Manager Page
+     *
+     * @return ApiManagerHomePage
+     * @throws IOException          input output Exception
+     * @throws InterruptedException thread sleeps.
+     */
     public ApiManagerHomePage gotoApiManagerPage() throws IOException, InterruptedException {
         driver.findElement(By.linkText(uiElementMapper.getElement
                 ("app.api.page.link.text"))).click();
-        //Waits until APi Page gets Load
+        //Waits until APi Page gets Load and the generated application values get generated
+        //this thread could be removed required an explicit wait.
         Thread.sleep(45000);
         return new ApiManagerHomePage(driver);
     }

@@ -43,15 +43,24 @@ public class TeamManagementPage {
     }
 
     //this method is used to add new member to the AppFactory
+    /**
+     * This method is used to add a member to Team.
+     *
+     * @param userEmail use email of the member
+     * @param member    member of the application
+     * @return TeamPage
+     * @throws InterruptedException on for thread sleeps.
+     * @throws IOException          on input output exception
+     */
     public TeamPage addMemberToTeam(String userEmail, String member)
             throws InterruptedException, IOException {
-        driver.findElement(By.id(uiElementMapper.getElement("app.add.member.name"))).sendKeys(userEmail);
-        driver.findElement(By.id(uiElementMapper.getElement("app.add.add.to.list.button"))).click();
+        driver.findElement(By.id(uiElementMapper.getElement("app.add.member.name.id"))).sendKeys(userEmail);
+        driver.findElement(By.id(uiElementMapper.getElement("app.add.add.to.list.button.id"))).click();
         //this wait until email added to the system
         Thread.sleep(5000);
         String memberXpath = "(//input[@data-role='" + member + "'])[last()]";
         driver.findElement(By.xpath((memberXpath))).click();
-        driver.findElement(By.id(uiElementMapper.getElement("app.invite.users"))).click();
+        driver.findElement(By.id(uiElementMapper.getElement("app.invite.users.id"))).click();
         //this is to wait until team page loads
         Thread.sleep(15000);
         log.info("Loading the team Page");

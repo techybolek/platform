@@ -48,7 +48,13 @@ public class ApiManagerHomePage {
         }
     }
 
-
+    /**
+     * this method is used to navigate to Api Manager Subscription Page.
+     *
+     * @return SubscriptionPage
+     * @throws IOException          for input output exceptions.
+     * @throws InterruptedException for thread sleeps
+     */
     public SubscriptionPage gotoApiManageSubscriptionPage() throws IOException, InterruptedException {
         //this Thread waits until APi Store loads
         Thread.sleep(30000);
@@ -68,6 +74,12 @@ public class ApiManagerHomePage {
     }
 
     //Checking the values.
+    /**
+     * this method is used to check the values generated in Api Manager and the App Factory
+     *
+     * @return matching status of the key values
+     * @throws IOException for input out put exceptions.
+     */
     public boolean valueCheck() throws IOException {
         String apiPropertyValues = driver.findElement(By.id(uiElementMapper.getElement
                 ("app.api.page.resource.list.id"))).getText();
@@ -75,14 +87,13 @@ public class ApiManagerHomePage {
         log.info(apiPropertyValues);
         log.info("*******************************************************************************");
         String sandBoxAndProductionDetails = AppFactoryDataHolder.getSandboxAndProductionDetails();
-        log.info("========================property values in api manager=========================");
+        log.info("========================property values in apimanager manager=========================");
         log.info("APi Store Key Value String");
         log.info(sandBoxAndProductionDetails);
         log.info("===============================================================================");
         //this set of strings declared in order to truncate headings in the string
-        String oldStr = apiPropertyValues;
         String newStr;
-        newStr = oldStr.replace("Key\n" +
+        newStr = apiPropertyValues.replace("Key\n" +
                 "Value\n" +
                 "prodKey", "");
         String newStr2 = newStr.replace("prodConsumerKey", "");
@@ -90,11 +101,11 @@ public class ApiManagerHomePage {
         String newStr4 = newStr3.replace("sandboxKey", "");
         String newStr5 = newStr4.replace("sandboxConsumerKey", "");
         String newStr6 = newStr5.replace("sandboxConsumerSecret", "");
-        log.info(oldStr);
+        log.info(apiPropertyValues);
         log.info("-----------------------------------------------------------");
         String newString7 = newStr6.replace("\n", "");
         log.info(newString7);
-        //truncating the headings of api manager sandbox and production key values
+        //truncating the headings of apimanager manager sandbox and production key values
         String new1 = sandBoxAndProductionDetails.replace("Keys Production Hide Keys Access Token", "");
         String new2 = new1.replace("Re-generate Consumer Key", "");
         String new3 = new2.replace("Consumer Secret", "");
@@ -103,14 +114,15 @@ public class ApiManagerHomePage {
         log.info(newApiValue5);
 
         //storing string elements as lists and checking the sequence
-        final Set<String[]> s = new HashSet<String[]>();
+        final Set<String[]> s;
+        s = new HashSet<String[]>();
         final Set<List<String>> s2 = new HashSet<List<String>>();
 
         s.add(new String[]{newString7, newApiValue5});
-        s2.add(Arrays.asList(new String[]{newString7, newApiValue5}));
+        s2.add(Arrays.asList(newString7, newApiValue5));
 
-        if (s2.contains(Arrays.asList(new String[]{newString7, newApiValue5}))) {
-            log.info("values are matching in api manager and AppFactory ");
+        if (s2.contains(Arrays.asList(newString7, newApiValue5))) {
+            log.info("values are matching in apimanager manager and AppFactory ");
             log.info("Test Case passes ");
             return true;
         }

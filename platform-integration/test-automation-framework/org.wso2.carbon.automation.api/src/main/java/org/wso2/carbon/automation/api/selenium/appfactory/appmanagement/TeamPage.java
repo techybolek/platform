@@ -37,14 +37,25 @@ public class TeamPage {
             throw new IllegalStateException("This is not the Team page");
         }
     }
-
+    /**
+     * this method is used to navigate to Team Management page
+     *
+     * @return TeamManagementPage
+     * @throws IOException on for input out put exception
+     */
     public TeamManagementPage gotoTeamManagementPage() throws IOException {
         driver.findElement(By.id(uiElementMapper.getElement("app.add.member.page.id"))).click();
         return new TeamManagementPage(driver);
     }
 
+    /**
+     * this method is used to navigate to App Management page.
+     *
+     * @return AppManagementPage.
+     * @throws IOException on for input out put exception.
+     */
     public AppManagementPage gotoAppManagementPage() throws IOException {
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.application.overview.page"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.application.overview.page.link.text"))).click();
         return new AppManagementPage(driver);
     }
 }

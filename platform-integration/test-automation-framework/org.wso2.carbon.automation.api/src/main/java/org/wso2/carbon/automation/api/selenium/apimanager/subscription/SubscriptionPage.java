@@ -45,32 +45,37 @@ public class SubscriptionPage {
         }
     }
 
-    //this method is used to subscribe to api manager
+
+    /**
+     * this method uses to Subscribe to Api Manager
+     *
+     * @throws IOException          input output exception
+     * @throws InterruptedException for thread sleeps
+     */
     public void generateKeys()
             throws IOException, InterruptedException {
         driver.manage().window().maximize();
         Thread.sleep(5000);
         driver.findElement(By.linkText(uiElementMapper.getElement
-                ("app.api.key.generate.text"))).click();
+                ("app.api.key.generate.link.text"))).click();
         //This thread waits until keys Get generated
         Thread.sleep(10000);
         driver.findElement(By.linkText(uiElementMapper.getElement
-                ("app.api.key.generate.text"))).click();
-
+                ("app.api.key.generate.link.text"))).click();
         Thread.sleep(10000);
-        String sandboxDetails = driver.findElement(By.id(uiElementMapper.getElement
-                ("app.api.sandbox.details.id"))).getText();
+        String sandBoxAndProductionDetails = driver.findElement(By.id(("appDetails0_super"))).getText();
         log.info("--------------------------------------------------------------------------");
-        log.info(sandboxDetails);
-        String productionDetails = driver.findElement(By.id(uiElementMapper.getElement
-                ("app.api.production.details.id"))).getText();
-        log.info(productionDetails);
-        log.info("----------------------------------------------------------------------");
-        AppFactoryDataHolder.setSandBoxDetails(sandboxDetails);
-        AppFactoryDataHolder.setProductionDetails(productionDetails);
+        log.info(sandBoxAndProductionDetails);
+        log.info("--------------------------------------------------------------------------");
+        AppFactoryDataHolder.setSandBoxAndProductionDetails(sandBoxAndProductionDetails);
         log.info("Sand box And production details are added");
     }
-
+    /**
+     * navigates to Resource Overview Page
+     *
+     * @return ResourceOverviewPage
+     * @throws IOException for input output exceptions
+     */
     public ResourceOverviewPage gotoResourceOverviewPage() throws IOException {
 
         try {
@@ -86,6 +91,12 @@ public class SubscriptionPage {
         return new ResourceOverviewPage(driver);
     }
 
+    /**
+     * navigates to APi Manager Home Page
+     *
+     * @return ApiManagerHomePage
+     * @throws IOException for input Output Exceptions
+     */
     public ApiManagerHomePage gotoApiManagerHomePage() throws IOException {
 
         try {
@@ -100,14 +111,24 @@ public class SubscriptionPage {
         log.info("shifted to the app factory tab");
         return new ApiManagerHomePage(driver);
     }
-
+    /**
+     * this method refreshes the page
+     *
+     * @throws InterruptedException for Thread Sleeps
+     */
     public void refresh() throws InterruptedException {
         log.info("page is refreshing");
         //This Thread waits until the page get refreshed
         Thread.sleep(20000);
         driver.navigate().refresh();
     }
-
+    /**
+     * this method uses to select application
+     *
+     * @param appKey application key
+     * @throws InterruptedException for thread sleeps
+     * @throws IOException          for input output exceptions
+     */
     public void selectApp(String appKey) throws InterruptedException, IOException {
         log.info("selecting the application");
         //This Thread waits until application gets select

@@ -43,14 +43,21 @@ public class AppLogin {
         }
     }
 
-    //login to the home page
+    /**
+     * this method is used to log in to the App Factory
+     *
+     * @param userName username of OT the user
+     * @param password password of the OT user
+     * @return AppHomePage
+     * @throws IOException for input Output Exceptions.
+     */
     public AppHomePage loginAs(String userName, String password) throws IOException {
         log.info("login as " + userName);
-        WebElement userNameField = driver.findElement(By.name(uiElementMapper.getElement("login.username.name")));
-        WebElement passwordField = driver.findElement(By.name(uiElementMapper.getElement("login.password")));
+        WebElement userNameField = driver.findElement(By.name(uiElementMapper.getElement("app.login.username.name")));
+        WebElement passwordField = driver.findElement(By.name(uiElementMapper.getElement("app.login.password.name")));
         userNameField.sendKeys(userName);
         passwordField.sendKeys(password);
-        driver.findElement(By.cssSelector(uiElementMapper.getElement("app.sign.in.button"))).click();
+        driver.findElement(By.cssSelector(uiElementMapper.getElement("app.sign.in.button.css.value"))).click();
         return new AppHomePage(driver);
     }
 }

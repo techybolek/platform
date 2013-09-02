@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.wso2.carbon.automation.api.selenium.appfactory.resources.ResourceOverviewPage;
 import org.wso2.carbon.automation.api.selenium.login.LoginPage;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
@@ -35,25 +37,34 @@ public class AppManagementPage {
     private WebDriver driver;
     private UIElementMapper uiElementMapper;
     private static final Log log = LogFactory.getLog(LoginPage.class);
+    private WebDriverWait wait;
 
     public AppManagementPage(WebDriver driver) throws IOException {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
+        wait = new WebDriverWait(this.driver, 30000);
         // Check that we're on the right page.
 
         if (!(driver.getCurrentUrl().contains("application.jag"))) {
             throw new IllegalStateException("this is not the Application Management Page");
         }
     }
-
-    //this method is used to check the application details accuracy in the application Overview page.
+    /**
+     * this method is used to check the application details accuracy in the application Overview page.
+     *
+     * @param repositoryType  repository details of the application.
+     * @param appOwner        appOwner of the Application .
+     * @param Description     Description of the application .
+     * @param applicationType Type of the Application.
+     * @param applicationKey  Key of the Application.
+     * @return boolean value of the application state.
+     * @throws Exception if application details are not matching.
+     */
     public boolean isAppDetailsAvailable(String repositoryType, String appOwner, String Description,
-                                         String applicationType, String applicationKey)
-            throws InterruptedException {
-        //this  wait until overview page load
-        Thread.sleep(5000);
+                                         String applicationType, String applicationKey) throws Exception {
         String repositoryTypeName = driver.findElement(By.id(uiElementMapper.getElement
                 ("app.overview.page.repository.type.id"))).getText();
+
         String appOwnerName = driver.findElement(By.id(uiElementMapper.getElement
                 ("app.overview.page.app.owner.id"))).getText().toUpperCase();
         String DescriptionOfApp = driver.findElement(By.id(uiElementMapper.getElement
@@ -63,84 +74,79 @@ public class AppManagementPage {
         String applicationKeyOfApp = driver.findElement(By.xpath(uiElementMapper.getElement
                 ("app.overview.page.app.key.xpath"))).getText();
 
-        if (repositoryType.equals(repositoryTypeName) && appOwner.equals(appOwnerName) &&
-                Description.equals(DescriptionOfApp) && applicationType.equals(applicationTypeOfApp) && applicationKey.
-                equals(applicationKeyOfApp)) {
 
-            log.info(repositoryType);
-            log.info(repositoryTypeName);
-            log.info("--------------------------------------------------");
-
-            log.info(appOwner);
-            log.info(appOwnerName);
-            log.info("---------------------------------------------------");
-
-            log.info(Description);
-            log.info(DescriptionOfApp);
-            log.info("---------------------------------------------------");
-
-            log.info(applicationType);
-            log.info(applicationTypeOfApp);
-            log.info("----------------------------------------------------");
-
-            log.info(applicationKey);
-            log.info(applicationKeyOfApp);
-            log.info("----------------------------------------------------");
-
-            log.info("application details added are accurate in App Management page");
-            return true;
+        if (repositoryType.equals(repositoryTypeName)) {
+            log.info("repository type is equal");
+        } else {
+            throw new Exception("repository types are not equal");
         }
 
-        log.info(repositoryType);
-        log.info(repositoryTypeName);
-        log.info("--------------------------------------------------");
+        if (appOwner.equals(appOwnerName)) {
+            log.info("app owner name is equal");
+        } else {
+            throw new Exception("app owner names are not equal");
+        }
 
-        log.info(appOwner);
-        log.info(appOwnerName);
-        log.info("---------------------------------------------------");
+        if (Description.equals(DescriptionOfApp)) {
+            log.info("Description of the app is equal");
+        } else {
+            throw new Exception("Description of app is not equal");
+        }
 
-        log.info(Description);
-        log.info(DescriptionOfApp);
-        log.info("---------------------------------------------------");
+        if (applicationType.equals(applicationTypeOfApp)) {
+            log.info("application type is equal");
+        } else {
+            throw new Exception("application types are not equal");
+        }
 
-        log.info(applicationType);
-        log.info(applicationTypeOfApp);
-        log.info("----------------------------------------------------");
-
-        log.info(applicationKey);
-        log.info(applicationKeyOfApp);
-        log.info("----------------------------------------------------");
-
-        log.info("application details added are inaccurate in App Management page");
-        return false;
+        if (applicationKey.equals(applicationKeyOfApp)) {
+            log.info("application key is equal");
+        } else {
+            throw new Exception("application keys are not equal");
+        }
+        return true;
     }
 
-    public void editApplicationDetails(String editedString) throws InterruptedException {
+
+    /**
+     * this method use to edit the description of the application
+     *
+     * @param newDescription new description to be enter.
+     * @throws InterruptedException for thread sleeps.
+     */
+    public void editApplicationDescription(String newDescription) throws InterruptedException {
         //only description could be edited by now later this method will give the functionality to
         //edit the rest of the values
         driver.findElement(By.id(uiElementMapper.getElement("app.overview.page.app.description.id"))).click();
         //this wait until overview page loads
-        Thread.sleep(5000);
-        driver.findElement(By.id(uiElementMapper.getElement("new.app.add.app.edit.Description"))).clear();
-        driver.findElement(By.id(uiElementMapper.getElement("new.app.add.app.edit.Description")))
-                .sendKeys(editedString);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id
+                (uiElementMapper.getElement("app.new.add.app.edit.Description.id"))));
+        driver.findElement(By.id(uiElementMapper.getElement("app.new.add.app.edit.Description.id"))).clear();
+        driver.findElement(By.id(uiElementMapper.getElement("app.new.add.app.edit.Description.id")))
+                .sendKeys(newDescription);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("updateDescription()");
         log.info("Description is updated");
     }
 
-    //this method use to check the Description editing of the Application
-    public boolean isEdited(String editedText) throws InterruptedException {
+
+    /**
+     * this method use to check the Description editing of the Application.
+     *
+     * @param expectedNewDescription edited description of the app
+     * @return the description state of the application.
+     */
+    public boolean isApplicationDescriptionEdited(String expectedNewDescription)  {
         log.info("checking the edited text of the description text area");
-        //this waits until overview page loads
-        Thread.sleep(5000);
-        String editedDescription = driver.findElement(By.id(uiElementMapper.getElement
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id
+                (uiElementMapper.getElement("app.overview.page.app.description.id"))));
+        String newDescription = driver.findElement(By.id(uiElementMapper.getElement
                 ("app.overview.page.app.description.id"))).getText();
         log.info("-------------------------------------");
-        log.info(editedText);
-        log.info(editedDescription);
+        log.info(expectedNewDescription);
+        log.info(newDescription);
 
-        if (editedText.equals(editedDescription)) {
+        if (expectedNewDescription.equals(newDescription)) {
             log.info("Application Description edit is successful");
             return true;
         }
@@ -148,34 +154,67 @@ public class AppManagementPage {
         log.info("Application Description edit is unsuccessful");
         return false;
     }
-
-    public GovernancePage gotoGovernancePage() throws IOException {
-        driver.findElement(By.id(uiElementMapper.getElement("app.navigate.Governance.page.link"))).click();
-        return new GovernancePage(driver);
+    /**
+     * this method is used to LifeCycleManagementPage
+     *
+     * @return AppLifeCycleManagementPage
+     * @throws IOException on input error
+     */
+    public AppLifeCycleManagementPage gotoLifeCycleManagePage() throws IOException {
+        driver.findElement(By.id(uiElementMapper.getElement("app.navigate.Governance.page.id"))).click();
+        return new AppLifeCycleManagementPage(driver);
     }
 
+    /**
+     * this method is used to gotoIssue page
+     *
+     * @return gotoIssuePage
+     * @throws IOException on input error
+     */
     public IssuePage gotoIssuePage() throws IOException {
-        driver.findElement(By.id(uiElementMapper.getElement("app.navigate.isue.page.link.id"))).click();
+        driver.findElement(By.id(uiElementMapper.getElement("app.navigate.issue.page.link.id"))).click();
         return new IssuePage(driver);
     }
 
-    //this method use to go to team page
+    /**
+     * this method is used to go to team page
+     *
+     * @return gotoTeamPage
+     * @throws IOException on input error
+     */
     public TeamPage gotoTeamPage() throws IOException {
         driver.findElement(By.id(uiElementMapper.getElement("app.team.page.id"))).click();
         return new TeamPage(driver);
     }
-    //this method use to go to team page
+
+    /**
+     * this method is used to navigate to ResourceOverviewPage
+     *
+     * @return ResourceOverviewPage
+     * @throws IOException on input error
+     */
     public ResourceOverviewPage gotoResourceOverviewPage() throws IOException {
         driver.findElement(By.id(uiElementMapper.getElement("app.factory.db.admin.id"))).click();
         return new ResourceOverviewPage(driver);
     }
 
-    //this method use to  go to repository and build page
+
+    /**
+     * this method is used to navigate to RepositoryAndBuildPage
+     *
+     * @return RepositoryAndBuildPage
+     * @throws IOException on input error
+     */
     public RepositoryAndBuildPage gotoRepositoryAndBuildPage() throws IOException {
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.navigate.Link"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.navigate.link.text"))).click();
         return new RepositoryAndBuildPage(driver);
     }
-
+    /**
+     * This method is used to check the Team Details.
+     *
+     * @param teamMember checking member of the team
+     * @return team details status
+     */
     public boolean isTeamDetailsAvailable(String teamMember) {
         String memberDetails = driver.findElement(By.id(uiElementMapper.getElement
                 ("app.overview.page.team.details.id"))).getText();
@@ -186,22 +225,32 @@ public class AppManagementPage {
         return false;
     }
 
+    /**
+     * this method is used to sign out from the AppManagement Page.
+     */
     public void signOut() {
         log.info("Ready to sign out from the system");
         driver.findElement(By.cssSelector(uiElementMapper.getElement
-                ("app.factory.sign.out.email"))).click();
+                ("app.factory.sign.out.email.css.value"))).click();
         driver.findElement(By.linkText(uiElementMapper.getElement
-                ("app.factory.sing.out.text"))).click();
+                ("app.factory.sing.out.link.text"))).click();
 
         log.info("log out from the app factory");
     }
 
 
-    //this method is used to check the build details of the versions of desired application at the
-    //overview Page
-    public boolean isBuildDetailsAccurate(String buildVersion) throws InterruptedException {
+    /**
+     * this method is used to check the Build details of the application
+     *
+     * @param buildVersion checking version.
+     * @return build status
+     * @throws InterruptedException used in thread sleep
+     */
+    public String isBuildDetailsAccurate(String buildVersion) throws InterruptedException {
+        String buildStatus = "";
         //this thread waits until deployment details loads to the overview Page
-        Thread.sleep(30000);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id
+                (uiElementMapper.getElement("app.trunk.overview.xpath"))));
         log.info("Verifying the Build Details of the application");
         String version = driver.findElement(By.xpath(uiElementMapper.getElement("app.trunk.overview.xpath")))
                 .getText();
@@ -210,25 +259,22 @@ public class AppManagementPage {
         {
             log.info("Trunk of the Application");
 
-            String buildStatus = driver.findElement(By.xpath(uiElementMapper.getElement
+            buildStatus = driver.findElement(By.xpath(uiElementMapper.getElement
                     ("app.trunk.build.status.xpath"))).getText();
             log.info(buildStatus);
-
-            if (buildStatus.equals("SUCCESSFUL")) {
-                log.info("Trunk of the application  build successful");
-                return true;
-            }
-            log.info("Trunk of the application build unsuccessful");
-            return false;
+            return buildStatus;
         } else {
-            String resourceXpath = "/html/body/div/div/article/section[3]/div/ul[";
-            String resourceXpath2 = "]/li/p/strong";
 
-            for (int i = 2; i < 10; i++) {
-                String versionXpath = resourceXpath + i + resourceXpath2;
+            //constructing the Xpath in order to traverse the Table
+            String XpathConstructorFistPart = "/html/body/div/div/article/section[3]/div/ul[";
+            String XpathConstructorSecondPart = "]/li/p/strong";
+
+            for (int XpathTableValue = 2; XpathTableValue < 10; XpathTableValue++) {
+                String versionXpath = XpathConstructorFistPart + XpathTableValue
+                        + XpathConstructorSecondPart;
                 String versionName = driver.findElement(By.xpath(versionXpath)).getText();
-                log.info("val on app is -------> " + versionName);
-                log.info("Correct is    -------> " + buildVersion);
+                log.info("val on app Factory Page -------> " + versionName);
+                log.info("Value Passed in test    -------> " + buildVersion);
 
                 try {
 
@@ -236,21 +282,17 @@ public class AppManagementPage {
 
                         String buildStatusXpath = "/html/body/div/div[2]/article/section[3]/div/ul[";
                         String buildStatusXpath2 = "]/li[4]/p/span/strong";
-                        String xpathConstructForBuild = buildStatusXpath + i + buildStatusXpath2;
-                        String buildStatus = driver.findElement(By.xpath(xpathConstructForBuild)).getText();
-                        if (buildStatus.equals("SUCCESSFUL")) {
-                            log.info("build status of" + "" + buildVersion + " is" + buildStatus);
-                            return true;
-                        } else {
-                            return false;
-                        }
+                        String xpathConstructForBuild = buildStatusXpath + XpathTableValue + buildStatusXpath2;
+                        buildStatus = driver.findElement(By.xpath(xpathConstructForBuild)).getText();
+                        return buildStatus;
                     }
                 } catch (NoSuchElementException ex) {
-                    log.info("Cannot Find the Uploaded Profile");
+                    log.error("Cannot Find the Uploaded Profile", ex);
+                    throw ex;
                 }
             }
         }
 
-        return false;
+        return buildStatus;
     }
 }

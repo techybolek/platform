@@ -43,21 +43,34 @@ public class RedMineHomePage {
             throw new IllegalStateException("This is not the Red Mine Home page");
         }
     }
-
+    /**
+     * This method is used to crate a issue for a project
+     *
+     * @param subject     subject of the issue
+     * @param description description of the issue
+     * @param version     version of the issue
+     * @throws InterruptedException for thread sleeps.
+     */
     public void createIssueForProject(String subject, String description, String version) throws InterruptedException {
         log.info("creating the issue ");
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.redMine.issue.button"))).click();
-        driver.findElement(By.id(uiElementMapper.getElement("app.redMine.issue.subject"))).sendKeys(subject);
-        driver.findElement(By.id(uiElementMapper.getElement("app.redMine.issue.description"))).sendKeys(description);
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.redMine.issue.button.link.text"))).click();
+        driver.findElement(By.id(uiElementMapper.getElement("app.redMine.issue.subject.id"))).sendKeys(subject);
+        driver.findElement(By.id(uiElementMapper.getElement("app.redMine.issue.description.id"))).sendKeys(description);
         new Select(driver.findElement(By.id(uiElementMapper.getElement("app.issue.version.id")))).
                 selectByVisibleText(version);
 
-        driver.findElement(By.name(uiElementMapper.getElement("app.redMine.issue.submit"))).click();
+        driver.findElement(By.name(uiElementMapper.getElement("app.redMine.issue.submit.name"))).click();
         Thread.sleep(15000);
         log.info("Issue is Created");
     }
 
-
+    /**
+     * this method is used to go to App factory from Red Mine
+     *
+     * @return IssuePage
+     * @throws IOException          for input output exception
+     * @throws InterruptedException for thread sleeps.
+     */
     public IssuePage gotoAppFactory() throws IOException, InterruptedException {
         Thread.sleep(10000);
         log.info("changing the windows");

@@ -40,11 +40,18 @@ public class RedMineLoginPage {
             throw new IllegalStateException("This is not the Red mine  page");
         }
     }
-
+    /**
+     * this method is used to log in to Red Mine.
+     *
+     * @param userName username for the Red mine.
+     * @param password Password for the Red Mine.
+     * @return RedMineHomePage
+     * @throws IOException for input output exceptions
+     */
     public RedMineHomePage loginToRedMine(String userName, String password) throws IOException {
         log.info("login as " + userName);
-        WebElement userNameField = driver.findElement(By.name(uiElementMapper.getElement("login.username.name")));
-        WebElement passwordField = driver.findElement(By.name(uiElementMapper.getElement("login.password")));
+        WebElement userNameField = driver.findElement(By.name(uiElementMapper.getElement("red.mine.login.username.name")));
+        WebElement passwordField = driver.findElement(By.name(uiElementMapper.getElement("red.mine.login.password.name")));
         userNameField.sendKeys(userName);
         passwordField.sendKeys(password);
         driver.findElement(By.name(uiElementMapper.getElement("app.redMine.login.button.name"))).click();

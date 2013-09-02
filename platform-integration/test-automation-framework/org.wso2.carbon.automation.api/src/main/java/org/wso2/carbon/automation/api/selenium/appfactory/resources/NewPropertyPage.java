@@ -20,7 +20,9 @@ package org.wso2.carbon.automation.api.selenium.appfactory.resources;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
 import java.io.IOException;
@@ -28,10 +30,12 @@ import java.io.IOException;
 public class NewPropertyPage {
     private WebDriver driver;
     private UIElementMapper uiElementMapper;
+    private WebDriverWait wait;
 
     public NewPropertyPage(WebDriver driver) throws IOException {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
+        wait = new WebDriverWait(this.driver, 30000);
         // Check that we're on the right page.
 
         if (!(driver.getCurrentUrl().contains("resources-add.jag"))) {
@@ -39,21 +43,49 @@ public class NewPropertyPage {
         }
     }
 
-
-    public ResourceOverviewPage CreateNewDataSource(String propertyName, String propertyType,
-                                                    String description, String propertyValue)
+    /**
+     * this method is used to create a new property
+     *
+     * @param propertyName  property name
+     * @param propertyType  property type
+     * @param description   Description
+     * @param propertyValue property value
+     * @return EndPointAndRegistryPage
+     * @throws IOException          for input output exceptions
+     * @throws InterruptedException for thread sleeps.
+     */
+    public EndPointAndRegistryPage createNewProperty(String propertyName, String propertyType,
+                                                     String description, String propertyValue)
             throws IOException, InterruptedException {
-           driver.findElement(By.id(uiElementMapper.getElement("app.property.name")))
+        driver.findElement(By.id(uiElementMapper.getElement("app.property.name.id")))
                 .sendKeys(propertyName);
-        new Select(driver.findElement(By.id(uiElementMapper.getElement("app.property.type")))).
+        new Select(driver.findElement(By.id(uiElementMapper.getElement("app.property.type.id")))).
                 selectByVisibleText(propertyType);
-        driver.findElement(By.id(uiElementMapper.getElement("app.property.description")))
+        driver.findElement(By.id(uiElementMapper.getElement("app.property.description.id")))
                 .sendKeys(description);
-        driver.findElement(By.id(uiElementMapper.getElement("app.property.value")))
+        driver.findElement(By.id(uiElementMapper.getElement("app.property.value.id")))
                 .sendKeys(propertyValue);
-        driver.findElement(By.name(uiElementMapper.getElement("app.data.source.add.button"))).click();
+        driver.findElement(By.id(uiElementMapper.getElement("app.data.source.add.button.name"))).click();
         //this thread waits until data source creation
-        Thread.sleep(15000);
-        return new ResourceOverviewPage(driver);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath
+                (uiElementMapper.getElement("app.factory.new.data.source.page.button.xpath"))));
+        return new EndPointAndRegistryPage(driver);
+    }
+
+    /**
+     * this method use to delete a property
+     *
+     * @return EndPointAndRegistryPage
+     * @throws IOException          for input output exception
+     * @throws InterruptedException for thread sleeps.
+     */
+    public EndPointAndRegistryPage deleteProperty() throws IOException, InterruptedException {
+        driver.findElement(By.id(uiElementMapper.getElement("app.property.value.delete.id"))).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText
+                (uiElementMapper.getElement("app.property.ok.button.link.text"))));
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.property.ok.button.link.text"))).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath
+                (uiElementMapper.getElement("app.data.add.property"))));
+        return new EndPointAndRegistryPage(driver);
     }
 }
