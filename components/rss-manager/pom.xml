@@ -20,6 +20,7 @@
                 <module>org.wso2.carbon.rssmanager.common</module>
                 <module>org.wso2.carbon.rssmanager.core</module>
                 <module>org.wso2.carbon.rssmanager.ui</module>
+                <module>org.wso2.carbon.rssmanager.data.mgt</module>
             </modules>
     
 </project>
