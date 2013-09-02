@@ -41,8 +41,8 @@ public class DataTaskContext {
 	
 	private AxisConfiguration axisConfig;
 			
-	public DataTaskContext(String tenantDomain) {
-		this.axisConfig = DSTaskUtils.lookupAxisConfig(tenantDomain);
+	public DataTaskContext(int tid) {
+		this.axisConfig = DSTaskUtils.lookupAxisConfig(tid);
 	}
 
 	private DataService getDataService(String serviceName) {

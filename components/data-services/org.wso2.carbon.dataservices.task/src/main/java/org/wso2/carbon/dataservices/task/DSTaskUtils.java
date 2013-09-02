@@ -26,6 +26,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.WSDL2Constants;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
+import org.wso2.carbon.dataservices.core.DBUtils;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskInfo.TriggerInfo;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
@@ -114,21 +115,22 @@ public class DSTaskUtils {
         return false;
     }
 
-    public static AxisConfiguration lookupAxisConfig(String tenantDomain) {
+    public static AxisConfiguration lookupAxisConfig(int tid) {
     	ConfigurationContext mainConfigCtx = TasksDSComponent.getConfigurationContextService().
 				getServerConfigContext();
 		AxisConfiguration tenantAxisConf;
-		if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+		if (tid == MultitenantConstants.SUPER_TENANT_ID) {
 			tenantAxisConf = mainConfigCtx.getAxisConfiguration();
 		} else {
+                    String tenantDomain = DBUtils.getTenantDomainFromId(tid);
 		    tenantAxisConf = TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, 
 		    		mainConfigCtx);
 		}
 		return tenantAxisConf;
     }
     
-	public static AxisService lookupAxisService(String tenantDomain, String serviceName) {
-		return lookupAxisService(lookupAxisConfig(tenantDomain), serviceName);
+	public static AxisService lookupAxisService(int tid, String serviceName) {
+		return lookupAxisService(lookupAxisConfig(tid), serviceName);
 	}
 	
 	public static AxisService lookupAxisService(AxisConfiguration tenantAxisConf, 

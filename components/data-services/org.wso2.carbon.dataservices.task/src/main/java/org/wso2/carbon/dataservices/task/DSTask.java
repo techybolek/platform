@@ -46,13 +46,13 @@ public class DSTask extends WebServiceCallTask {
 		}
 		String serviceName = this.getProperties().get(DSTaskConstants.DATA_SERVICE_NAME);
 		String opName = this.getProperties().get(DSTaskConstants.DATA_SERVICE_OPERATION_NAME);
-		String tenantDomainProp = this.getProperties().get(TaskInfo.TENANT_DOMAIN_PROP);
-		if (tenantDomainProp == null) {
+                String tidProp = this.getProperties().get(TaskInfo.TENANT_ID_PROP);
+		if (tidProp == null) {
 			throw new RuntimeException("Cannot determine the tenant domain for the scheduled service: " +
 		            serviceName);
 		}
-		String tenantDomain = tenantDomainProp;
-		AxisService axisService = DSTaskUtils.lookupAxisService(tenantDomain, serviceName);
+                int tid = Integer.parseInt(tidProp);
+		AxisService axisService = DSTaskUtils.lookupAxisService(tid, serviceName);
 		if (axisService == null) {
 		    return false;
 		}
