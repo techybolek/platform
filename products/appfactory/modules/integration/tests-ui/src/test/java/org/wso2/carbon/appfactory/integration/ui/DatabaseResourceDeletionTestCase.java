@@ -45,7 +45,7 @@ public class DatabaseResourceDeletionTestCase extends AppFactoryIntegrationBase 
     public void deleteDatabaseResource() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
         AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
-        String appName = AppCredentialsGenerator.getAppName();
+        String appName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
         appManagementPage.gotoResourceOverviewPage();
@@ -61,7 +61,7 @@ public class DatabaseResourceDeletionTestCase extends AppFactoryIntegrationBase 
         DeleteDbUserPage deleteDbUserPage = new DeleteDbUserPage(driver);
         deleteDbUserPage.deleteDbUser();
         //deleting the auto user
-        String dbUser = AppCredentialsGenerator.getDbName();
+        String dbUser = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getDBName();
         System.out.println(dbUser);
         databaseConfigurationPage.gotoDeleteDbUserPage(dbUser + "_");
         deleteDbUserPage.deleteDbUser();

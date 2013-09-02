@@ -46,27 +46,27 @@ public class ApplicationAvailabilityTestCase extends AppFactoryIntegrationBase {
     public void testAppAvailableHomePage() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
         AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
-        String appName = AppCredentialsGenerator.getAppName();
+        String appName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppName();
         assertTrue(appHomePage.isApplicationAvailable(appName), "Application is not added Successfully");
     }
 
     @Test(dependsOnMethods = "testAppAvailableHomePage", groups = "wso2.af",
-            description = "checking added application details are available at the overview Page")
+          description = "checking added application details are available at the overview Page")
     public void testAppDetailsOverviewPage() throws Exception {
         AppHomePage appHomePage = new AppHomePage(driver);
-        String appName = AppCredentialsGenerator.getAppName();
-        String appKey = AppCredentialsGenerator.getAppKey();
+        String appName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppName();
+        String appKey = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppKey();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
         int charAt = userInfo.getUserName().indexOf('@');
         //This is the first name of the OT login creation
         String appOwnerName = userInfo.getUserName().substring(0, charAt).toUpperCase();
         assertTrue(appManagementPage.isAppDetailsAvailable("Git", appOwnerName, "this is a test app",
-                "JAX-RS Application", appKey), "Application Details are incorrect in App Management page");
+                                                           "JAX-RS Application", appKey), "Application Details are incorrect in App Management page");
     }
 
     @Test(dependsOnMethods = "testAppDetailsOverviewPage", groups = "wso2.af",
-            description = "checking Description Edit")
+          description = "checking Description Edit")
     public void testEditDescription() throws Exception {
         AppManagementPage appManagementPage = new AppManagementPage(driver);
         appManagementPage.editApplicationDescription("notepad edit cycle");

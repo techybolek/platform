@@ -32,13 +32,11 @@ import static org.testng.Assert.assertTrue;
 
 public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationBase {
     private WebDriver driver;
-    public String databaseName ;
+    public String databaseName;
 
-
-    public DatabaseResourceCreationTestCase(){
+    public DatabaseResourceCreationTestCase() {
         super.setDatabaseName();
-        databaseName=super.getDatabaseName();
-
+        databaseName = super.getDatabaseName();
     }
 
     @BeforeClass(alwaysRun = true)
@@ -47,12 +45,11 @@ public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationBase 
         driver.get(getLoginURL());
     }
 
-
     @Test(groups = "wso2.af", description = "create Database")
     public void testDatabaseResourceCreation() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
         AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
-        String appName = AppCredentialsGenerator.getAppName();
+        String appName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
         appManagementPage.gotoResourceOverviewPage();
@@ -61,8 +58,7 @@ public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationBase 
         DatabaseConfigurationPage databaseConfigurationPage = new DatabaseConfigurationPage(driver);
         databaseConfigurationPage.gotoNewDatabasePage();
         NewDatabasePage newDatabasePage = new NewDatabasePage(driver);
-        AppCredentialsGenerator.setDbName(databaseName);
-        String database = AppCredentialsGenerator.getDbName();
+        String database = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getDBName();
         newDatabasePage.createDatabaseDefault(database, "DbUser123");
         //DatabaseConfigurationPage databaseConfigurationPage = new DatabaseConfigurationPage(driver);
         databaseConfigurationPage.gotoNewDatabaseUserPage();
@@ -73,9 +69,9 @@ public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationBase 
         NewDatabaseTemplatePage newDatabaseTemplatePage = new NewDatabaseTemplatePage(driver);
         newDatabaseTemplatePage.createDatabaseTemplate("wso2Temp");
         //databaseConfigurationPage.signOut();
-        String databaseCheckName = AppCredentialsGenerator.getDbName();
+        String databaseCheckName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getDBName();
         assertTrue(databaseConfigurationPage.isDatabaseDetailsAvailable(databaseCheckName, "wso2usr_",
-                "wso2Temp@Development")
+                                                                        "wso2Temp@Development")
                 , "Database Details Are Not Available in Database Configuration Page");
         databaseConfigurationPage.signOut();
     }
@@ -83,11 +79,11 @@ public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationBase 
     //starting the data source creation and deletion tests
 
     @Test(dependsOnMethods = "testDatabaseResourceCreation", groups = "wso2.af",
-            description = "Creating a data Source")
+          description = "Creating a data Source")
     public void createNewDataSourceTestCase() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
         AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
-        String appName = AppCredentialsGenerator.getAppName();
+        String appName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppName();
         //assign the application name
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
@@ -106,13 +102,12 @@ public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationBase 
         resourceOverviewPage.signOut();
     }
 
-
     @Test(dependsOnMethods = "createNewDataSourceTestCase", groups = "wso2.af",
-            description = "Delete database Resource")
+          description = "Delete database Resource")
     public void testDeleteDatabaseResource() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
         AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
-        String appName = AppCredentialsGenerator.getAppName();
+        String appName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
         appManagementPage.gotoResourceOverviewPage();
@@ -128,14 +123,14 @@ public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationBase 
         DeleteDbUserPage deleteDbUserPage = new DeleteDbUserPage(driver);
         deleteDbUserPage.deleteDbUser();
         //deleting the auto user
-        String dbUser = AppCredentialsGenerator.getDbName();
+        String dbUser = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getDBName();
         databaseConfigurationPage.gotoDeleteDbUserPage(dbUser + "_");
         deleteDbUserPage.deleteDbUser();
         //deleting the auto template
         databaseConfigurationPage.gotoDeleteDbTemplatePage(dbUser + "@");
         deleteTemplatePage.deleteTemplate();
         //deleting the database
-        String dbName = AppCredentialsGenerator.getDbName();
+        String dbName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getDBName();
         databaseConfigurationPage.gotoDeleteDbPage(dbName);
         DeleteDBPage deleteDBPage = new DeleteDBPage(driver);
         deleteDBPage.deleteDatabase();
@@ -143,7 +138,6 @@ public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationBase 
         assertTrue(databaseConfigurationPage.isDatabaseDetailsDeleted()
                 , "Database Deletion has a  error");
     }
-
 
     @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception {

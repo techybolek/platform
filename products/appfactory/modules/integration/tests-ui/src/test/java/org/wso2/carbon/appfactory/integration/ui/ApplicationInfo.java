@@ -18,44 +18,26 @@
 
 package org.wso2.carbon.appfactory.integration.ui;
 
-public class AppCredentialsGenerator {
+public class ApplicationInfo {
+    private String appName;
+    private String dbName;
+    private String appKey;
 
-    private static AppCredentialsGenerator value = new AppCredentialsGenerator();
-    private static String appKey;
-    private static String appName;
-    private static String dbName;
-
-
-    private AppCredentialsGenerator() {
+    public ApplicationInfo(String appKey, String appName, String dbName) {
+        this.appKey = appKey;
+        this.appName = appName;
+        this.dbName = dbName;
     }
 
-    public static AppCredentialsGenerator getInstance() {
-        return value;
+    public String getAppName() {
+        return appName;
     }
 
-    public static void setAppKey(String Key) {
-        appKey = Key;
-    }
-
-    public static void setAppName(String name) {
-        appName = name;
-    }
-
-    public static void setDbName(String database) {
-        dbName = database;
-    }
-
-    public static String getAppKey() {
+    public String getAppKey() {
         return appKey;
     }
 
-    public static String getAppName() {
-        return appName;
-    }
-    public static String getDbName() {
+    public String getDBName() {
         return dbName;
     }
-
-
 }
-

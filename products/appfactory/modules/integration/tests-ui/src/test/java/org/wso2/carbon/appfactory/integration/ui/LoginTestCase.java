@@ -35,11 +35,10 @@ public class LoginTestCase extends AppFactoryIntegrationBase {
         driver.get(getLoginURL());
     }
 
-
     @Test(groups = "wso2.af", description = "verify login to app server")
     public void testLogin() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
-        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(),getUserInfo().getPassword());
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
     }
 
     @AfterClass(alwaysRun = true)

@@ -32,18 +32,15 @@ public class ApplicationCreationTestCase extends AppFactoryIntegrationBase {
     private String appName;
     private String appKey;
 
-
     public ApplicationCreationTestCase() {
-        super.setApplicationName();
-        appName = super.getApplicationName();
-        super.setApplicationKey();
-        appKey = super.getApplicationKey();
+        appKey = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppKey();
+        appName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppName();
     }
 
-
     @BeforeTest(alwaysRun = true, groups = "wso2.af",
-            description = "Create a new Application according to the passing values")
+                description = "Create a new Application according to the passing values")
     public void createApplication() throws Exception {
+
         WebDriver driver = BrowserManager.getWebDriver();
         driver.get(getLoginURL());
         try {
@@ -51,12 +48,10 @@ public class ApplicationCreationTestCase extends AppFactoryIntegrationBase {
             AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
             appHomePage.gotoAddNewAppPage();
             AddNewAppPage addNewAppPage = new AddNewAppPage(driver);
-            AppCredentialsGenerator.setAppKey(appKey);
-            AppCredentialsGenerator.setAppName(appName);
             String iconPath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
-                    File.separator + "AF" + File.separator + "images" + File.separator + "build.png";
+                              File.separator + "AF" + File.separator + "images" + File.separator + "build.png";
             addNewAppPage.createAnApplication(appName, appKey, iconPath, "this is a test app",
-                    "JAX-RS Application", "Git");
+                                              "JAX-RS Application", "Git");
         } finally {
             driver.quit();
         }

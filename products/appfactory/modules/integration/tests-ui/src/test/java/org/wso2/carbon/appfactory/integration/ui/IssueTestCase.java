@@ -34,7 +34,6 @@ import static org.testng.Assert.assertTrue;
 
 public class IssueTestCase extends AppFactoryIntegrationBase {
 
-
     private WebDriver driver;
 
     @BeforeClass(alwaysRun = true)
@@ -47,7 +46,7 @@ public class IssueTestCase extends AppFactoryIntegrationBase {
     public void testAddIssue() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
         AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
-        String appName = AppCredentialsGenerator.getAppName();
+        String appName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
         appManagementPage.gotoIssuePage();
@@ -60,14 +59,12 @@ public class IssueTestCase extends AppFactoryIntegrationBase {
         redMineHomePage.gotoAppFactory();
     }
 
-
     @Test(groups = "wso2.af", description = "verify issue Page")
     public void testVerifyIssuePage() throws Exception {
         IssuePage issuePage = new IssuePage(driver);
         assertTrue(issuePage.isIssueDetailsAreAvailable()
                 , "Issue details are not available");
     }
-
 
     @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception {

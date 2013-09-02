@@ -44,7 +44,7 @@ public class TeamVerificationTestCase extends AppFactoryIntegrationBase {
     public void testAddMemberToTeam() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
         AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
-        String appName = AppCredentialsGenerator.getAppName();
+        String appName = AppInfoGenerator.getInstance().getApplicationInfoMap().get("appId1").getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
         appManagementPage.gotoTeamPage();
