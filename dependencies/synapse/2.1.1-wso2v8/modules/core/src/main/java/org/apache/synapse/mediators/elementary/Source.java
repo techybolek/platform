@@ -20,9 +20,11 @@
 package org.apache.synapse.mediators.elementary;
 
 import org.apache.axiom.om.*;
+import org.apache.axiom.om.util.ElementHelper;
 import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseLog;
@@ -78,7 +80,18 @@ public class Source {
                 for (Object o : selectedNodeList) {
                     if (o instanceof OMElement) {
                         if (clone) {
-                            sourceNodeList.add(((OMElement) o).cloneOMElement());
+                            OMElement ins = ((OMElement) o).cloneOMElement();
+                            if (o instanceof SOAPHeaderBlock) {
+                                SOAPFactory fac = (SOAPFactory) ((OMElement) o).getOMFactory();
+                                try {
+                                    sourceNodeList.add(ElementHelper.toSOAPHeaderBlock(ins, fac));
+                                } catch (Exception e) {
+                                    synLog.error(e);
+                                    throw new JaxenException(e);
+                                }
+                            } else {
+                                sourceNodeList.add(ins);
+                            }
                         } else {
                             sourceNodeList.add((OMElement) o);
                         }
