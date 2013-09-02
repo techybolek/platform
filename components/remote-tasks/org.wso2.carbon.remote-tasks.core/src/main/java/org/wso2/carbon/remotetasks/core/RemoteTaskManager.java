@@ -91,12 +91,12 @@ public class RemoteTaskManager {
 		this.addTask(stTaskInfo, false);
 	}
 	
-	public void addSystemTask(String targetTenantDomain,
+	public void addSystemTask(int targetTenantId,
 			StaticTaskInformation stTaskInfo) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
+			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId, true);
 			this.addTask(stTaskInfo, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -123,12 +123,12 @@ public class RemoteTaskManager {
 		this.rescheduleTask(taskName, stTriggerInfo, false);
 	}
 	
-	public void rescheduleSystemTask(String targetTenantDomain, String taskName,
+	public void rescheduleSystemTask(int targetTenantId, String taskName,
 			TriggerInformation stTriggerInfo) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
+			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId, true);
 			this.rescheduleTask(taskName, stTriggerInfo, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -149,12 +149,12 @@ public class RemoteTaskManager {
 		return this.deleteTask(taskName, false);
 	}
 	
-	public boolean deleteSystemTask(String targetTenantDomain,
+	public boolean deleteSystemTask(int targetTenantId,
 			String taskName) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
+			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId, true);
 			return this.deleteTask(taskName, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -175,12 +175,12 @@ public class RemoteTaskManager {
 		this.pauseTask(taskName, false);
 	}
 	
-	public void pauseSystemTask(String targetTenantDomain,
+	public void pauseSystemTask(int targetTenantId,
 			String taskName) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
+			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId, true);
 			this.pauseTask(taskName, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -201,12 +201,12 @@ public class RemoteTaskManager {
 		this.resumeTask(taskName, false);
 	}
 	
-	public void resumeSystemTask(String targetTenantDomain,
+	public void resumeSystemTask(int targetTenantId,
 			String taskName) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
+			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId, true);
 			this.resumeTask(taskName, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -241,12 +241,12 @@ public class RemoteTaskManager {
 		return this.getTask(taskName, false);
 	}
 	
-	public DeployedTaskInformation getSystemTask(String targetTenantDomain,
+	public DeployedTaskInformation getSystemTask(int targetTenantId,
 			String taskName) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
+			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId, true);
 			return this.getTask(taskName, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -271,11 +271,11 @@ public class RemoteTaskManager {
 		return this.getAllTasks(false);
 	}
 	
-	public String[] getAllSystemTasks(String targetTenantDomain) throws RemoteTasksException {
+	public String[] getAllSystemTasks(int targetTenantId) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
+			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId, true);
 			return this.getAllTasks(true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
