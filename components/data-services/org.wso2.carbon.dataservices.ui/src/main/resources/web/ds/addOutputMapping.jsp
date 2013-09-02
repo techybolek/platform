@@ -17,6 +17,7 @@
 -->
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="org.wso2.carbon.dataservices.ui.beans.*" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
@@ -129,7 +130,11 @@
 
     try {
         client = new UserAdminClient(cookie, backendServerURL, configContext);
-        userRoles = client.getAllRolesNames("*", -1);
+        FlaggedName[] userRoleData = client.getAllRolesNames("*", -1);
+        ArrayList<FlaggedName> userRoleDataList = new ArrayList<FlaggedName>(Arrays.asList(userRoleData));
+        userRoleDataList.remove(userRoleDataList.size() - 1);
+        userRoles = new FlaggedName[userRoleDataList.size()];
+        userRoles = userRoleDataList.toArray(userRoles);
     } catch (Exception e) {
         e.printStackTrace();
     }
