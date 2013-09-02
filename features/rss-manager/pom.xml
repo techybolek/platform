@@ -20,6 +20,7 @@
     <modules>
         <module>org.wso2.carbon.rssmanager.server.feature</module>
         <module>org.wso2.carbon.rssmanager.ui.feature</module>
+        <module>org.wso2.carbon.rssmanager.data.mgt.feature</module>
         <module>org.wso2.carbon.rssmanager.feature</module>
     </modules>
 
@@ -33,6 +34,11 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.rssmanager.ui</artifactId>
+                <version>${carbon.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.rssmanager.data.mgt</artifactId>
                 <version>${carbon.platform.version}</version>
             </dependency>
         </dependencies>
