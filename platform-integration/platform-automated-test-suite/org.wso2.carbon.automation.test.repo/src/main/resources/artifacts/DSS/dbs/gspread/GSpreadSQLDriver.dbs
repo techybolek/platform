@@ -1,8 +1,8 @@
 <data name="GSpreadSQLDriverSample" serviceNamespace="http://ws.wso2.org/dataservice/samples/gspread_sql_driver_sample_service">
    <config id="gspreadConfig">
       <property name="driverClassName">org.wso2.carbon.dataservices.sql.driver.TDriver</property>
-      <property name="url">jdbc:wso2:gspread:filePath=https://docs.google.com/spreadsheet/ccc?key=0Ai7s-9Hnmkf-dFI2cDM3ZDlGN0JjU3Y2LVAwQTFTQVE;sheetName=CustomerRecords;visibility=private</property>
-      <property name="username">zaqxsw987593</property>
+      <property name="url">jdbc:wso2:gspread:filePath=https://docs.google.com/spreadsheet/ccc?key=0AmQij-FfB5wYdEJfRVViUlpaN0MzQ01XbUxGUzZKS0E;sheetName=customers;visibility=private</property>
+      <property name="username">zaqxsw987592</property>
       <property name="password">oijoacxe42</property>
    </config>
    <query id="getCustomersSQL" useConfig="gspreadConfig">
