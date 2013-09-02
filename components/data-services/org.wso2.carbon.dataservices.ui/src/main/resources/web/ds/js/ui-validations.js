@@ -715,7 +715,11 @@ function validateOutputMappingMandatoryFields(){
             if (!isNaN(outputField)) {
            	 	CARBON.showWarningDialog('Output field name cannot be numeric');
            	 	return false;
-            }	
+            }
+            if (outputField.indexOf(" ") != -1) {
+                CARBON.showWarningDialog('Output filed name cannot contain spaces');
+                return false;
+            }
             if (document.getElementById('datasourceValue1').value == '' && document.getElementById('datasourceValue2').value == ''){
             	CARBON.showWarningDialog('Column name / query-param is required for adding an output mapping');
                 return false;
