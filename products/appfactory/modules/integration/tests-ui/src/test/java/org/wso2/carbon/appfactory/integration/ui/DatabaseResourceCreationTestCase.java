@@ -30,9 +30,16 @@ import org.wso2.carbon.automation.core.BrowserManager;
 
 import static org.testng.Assert.assertTrue;
 
-public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationTestCase {
+public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationBase {
     private WebDriver driver;
-    public String databaseName = super.databaseName();
+    public String databaseName ;
+
+
+    public DatabaseResourceCreationTestCase(){
+        super.setDatabaseName();
+        databaseName=super.getDatabaseName();
+
+    }
 
     @BeforeClass(alwaysRun = true)
     public void setUp() throws Exception {
@@ -41,10 +48,10 @@ public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationTestC
     }
 
 
-    @Test(groups = "wso2.af", description = "verify database Creation")
-    public void testDatabaseCreation() throws Exception {
+    @Test(groups = "wso2.af", description = "create Database")
+    public void testDatabaseResourceCreation() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
-        AppHomePage appHomePage = appLogin.loginAs(userName(), password());
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
         String appName = AppCredentialsGenerator.getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
@@ -57,32 +64,84 @@ public class DatabaseResourceCreationTestCase extends AppFactoryIntegrationTestC
         AppCredentialsGenerator.setDbName(databaseName);
         String database = AppCredentialsGenerator.getDbName();
         newDatabasePage.createDatabaseDefault(database, "DbUser123");
-    }
-
-
-    @Test(groups = "wso2.af", description = "verify database user Creation")
-    public void testDatabaseUserCreation() throws Exception {
-        DatabaseConfigurationPage databaseConfigurationPage = new DatabaseConfigurationPage(driver);
+        //DatabaseConfigurationPage databaseConfigurationPage = new DatabaseConfigurationPage(driver);
         databaseConfigurationPage.gotoNewDatabaseUserPage();
         NewDatabaseUserPage newDatabaseUserPage = new NewDatabaseUserPage(driver);
         newDatabaseUserPage.createNewDatabaseUser("wso2usr", "wso2DbUser123", "Testing");
-    }
-
-
-    @Test(groups = "wso2.af", description = "verify data base template Creation")
-    public void testDatabaseTemplateCreation() throws Exception {
-        DatabaseConfigurationPage databaseConfigurationPage = new DatabaseConfigurationPage(driver);
+        // DatabaseConfigurationPage databaseConfigurationPage = new DatabaseConfigurationPage(driver);
         databaseConfigurationPage.gotoNewDatabaseTemplatePage();
         NewDatabaseTemplatePage newDatabaseTemplatePage = new NewDatabaseTemplatePage(driver);
         newDatabaseTemplatePage.createDatabaseTemplate("wso2Temp");
+        //databaseConfigurationPage.signOut();
+        String databaseCheckName = AppCredentialsGenerator.getDbName();
+        assertTrue(databaseConfigurationPage.isDatabaseDetailsAvailable(databaseCheckName, "wso2usr_",
+                "wso2Temp@Development")
+                , "Database Details Are Not Available in Database Configuration Page");
+        databaseConfigurationPage.signOut();
     }
 
-    @Test(groups = "wso2.af", description = "verify created data base resources exists")
-    public void testDatabaseVerification() throws Exception {
+    //starting the data source creation and deletion tests
+
+    @Test(dependsOnMethods = "testDatabaseResourceCreation", groups = "wso2.af",
+            description = "Creating a data Source")
+    public void createNewDataSourceTestCase() throws Exception {
+        AppLogin appLogin = new AppLogin(driver);
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
+        String appName = AppCredentialsGenerator.getAppName();
+        //assign the application name
+        appHomePage.gotoApplicationManagementPage(appName);
+        AppManagementPage appManagementPage = new AppManagementPage(driver);
+        appManagementPage.gotoResourceOverviewPage();
+        ResourceOverviewPage resourceOverviewPage = new ResourceOverviewPage(driver);
+        resourceOverviewPage.gotoDataSourcePage();
+        DataSourcePage dataSourcePage = new DataSourcePage(driver);
+        dataSourcePage.gotoNewDataSourcePage();
+        NewDataSourcePage newDataSourcePage = new NewDataSourcePage(driver);
+        newDataSourcePage.createNewDataSource("Wso2DS", "Test Description", "test123");
+        //DataSourcePage dataSourcePage = new DataSourcePage(driver);
+        dataSourcePage.gotoResourceOverviewPage();
+        //  ResourceOverviewPage resourceOverviewPage = new ResourceOverviewPage(driver);
+        assertTrue(resourceOverviewPage.isDataSourceAvailable("Wso2DS")
+                , "Data Source details are not available");
+        resourceOverviewPage.signOut();
+    }
+
+
+    @Test(dependsOnMethods = "createNewDataSourceTestCase", groups = "wso2.af",
+            description = "Delete database Resource")
+    public void testDeleteDatabaseResource() throws Exception {
+        AppLogin appLogin = new AppLogin(driver);
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
+        String appName = AppCredentialsGenerator.getAppName();
+        appHomePage.gotoApplicationManagementPage(appName);
+        AppManagementPage appManagementPage = new AppManagementPage(driver);
+        appManagementPage.gotoResourceOverviewPage();
+        ResourceOverviewPage resourceOverviewPage = new ResourceOverviewPage(driver);
+        resourceOverviewPage.gotoDataBaseConfigPage();
+        //deleting the template
         DatabaseConfigurationPage databaseConfigurationPage = new DatabaseConfigurationPage(driver);
-        String databaseCheckName = AppCredentialsGenerator.getDbName();
-        assertTrue(databaseConfigurationPage.isDatabaseDetailsAvailable(databaseCheckName, "wso2usr_", "wso2Temp@Development")
-                , "Database Details Are Not Available in Database Configuration Page");
+        databaseConfigurationPage.gotoDeleteDbTemplatePage("wso2Temp@Development");
+        DeleteTemplatePage deleteTemplatePage = new DeleteTemplatePage(driver);
+        deleteTemplatePage.deleteTemplate();
+        //deleting the db user
+        databaseConfigurationPage.gotoDeleteDbUserPage("wso2usr_");
+        DeleteDbUserPage deleteDbUserPage = new DeleteDbUserPage(driver);
+        deleteDbUserPage.deleteDbUser();
+        //deleting the auto user
+        String dbUser = AppCredentialsGenerator.getDbName();
+        databaseConfigurationPage.gotoDeleteDbUserPage(dbUser + "_");
+        deleteDbUserPage.deleteDbUser();
+        //deleting the auto template
+        databaseConfigurationPage.gotoDeleteDbTemplatePage(dbUser + "@");
+        deleteTemplatePage.deleteTemplate();
+        //deleting the database
+        String dbName = AppCredentialsGenerator.getDbName();
+        databaseConfigurationPage.gotoDeleteDbPage(dbName);
+        DeleteDBPage deleteDBPage = new DeleteDBPage(driver);
+        deleteDBPage.deleteDatabase();
+        resourceOverviewPage.gotoDataBaseConfigPage();
+        assertTrue(databaseConfigurationPage.isDatabaseDetailsDeleted()
+                , "Database Deletion has a  error");
     }
 
 

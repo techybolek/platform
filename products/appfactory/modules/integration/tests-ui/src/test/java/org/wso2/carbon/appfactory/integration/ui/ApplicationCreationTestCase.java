@@ -19,10 +19,7 @@
 package org.wso2.carbon.appfactory.integration.ui;
 
 import org.openqa.selenium.WebDriver;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 import org.wso2.carbon.automation.api.selenium.appfactory.appmanagement.AddNewAppPage;
 import org.wso2.carbon.automation.api.selenium.appfactory.home.AppHomePage;
 import org.wso2.carbon.automation.api.selenium.appfactory.home.AppLogin;
@@ -31,27 +28,35 @@ import org.wso2.carbon.automation.core.ProductConstant;
 
 import java.io.File;
 
-public class ApplicationCreationTestCase extends AppFactoryIntegrationTestCase {
+public class ApplicationCreationTestCase extends AppFactoryIntegrationBase {
+    private String appName;
+    private String appKey;
 
-    public String appName = super.applicationName();
-    public String appKey = super.applicationKey();
+
+    public ApplicationCreationTestCase() {
+        super.setApplicationName();
+        appName = super.getApplicationName();
+        super.setApplicationKey();
+        appKey = super.getApplicationKey();
+    }
+
 
     @BeforeTest(alwaysRun = true, groups = "wso2.af",
-                description = "Create a new Application according to the passing values")
+            description = "Create a new Application according to the passing values")
     public void createApplication() throws Exception {
         WebDriver driver = BrowserManager.getWebDriver();
         driver.get(getLoginURL());
         try {
             AppLogin appLogin = new AppLogin(driver);
-            AppHomePage appHomePage = appLogin.loginAs(userName(), password());
+            AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
             appHomePage.gotoAddNewAppPage();
             AddNewAppPage addNewAppPage = new AddNewAppPage(driver);
             AppCredentialsGenerator.setAppKey(appKey);
             AppCredentialsGenerator.setAppName(appName);
             String iconPath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
-                              File.separator + "AF" + File.separator + "images" + File.separator + "build.png";
+                    File.separator + "AF" + File.separator + "images" + File.separator + "build.png";
             addNewAppPage.createAnApplication(appName, appKey, iconPath, "this is a test app",
-                                              "JAX-RS Application", "Git");
+                    "JAX-RS Application", "Git");
         } finally {
             driver.quit();
         }

@@ -30,7 +30,7 @@ import org.wso2.carbon.automation.core.BrowserManager;
 
 import static org.testng.Assert.assertTrue;
 
-public class TeamVerificationTestCase extends AppFactoryIntegrationTestCase {
+public class TeamVerificationTestCase extends AppFactoryIntegrationBase {
 
     private WebDriver driver;
 
@@ -43,7 +43,7 @@ public class TeamVerificationTestCase extends AppFactoryIntegrationTestCase {
     @Test(groups = "wso2.af", description = "adding Team members")
     public void testAddMemberToTeam() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
-        AppHomePage appHomePage = appLogin.loginAs(userName(), password());
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
         String appName = AppCredentialsGenerator.getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
@@ -54,13 +54,6 @@ public class TeamVerificationTestCase extends AppFactoryIntegrationTestCase {
         teamManagementPage.addMemberToTeam("internuserwso2@gmail.com", "developer");
         teamPage.gotoTeamManagementPage();
         teamManagementPage.addMemberToTeam("marketinguserwso2@gmail.com", "qa");
-    }
-
-    @Test(groups = "wso2.af", description = "verify team member Details")
-    public void testApplicationTeamVerification() throws Exception {
-        TeamPage teamPage = new TeamPage(driver);
-        teamPage.gotoAppManagementPage();
-        AppManagementPage appManagementPage = new AppManagementPage(driver);
         assertTrue(appManagementPage.isTeamDetailsAvailable("Developer")
                 , "Team Details are not available in overview page");
         assertTrue(appManagementPage.isTeamDetailsAvailable("QA")

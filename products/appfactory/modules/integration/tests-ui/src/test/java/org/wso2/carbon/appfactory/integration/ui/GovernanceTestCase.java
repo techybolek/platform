@@ -28,7 +28,7 @@ import org.wso2.carbon.automation.api.selenium.appfactory.home.AppHomePage;
 import org.wso2.carbon.automation.api.selenium.appfactory.home.AppLogin;
 import org.wso2.carbon.automation.core.BrowserManager;
 
-public class GovernanceTestCase extends AppFactoryIntegrationTestCase {
+public class GovernanceTestCase extends AppFactoryIntegrationBase {
 
     private WebDriver driver;
 
@@ -41,11 +41,11 @@ public class GovernanceTestCase extends AppFactoryIntegrationTestCase {
     @Test(groups = "wso2.af", description = "verify login to app server")
     public void testLogin() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
-        AppHomePage appHomePage = appLogin.loginAs(userName(), password());
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
         String appName = AppCredentialsGenerator.getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
-        appManagementPage.gotoGovernancePage();
+        appManagementPage.gotoLifeCycleManagePage();
         GovernancePage governancePage = new GovernancePage(driver);
         governancePage.promoteVersion("1.0.2", "Development");
     }

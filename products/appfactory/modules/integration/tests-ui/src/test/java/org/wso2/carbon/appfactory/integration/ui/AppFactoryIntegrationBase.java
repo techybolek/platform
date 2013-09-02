@@ -24,17 +24,14 @@ import org.wso2.carbon.automation.core.utils.UserListCsvReader;
 import org.wso2.carbon.automation.core.utils.environmentutils.ProductUrlGeneratorUtil;
 import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkFactory;
 
-public class AppFactoryIntegrationTestCase {
+public class AppFactoryIntegrationBase {
+    private UserInfo userInfo = UserListCsvReader.getUserInfo(0);
+    private String applicationName;
+    private String applicationKey;
+    private String databaseName;
 
-    protected UserInfo userInfo = UserListCsvReader.getUserInfo(0);
-
-
-    protected String userName() throws Exception {
-        return userInfo.getUserName();
-    }
-
-    protected String password() throws Exception {
-        return userInfo.getPassword();
+    public UserInfo getUserInfo() {
+        return userInfo;
     }
 
     protected String getLoginURL() {
@@ -47,27 +44,37 @@ public class AppFactoryIntegrationTestCase {
                 ProductConstant.APP_FACTORY_SERVER_NAME).getEnvironmentSettings().is_runningOnStratos();
     }
 
-    protected String applicationName() {
+    protected void setApplicationName() {
         String applicationName = "wso2App";
-        int value = (int) (Math.random() * 200);
+        int value = (int) (Math.random() * 999);
         String randomNumber = Integer.toString(value);
-        return applicationName + randomNumber;
+        this.applicationName = applicationName + randomNumber;
     }
 
-    protected String applicationKey() {
+    protected String getApplicationName() {
+        return applicationName;
+    }
+
+    protected void setApplicationKey() {
         String applicationKey = "wso2key";
-        int value = (int) (Math.random() * 200);
+        int value = (int) (Math.random() * 999);
         String randomNumber = Integer.toString(value);
-        return applicationKey + randomNumber;
+        this.applicationKey = applicationKey + randomNumber;
     }
 
+    protected String getApplicationKey() {
+        return applicationKey;
+    }
 
-    protected String databaseName() {
+    protected void setDatabaseName() {
         String databaseName = "Db";
         int value = (int) (Math.random() * 999);
         String randomNumber = Integer.toString(value);
-        return databaseName + randomNumber;
+        this.databaseName = databaseName + randomNumber;
+    }
+
+    protected String getDatabaseName() {
+        return databaseName;
     }
 }
 
-                                                                 

@@ -25,6 +25,7 @@ public class AppCredentialsGenerator {
     private static String appName;
     private static String dbName;
 
+
     private AppCredentialsGenerator() {
     }
 
@@ -54,7 +55,7 @@ public class AppCredentialsGenerator {
     public static String getDbName() {
         return dbName;
     }
+
+
 }
-
-
 

@@ -31,7 +31,7 @@ import org.wso2.carbon.automation.core.utils.UserListCsvReader;
 
 import static org.testng.Assert.assertTrue;
 
-public class ApplicationAvailabilityTestCase extends AppFactoryIntegrationTestCase {
+public class ApplicationAvailabilityTestCase extends AppFactoryIntegrationBase {
     private WebDriver driver;
     private UserInfo userInfo;
 
@@ -45,12 +45,13 @@ public class ApplicationAvailabilityTestCase extends AppFactoryIntegrationTestCa
     @Test(groups = "wso2.af", description = "checking added application is available at the home page")
     public void testAppAvailableHomePage() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
-        AppHomePage appHomePage = appLogin.loginAs(userName(), password());
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
         String appName = AppCredentialsGenerator.getAppName();
         assertTrue(appHomePage.isApplicationAvailable(appName), "Application is not added Successfully");
     }
 
-    @Test(groups = "wso2.af", description = "checking added application details are available at the overview Page")
+    @Test(dependsOnMethods = "testAppAvailableHomePage", groups = "wso2.af",
+            description = "checking added application details are available at the overview Page")
     public void testAppDetailsOverviewPage() throws Exception {
         AppHomePage appHomePage = new AppHomePage(driver);
         String appName = AppCredentialsGenerator.getAppName();
@@ -58,16 +59,19 @@ public class ApplicationAvailabilityTestCase extends AppFactoryIntegrationTestCa
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
         int charAt = userInfo.getUserName().indexOf('@');
+        //This is the first name of the OT login creation
         String appOwnerName = userInfo.getUserName().substring(0, charAt).toUpperCase();
-        assertTrue(appManagementPage.isAppDetailsAvailable("git", appOwnerName, "this is a test app",
+        assertTrue(appManagementPage.isAppDetailsAvailable("Git", appOwnerName, "this is a test app",
                 "JAX-RS Application", appKey), "Application Details are incorrect in App Management page");
     }
 
-    @Test(groups = "wso2.af", description = "checking Description Edit")
+    @Test(dependsOnMethods = "testAppDetailsOverviewPage", groups = "wso2.af",
+            description = "checking Description Edit")
     public void testEditDescription() throws Exception {
         AppManagementPage appManagementPage = new AppManagementPage(driver);
-        appManagementPage.editApplicationDetails("notepad edit cycle");
-        assertTrue(appManagementPage.isEdited("notepad edit cycle")
+        appManagementPage.editApplicationDescription("notepad edit cycle");
+
+        assertTrue(appManagementPage.isApplicationDescriptionEdited("notepad edit cycle")
                 , "Application description edit unsuccessful");
     }
 

@@ -32,7 +32,7 @@ import org.wso2.carbon.automation.core.BrowserManager;
 
 import static org.testng.Assert.assertTrue;
 
-public class IssueTestCase extends AppFactoryIntegrationTestCase {
+public class IssueTestCase extends AppFactoryIntegrationBase {
 
 
     private WebDriver driver;
@@ -46,7 +46,7 @@ public class IssueTestCase extends AppFactoryIntegrationTestCase {
     @Test(groups = "wso2.af", description = "verify issue creation")
     public void testAddIssue() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
-        AppHomePage appHomePage = appLogin.loginAs(userName(), password());
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
         String appName = AppCredentialsGenerator.getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
@@ -54,7 +54,7 @@ public class IssueTestCase extends AppFactoryIntegrationTestCase {
         IssuePage issuePage = new IssuePage(driver);
         issuePage.gotoRedMineTab();
         RedMineLoginPage redMineLoginPage = new RedMineLoginPage(driver);
-        redMineLoginPage.loginToRedMine(userName(), password());
+        redMineLoginPage.loginToRedMine(getUserInfo().getUserName(), getUserInfo().getPassword());
         RedMineHomePage redMineHomePage = new RedMineHomePage(driver);
         redMineHomePage.createIssueForProject("this is a bug", "Bug Description", "1.0.3");
         redMineHomePage.gotoAppFactory();

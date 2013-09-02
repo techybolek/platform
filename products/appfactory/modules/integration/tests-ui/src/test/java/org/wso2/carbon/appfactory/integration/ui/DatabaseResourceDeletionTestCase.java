@@ -31,7 +31,7 @@ import org.wso2.carbon.automation.api.selenium.appfactory.resources.DeleteTempla
 import org.wso2.carbon.automation.api.selenium.appfactory.resources.ResourceOverviewPage;
 import org.wso2.carbon.automation.core.BrowserManager;
 
-public class DatabaseResourceDeletionTestCase extends AppFactoryIntegrationTestCase {
+public class DatabaseResourceDeletionTestCase extends AppFactoryIntegrationBase {
 
     private WebDriver driver;
 
@@ -44,7 +44,7 @@ public class DatabaseResourceDeletionTestCase extends AppFactoryIntegrationTestC
     @Test(groups = "wso2.af", description = "Delete database Resource")
     public void deleteDatabaseResource() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
-        AppHomePage appHomePage = appLogin.loginAs(userName(), password());
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
         String appName = AppCredentialsGenerator.getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
@@ -69,7 +69,6 @@ public class DatabaseResourceDeletionTestCase extends AppFactoryIntegrationTestC
         databaseConfigurationPage.gotoDeleteDbTemplatePage(dbUser + "@");
         deleteTemplatePage.deleteTemplate();
     }
-
 
     @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception {

@@ -26,7 +26,7 @@ import org.wso2.carbon.automation.api.selenium.appfactory.home.AppHomePage;
 import org.wso2.carbon.automation.api.selenium.appfactory.home.AppLogin;
 import org.wso2.carbon.automation.core.BrowserManager;
 
-public class LoginTestCase extends AppFactoryIntegrationTestCase {
+public class LoginTestCase extends AppFactoryIntegrationBase {
     private WebDriver driver;
 
     @BeforeClass(alwaysRun = true)
@@ -35,10 +35,11 @@ public class LoginTestCase extends AppFactoryIntegrationTestCase {
         driver.get(getLoginURL());
     }
 
+
     @Test(groups = "wso2.af", description = "verify login to app server")
     public void testLogin() throws Exception {
-    AppLogin appLogin = new AppLogin(driver);
-    AppHomePage appHomePage = appLogin.loginAs(userName(), password());
+        AppLogin appLogin = new AppLogin(driver);
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(),getUserInfo().getPassword());
     }
 
     @AfterClass(alwaysRun = true)

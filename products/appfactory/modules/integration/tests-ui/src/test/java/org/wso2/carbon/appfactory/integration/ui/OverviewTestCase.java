@@ -26,9 +26,10 @@ import org.wso2.carbon.automation.api.selenium.appfactory.home.AppHomePage;
 import org.wso2.carbon.automation.api.selenium.appfactory.home.AppLogin;
 import org.wso2.carbon.automation.core.BrowserManager;
 
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-public class OverviewTestCase extends AppFactoryIntegrationTestCase {
+public class OverviewTestCase extends AppFactoryIntegrationBase {
 
     private WebDriver driver;
 
@@ -41,12 +42,11 @@ public class OverviewTestCase extends AppFactoryIntegrationTestCase {
     @Test(groups = "wso2.af", description = "adding a version from the trunk")
     public void testAddVersionToTrunk() throws Exception {
         AppLogin appLogin = new AppLogin(driver);
-        AppHomePage appHomePage = appLogin.loginAs(userName(), password());
+        AppHomePage appHomePage = appLogin.loginAs(getUserInfo().getUserName(), getUserInfo().getPassword());
         String appName = AppCredentialsGenerator.getAppName();
         appHomePage.gotoApplicationManagementPage(appName);
         AppManagementPage appManagementPage = new AppManagementPage(driver);
-        assertTrue(appManagementPage.isBuildDetailsAccurate("1.0.3")
-                , "Application Build Successfully");
+        assertNotNull(appManagementPage.isBuildDetailsAccurate("1.0.3"));
     }
 
     @AfterClass(alwaysRun = true)
