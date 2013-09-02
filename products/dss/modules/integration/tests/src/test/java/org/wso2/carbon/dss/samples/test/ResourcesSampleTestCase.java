@@ -105,7 +105,7 @@ public class ResourcesSampleTestCase extends DSSIntegrationTest {
 
         HttpClientUtil httpClient = new HttpClientUtil();
         for (int i = 1; i < 6; i++) {
-            httpClient.delete(serviceEndPoint + "_deleteproduct_productcode", "productCode=" + i);
+            httpClient.delete(serviceEndPoint +  "product/", ""+ i);
 
 
         }
@@ -145,7 +145,7 @@ public class ResourcesSampleTestCase extends DSSIntegrationTest {
 
         HttpClientUtil httpClient = new HttpClientUtil();
 
-        return httpClient.get(serviceEndPoint + "_getproduct_productcode?productCode=" + productId);
+        return httpClient.get(serviceEndPoint + "product/" + productId);
 
 
     }
