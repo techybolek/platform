@@ -42,6 +42,7 @@
         <module>server-monitor/org.wso2.carbon.cassandra.cluster.mgt.feature</module>
         <module>server-monitor/org.wso2.carbon.cassandra.cluster.mgt.ui.feature</module>
         <module>server-monitor/org.wso2.carbon.cassandra.cluster.proxy.feature</module>
+        <module>server-monitor/org.wso2.carbon.cassandra.monitor.feature</module>
     </modules>
 
     <dependencyManagement>
