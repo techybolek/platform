@@ -488,7 +488,7 @@
                       res.setResultWrapper("GeneratedKeys");
                       res.setRowName("Entry");
                       res.setUseColumnNumbers("true");
-                      result.setEscapeNonPrintableChar(escapeNonPrintableChar);
+                      res.setEscapeNonPrintableChar(escapeNonPrintableChar);
                       returnRowQuery.setResult(res);
                   }
                   Element newElement = new Element();
@@ -512,7 +512,7 @@
                             res.setResultWrapper("");
                             res.setRowName("");
                             res.setUseColumnNumbers("false");
-                            result.setEscapeNonPrintableChar(escapeNonPrintableChar);
+                            res.setEscapeNonPrintableChar(escapeNonPrintableChar);
                         }
                         returnRowQuery.setResult(res);
                     }
