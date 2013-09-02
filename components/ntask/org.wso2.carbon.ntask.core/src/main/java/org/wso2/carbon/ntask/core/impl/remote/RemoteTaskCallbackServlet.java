@@ -63,12 +63,12 @@ public class RemoteTaskCallbackServlet extends HttpServlet {
                 log.debug("Remote Task Request Received: " + remoteTaskId);
             }
             Object[] taskInfo = RemoteTaskUtils.lookupRemoteTask(remoteTaskId);
-            String tenantDomain = (String) taskInfo[0];
+            int tenantId = (Integer) taskInfo[0];
             String taskType = (String) taskInfo[1];
             String taskName = (String) taskInfo[2];
             try {
                 PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain);
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId, true);
                 TaskManager tm = TasksDSComponent.getTaskService().getTaskManager(taskType);
                 if (!(tm instanceof RemoteTaskManager)) {
                     log.error("The server is not running in remote task mode, "

@@ -61,10 +61,10 @@ public interface TaskRepository {
     public String getTasksType();
 
     /**
-     * Returns the tenant domain of the tasks represented by this task manager.
-     * @return The tenant domain of the tasks
+     * Returns the tenant id of the tasks represented by this task manager.
+     * @return The tenant id of the tasks
      */
-    public String getTenantDomain();
+    public int getTenantId();
 
     /**
      * Sets a task metadata property to a given task name with a given property key.

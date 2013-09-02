@@ -45,8 +45,8 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
         super(taskRepository);
     }
 
-    public String getTenantDomain() {
-        return this.getTaskRepository().getTenantDomain();
+    public int getTenantId() {
+        return this.getTaskRepository().getTenantId();
     }
 
     public String getTaskType() {
@@ -266,7 +266,7 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
             throws Exception {
         /* the tenant domain and task type are populated here, instead of giving them in
          * the constructor of each TaskClusterCall classes */
-        taskCall.setTenantDomain(this.getTenantDomain());
+        taskCall.setTenantId(this.getTenantId());
         taskCall.setTaskType(this.getTaskType());
         return this.getClusterComm().sendReceive(memberId, taskCall);
     }

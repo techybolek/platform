@@ -27,6 +27,7 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.remotetasks.stub.admin.common.xsd.StaticTaskInformation;
 import org.wso2.carbon.remotetasks.stub.admin.common.xsd.TriggerInformation;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -42,7 +43,7 @@ public class RemoteTaskUtils {
     public static final String REG_REMOTE_TASK_PROPS_BASE_PATH = RegistryBasedTaskRepository.REG_TASK_BASE_PATH
             + "/" + "remote_task_props";
 
-    public static final String REMOTE_TASK_TENANT_DOMAIN = "REMOTE_TASK_TENANT_DOMAIN";
+    public static final String REMOTE_TASK_TENANT_ID = "REMOTE_TASK_TENANT_ID";
 
     public static final String REMOTE_TASK_TASK_TYPE = "REMOTE_TASK_TASK_TYPE";
 
@@ -70,7 +71,7 @@ public class RemoteTaskUtils {
         }
     }
 
-    public static String createRemoteTaskMapping(String tenantDomain, String taskType,
+    public static String createRemoteTaskMapping(int tenantId, String taskType,
             String taskName) throws TaskException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -78,7 +79,7 @@ public class RemoteTaskUtils {
                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
             Registry registry = RegistryBasedTaskRepository.getRegistry();
             Resource res = registry.newResource();
-            res.setProperty(REMOTE_TASK_TENANT_DOMAIN, tenantDomain);
+            res.setProperty(REMOTE_TASK_TENANT_ID, Integer.toString(tenantId));
             res.setProperty(REMOTE_TASK_TASK_TYPE, taskType);
             res.setProperty(REMOTE_TASK_TASK_NAME, taskName);
             String remoteTaskId = generateRemoteTaskID();
@@ -99,7 +100,7 @@ public class RemoteTaskUtils {
             Registry registry = RegistryBasedTaskRepository.getRegistry();
             Resource res = registry.get(resourcePathFromRemoteTaskId(remoteTaskId));
             Object[] result = new Object[3];
-            result[0] = res.getProperty(REMOTE_TASK_TENANT_DOMAIN);
+            result[0] = Integer.parseInt(res.getProperty(REMOTE_TASK_TENANT_ID).toString());
             result[1] = res.getProperty(REMOTE_TASK_TASK_TYPE);
             result[2] = res.getProperty(REMOTE_TASK_TASK_NAME);
             return result;
@@ -110,18 +111,26 @@ public class RemoteTaskUtils {
         }
     }
 
-    private static String getTenantSectionInURL(String tenantDomain) {
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            return "";
-        } else {
-            return "/t/" + tenantDomain;
+    public static String getTenantDomainFromId(int tid) {
+        try {
+            return TasksDSComponent.getRealmService().getTenantManager().getTenant(tid).getDomain();
+        } catch (UserStoreException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private static String getTaskNodeBaseURL(String tenantDomain) {
+    private static String getTenantSectionInURL(int tenantId) {
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            return "";
+        } else {
+            return "/t/" + getTenantDomainFromId(tenantId);
+        }
+    }
+
+    private static String getTaskNodeBaseURL(int tenantId) {
         return TasksDSComponent.getTaskService().getServerConfiguration()
                 .getTaskClientDispatchAddress()
-                + getTenantSectionInURL(tenantDomain) + "/" + REMOTE_TASKS_CALLBACK_SERVLET_CONTEXT;
+                + getTenantSectionInURL(tenantId) + "/" + REMOTE_TASKS_CALLBACK_SERVLET_CONTEXT;
     }
 
     public static String remoteTaskNameFromTaskInfo(String taskType, String taskName) {
@@ -129,10 +138,10 @@ public class RemoteTaskUtils {
     }
 
     public static StaticTaskInformation convert(TaskInfo taskInfo, String taskType,
-            String remoteTaskId, String tenantDomain) throws TaskException {
+            String remoteTaskId, int tenantId) throws TaskException {
         StaticTaskInformation stTaskInfo = new StaticTaskInformation();
         stTaskInfo.setName(remoteTaskNameFromTaskInfo(taskType, taskInfo.getName()));
-        stTaskInfo.setTargetURI(getTaskNodeBaseURL(tenantDomain) + "/" + remoteTaskId);
+        stTaskInfo.setTargetURI(getTaskNodeBaseURL(tenantId) + "/" + remoteTaskId);
         TriggerInfo triggerInfo = taskInfo.getTriggerInfo();
         TriggerInformation stTriggerInfo = new TriggerInformation();
         stTriggerInfo.setCronExpression(triggerInfo.getCronExpression());

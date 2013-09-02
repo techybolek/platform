@@ -20,17 +20,17 @@ package org.wso2.carbon.ntask.core;
  */
 public class TaskManagerId {
 
-    private String tenantDomain;
+    private int tenantId;
 
     private String taskType;
 
-    public TaskManagerId(String tenantDomain, String taskType) {
-        this.tenantDomain = tenantDomain;
+    public TaskManagerId(int tenantId, String taskType) {
+        this.tenantId = tenantId;
         this.taskType = taskType;
     }
 
-    public String getTenantDomain() {
-        return tenantDomain;
+    public int getTenantId() {
+        return tenantId;
     }
 
     public String getTaskType() {
@@ -39,7 +39,7 @@ public class TaskManagerId {
 
     @Override
     public int hashCode() {
-        return (this.getTaskType() + ":" + this.getTenantDomain()).hashCode();
+        return (this.getTaskType() + ":" + this.getTenantId()).hashCode();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class TaskManagerId {
 
     @Override
     public String toString() {
-        return this.getTaskType() + ":" + this.getTenantDomain();
+        return this.getTaskType() + ":" + this.getTenantId();
     }
 
 }

@@ -15,15 +15,15 @@
  */
 package org.wso2.carbon.ntask.core.impl.clustered.rpc;
 
-import java.io.Serializable;
-import java.util.concurrent.Callable;
-
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.impl.clustered.ClusteredTaskManager;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
+
+import java.io.Serializable;
+import java.util.concurrent.Callable;
 
 /**
  * Base class for cluster RPC calls.
@@ -32,20 +32,20 @@ public abstract class TaskCall<V> implements Callable<V>, Serializable {
     
     private static final long serialVersionUID = 1L;
 
-    private String tenantDomain;
+    private int tenantId;
     
     private String taskType;
     
-    public void setTenantDomain(String tenantDomain) {
-        this.tenantDomain = tenantDomain;
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
     }
     
     public void setTaskType(String taskType) {
         this.taskType = taskType;
     }
     
-    public String getTenantDomain() {
-        return tenantDomain;
+    public int getTenantId() {
+        return tenantId;
     }
     
     public String getTaskType() {
@@ -56,8 +56,8 @@ public abstract class TaskCall<V> implements Callable<V>, Serializable {
     public V call() throws Exception {
         try {
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getCurrentContext().setTenantDomain(
-                    this.getTenantDomain(), true);
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(
+                    this.getTenantId(), true);
             TaskManager tm = TasksDSComponent.getTaskService().getTaskManager(
                     this.getTaskType());
             if (tm instanceof ClusteredTaskManager) {

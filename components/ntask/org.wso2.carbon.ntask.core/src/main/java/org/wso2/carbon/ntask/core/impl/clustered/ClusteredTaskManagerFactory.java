@@ -36,7 +36,7 @@ public class ClusteredTaskManagerFactory extends StandaloneTaskManagerFactory {
     
     @Override
     protected TaskManager createTaskManager(TaskManagerId tmId) throws TaskException {
-        TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantDomain(),
+        TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantId(),
                 tmId.getTaskType());
         return new ClusteredTaskManager(taskRepo);
     }

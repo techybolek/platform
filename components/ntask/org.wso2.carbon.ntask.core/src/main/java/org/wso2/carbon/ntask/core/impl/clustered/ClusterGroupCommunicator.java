@@ -188,7 +188,7 @@ public class ClusterGroupCommunicator implements MembershipListener {
                 break;
             } catch (TaskException e) {
                 log.error("Encountered error(s) in scheduling missing tasks ["
-                        + tm.getTaskType() + "][" + tm.getTenantDomain() + "]:- \n" + 
+                        + tm.getTaskType() + "][" + tm.getTenantId() + "]:- \n" +
                         e.getMessage() + "\n" + ((count > 1) ? "Retrying [" + 
                         ((MISSING_TASKS_ON_ERROR_RETRY_COUNT - count) + 1) + "]..." : "Giving up."));
             }

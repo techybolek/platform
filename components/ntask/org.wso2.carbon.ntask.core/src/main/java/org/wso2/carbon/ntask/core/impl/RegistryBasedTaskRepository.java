@@ -57,7 +57,7 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 
     private static Unmarshaller taskUnmarshaller;
 
-    private String tenantDomain;
+    private int tenantId;
 
     static {
         try {
@@ -70,14 +70,14 @@ public class RegistryBasedTaskRepository implements TaskRepository {
         }
     }
 
-    public RegistryBasedTaskRepository(String tenantDomain, String taskType) throws TaskException {
-        this.tenantDomain = tenantDomain;
+    public RegistryBasedTaskRepository(int tenantId, String taskType) throws TaskException {
+        this.tenantId = tenantId;
         this.taskType = taskType;
     }
 
     @Override
-    public String getTenantDomain() {
-        return tenantDomain;
+    public int getTenantId() {
+        return tenantId;
     }
 
     private static Marshaller getTaskMarshaller() {
@@ -200,7 +200,7 @@ public class RegistryBasedTaskRepository implements TaskRepository {
     }
 
     private String getMyTasksPath() {
-        return REG_TASK_REPO_BASE_PATH + "/" + this.getTenantDomain() + "/" + this.getTasksType();
+        return REG_TASK_REPO_BASE_PATH + "/" + this.getTenantId() + "/" + this.getTasksType();
     }
 
     private TaskInfo getTaskInfoRegistryPath(String path) throws Exception {
@@ -220,8 +220,8 @@ public class RegistryBasedTaskRepository implements TaskRepository {
                 taskInfo = (TaskInfo) getTaskUnmarshaller().unmarshal(in);
             }
             in.close();
-            taskInfo.getProperties().put(TaskInfo.TENANT_DOMAIN_PROP,
-                    String.valueOf(this.getTenantDomain()));
+            taskInfo.getProperties().put(TaskInfo.TENANT_ID_PROP,
+                    String.valueOf(this.getTenantId()));
             return taskInfo;
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
@@ -242,7 +242,7 @@ public class RegistryBasedTaskRepository implements TaskRepository {
             boolean result = getRegistry().resourceExists(
                     RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH);
             Resource tmpRes;
-            String tenantDomain;
+            int tid;
             if (result) {
                 tmpRes = getRegistry().get(RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH);
                 if (!(tmpRes instanceof Collection)) {
@@ -264,8 +264,8 @@ public class RegistryBasedTaskRepository implements TaskRepository {
                         taskTypePathCollection = (Collection) tmpRes;
                         if (taskTypePathCollection.getChildren().length > 0) {
                             try {
-                                tenantDomain = tidPath.substring(tidPath.lastIndexOf('/') + 1);
-                                tmList.add(new TaskManagerId(tenantDomain, taskTypePath
+                                tid = Integer.parseInt(tidPath.substring(tidPath.lastIndexOf('/') + 1));
+                                tmList.add(new TaskManagerId(tid, taskTypePath
                                         .substring(taskTypePath.lastIndexOf('/') + 1)));
                             } catch (NumberFormatException ignore) {
                                 continue;
@@ -301,7 +301,7 @@ public class RegistryBasedTaskRepository implements TaskRepository {
                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
             return getRegistry().get(
                     RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH + "/"
-                            + this.getTenantDomain() + "/" + this.getTasksType() + "/" + taskName);
+                            + this.getTenantId() + "/" + this.getTasksType() + "/" + taskName);
         } catch (ResourceNotFoundException e) {
             throw new TaskException("The task '" + taskName + "' does not exist",
                     Code.NO_TASK_EXISTS, e);

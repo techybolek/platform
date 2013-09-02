@@ -68,8 +68,8 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         return scheduler;
     }
 
-    public String getTenantDomain() {
-        return this.getTaskRepository().getTenantDomain();
+    public int getTenantId() {
+        return this.getTaskRepository().getTenantId();
     }
 
     public String getTaskType() {
@@ -91,7 +91,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         try {
             Set<TriggerKey> keys = this.getScheduler().getTriggerKeys(
                     GroupMatcher.triggerGroupEquals(this.getTenantTaskGroup()));
-            Map<String, TaskState> states = new HashMap<String, TaskManager.TaskState>();
+            Map<String, TaskState> states = new HashMap<String, TaskState>();
             for (TriggerKey key : keys) {
                 states.put(key.getName(), triggerStateToTaskState(
                         this.getScheduler().getTriggerState(
@@ -132,7 +132,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         try {
             result = this.getScheduler().deleteJob(new JobKey(taskName, taskGroup));
             if (result) {
-                log.info("Task deleted: [" + this.getTenantDomain() +
+                log.info("Task deleted: [" + this.getTenantId() +
                         "][" + this.getTaskType() + "][" + taskName + "]");
             }
         } catch (SchedulerException e) {
@@ -163,7 +163,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
     }
 
     private String getTenantTaskGroup() {
-        return "TENANT_" + this.getTenantDomain() + "_TYPE_" + this.getTaskType();
+        return "TENANT_" + this.getTenantId() + "_TYPE_" + this.getTaskType();
     }
 
     private JobDataMap getJobDataMapFromTaskInfo(TaskInfo taskInfo) {
@@ -212,7 +212,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
             if (paused) {
                 this.getScheduler().pauseJob(job.getKey());
             }
-            log.info("Task scheduled: [" + this.getTenantDomain() +
+            log.info("Task scheduled: [" + this.getTenantId() +
                     "][" + this.getTaskType() + "][" + taskName + "]" + (paused ? "[Paused]" : ""));
         } catch (SchedulerException e) {
             throw new TaskException("Error in scheduling task with name: " + taskName,
@@ -419,7 +419,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         public void triggerComplete(Trigger trigger, JobExecutionContext jobExecutionContext, 
                 Trigger.CompletedExecutionInstruction completedExecutionInstruction) {
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getCurrentContext().setTenantDomain(getTenantDomain(), true);
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(getTenantId(), true);
             if(trigger.getNextFireTime() == null) {
                 try {
                     TaskUtils.setTaskFinished(getTaskRepository(), trigger.getJobKey().getName(), true);

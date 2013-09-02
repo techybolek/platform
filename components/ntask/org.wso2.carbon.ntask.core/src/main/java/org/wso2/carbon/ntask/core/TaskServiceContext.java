@@ -33,8 +33,8 @@ public class TaskServiceContext {
         this.serverCount = serverCount;
     }
 
-    public String getTenantDomain() {
-        return this.taskRepo.getTenantDomain();
+    public int getTenantId() {
+        return this.taskRepo.getTenantId();
     }
 
     public String getTaskType() {

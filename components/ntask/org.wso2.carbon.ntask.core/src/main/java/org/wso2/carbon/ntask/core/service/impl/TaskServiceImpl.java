@@ -135,9 +135,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskManager getTaskManager(String taskType) throws TaskException {
-        String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId(true);
         return this.getTaskManagerFactory().getTaskManager(
-                new TaskManagerId(tenantDomain, taskType));
+                new TaskManagerId(tenantId, taskType));
     }
 
     @Override

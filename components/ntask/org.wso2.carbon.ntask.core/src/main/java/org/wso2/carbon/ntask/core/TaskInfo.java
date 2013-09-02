@@ -36,7 +36,7 @@ public class TaskInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String TENANT_DOMAIN_PROP = "__TENANT_DOMAIN_PROP__";
+    public static final String TENANT_ID_PROP = "__TENANT_ID_PROP__";
 
     private String name;
 

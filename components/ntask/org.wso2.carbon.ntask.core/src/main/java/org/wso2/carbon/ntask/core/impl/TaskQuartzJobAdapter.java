@@ -59,10 +59,10 @@ public class TaskQuartzJobAdapter implements Job {
             Map<String, String> properties = (Map<String, String>) dataMap
                     .get(TaskConstants.TASK_PROPERTIES);
             task.setProperties(properties);
-            String tenantDomain = properties.get(TaskInfo.TENANT_DOMAIN_PROP);
+            int tenantId = Integer.parseInt(properties.get(TaskInfo.TENANT_ID_PROP));
             try {
                 PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId, true);
                 task.init();
                 task.execute();
             } finally {
