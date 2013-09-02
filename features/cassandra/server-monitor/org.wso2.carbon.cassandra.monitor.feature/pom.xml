@@ -80,7 +80,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.cassandra</id>
+                            <id>org.wso2.carbon.cassandra.monitor</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core:${project.version}</importFeatureDef>
