@@ -56,6 +56,7 @@ public class Utils {
     private static String readConsistencyLevel;
     private static String writeConsistencyLevel;
     private static String strategyClass;
+    private static int nodeId;
 
     public static void readConfigFile() {
 
@@ -94,6 +95,13 @@ public class Utils {
             strategyClass = strategyEl.getText();
         }
 
+         OMElement nodeIdElement = documentElement.getFirstChildWithName(new QName("NodeId"));
+        if (nodeIdElement != null){
+            nodeId = Integer.parseInt(nodeIdElement.getText());
+        }else {
+            nodeId = DataReceiverConstants.DEFAULT_RECEIVER_NODE_ID;
+        }
+
 
     }
 
@@ -116,5 +124,9 @@ public class Utils {
 
     public static String getWriteConsistencyLevel() {
         return writeConsistencyLevel;
+    }
+
+    public static int getNodeId(){
+        return nodeId;
     }
 }

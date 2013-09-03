@@ -5,10 +5,10 @@ import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.persistence.cassandra.datastore.CassandraConnector;
 import org.wso2.carbon.databridge.persistence.cassandra.datastore.DataType;
-import org.wso2.carbon.databridge.persistence.cassandra.Utils.KeySpaceUtils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Calendar;
 
 /**
  * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -33,8 +33,8 @@ public class CassandraSDSUtils {
         int keySpaceLength = KeySpaceUtils.getKeySpaceName().length();
         if ((streamName.length() + keySpaceLength) > 48) {
             throw new RuntimeException("The stream name you provided is too long. This has caused the" +
-                    " generated key (\""+ streamName+"\") to go " +
-                    "beyond the allowed characters. of "+ (48 - keySpaceLength) );
+                    " generated key (\"" + streamName + "\") to go " +
+                    "beyond the allowed characters. of " + (48 - keySpaceLength));
         }
         return streamName.replace(":", "_").replace(".", "_");
     }
@@ -80,13 +80,25 @@ public class CassandraSDSUtils {
     }
 
 
-
-
     public static String getColumnName(DataType dataType, Attribute attribute) {
         return dataType.name() + "_" + attribute.getName();
     }
 
     public static String createRowKey(long timestamp, String ip, int port, int count) {
         return timestamp + "::" + ip + "::" + port + "::" + count;
+    }
+
+    public static long getIndexCFRowKey(long timeStamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeStamp);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime().getTime();
+
+    }
+
+    public static String getIndexColumnFamilyName(String eventCFName) {
+        return CassandraConnector.EVENT_INDEX_CF_PREFIX + eventCFName;
     }
 }

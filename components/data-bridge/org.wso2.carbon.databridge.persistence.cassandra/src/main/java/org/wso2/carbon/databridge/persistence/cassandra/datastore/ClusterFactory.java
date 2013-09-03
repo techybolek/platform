@@ -84,7 +84,7 @@ public class ClusterFactory {
         connector.createKeySpaceIfNotExisting(cluster, CassandraConnector.BAM_META_KEYSPACE);
 
         connector.createKeySpaceIfNotExisting(cluster, KeySpaceUtils.getKeySpaceName());
-
+        connector.createKeySpaceIfNotExisting(cluster, CassandraConnector.EVENT_META_KS);
 
         // Create BAM meta column families if not existing
 //        connector.createColumnFamily(cluster, CassandraConnector.BAM_META_KEYSPACE,

@@ -38,4 +38,6 @@ public final class DataReceiverConstants {
     public static final String USERNAME_PROPERTY = "CASSANDRA_STREAM_DEF_USER_NAME";
     public static final String CASSANDRA_STREAM_DEF_HOSTPOOL_PATH = "/components/org.wso2.carbon.bam.datareceiver/streamdef/hostpool";
     public static final String HOSTPOOL_PROPERTY = "CASSANDRA_STREAM_DEF_HOST_POOL";
+
+    public static final int DEFAULT_RECEIVER_NODE_ID = 0;
 }
