@@ -98,7 +98,7 @@ public class CassandraArchivalService {
                             if (log.isDebugEnabled()) {
                                 log.debug(hiveQuery);
                             }
-                            hiveExecutorService.execute(hiveQuery);
+                            hiveExecutorService.execute(null, hiveQuery);
                         }
                     }else {
                         String message = "Unable to find stream definition " + archiveConfiguration.getStreamName() +
