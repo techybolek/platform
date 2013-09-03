@@ -15,15 +15,23 @@
  */
 package org.wso2.carbon.ndatasource.ui;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.StringWriter;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.wso2.carbon.ndatasource.common.DataSourceConstants;
+import org.wso2.carbon.ndatasource.common.DataSourceException;
+import org.wso2.carbon.ndatasource.ui.config.DSXMLConfiguration;
+import org.wso2.carbon.ndatasource.ui.config.RDBMSDSXMLConfiguration;
+import org.wso2.carbon.ndatasource.ui.config.RDBMSDSXMLConfiguration.DataSourceProperty;
+import org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminDataSourceException;
+import org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceInfo;
+import org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo;
+import org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo_WSDataSourceDefinition;
+import org.wso2.carbon.ndatasource.ui.stub.core.xsd.JNDIConfig;
+import org.wso2.carbon.ndatasource.ui.stub.core.xsd.JNDIConfig_EnvEntry;
+import org.wso2.carbon.utils.xml.XMLPrettyPrinter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBContext;
@@ -35,23 +43,11 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.wso2.carbon.ndatasource.common.DataSourceException;
-import org.wso2.carbon.ndatasource.ui.config.DSXMLConfiguration;
-import org.wso2.carbon.ndatasource.ui.config.RDBMSDSXMLConfiguration;
-import org.wso2.carbon.ndatasource.ui.config.RDBMSDSXMLConfiguration.DataSourceProperty;
-import org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminDataSourceException;
-import org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceInfo;
-import org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo;
-import org.wso2.carbon.ndatasource.ui.stub.core.xsd.JNDIConfig;
-import org.wso2.carbon.ndatasource.ui.stub.core.xsd.JNDIConfig_EnvEntry;
-import org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo_WSDataSourceDefinition;
-import org.wso2.carbon.utils.xml.XMLPrettyPrinter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
+import java.rmi.RemoteException;
+import java.util.*;
 
 public class NDataSourceHelper {
 
@@ -247,7 +243,11 @@ public class NDataSourceHelper {
 		if (allDataSourcesInfo != null) {
 			for (WSDataSourceInfo dataSourceInfo : allDataSourcesInfo) {
 				WSDataSourceMetaInfo dataSourceMetaInfo = dataSourceInfo.getDsMetaInfo();
-				allDataSources.put(dataSourceMetaInfo.getName(), dataSourceInfo.getDsStatus().getMode());
+                                if (DataSourceConstants.DataSourceStatusModes.ERROR.toString().equals(dataSourceInfo.getDsStatus().getMode())) {
+                                    allDataSources.put(dataSourceMetaInfo.getName(), "ERROR: " + dataSourceInfo.getDsStatus().getDetails());
+                                } else {
+				    allDataSources.put(dataSourceMetaInfo.getName(), dataSourceInfo.getDsStatus().getMode());
+                                }
 			}
 		}
 		return allDataSources;
@@ -270,7 +270,7 @@ public class NDataSourceHelper {
 	}
 	
 	public static Element stringToElement(String xml) {
-		if (xml == null) {
+		if (xml == null || xml.trim().length() == 0) {
 			return null;
 		}
 		try {
@@ -279,8 +279,7 @@ public class NDataSourceHelper {
 		    DocumentBuilder db = docFactory.newDocumentBuilder();
 		    return db.parse(new ByteArrayInputStream(xml.getBytes())).getDocumentElement();
 		} catch (Exception e) {
-			log.error("Error while convering string to element: " + e.getMessage(), e);
-			return null;
+			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 	
@@ -541,9 +540,9 @@ public class NDataSourceHelper {
     public static String prettifyXML(String xmlContent) {
     	Element element = stringToElement(xmlContent);
     	if (element == null) {
-    	    throw new RuntimeException("Error in converting string to XML: " + xmlContent);
+    	    return "";
     	}
-		removeWhitespaceInMixedContentElements(element);
+	removeWhitespaceInMixedContentElements(element);
     	xmlContent = elementToString(element);
         ByteArrayInputStream byteIn = new ByteArrayInputStream(xmlContent.getBytes());
         XMLPrettyPrinter prettyPrinter = new XMLPrettyPrinter(byteIn);
