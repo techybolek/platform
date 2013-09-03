@@ -538,6 +538,7 @@ public class DatabaseDescriptor
         }
 
         Schema.instance.updateVersion();
+        Schema.instance.fixCFMaxId();
     }
 
     private static boolean hasExistingNoSystemTables()

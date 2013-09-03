@@ -49,13 +49,7 @@ import java.util.*;
 public class SerializationsTest extends AbstractSerializationsTester
 {
     private static MessageSerializer messageSerializer = new MessageSerializer();
-
-    @BeforeClass
-    public static void loadSchema() throws IOException
-    {
-        loadSchema(true);
-    }
-
+    
     private void testRangeSliceCommandWrite() throws IOException
     {
         ByteBuffer startCol = ByteBufferUtil.bytes("Start");
@@ -197,7 +191,7 @@ public class SerializationsTest extends AbstractSerializationsTester
         standardRm.add(Statics.StandardCf);
         RowMutation superRm = new RowMutation(Statics.KS, Statics.Key);
         superRm.add(Statics.SuperCf);
-        Map<UUID, ColumnFamily> mods = new HashMap<UUID, ColumnFamily>();
+        Map<Integer, ColumnFamily> mods = new HashMap<Integer, ColumnFamily>();
         mods.put(Statics.StandardCf.metadata().cfId, Statics.StandardCf);
         mods.put(Statics.SuperCf.metadata().cfId, Statics.SuperCf);
         RowMutation mixedRm = new RowMutation(Statics.KS, Statics.Key, mods);

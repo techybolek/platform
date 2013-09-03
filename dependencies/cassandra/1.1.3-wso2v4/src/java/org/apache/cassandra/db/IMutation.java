@@ -26,7 +26,7 @@ import java.util.UUID;
 public interface IMutation
 {
     public String getTable();
-    public Collection<UUID> getColumnFamilyIds();
+    public Collection<Integer> getColumnFamilyIds();
     public ByteBuffer key();
     public void apply() throws IOException;
     public String toString(boolean shallow);

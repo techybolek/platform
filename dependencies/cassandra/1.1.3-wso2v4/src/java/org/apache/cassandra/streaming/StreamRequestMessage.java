@@ -166,9 +166,7 @@ class StreamRequestMessage implements MessageProducer
                 {
                     dos.writeInt(Iterables.size(srm.columnFamilies));
                     for (ColumnFamilyStore cfs : srm.columnFamilies)
-                    {
-                        ColumnFamily.serializer().serializeCfId(cfs.metadata.cfId, dos, version);
-                    }
+                        dos.writeInt(cfs.metadata.cfId);
                 }
             }
         }
@@ -201,7 +199,7 @@ class StreamRequestMessage implements MessageProducer
                 {
                     int cfsSize = dis.readInt();
                     for (int i = 0; i < cfsSize; ++i)
-                        stores.add(Table.open(table).getColumnFamilyStore(ColumnFamily.serializer().deserializeCfId(dis, version)));
+                        stores.add(Table.open(table).getColumnFamilyStore(dis.readInt()));
                 }
 
                 return new StreamRequestMessage(target, ranges, table, stores, sessionId, type);

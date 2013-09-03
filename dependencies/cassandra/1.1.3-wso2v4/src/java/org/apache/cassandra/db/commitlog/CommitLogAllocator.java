@@ -302,7 +302,7 @@ public class CommitLogAllocator
 
         if (oldestSegment != null)
         {
-            for (UUID dirtyCFId : oldestSegment.getDirtyCFIDs())
+            for (Integer dirtyCFId : oldestSegment.getDirtyCFIDs())
             {
                 String keypace = Schema.instance.getCF(dirtyCFId).left;
                 final ColumnFamilyStore cfs = Table.open(keypace).getColumnFamilyStore(dirtyCFId);

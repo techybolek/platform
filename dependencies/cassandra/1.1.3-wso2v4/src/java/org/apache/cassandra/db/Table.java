@@ -80,7 +80,7 @@ public class Table
     /* Table name. */
     public final String name;
     /* ColumnFamilyStore per column family */
-    private final Map<UUID, ColumnFamilyStore> columnFamilyStores = new ConcurrentHashMap<UUID, ColumnFamilyStore>();
+    private final Map<Integer, ColumnFamilyStore> columnFamilyStores = new ConcurrentHashMap<Integer, ColumnFamilyStore>();
     private final Object[] indexLocks;
     private volatile AbstractReplicationStrategy replicationStrategy;
 
@@ -146,13 +146,13 @@ public class Table
 
     public ColumnFamilyStore getColumnFamilyStore(String cfName)
     {
-        UUID id = Schema.instance.getId(name, cfName);
+        Integer id = Schema.instance.getId(name, cfName);
         if (id == null)
             throw new IllegalArgumentException(String.format("Unknown table/cf pair (%s.%s)", name, cfName));
         return getColumnFamilyStore(id);
     }
 
-    public ColumnFamilyStore getColumnFamilyStore(UUID id)
+    public ColumnFamilyStore getColumnFamilyStore(Integer id)
     {
         ColumnFamilyStore cfs = columnFamilyStores.get(id);
         if (cfs == null)
@@ -310,7 +310,7 @@ public class Table
     }
 
     // best invoked on the compaction mananger.
-    public void dropCf(UUID cfId) throws IOException
+    public void dropCf(Integer cfId) throws IOException
     {
         assert columnFamilyStores.containsKey(cfId);
         ColumnFamilyStore cfs = columnFamilyStores.remove(cfId);
@@ -339,7 +339,7 @@ public class Table
     }
 
     /** adds a cf to internal structures, ends up creating disk files). */
-    public void initCf(UUID cfId, String cfName, boolean loadSSTables)
+    public void initCf(Integer cfId, String cfName, boolean loadSSTables)
     {
         if (columnFamilyStores.containsKey(cfId))
         {
@@ -552,7 +552,7 @@ public class Table
     public List<Future<?>> flush() throws IOException
     {
         List<Future<?>> futures = new ArrayList<Future<?>>();
-        for (UUID cfId : columnFamilyStores.keySet())
+        for (Integer cfId : columnFamilyStores.keySet())
         {
             Future<?> future = columnFamilyStores.get(cfId).forceFlush();
             if (future != null)

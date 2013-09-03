@@ -24,9 +24,9 @@ import java.util.UUID;
 
 public class UnknownColumnFamilyException extends IOException
 {
-    public final UUID cfId;
+    public final Integer cfId;
 
-    public UnknownColumnFamilyException(String msg, UUID cfId)
+    public UnknownColumnFamilyException(String msg, Integer cfId)
     {
         super(msg);
         this.cfId = cfId;

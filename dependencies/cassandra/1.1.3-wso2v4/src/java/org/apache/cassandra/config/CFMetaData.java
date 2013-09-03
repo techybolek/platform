@@ -181,7 +181,7 @@ public final class CFMetaData
     }
 
     //REQUIRED
-    public final UUID cfId;                           // internal id, never exposed to user
+    public final Integer cfId;                           // internal id, never exposed to user
     public final String ksName;                       // name of keyspace
     public final String cfName;                       // name of this column family
     public final ColumnFamilyType cfType;             // standard, super
@@ -245,10 +245,10 @@ public final class CFMetaData
 
     public CFMetaData(String keyspace, String name, ColumnFamilyType type, AbstractType<?> comp, AbstractType<?> subcc)
     {
-        this(keyspace, name, type, comp, subcc, getId(keyspace, name));
+        this(keyspace, name, type, comp, subcc, Schema.instance.nextCFId());
     }
 
-    CFMetaData(String keyspace, String name, ColumnFamilyType type, AbstractType<?> comp, AbstractType<?> subcc, UUID id)
+    CFMetaData(String keyspace, String name, ColumnFamilyType type, AbstractType<?> comp, AbstractType<?> subcc, int id)
     {
         // Final fields must be set in constructor
         ksName = keyspace;
@@ -256,6 +256,8 @@ public final class CFMetaData
         cfType = type;
         comparator = comp;
         subcolumnComparator = enforceSubccDefault(type, subcc);
+        // System cfs have specific ids, and copies of old CFMDs need
+        //  to copy over the old id.
         cfId = id;
 
         this.init();
@@ -270,12 +272,7 @@ public final class CFMetaData
     {
         return (comment == null) ? "" : comment.toString();
     }
-
-    static UUID getId(String ksName, String cfName)
-    {
-        return UUID.nameUUIDFromBytes(ArrayUtils.addAll(ksName.getBytes(), cfName.getBytes()));
-    }
-
+    
     private void init()
     {
         // Set a bunch of defaults
@@ -310,13 +307,10 @@ public final class CFMetaData
         updateCfDef(); // init cqlCfDef
     }
 
-    private static CFMetaData newSystemMetadata(String cfName, int oldCfId, String comment, AbstractType<?> comparator, AbstractType<?> subcc)
+    private static CFMetaData newSystemMetadata(String cfName, int cfId, String comment, AbstractType<?> comparator, AbstractType<?> subcc)
     {
         ColumnFamilyType type = subcc == null ? ColumnFamilyType.Standard : ColumnFamilyType.Super;
-        CFMetaData newCFMD = new CFMetaData(Table.SYSTEM_TABLE, cfName, type, comparator,  subcc);
-
-        // adding old -> new style ID mapping to support backward compatibility
-        Schema.instance.addOldCfIdMapping(oldCfId, newCFMD.cfId);
+        CFMetaData newCFMD = new CFMetaData(Table.SYSTEM_TABLE, cfName, type, comparator,  subcc, cfId);
 
         return newCFMD.comment(comment)
                       .readRepairChance(0)
@@ -324,7 +318,7 @@ public final class CFMetaData
                       .gcGraceSeconds(0);
     }
 
-    private static CFMetaData newSchemaMetadata(String cfName, int oldCfId, String comment, AbstractType<?> comparator, AbstractType<?> subcc)
+    private static CFMetaData newSchemaMetadata(String cfName, int cfId, String comment, AbstractType<?> comparator, AbstractType<?> subcc)
     {
         /*
          * Schema column families needs a gc_grace (since they are replicated
@@ -332,7 +326,7 @@ public final class CFMetaData
          * could be dead for that long a time.
          */
         int gcGrace = 120 * 24 * 3600; // 3 months
-        return newSystemMetadata(cfName, oldCfId, comment, comparator, subcc).gcGraceSeconds(gcGrace);
+        return newSystemMetadata(cfName, cfId, comment, comparator, subcc).gcGraceSeconds(gcGrace);
     }
 
     public static CFMetaData newIndexMetadata(CFMetaData parent, ColumnDefinition info, AbstractType<?> columnComparator)
@@ -534,7 +528,7 @@ public final class CFMetaData
             .append(keyValidator, rhs.keyValidator)
             .append(minCompactionThreshold, rhs.minCompactionThreshold)
             .append(maxCompactionThreshold, rhs.maxCompactionThreshold)
-            .append(cfId, rhs.cfId)
+            .append(cfId.intValue(), rhs.cfId.intValue())
             .append(column_metadata, rhs.column_metadata)
             .append(keyAlias, rhs.keyAlias)
             .append(columnAliases, rhs.columnAliases)
@@ -685,6 +679,7 @@ public final class CFMetaData
                 TypeParser.parse(cf_def.comparator_type),
                 cf_def.subcomparator_type == null ? null : TypeParser.parse(cf_def.subcomparator_type),
                 cf_def.isSetId() ? cf_def.id : Schema.instance.nextCFId());
+
 
         if (cf_def.isSetGc_grace_seconds()) { newCFMD.gcGraceSeconds(cf_def.gc_grace_seconds); }
         if (cf_def.isSetMin_compaction_threshold()) { newCFMD.minCompactionThreshold(cf_def.min_compaction_threshold); }
@@ -965,7 +960,7 @@ public final class CFMetaData
     public void addDefaultIndexNames() throws ConfigurationException
     {
         // if this is ColumnFamily update we need to add previously defined index names to the existing columns first
-        UUID cfId = Schema.instance.getId(ksName, cfName);
+        Integer cfId = Schema.instance.getId(ksName, cfName);
         if (cfId != null)
         {
             CFMetaData cfm = Schema.instance.getCFMetaData(cfId);
@@ -1268,11 +1263,7 @@ public final class CFMetaData
         ColumnFamily cf = rm.addOrGet(SystemTable.SCHEMA_COLUMNFAMILIES_CF);
         int ldt = (int) (System.currentTimeMillis() / 1000);
 
-        Integer oldId = Schema.instance.convertNewCfId(cfId);
-
-        if (oldId != null) // keep old ids (see CASSANDRA-3794 for details)
-            cf.addColumn(Column.create(oldId, timestamp, cfName, "id"));
-
+        cf.addColumn(Column.create(cfId, timestamp, cfName, "id"));
         cf.addColumn(Column.create(cfType.toString(), timestamp, cfName, "type"));
         cf.addColumn(Column.create(comparator.toString(), timestamp, cfName, "comparator"));
         if (subcolumnComparator != null)
@@ -1309,18 +1300,9 @@ public final class CFMetaData
                                             result.getString("columnfamily"),
                                             ColumnFamilyType.valueOf(result.getString("type")),
                                             TypeParser.parse(result.getString("comparator")),
-                                            result.has("subcomparator") ? TypeParser.parse(result.getString("subcomparator")) : null);
-
-            try
-            {
-                // try to identify if ColumnFamily Id is old style (before C* 1.1.1) and add old -> new mapping if so
-                Schema.instance.addOldCfIdMapping(result.getInt("id"), cfm.cfId);
-            }
-            catch (Exception e)
-            {
-                // it was a UUID after all
-            }
-
+                                            result.has("subcomparator") ? TypeParser.parse(result.getString("subcomparator")) : null,
+                                            result.getInt("id"));
+            
             cfm.readRepairChance(result.getDouble("read_repair_chance"));
             cfm.dcLocalReadRepairChance(result.getDouble("local_read_repair_chance"));
             cfm.replicateOnWrite(result.getBoolean("replicate_on_write"));

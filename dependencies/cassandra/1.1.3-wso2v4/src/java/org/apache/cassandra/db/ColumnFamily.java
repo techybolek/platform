@@ -22,7 +22,6 @@ import static org.apache.cassandra.db.DBConstants.*;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
-import java.util.UUID;
 
 import org.apache.cassandra.net.MessagingService;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -50,12 +49,12 @@ public class ColumnFamily extends AbstractColumnContainer implements IRowCacheEn
         return serializer;
     }
 
-    public static ColumnFamily create(UUID cfId)
+    public static ColumnFamily create(Integer cfId)
     {
         return create(Schema.instance.getCFMetaData(cfId));
     }
 
-    public static ColumnFamily create(UUID cfId, ISortedColumns.Factory factory)
+    public static ColumnFamily create(Integer cfId, ISortedColumns.Factory factory)
     {
         return create(Schema.instance.getCFMetaData(cfId), factory);
     }
@@ -117,7 +116,7 @@ public class ColumnFamily extends AbstractColumnContainer implements IRowCacheEn
         return cf;
     }
 
-    public UUID id()
+    public Integer id()
     {
         return cfm.cfId;
     }
@@ -357,11 +356,11 @@ public class ColumnFamily extends AbstractColumnContainer implements IRowCacheEn
         addAll(cf, allocator);
     }
 
-    public long serializedSize(int version)
+    public long serializedSize()
     {
         return boolSize // nullness bool
                // try to use CF's old id where possible (CASSANDRA-3794)
-               + ColumnFamily.serializer().cfIdSerializedSize(version) // id
+               + intSize // id
                + serializedSizeForSSTable();
     }
 

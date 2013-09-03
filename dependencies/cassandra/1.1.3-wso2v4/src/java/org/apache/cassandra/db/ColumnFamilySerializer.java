@@ -25,7 +25,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.UUID;
 
 import org.apache.cassandra.config.Schema;
 import org.slf4j.Logger;
@@ -59,16 +58,6 @@ public class ColumnFamilySerializer implements ISerializer<ColumnFamily>
     */
     public void serialize(ColumnFamily columnFamily, DataOutput dos)
     {
-        serialize(columnFamily, dos, MessagingService.version_);
-    }
-
-    /**public void serialize(ColumnFamily columnFamily, DataOutput dos, int version)
-    {
-        serialize(columnFamily, dos, MessagingService.version_);
-    }*/
-
-    public void serialize(ColumnFamily columnFamily, DataOutput dos, int version)
-    {
         try
         {
             if (columnFamily == null)
@@ -78,8 +67,7 @@ public class ColumnFamilySerializer implements ISerializer<ColumnFamily>
             }
 
             dos.writeBoolean(true);
-
-            serializeCfId(columnFamily.id(), dos, version);
+            dos.writeInt(columnFamily.id());
         }
         catch (IOException e)
         {
@@ -126,15 +114,19 @@ public class ColumnFamilySerializer implements ISerializer<ColumnFamily>
 
     public ColumnFamily deserialize(DataInput dis) throws IOException
     {
-        return deserialize(dis, MessagingService.version_, IColumnSerializer.Flag.LOCAL, TreeMapBackedSortedColumns.factory());
+        return deserialize(dis, IColumnSerializer.Flag.LOCAL, TreeMapBackedSortedColumns.factory());
     }
 
-    public ColumnFamily deserialize(DataInput dis, int version, IColumnSerializer.Flag flag, ISortedColumns.Factory factory) throws IOException
+    public ColumnFamily deserialize(DataInput dis, IColumnSerializer.Flag flag, ISortedColumns.Factory factory) throws IOException
     {
         if (!dis.readBoolean())
             return null;
 
-        ColumnFamily cf = ColumnFamily.create(deserializeCfId(dis, version), factory);
+        // create a ColumnFamily based on the cf id
+        int cfId = dis.readInt();
+        if (Schema.instance.getCF(cfId) == null)
+            throw new UnknownColumnFamilyException("Couldn't find cfId=" + cfId, cfId);
+        ColumnFamily cf = ColumnFamily.create(cfId, factory);
         deserializeFromSSTableNoColumns(cf, dis);
         deserializeColumns(dis, cf, flag);
         return cf;
@@ -161,48 +153,10 @@ public class ColumnFamilySerializer implements ISerializer<ColumnFamily>
         cf.delete(input.readInt(), input.readLong());
         return cf;
     }
-
-    public void serializeCfId(UUID cfId, DataOutput dos, int version) throws IOException
-    {
-        if (version < MessagingService.VERSION_111) // try to use CF's old id where possible (CASSANDRA-3794)
-        {
-            Integer oldId = Schema.instance.convertNewCfId(cfId);
-
-            if (oldId == null)
-                throw new IOException("Can't serialize ColumnFamily ID " + cfId + " to be used by version " + version +
-                                      ", because int <-> uuid mapping could not be established (CF was created in mixed version cluster).");
-
-            dos.writeInt(oldId);
-        }
-        else
-            UUIDGen.write(cfId, dos);
-    }
-
-    public UUID deserializeCfId(DataInput dis, int version) throws IOException
-    {
-        // create a ColumnFamily based on the cf id
-        UUID cfId = (version < MessagingService.VERSION_111)
-                     ? Schema.instance.convertOldCfId(dis.readInt())
-                     : UUIDGen.read(dis);
-
-        if (Schema.instance.getCF(cfId) == null)
-            throw new UnknownColumnFamilyException("Couldn't find cfId=" + cfId, cfId);
-
-        return cfId;
-    }
-
-    public int cfIdSerializedSize(int version)
-    {
-        return version < MessagingService.VERSION_111 ? DBConstants.intSize : DBConstants.uuidSize;
-    }
-
+    
     public long serializedSize(ColumnFamily cf)
     {
-        return serializedSize(cf, MessagingService.version_);
+        return cf == null ? DBConstants.boolSize : cf.serializedSize();
     }
-
-    public long serializedSize(ColumnFamily cf, int version)
-    {
-        return cf == null ? DBConstants.boolSize : cf.serializedSize(version);
-    }
+    
 }

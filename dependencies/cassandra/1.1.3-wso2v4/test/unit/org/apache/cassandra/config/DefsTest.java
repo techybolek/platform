@@ -49,8 +49,10 @@ public class DefsTest extends SchemaLoader
     @Test
     public void ensureStaticCFMIdsAreLessThan1000()
     {
-        assert CFMetaData.StatusCf.cfId.equals(CFMetaData.getId(Table.SYSTEM_TABLE, SystemTable.STATUS_CF));
-        assert CFMetaData.HintsCf.cfId.equals(CFMetaData.getId(Table.SYSTEM_TABLE, HintedHandOffManager.HINTS_CF));
+        assert CFMetaData.StatusCf.cfId == 0;
+        assert CFMetaData.HintsCf.cfId == 1;
+        assert CFMetaData.MigrationsCf.cfId == 2;
+        assert CFMetaData.SchemaCf.cfId == 3;
     }
 
     @Test
@@ -460,7 +462,7 @@ public class DefsTest extends SchemaLoader
         assert Schema.instance.getCFMetaData(cf.ksName, cf.cfName).getDefaultValidator() == UTF8Type.instance;
 
         // Change cfId
-        newCfm = new CFMetaData(cf.ksName, cf.cfName, cf.cfType, cf.comparator, cf.subcolumnComparator, UUID.randomUUID());
+        newCfm = new CFMetaData(cf.ksName, cf.cfName, cf.cfType, cf.comparator, cf.subcolumnComparator, cf.cfId + 1);
         CFMetaData.copyOpts(newCfm, cf);
         try
         {
@@ -470,7 +472,7 @@ public class DefsTest extends SchemaLoader
         catch (ConfigurationException expected) {}
 
         // Change cfName
-        newCfm = new CFMetaData(cf.ksName, cf.cfName + "_renamed", cf.cfType, cf.comparator, cf.subcolumnComparator);
+        newCfm = new CFMetaData(cf.ksName, cf.cfName + "_renamed", cf.cfType, cf.comparator, cf.subcolumnComparator, cf.cfId);
         CFMetaData.copyOpts(newCfm, cf);
         try
         {
@@ -480,7 +482,7 @@ public class DefsTest extends SchemaLoader
         catch (ConfigurationException expected) {}
 
         // Change ksName
-        newCfm = new CFMetaData(cf.ksName + "_renamed", cf.cfName, cf.cfType, cf.comparator, cf.subcolumnComparator);
+        newCfm = new CFMetaData(cf.ksName + "_renamed", cf.cfName, cf.cfType, cf.comparator, cf.subcolumnComparator, cf.cfId);
         CFMetaData.copyOpts(newCfm, cf);
         try
         {
@@ -490,7 +492,7 @@ public class DefsTest extends SchemaLoader
         catch (ConfigurationException expected) {}
 
         // Change cf type
-        newCfm = new CFMetaData(cf.ksName, cf.cfName, ColumnFamilyType.Super, cf.comparator, cf.subcolumnComparator);
+        newCfm = new CFMetaData(cf.ksName, cf.cfName, ColumnFamilyType.Super, cf.comparator, cf.subcolumnComparator, cf.cfId);
         CFMetaData.copyOpts(newCfm, cf);
         try
         {
@@ -500,7 +502,7 @@ public class DefsTest extends SchemaLoader
         catch (ConfigurationException expected) {}
 
         // Change comparator
-        newCfm = new CFMetaData(cf.ksName, cf.cfName, cf.cfType, TimeUUIDType.instance, cf.subcolumnComparator);
+         newCfm = new CFMetaData(cf.ksName, cf.cfName, cf.cfType, TimeUUIDType.instance, cf.subcolumnComparator, cf.cfId);
         CFMetaData.copyOpts(newCfm, cf);
         try
         {

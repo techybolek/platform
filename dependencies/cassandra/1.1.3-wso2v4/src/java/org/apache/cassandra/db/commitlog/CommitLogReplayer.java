@@ -58,9 +58,9 @@ public class CommitLogReplayer
 
     private final Set<Table> tablesRecovered;
     private final List<Future<?>> futures;
-    private final Map<UUID, AtomicInteger> invalidMutations;
+    private final Map<Integer, AtomicInteger> invalidMutations;
 private final AtomicInteger replayedCount;
-    private final Map<UUID, ReplayPosition> cfPositions;
+    private final Map<Integer, ReplayPosition> cfPositions;
     private final ReplayPosition globalPosition;
     private final Checksum checksum;
     private byte[] buffer;
@@ -70,11 +70,11 @@ private final AtomicInteger replayedCount;
         this.tablesRecovered = new NonBlockingHashSet<Table>();
         this.futures = new ArrayList<Future<?>>();
         this.buffer = new byte[4096];
-        this.invalidMutations = new HashMap<UUID, AtomicInteger>();
+        this.invalidMutations = new HashMap<Integer, AtomicInteger>();
         // count the number of replayed mutation. We don't really care about atomicity, but we need it to be a reference.
         this.replayedCount = new AtomicInteger();
         // compute per-CF and global replay positions
-        this.cfPositions = new HashMap<UUID, ReplayPosition>();
+        this.cfPositions = new HashMap<Integer, ReplayPosition>();
         for (ColumnFamilyStore cfs : ColumnFamilyStore.all())
         {
             // it's important to call RP.gRP per-cf, before aggregating all the positions w/ the Ordering.min call
@@ -95,7 +95,7 @@ private final AtomicInteger replayedCount;
 
     public int blockForWrites() throws IOException
     {
-        for (Map.Entry<UUID, AtomicInteger> entry : invalidMutations.entrySet())
+        for (Map.Entry<Integer, AtomicInteger> entry : invalidMutations.entrySet())
             logger.info(String.format("Skipped %d mutations from unknown (probably removed) CF with id %s", entry.getValue().intValue(), entry.getKey()));
 
         // wait for all the writes to finish on the mutation stage

@@ -56,7 +56,7 @@ public class CounterMutation implements IMutation
         return rowMutation.getTable();
     }
 
-    public Collection<UUID> getColumnFamilyIds()
+    public Collection<Integer> getColumnFamilyIds()
     {
         return rowMutation.getColumnFamilyIds();
     }
