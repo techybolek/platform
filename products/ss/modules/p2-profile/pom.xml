@@ -90,20 +90,11 @@
                                     org.wso2.carbon:org.wso2.carbon.cassandra.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.cassandra.cluster.feature:${carbon.platform.version}
-                                </featureArtifactDef>
-                                <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.cassandra.cluster.mgt.feature:${carbon.platform.version}
-                                </featureArtifactDef>
-                                <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.cassandra.cluster.mgt.ui.feature:${carbon.platform.version}
-                                </featureArtifactDef>
-                                <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.cassandra.cluster.proxy.feature:${carbon.platform.version}
+                                    org.wso2.carbon:org.wso2.carbon.cassandra.monitor.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <!--featureArtifactDef>
-                                                                org.wso2.carbon:org.wso2.carbon.styles.feature:${carbon.platform.version}
-                                                        </featureArtifactDef-->
+                                        org.wso2.carbon:org.wso2.carbon.styles.feature:${carbon.platform.version}
+                                </featureArtifactDef-->
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.cassandra.explorer.feature:${carbon.platform.version}
                                 </featureArtifactDef>
@@ -119,9 +110,9 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.ndatasource.feature:${carbon.platform.version}
                                 </featureArtifactDef>
-                                <featureArtifactDef>
+                                <!--featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.coordination.core.feature:${carbon.platform.version}
-                                </featureArtifactDef>
+                                </featureArtifactDef-->
                                 <!--End RSS features-->
                                 <!--Start HDFS features-->
                                 <featureArtifactDef>
@@ -258,19 +249,7 @@
                                     <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
-                                    <id>org.wso2.carbon.cassandra.cluster.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.cassandra.cluster.mgt.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.cassandra.cluster.mgt.ui.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.cassandra.cluster.proxy.feature.group</id>
+                                    <id>org.wso2.carbon.cassandra.monitor.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
                                 <!--feature>
@@ -295,10 +274,10 @@
                                     <id>org.wso2.carbon.ndatasource.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-                                <feature>
+                                <!--feature>
                                     <id>org.wso2.carbon.coordination.core.feature.group</id>
                                     <version>${carbon.platform.version}</version>
-                                </feature>
+                                </feature-->
                                 <!--End RSS featrues-->
                                 <!--Start HDFS featrues-->
                                 <feature>
