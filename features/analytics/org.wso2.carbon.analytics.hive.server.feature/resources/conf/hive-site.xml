@@ -1241,6 +1241,36 @@
     <value>false</value>
   </property>
 
+   <!--property>
+    <name>cassandra.hadoop.split.index.cf.size</name>
+    <value>2</value>
+  </property-->
+
+  <!--Incremental intermediate table configs -->
+
+   <property>
+    <name>hive.incremental.processing.intermediate.results.cassandra.keyspace</name>
+    <value>HIVE_MARKER_META_DATA</value>
+  </property>
+
+   <property>
+    <name>hive.incremental.processing.intermediate.results.cassandra.hosts</name>
+    <value>localhost:9160</value>
+  </property>
+
+   <property>
+    <name>hive.incremental.processing.intermediate.results.cassandra.userName</name>
+    <value>admin</value>
+  </property>
+
+   <property>
+    <name>hive.incremental.processing.intermediate.results.cassandra.password</name>
+    <value>admin</value>
+  </property>
+
+
+ <!--End of Incremental intermediate table configs -->	
+
   <property>
     <name>hadoop.embedded.local.mode.trace.enable</name>
     <value>false</value>
