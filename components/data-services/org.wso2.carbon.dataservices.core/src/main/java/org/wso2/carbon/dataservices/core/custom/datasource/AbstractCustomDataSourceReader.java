@@ -18,18 +18,6 @@
  */
 package org.wso2.carbon.dataservices.core.custom.datasource;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -39,6 +27,17 @@ import org.wso2.carbon.ndatasource.common.spi.DataSourceReader;
 import org.wso2.carbon.ndatasource.core.utils.DataSourceUtils;
 import org.wso2.carbon.ndatasource.rdbms.RDBMSConfiguration.DataSourceProperty;
 import org.wso2.carbon.utils.CarbonUtils;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class represents a common data source reader implementation for 
@@ -54,8 +53,8 @@ public abstract class AbstractCustomDataSourceReader implements DataSourceReader
 	@Override
 	public Object createDataSource(String xmlConfiguration, 
 			boolean isDataSourceFactoryReference) throws DataSourceException {
+                CustomDataSourceInfo dsInfo = this.loadConfig(xmlConfiguration);
 		try {
-			CustomDataSourceInfo dsInfo = this.loadConfig(xmlConfiguration);
 			CustomDataSourceBase customDS = (CustomDataSourceBase) Class.forName(
 					dsInfo.getCustomDataSourceClass()).newInstance();
 			Map<String, String> dsProps = this.extractProps(dsInfo);
@@ -63,8 +62,7 @@ public abstract class AbstractCustomDataSourceReader implements DataSourceReader
 			customDS.init(dsProps);
 			return customDS;
 		} catch (Exception e) {
-			throw new DataSourceException("Error creating custom data source: " + 
-					e.getMessage(), e);
+			throw new DataSourceException(e.getMessage(), e);
 		}
 	}
 	
@@ -88,8 +86,11 @@ public abstract class AbstractCustomDataSourceReader implements DataSourceReader
 	}
 	
 	private CustomDataSourceInfo loadConfig(String xmlConfiguration) throws DataSourceException {
+                if (xmlConfiguration == null || xmlConfiguration.trim().length() == 0) {
+                        throw new DataSourceException("Invalid Data Services Custom DS Configuration");
+                }
 		try {
-			xmlConfiguration = CarbonUtils.replaceSystemVariablesInXml(xmlConfiguration);
+                        xmlConfiguration = CarbonUtils.replaceSystemVariablesInXml(xmlConfiguration);
 			JAXBContext ctx = JAXBContext.newInstance(CustomDataSourceInfo.class);
 			return (CustomDataSourceInfo) ctx.createUnmarshaller().unmarshal(
 					new ByteArrayInputStream(xmlConfiguration.getBytes()));
