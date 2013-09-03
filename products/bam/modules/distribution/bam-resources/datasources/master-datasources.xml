@@ -57,6 +57,24 @@
             </definition>
         </datasource>
 
+	<!-- The URL configs are loaded from cassandra-component.xml -->
+	 <datasource>
+            <name>WSO2BAM_HIVE_INCREMENTAL_DATASOURCE</name>
+            <definition type="RDBMS">
+                <configuration>
+		    <username>admin</username>
+    		     <password>admin</password>
+    		<dataSourceProps>
+      			<property name="replicationFactor">1</property>
+        		<property name="strategyClass">org.apache.cassandra.locator.SimpleStrategy</property>
+        		<property name="readConsistencyLevel">QUORUM</property>
+        		<property name="writeConsistencyLevel">QUORUM</property>
+        		<property name="keyspaceName">HIVE_MARKER_META_DATA</property>
+    		</dataSourceProps>
+                </configuration>
+            </definition>
+        </datasource>
+
         <!-- For an explanation of the properties, see: http://people.apache.org/~fhanik/jdbc-pool/jdbc-pool.html -->
         <!--datasource>
             <name>SAMPLE_DATA_SOURCE</name>
