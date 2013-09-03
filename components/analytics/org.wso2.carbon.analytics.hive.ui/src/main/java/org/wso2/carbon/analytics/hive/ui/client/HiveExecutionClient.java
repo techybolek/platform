@@ -61,9 +61,9 @@ public class HiveExecutionClient {
         option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
     }
 
-    public QueryResult[] executeScript(String script) throws RemoteException, HiveExecutionServiceHiveExecutionException {
+    public QueryResult[] executeScript(String name, String script) throws RemoteException, HiveExecutionServiceHiveExecutionException {
         try {
-            QueryResult[] res = stub.executeHiveScript(script);
+            QueryResult[] res = stub.executeHiveScript(name, script);
             return res;
         } catch (RemoteException e) {
             log.error(e.getMessage(), e);

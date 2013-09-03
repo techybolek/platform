@@ -73,7 +73,7 @@
                     scriptContent = scriptContent + aquery + ";" + "\n";
                 }
             }
-            results = client.executeScript(scriptContent);
+            results = client.executeScript(scriptName, scriptContent);
         }
 
 

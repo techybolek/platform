@@ -39,7 +39,7 @@
         HiveScriptStoreClient storeClient = new HiveScriptStoreClient(cookie, serverURL, configContext);
 
         if ( null == scriptName || scriptName.trim().isEmpty()  || !storeClient.isTaskRunning(scriptName)) {
-            QueryResult[] results = client.executeScript(hiveScript);
+            QueryResult[] results = client.executeScript(scriptName, hiveScript);
 %>
 <div id="returnedResults">
 
