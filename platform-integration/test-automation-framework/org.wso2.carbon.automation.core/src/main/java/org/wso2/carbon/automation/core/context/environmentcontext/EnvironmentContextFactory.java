@@ -51,7 +51,7 @@ public class EnvironmentContextFactory {
                                          String instanceName,
                                          String domain, String tenantUserId) {
         UrlGenerationUtil urlGenerationUtil =
-                new UrlGenerationUtil(automationContext, instanceGroupName, instanceName, tenantUserId);
+                new UrlGenerationUtil(automationContext, instanceGroupName, instanceName,domain, tenantUserId);
         environment.setBackEndUrl(urlGenerationUtil.getBackendUrl());
         environment.setSecureServiceUrl(urlGenerationUtil.getHttpsServiceURL());
         environment.setServiceUrl(urlGenerationUtil.getHttpServiceURL());
