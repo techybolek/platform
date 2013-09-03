@@ -84,7 +84,7 @@ public class RSSInstance {
         this.serverCategory = serverCategory;
     }
 
-    @XmlElement (name = "DataSourceConfig")
+    @XmlElement (name = "Definition")
     public RDBMSConfig getDataSourceConfig() {
         return dataSourceConfig;
     }
