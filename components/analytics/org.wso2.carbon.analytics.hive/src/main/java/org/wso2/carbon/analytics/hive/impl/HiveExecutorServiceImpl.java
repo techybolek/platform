@@ -33,6 +33,8 @@ import org.wso2.carbon.analytics.hive.extension.HiveAnalyzer;
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
 import org.wso2.carbon.analytics.hive.extension.AnalyzerMeta;
 import org.wso2.carbon.analytics.hive.extension.util.AnalyzerHolder;
+import org.wso2.carbon.analytics.hive.incremental.IncrementalProcessingAnalyzer;
+import org.wso2.carbon.analytics.hive.incremental.util.IncrementalProcessingConstants;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveMultitenantUtil;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveRSSMetastoreManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
@@ -82,7 +84,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
      * @return The Resultset of all executed queries in the script
      * @throws HiveExecutionException
      */
-    public QueryResult[] execute(String script) throws HiveExecutionException {
+    public QueryResult[] execute(String scriptName, String script) throws HiveExecutionException {
         String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
         int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
         if (Utils.canConnectToRSS() && HiveMultitenantUtil.isMultiTenantMode() && null != HiveRSSMetastoreManager.getInstance()) {
@@ -100,7 +102,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                 throw new HiveExecutionException(e.getExceptionMessage(), e);
             }
 
-            ScriptCallable callable = new ScriptCallable(tenantId, script);
+            ScriptCallable callable = new ScriptCallable(tenantId,scriptName,  script);
 
             Future<ScriptResult> future = singleThreadExecutor.submit(callable);
 
@@ -128,37 +130,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                 throw new HiveExecutionException("Query returned a NULL result..");
             }
 
-/*            int threadCount = 0;
-            try {
-                threadCount = Integer.parseInt(script);
-            } catch (Exception e) {
-                ScriptCallable callable = new ScriptCallable(script);
-                ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
-
-                Future<ScriptResult> future = singleThreadExecutor.submit(callable);
-
-                ScriptResult result;
-                try {
-                    result = future.get();
-                } catch (InterruptedException x) {
-                    log.error("Query execution interrupted..", x);
-                    throw new HiveExecutionException("Query execution interrupted..", x);
-                } catch (ExecutionException z) {
-                    log.error("Error during query execution..", z);
-                    throw new HiveExecutionException("Error during query execution..", z);
-                }
-            }
-
-            for (int i = 0; i < threadCount; i++) {
-                ScriptCallable callable = new ScriptCallable(asScript);
-                ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
-
-                singleThreadExecutor.submit(callable);
-
-            }*/
-
         }
-
         return null;
 
     }
@@ -184,12 +156,12 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
      * @return The Resultset of all executed queries in the script
      * @throws HiveExecutionException
      */
-    public QueryResult[] execute(int tenantId, String script) throws HiveExecutionException {
+    public QueryResult[] execute(int tenantId, String scriptName, String script) throws HiveExecutionException {
         if (script != null) {
 
             ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
 
-            ScriptCallable callable = new ScriptCallable(tenantId, script);
+            ScriptCallable callable = new ScriptCallable(tenantId, scriptName, script);
 
             Future<ScriptResult> future = singleThreadExecutor.submit(callable);
 
@@ -215,35 +187,6 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                 throw new HiveExecutionException("Query returned a NULL result..");
             }
 
-/*            int threadCount = 0;
-            try {
-                threadCount = Integer.parseInt(script);
-            } catch (Exception e) {
-                ScriptCallable callable = new ScriptCallable(script);
-                ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
-
-                Future<ScriptResult> future = singleThreadExecutor.submit(callable);
-
-                ScriptResult result;
-                try {
-                    result = future.get();
-                } catch (InterruptedException x) {
-                    log.error("Query execution interrupted..", x);
-                    throw new HiveExecutionException("Query execution interrupted..", x);
-                } catch (ExecutionException z) {
-                    log.error("Error during query execution..", z);
-                    throw new HiveExecutionException("Error during query execution..", z);
-                }
-            }
-
-            for (int i = 0; i < threadCount; i++) {
-                ScriptCallable callable = new ScriptCallable(asScript);
-                ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
-
-                singleThreadExecutor.submit(callable);
-
-            }*/
-
         }
 
         return null;
@@ -257,15 +200,20 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
         private final String LOCAL_META_STORE_URI = "jdbc:hive://";
 
         private String script;
-
+        private String scriptName;
         private int tenantId;
 
-        public ScriptCallable(int tenantId, String script) {
+        public ScriptCallable(int tenantId, String scriptName, String script) {
             this.script = script;
+            if (null == scriptName){
+                this.scriptName = UUID.randomUUID().toString();
+            }else {
+                this.scriptName = scriptName;
+            }
             this.tenantId = tenantId;
         }
 
-        public ScriptResult call() {
+        public ScriptResult call() throws HiveExecutionException {
 
             HiveContext.startTenantFlow(tenantId);
 
@@ -318,10 +266,6 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                     newScript = newScript.replaceAll("\n", " ");
                     newScript = newScript.replaceAll("\t", " ");
 
-                    if ("".equals(trimmedCmdLine)) {
-                        continue;
-                    }
-
                     if (trimmedCmdLine.startsWith("class") ||
                             trimmedCmdLine.startsWith("CLASS")) { // Class analyzer for executing custom logic
                         executeClassAnalyzer(trimmedCmdLine);
@@ -330,8 +274,15 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                             trimmedCmdLine.startsWith("ANALYZER")) {
                         executeAnalyzer(trimmedCmdLine);
 
+                    } else if (trimmedCmdLine.startsWith("@")) {      //annotation found
+                        if (trimmedCmdLine.toLowerCase().startsWith(HiveConstants.INCREMENTAL_ANNOTATION.toLowerCase())) {
+                            executeIncrementalAnnotation(result, trimmedCmdLine, stmt);
+                        } else {
+                            throw new HiveExecutionException("Unsupported Annotation. Only" +
+                                    " @Incremental is supported as annotation.");
+                        }
                     } else { // Normal hive query
-                        executeHiveQuery(result,trimmedCmdLine,stmt);
+                        executeHiveQuery(result, trimmedCmdLine, stmt);
                     }
                 }
 
@@ -400,6 +351,68 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
         }
 
+        private void executeIncrementalAnnotation(ScriptResult result, String trimmedCmdLine, Statement stmt)
+                throws HiveExecutionException, SQLException {
+            HashMap<String, String> incrParameters = new HashMap<String, String>();
+
+            int closeBraceIndex = trimmedCmdLine.indexOf(")");
+            String incrConf = trimmedCmdLine.substring(0, closeBraceIndex + 1);
+            String hiveQuery = trimmedCmdLine.substring(closeBraceIndex + 1);
+
+            if (hiveQuery == null || incrConf == null) {
+                String errorMessage = "Error in incremental Annotation syntax!";
+                throw new HiveExecutionException(errorMessage);
+            }
+
+            String regEx = "(\\(.*\\))";
+
+            String[] tokensName = incrConf.trim().split(regEx);
+
+
+            if (tokensName == null) {
+                String errorMessage = "Error in processing analyzer command " + trimmedCmdLine;
+                throw new HiveExecutionException(errorMessage);
+            }
+
+            Pattern pattern = Pattern.compile(regEx, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            Matcher matcher = pattern.matcher(incrConf.trim());
+            if (matcher.find()) {
+                String rBraces = matcher.group(1);
+                int temp = rBraces.trim().length();
+
+                String s = rBraces.substring(1, temp - 1);
+
+                String[] variables = s.split(",(?=(?:(?:[^\\\"]*\\\"){2})*[^\\\"]*$)");
+
+                for (String variable : variables) {
+                    String[] values = variable.split("=");
+                    String key = values[0].trim();
+                    String valueTemp = values[1].trim();
+                    String value = valueTemp.substring(1, valueTemp.length() - 1);
+                    incrParameters.put(key, value);
+                }
+            }
+            if (incrParameters.isEmpty()) {
+                String errorMessage = "Incremental Annotation is empty!";
+                throw new HiveExecutionException(errorMessage);
+            }
+
+            IncrementalProcessingAnalyzer incrAnalyzer =
+                    new IncrementalProcessingAnalyzer(tenantId);
+            incrParameters.put(IncrementalProcessingConstants.SCRIPT_NAME, scriptName);
+            incrAnalyzer.setParameters(incrParameters);
+            incrAnalyzer.execute();
+            try {
+                if (incrAnalyzer.isValidToRunQuery())
+                    executeHiveQuery(result, hiveQuery, stmt);
+            } finally {
+                incrAnalyzer.cleanUp();
+            }
+        }
+
+
+
+
 
         private void executeAnalyzer(String trimmedCmdLine) throws AnalyzerConfigException {
             String name;
@@ -433,7 +446,9 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                 String s = rBraces.substring(1, temp - 1);
 
-                String[] variables = s.split(",");
+                //There may commas witin the values also, therefore not spliiting with comma's and
+                // splitting with below gegular expression
+                String[] variables = s.split(",(?=(?:(?:[^\\\"]*\\\"){2})*[^\\\"]*$)");
 
                 for (String variable : variables) {
                     String[] values = variable.split("=");
@@ -442,8 +457,6 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                     String value = valueTemp.substring(1, valueTemp.length() - 1);
                     parameters.put(key, value);
                 }
-            }else{
-                parameters =null;
             }
 
             String className;
@@ -462,7 +475,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                 className = name;
             }
 
-            AnalyzerContext analyzerContext= new AnalyzerContext();
+            AnalyzerContext analyzerContext = new AnalyzerContext();
 
             analyzerContext.setAnalyzerName(name);
             analyzerContext.setParameters(parameters);
@@ -605,6 +618,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
         }
 
+
         private void executeHiveQuery(ScriptResult result, String trimmedCmdLine, Statement stmt) throws SQLException {
             QueryResult queryResult = new QueryResult();
 
@@ -666,7 +680,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
             result.addQueryResult(queryResult);
         }
 
-        private void executeClassAnalyzer(String trimmedCmdLine){
+        private void executeClassAnalyzer(String trimmedCmdLine) {
             String[] tokens = trimmedCmdLine.split("\\s+");
             if (tokens != null && tokens.length >= 2) {
                 String className = tokens[1];

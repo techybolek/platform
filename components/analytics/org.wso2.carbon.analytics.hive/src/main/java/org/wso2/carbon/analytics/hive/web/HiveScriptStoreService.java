@@ -78,7 +78,7 @@ public class HiveScriptStoreService {
             info.setTriggerInfo(triggerInfo);
             info.setTaskClass(HiveConstants.HIVE_DEFAULT_TASK_CLASS);
 
-            info.setProperties(properties);*/
+            info.setParameters(properties);*/
 
             int tenantId = CarbonContext.getCurrentContext().getTenantId();
             try {

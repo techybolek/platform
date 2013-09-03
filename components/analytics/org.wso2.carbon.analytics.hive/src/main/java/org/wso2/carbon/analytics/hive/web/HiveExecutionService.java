@@ -23,10 +23,10 @@ import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
 
 public class HiveExecutionService {
 
-    public QueryResult[] executeHiveScript(String script) throws HiveExecutionException {
+    public QueryResult[] executeHiveScript(String scriptName, String script) throws HiveExecutionException {
 
         HiveExecutorService service = ServiceHolder.getHiveExecutorService();
-        return service.execute(script);
+        return service.execute(scriptName, script);
         
     }
 

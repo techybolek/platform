@@ -57,7 +57,7 @@ public class HiveScriptExecutorTask implements Task {
         }
 
         try {
-            ServiceHolder.getHiveExecutorService().execute(script);
+            ServiceHolder.getHiveExecutorService().execute(scriptName, script);
         } catch (HiveExecutionException e) {
             log.error("Error while executing script : " + scriptName , e);
         }

@@ -20,8 +20,8 @@ import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
 
 public interface HiveExecutorService {
 
-    public QueryResult[] execute(String script) throws HiveExecutionException;
+    public QueryResult[] execute(String scriptName, String script) throws HiveExecutionException;
 
-    public QueryResult[] execute(int tenantId, String script) throws HiveExecutionException;
+    public QueryResult[] execute(int tenantId, String scriptName, String script) throws HiveExecutionException;
 
 }

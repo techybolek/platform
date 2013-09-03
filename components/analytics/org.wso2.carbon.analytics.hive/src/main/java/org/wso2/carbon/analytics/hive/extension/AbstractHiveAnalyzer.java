@@ -17,7 +17,6 @@ package org.wso2.carbon.analytics.hive.extension;
 
 import org.apache.hadoop.hive.metastore.HiveContext;
 
-@Deprecated
 public abstract class AbstractHiveAnalyzer {
 
     public abstract void execute();

@@ -59,6 +59,6 @@ public class HiveConstants {
     public static final String ANALYZER_PARAMS_ELEMENT = "parameters";
     public static final String ANALYZER_KEY = "analyzer";
 
-
+    public static final String INCREMENTAL_ANNOTATION = "@Incremental";
 
 }

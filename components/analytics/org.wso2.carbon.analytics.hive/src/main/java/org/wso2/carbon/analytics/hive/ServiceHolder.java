@@ -21,6 +21,8 @@ import org.wso2.carbon.analytics.hive.conf.HiveConnectionManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
 import org.wso2.carbon.analytics.hive.web.HiveScriptStoreService;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.cassandra.dataaccess.DataAccessService;
+import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.service.TaskService;
@@ -41,6 +43,28 @@ public class ServiceHolder {
     private static HiveConnectionManager connectionManager;
     private static RSSManagerService rssManagerService;
     private static RealmService realmService;
+    private static DataSourceService dataSourceService;
+    private static DataAccessService cassandraDataAccessService;
+
+    private ServiceHolder(){
+
+    }
+
+    public static void setDataSourceService(DataSourceService service){
+        dataSourceService=service;
+    }
+
+    public static DataSourceService getDataSourceService() {
+        return dataSourceService;
+    }
+
+    public static DataAccessService getCassandraDataAccessService() {
+        return cassandraDataAccessService;
+    }
+
+    public static void setCassandraDataAccessService(DataAccessService cassandraDataAccessService) {
+        ServiceHolder.cassandraDataAccessService = cassandraDataAccessService;
+    }
 
     private static HiveScriptStoreService hiveScriptStoreService;
 

@@ -39,6 +39,8 @@ import org.wso2.carbon.analytics.hive.impl.HiveExecutorServiceImpl;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
 import org.wso2.carbon.analytics.hive.web.HiveScriptStoreService;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.cassandra.dataaccess.DataAccessService;
+import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -67,6 +69,10 @@ import java.util.concurrent.Executors;
  * cardinality="1..1" policy="dynamic" bind="setRSSManagerService" unbind="unsetRSSManagerService"
  * @scr.reference name="user.realmservice.default" interface="org.wso2.carbon.user.core.service.RealmService"
  * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
+ * @scr.reference name="dataaccess.service" interface="org.wso2.carbon.cassandra.dataaccess.DataAccessService"
+ * cardinality="1..1" policy="dynamic" bind="setDataAccessService" unbind="unsetDataAccessService"
+ * @scr.reference name="datasources.service" interface="org.wso2.carbon.ndatasource.core.DataSourceService"
+ * cardinality="1..1" policy="dynamic" bind="setDataSourceService" unbind="unsetDataSourceService"
  */
 
 public class HiveServiceComponent {
@@ -88,12 +94,6 @@ public class HiveServiceComponent {
 
         BundleContext bundleContext = ctx.getBundleContext();
 
-//        Axis2ConfigurationContextObserver tenantObserver = new HiveAxis2ConfigObserver();
-//        ((HiveAxis2ConfigObserver) tenantObserver).initializeTenant(
-//                PrivilegedCarbonContext.getCurrentContext().getTenantId());
-//
-//        bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
-//                                      tenantObserver, null);
 
         if (log.isDebugEnabled()) {
             log.debug("Starting 'HiveServiceComponent'");
@@ -125,6 +125,17 @@ public class HiveServiceComponent {
         }
 
 
+        try {
+            String carbonConf = System.getProperty(ServerConstants.CARBON_CONFIG_DIR_PATH);
+            String path = carbonConf + File.separator + HiveConstants.ANALYZER_CONFIG_XML;
+
+            AnalyzerFactory.loadAnalyzers(path);
+        } catch (AnalyzerConfigException e) {
+            String errorMessage = "Error loading analyzer-config.xml";
+            log.error(errorMessage, e);
+        }
+
+
         // Set and register HiveExecutorService
         ServiceHolder.setHiveExecutorService(new HiveExecutorServiceImpl());
 
@@ -143,49 +154,6 @@ public class HiveServiceComponent {
         //initializeMetaStore();
 
         Utils.setConnectRSS(true);
-
-/*        HiveConnectionManager connectionManager = HiveConnectionManager.getInstance();
-        connectionManager.loadHiveConnectionConfiguration(ctx.getBundleContext());*/
-
-        /*        DataSourceInformationRepositoryService dataSourceInfoService = ServiceHolder.
-        getDataSourceInformationRepositoryService();
-DataSourceInformationRepository repository = dataSourceInfoService.
-        getDataSourceInformationRepository();*/
-
-        // Registers HIVE DataSource used to connect to Hive service at component startup if not
-        // already existing
-/*        DataSourceInformation info = repository.
-                getDataSourceInformation(HiveConstants.DEFAULT_HIVE_DATASOURCE);
-        if (info == null) {
-            info = new DataSourceInformation();
-            info.setDatasourceName(HiveConstants.DEFAULT_HIVE_DATASOURCE);
-            info.setDriver(HiveConstants.HIVE_DRIVER);
-            info.setUrl(HiveConstants.HIVE_DEFAULT_URL);
-
-            SecretInformation secretInformation = new SecretInformation();
-            secretInformation.setUser(HiveConstants.HIVE_DEFAULT_USER);
-
-            info.setSecretInformation(secretInformation);
-
-            secretInformation = new SecretInformation();
-            secretInformation.setAliasSecret(HiveConstants.HIVE_DEFAULT_PASSWORD);
-
-            info.setSecretInformation(secretInformation);
-
-            repository.addDataSourceInformation(info);
-
-        }
-
-        DataSource dataSource = DataSourceFactory.createDataSource(info);
-        if (dataSource == null) {
-            log.error("Hive DataSource cannot be created..");
-        }
-
-        // Initialize HiveConnectionManager
-        HiveConnectionManager connectionManager = HiveConnectionManager.getInstance();
-        connectionManager.initialize(dataSource);
-
-        ServiceHolder.setHiveConnectionManager(connectionManager);*/
 
     }
 
@@ -262,12 +230,43 @@ DataSourceInformationRepository repository = dataSourceInfoService.
         ServiceHolder.setRealmService(null);
     }
 
+protected void setDataAccessService(DataAccessService dataAccessService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Cassandra Data Access Service");
+        }
+       ServiceHolder.setCassandraDataAccessService(dataAccessService);
+    }
+
+    protected void unsetDataAccessService(DataAccessService dataAccessService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting Cassandra Data Access Service");
+        }
+      ServiceHolder.setCassandraDataAccessService(null);
+    }
+
+    protected void setDataSourceService(DataSourceService dataSourceService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Carbon Data Sources Service");
+        }
+        ServiceHolder.setDataSourceService(dataSourceService);
+    }
+
+    protected void unsetDataSourceService(
+            DataSourceService dataSourceService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting the Carbon Data Sources Service");
+        }
+        ServiceHolder.setDataSourceService(null);
+    }
+
+
+
     private void initializeMetaStore() {
         log.info("Running Hive meta store validation query..");
 
         String validationQuery = "show tables;";
         try {
-            ServiceHolder.getHiveExecutorService().execute(validationQuery);
+            ServiceHolder.getHiveExecutorService().execute(null, validationQuery);
         } catch (HiveExecutionException e) {
             log.error("Error executing validation query for meta store initialization..", e);
         }
