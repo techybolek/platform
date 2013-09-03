@@ -86,7 +86,11 @@ public class FaultyServiceRectifier implements Runnable {
 				}
 
 				DBDeployer dbDeployer = (DBDeployer) this.configurationCtx.getProperty(DBConstants.DB_SERVICE_DEPLOYER);
-				
+                                /* configurationCtx.getAxisConfiguration() can be null when the tenant unload.
+                               Therefore this task terminates */
+                                if (configurationCtx.getAxisConfiguration() == null) {
+                                    return;
+                                }
 				/* check if the service is already deployed */
 				if (configurationCtx.getAxisConfiguration().getService(
 						getServiceNameFromPath(dbDeployer.getRepoDir(), file)) != null) {
