@@ -18,7 +18,6 @@ package org.apache.hadoop.hive.metastore;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.common.CarbonContextThreadLocal;
 import org.apache.hadoop.hive.common.JavaUtils;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.Database;
@@ -81,6 +80,17 @@ public class HiveContext {
         this.wh = new Warehouse(conf);
     }
 
+    private HiveContext(HiveConf conf) {
+        this.conf = conf;
+
+        int tenantId = getTenantId();
+        String whRootString = HiveConf.getVar(conf, HiveConf.ConfVars.METASTOREWAREHOUSE);
+        whRootString = whRootString + tenantId;
+
+        HiveConf.setVar(conf, HiveConf.ConfVars.METASTOREWAREHOUSE, whRootString);
+
+    }
+
     public static void startTenantFlow(int tenantId) {
         tenantIdThreadLocal.set(tenantId);
     }
@@ -108,7 +118,7 @@ public class HiveContext {
                 }
             } catch (ClassNotFoundException e) {
                 handleException("Unable to find the Connection URL Hook class : " +
-                                urlHookClassName, e);
+                        urlHookClassName, e);
             } catch (Exception e) {
                 handleException("Unable to fetch the JDO Connection URL for meta store..", e);
             }
@@ -133,15 +143,15 @@ public class HiveContext {
                     try {
                         ms.createDatabase(
                                 new Database(DEFAULT_DATABASE_NAME, DEFAULT_DATABASE_COMMENT,
-                                             getDefaultDatabasePath(DEFAULT_DATABASE_NAME,
-                                                                    context.getWarehouse()).
-                                                     toString(), null));
+                                        getDefaultDatabasePath(DEFAULT_DATABASE_NAME,
+                                                context.getWarehouse()).
+                                                toString(), null));
                     } catch (InvalidObjectException e1) {
                         handleException("Unable to create hive database for tenant : " + tenantId,
-                                        e1);
+                                e1);
                     } catch (MetaException e1) {
                         handleException("Unable to create hive database for tenant : " + tenantId,
-                                        e1);
+                                e1);
                     }
                 }
             }
@@ -158,6 +168,20 @@ public class HiveContext {
 
     public HiveConf getConf() {
         return conf;
+    }
+
+    public static void startTenantFlow(int tenantId, HiveConf hiveConf) {
+        startTenantFlow(tenantId);
+        HiveContext context = contextMap.get(tenantId);
+        if (context == null) {
+
+            hiveConf.setInt(HiveConf.ConfVars.CURRENTTENANT.varname, tenantId);
+
+            setPropertiesToConf(tenantId, hiveConf);
+            context = new HiveContext(hiveConf);
+
+            contextMap.put(tenantId, context);
+        }
     }
 
     public RawStore getMetaStore() {
@@ -185,7 +209,12 @@ public class HiveContext {
             tenantPropertyMap.put(getTenantId(), properties);
         }
 
-        properties.put(key, value);
+        if (null == value) {
+            properties.remove(key);
+            getConf().set(key, "");
+        } else {
+            properties.put(key, value);
+        }
 
     }
 
@@ -217,7 +246,7 @@ public class HiveContext {
             urlHookClassName = className.trim();
 
             Class<?> urlHookClass = Class.forName(urlHookClassName, true,
-                                                  JavaUtils.getClassLoader());
+                    JavaUtils.getClassLoader());
             urlHook = (JDOConnectionURLHook) ReflectionUtils.newInstance(urlHookClass, null);
         }
         return;
@@ -231,7 +260,7 @@ public class HiveContext {
         }
 
         RawStore ms = (RawStore) ReflectionUtils.newInstance(getClass(rawStoreClassName,
-                                                                      RawStore.class), hiveConf);
+                RawStore.class), hiveConf);
         ms.setConf(hiveConf);
 
         return ms;

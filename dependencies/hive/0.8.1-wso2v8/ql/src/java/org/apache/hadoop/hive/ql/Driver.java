@@ -1341,7 +1341,7 @@ public class Driver implements CommandProcessor {
     }
     tsk.initialize(conf, plan, cxt);
     TaskResult tskRes = new TaskResult();
-    TaskRunner tskRun = new TaskRunner(tsk, tskRes);
+    TaskRunner tskRun = new TaskRunner(tsk, tskRes, HiveContext.getCurrentContext().getTenantId());
 
     // Launch Task
     if (HiveConf.getBoolVar(conf, HiveConf.ConfVars.EXECPARALLEL) && tsk.isMapRedTask()) {

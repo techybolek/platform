@@ -18,6 +18,15 @@
 
 package org.apache.hadoop.hive.conf;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.shims.ShimLoader;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.security.UserGroupInformation;
+
+import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,17 +36,6 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.security.auth.login.LoginException;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.shims.ShimLoader;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.security.UserGroupInformation;
 
 /**
  * Hive Configuration.
@@ -585,6 +583,26 @@ public class HiveConf extends Configuration {
     // Whether to delete the scratchdir while startup
     HIVE_START_CLEANUP_SCRATCHDIR("hive.start.cleanup.scratchdir", false),
     HIVE_INSERT_INTO_MULTILEVEL_DIRS("hive.insert.into.multilevel.dirs", false),
+
+      //Incremental Processing related jars
+      HIVE_INCREMENTAL_CASSANDRA_TABLES("hive.incremental.cassandra.tables", ""),
+      HIVE_INCREMENTAL_VALID_TO_RUN_HIVE_QUERY("hive.incremental.execution.valid", ""),
+      HIVE_INCREMENTAL_PROCESS_ENABLE("hive.incremental", ""),
+      HIVE_INCREMENTAL_PROCESS_KEYSPACE("hive.incremental.index.keyspace", ""),
+      HIVE_INCREMENTAL_USERNAME("hive.incremental.index.username", ""),
+      HIVE_INCREMENTAL_PASSWORD("hive.incremental.index.password", ""),
+      HIVE_INCREMENTAL_TABLE_NAMES("hive.incremental.tables", ""),
+      HIVE_INCREMENTAL_MARKER_NAME("hive.incremental.marker.name", ""),
+      CURRENT_HIVE_SCRIPT_NAME("hive.current.script.name", ""),
+      HIVE_CASSANDRA_HADOOP_SPLIT_INDEX_CF_SIZE("cassandra.hadoop.split.index.cf.size", 100),
+      HIVE_INCREMENTAL_PROCESSING_INTERMEDIATE_RESULTS_KEYSPACE
+              ("hive.incremental.processing.intermediate.results.cassandra.keyspace", "HIVE_MARKER_META_DATA"),
+      HIVE_INCREMENTAL_PROCESSING_INTERMEDIATE_RESULTS_CASSANDRA_HOSTS(
+              "hive.incremental.processing.intermediate.results.cassandra.hosts", "localhost:9160"),
+      HIVE_INCREMENTAL_PROCESSING_INTERMEDIATE_RESULTS_CASSANDRA_USERNAME(
+              "hive.incremental.processing.intermediate.results.cassandra.userName", "admin"),
+      HIVE_INCREMENTAL_PROCESSING_INTERMEDIATE_RESULTS_CASSANDRA_PASSWORD(
+              "hive.incremental.processing.intermediate.results.cassandra.password", "admin")
     ;
 
     public final String varname;
@@ -800,6 +818,19 @@ public class HiveConf extends Configuration {
     initialize(this.getClass());
   }
 
+   public HiveConf(Configuration configuration) {
+    super(configuration);
+    initialize(this.getClass());
+  }
+
+//    public HiveConf(Properties properties) {
+//        super();
+//        initialize(this.getClass());
+//        for (String aProp : properties.stringPropertyNames()) {
+//            set(aProp, properties.get(aProp).toString());
+//        }
+//    }
+
   public HiveConf(Class<?> cls) {
     super();
     initialize(cls);
@@ -934,6 +965,7 @@ public class HiveConf extends Configuration {
     }
     return (ret);
   }
+
 
   public String getHiveSitePath() {
     return hiveSiteURL.getPath();

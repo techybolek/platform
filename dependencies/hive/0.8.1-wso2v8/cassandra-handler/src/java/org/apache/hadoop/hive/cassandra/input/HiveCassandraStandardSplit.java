@@ -1,23 +1,24 @@
 package org.apache.hadoop.hive.cassandra.input;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
 import org.apache.cassandra.hadoop.ColumnFamilySplit;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputSplit;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 @SuppressWarnings("deprecation")
 public class HiveCassandraStandardSplit extends FileSplit implements InputSplit{
-  private final ColumnFamilySplit split;
+  private InputSplit split;
   private String columnMapping;
   private String keyspace;
   private String columnFamily;
   private int rangeBatchSize;
   private int slicePredicateSize;
   private int splitSize;
+  private boolean isIncremental;
   //added for 7.0
   private String partitioner;
   private int port;
@@ -29,10 +30,13 @@ public class HiveCassandraStandardSplit extends FileSplit implements InputSplit{
     split  = new ColumnFamilySplit(null,null,null);
   }
 
-  public HiveCassandraStandardSplit(ColumnFamilySplit split, String columnsMapping, Path dummyPath) {
+  public HiveCassandraStandardSplit(InputSplit split, String columnsMapping, Path dummyPath) {
     super(dummyPath, 0, 0, (String[]) null);
     this.split = split;
     columnMapping = columnsMapping;
+    if(split instanceof IncrementalColumnFamilySplit){
+        isIncremental = true;
+    }
   }
 
   @Override
@@ -47,6 +51,9 @@ public class HiveCassandraStandardSplit extends FileSplit implements InputSplit{
     partitioner = in.readUTF();
     port = in.readInt();
     host = in.readUTF();
+    isIncremental = in.readBoolean();
+    if (isIncremental) split = new IncrementalColumnFamilySplit();
+
     split.readFields(in);
   }
 
@@ -62,6 +69,7 @@ public class HiveCassandraStandardSplit extends FileSplit implements InputSplit{
     out.writeUTF(partitioner);
     out.writeInt(port);
     out.writeUTF(host);
+    out.writeBoolean(isIncremental);
     split.write(out);
   }
 
@@ -72,7 +80,11 @@ public class HiveCassandraStandardSplit extends FileSplit implements InputSplit{
 
   @Override
   public long getLength() {
-    return split.getLength();
+      try {
+          return split.getLength();
+      } catch (IOException e) {
+          return -1;
+      }
   }
 
   public String getKeyspace() {
@@ -107,8 +119,8 @@ public class HiveCassandraStandardSplit extends FileSplit implements InputSplit{
     this.slicePredicateSize = slicePredicateSize;
   }
 
-  public ColumnFamilySplit getSplit() {
-    return split;
+  public org.apache.hadoop.mapreduce.InputSplit getSplit() {
+    return (org.apache.hadoop.mapreduce.InputSplit)split;
   }
 
   public String getColumnMapping() {

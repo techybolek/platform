@@ -158,6 +158,7 @@ public class CassandraManager {
         init();
     }
 
+
     private void init() {
         if (keyspace == null) {
             this.keyspace = getCassandraKeyspace();

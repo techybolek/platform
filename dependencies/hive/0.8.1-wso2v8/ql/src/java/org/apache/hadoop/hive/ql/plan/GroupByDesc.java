@@ -18,10 +18,10 @@
 
 package org.apache.hadoop.hive.ql.plan;
 
-import java.util.ArrayList;
-
 import org.apache.hadoop.hive.ql.udf.UDFType;
 import org.apache.hadoop.hive.ql.udf.generic.GenericUDAFEvaluator;
+
+import java.util.ArrayList;
 
 /**
  * GroupByDesc.
@@ -55,6 +55,7 @@ public class GroupByDesc implements java.io.Serializable {
   private boolean bucketGroup;
 
   private java.util.ArrayList<ExprNodeDesc> keys;
+  private ArrayList<ExprNodeDesc> keysOnlyInGroupBy;
   private java.util.ArrayList<org.apache.hadoop.hive.ql.plan.AggregationDesc> aggregators;
   private java.util.ArrayList<java.lang.String> outputColumnNames;
   private float groupByMemoryUsage;
@@ -67,9 +68,10 @@ public class GroupByDesc implements java.io.Serializable {
       final Mode mode,
       final java.util.ArrayList<java.lang.String> outputColumnNames,
       final java.util.ArrayList<ExprNodeDesc> keys,
+      final ArrayList<ExprNodeDesc> keysOnlyInGroup,
       final java.util.ArrayList<org.apache.hadoop.hive.ql.plan.AggregationDesc> aggregators,
       final boolean groupKeyNotReductionKey,float groupByMemoryUsage, float memoryThreshold) {
-    this(mode, outputColumnNames, keys, aggregators, groupKeyNotReductionKey,
+    this(mode, outputColumnNames, keys, keysOnlyInGroup, aggregators, groupKeyNotReductionKey,
         false, groupByMemoryUsage, memoryThreshold);
   }
 
@@ -77,11 +79,13 @@ public class GroupByDesc implements java.io.Serializable {
       final Mode mode,
       final java.util.ArrayList<java.lang.String> outputColumnNames,
       final java.util.ArrayList<ExprNodeDesc> keys,
+      final ArrayList<ExprNodeDesc> keysOnlyInGroup,
       final java.util.ArrayList<org.apache.hadoop.hive.ql.plan.AggregationDesc> aggregators,
       final boolean groupKeyNotReductionKey, final boolean bucketGroup,float groupByMemoryUsage, float memoryThreshold) {
     this.mode = mode;
     this.outputColumnNames = outputColumnNames;
     this.keys = keys;
+    this.keysOnlyInGroupBy = keysOnlyInGroup;
     this.aggregators = aggregators;
     this.groupKeyNotReductionKey = groupKeyNotReductionKey;
     this.bucketGroup = bucketGroup;
@@ -124,9 +128,19 @@ public class GroupByDesc implements java.io.Serializable {
     return keys;
   }
 
+  @Explain(displayName = "keysOnlyInGroupBy")
+  public ArrayList<ExprNodeDesc> getKeysOnlyInGroupBy(){
+      return keysOnlyInGroupBy;
+  }
+
+  public void setKeysOnlyInGroupBy(ArrayList<ExprNodeDesc> keysOnlyInGroupBy){
+      this.keysOnlyInGroupBy = keysOnlyInGroupBy;
+  }
   public void setKeys(final java.util.ArrayList<ExprNodeDesc> keys) {
     this.keys = keys;
   }
+
+
 
   @Explain(displayName = "outputColumnNames")
   public java.util.ArrayList<java.lang.String> getOutputColumnNames() {

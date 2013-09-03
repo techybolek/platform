@@ -34,6 +34,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.HiveContext;
 import org.apache.hadoop.hive.ql.Context;
 import org.apache.hadoop.hive.ql.DriverContext;
 import org.apache.hadoop.hive.ql.QueryPlan;
@@ -192,7 +193,7 @@ public class BlockMergeTask extends Task<MergeWork> implements Serializable,
         HiveConf.setVar(job, HiveConf.ConfVars.METASTOREPWD, "HIVE");
       }
       JobClient jc = new JobClient(job);
-      
+
       String addedJars = ExecDriver.getResourceFiles(job, SessionState.ResourceType.JAR);
       if (!addedJars.isEmpty()) {
         job.set("tmpjars", addedJars);
@@ -239,7 +240,6 @@ public class BlockMergeTask extends Task<MergeWork> implements Serializable,
       } catch (Exception e) {
       }
     }
-
     return (returnVal);
   }
 

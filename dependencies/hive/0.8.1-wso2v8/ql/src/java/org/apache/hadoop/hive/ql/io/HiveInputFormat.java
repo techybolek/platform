@@ -289,7 +289,17 @@ public class HiveInputFormat<K extends WritableComparable, V extends Writable>
 
       FileInputFormat.setInputPaths(newjob, dir);
       newjob.setInputFormat(inputFormat.getClass());
-      InputSplit[] iss = inputFormat.getSplits(newjob, numSplits / dirs.length);
+      double tempNoSplits = new Double(numSplits)/dirs.length;
+
+      int numJobSplits = 0;
+
+      if(tempNoSplits - Math.ceil(tempNoSplits) > 0){
+          numJobSplits = (int) (Math.ceil(tempNoSplits) + 1);
+      }else {
+          numJobSplits =  (int)Math.ceil(tempNoSplits);
+      }
+
+      InputSplit[] iss = inputFormat.getSplits(newjob, numJobSplits);
       for (InputSplit is : iss) {
         result.add(new HiveInputSplit(is, inputFormatClass.getName()));
       }

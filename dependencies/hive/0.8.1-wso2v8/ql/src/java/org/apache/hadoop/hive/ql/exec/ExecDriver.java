@@ -54,6 +54,7 @@ import org.apache.hadoop.hive.common.FileUtils;
 import org.apache.hadoop.hive.common.LogUtils;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
+import org.apache.hadoop.hive.metastore.HiveContext;
 import org.apache.hadoop.hive.ql.Context;
 import org.apache.hadoop.hive.ql.DriverContext;
 import org.apache.hadoop.hive.ql.QueryPlan;
@@ -255,6 +256,7 @@ public class ExecDriver extends Task<MapredWork> implements Serializable, Hadoop
    */
   @Override
   public int execute(DriverContext driverContext) {
+    HiveContext.getCurrentContext();
 
     IOPrepareCache ioPrepareCache = IOPrepareCache.get();
     ioPrepareCache.clear();
@@ -518,7 +520,6 @@ public class ExecDriver extends Task<MapredWork> implements Serializable, Hadoop
         console.printError(mesg, "\n" + org.apache.hadoop.util.StringUtils.stringifyException(e));
       }
     }
-
     return (returnVal);
   }
 
@@ -716,21 +717,28 @@ public class ExecDriver extends Task<MapredWork> implements Serializable, Hadoop
       throw new HiveException(e.getMessage(), e);
     }
     int ret;
-    if (localtask) {
-      memoryMXBean = ManagementFactory.getMemoryMXBean();
-      MapredLocalWork plan = Utilities.deserializeMapRedLocalWork(pathData, conf);
-      MapredLocalTask ed = new MapredLocalTask(plan, conf, isSilent);
-      ret = ed.executeFromChildJVM(new DriverContext());
+      int  tenantId = Integer.parseInt(conf.get(ConfVars.CURRENTTENANT.varname));
+      HiveContext.startTenantFlow(tenantId, new HiveConf(conf));
+      HiveContext.getCurrentContext();
 
-    } else {
-      MapredWork plan = Utilities.deserializeMapRedWork(pathData, conf);
-      ExecDriver ed = new ExecDriver(plan, conf, isSilent);
-      ret = ed.execute(new DriverContext());
-    }
+      if (localtask) {
+          memoryMXBean = ManagementFactory.getMemoryMXBean();
+          MapredLocalWork plan = Utilities.deserializeMapRedLocalWork(pathData, conf);
+          MapredLocalTask ed = new MapredLocalTask(plan, conf, isSilent);
+          ret = ed.executeFromChildJVM(new DriverContext());
 
-    if (ret != 0) {
-      System.exit(2);
-    }
+      } else {
+          MapredWork plan = Utilities.deserializeMapRedWork(pathData, conf);
+          ExecDriver ed = new ExecDriver(plan, conf, isSilent);
+          ret = ed.execute(new DriverContext());
+      }
+
+      HiveContext.endTenantFlow();
+
+      if (ret != 0) {
+          System.exit(2);
+      }
+
   }
 
   /**

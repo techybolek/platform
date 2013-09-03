@@ -18,12 +18,11 @@
 
 package org.apache.hadoop.hive.ql;
 
+import org.apache.hadoop.hive.ql.exec.Task;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Queue;
-
-import org.apache.hadoop.hive.ql.exec.Task;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  * DriverContext.
@@ -32,6 +31,7 @@ import org.apache.hadoop.mapred.JobConf;
 public class DriverContext {
 
   Queue<Task<? extends Serializable>> runnable = new LinkedList<Task<? extends Serializable>>();
+
 
   // how many jobs have been started
   int curJobNo;

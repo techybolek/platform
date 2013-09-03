@@ -60,5 +60,9 @@
     <dependency org="commons-logging" name="commons-logging-api" rev="${commons-logging-api.version}"
                 transitive="false"/>
     <dependency org="org.apache.derby" name="derby" rev="${derby.version}"/>
+    <dependency org="org.apache.cassandra" name="cassandra-all" rev="${cassandra.version}"
+		transitive="false"/>
+    <dependency org="org.apache.cassandra" name="cassandra-thrift" rev="${cassandra.version}"
+		transitive="false"/>
   </dependencies>
 </ivy-module>

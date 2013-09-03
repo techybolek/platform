@@ -18,9 +18,10 @@
 
 package org.apache.hadoop.hive.ql.exec;
 
-import java.io.Serializable;
-
+import org.apache.hadoop.hive.metastore.HiveContext;
 import org.apache.hadoop.hive.ql.session.SessionState;
+
+import java.io.Serializable;
 
 /**
  * TaskRunner implementation.
@@ -30,11 +31,13 @@ public class TaskRunner extends Thread {
   protected Task<? extends Serializable> tsk;
   protected TaskResult result;
   protected SessionState ss;
+  protected int tenantId;
 
-  public TaskRunner(Task<? extends Serializable> tsk, TaskResult result) {
+  public TaskRunner(Task<? extends Serializable> tsk, TaskResult result, int tenantId) {
     this.tsk = tsk;
     this.result = result;
     ss = SessionState.get();
+    this.tenantId  = tenantId;
   }
 
   public Task<? extends Serializable> getTask() {
@@ -43,8 +46,10 @@ public class TaskRunner extends Thread {
 
   @Override
   public void run() {
+    HiveContext.startTenantFlow(tenantId);
     SessionState.start(ss);
     runSequential();
+    HiveContext.endTenantFlow();
   }
 
   /**

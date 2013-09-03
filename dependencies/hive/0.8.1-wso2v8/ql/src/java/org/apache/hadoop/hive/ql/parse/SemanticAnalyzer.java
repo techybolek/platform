@@ -18,21 +18,6 @@
 
 package org.apache.hadoop.hive.ql.parse;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.Path;
@@ -47,107 +32,23 @@ import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.Order;
 import org.apache.hadoop.hive.ql.Context;
 import org.apache.hadoop.hive.ql.QueryProperties;
-import org.apache.hadoop.hive.ql.exec.AbstractMapJoinOperator;
-import org.apache.hadoop.hive.ql.exec.ColumnInfo;
-import org.apache.hadoop.hive.ql.exec.ConditionalTask;
-import org.apache.hadoop.hive.ql.exec.ExecDriver;
-import org.apache.hadoop.hive.ql.exec.FetchTask;
-import org.apache.hadoop.hive.ql.exec.FileSinkOperator;
-import org.apache.hadoop.hive.ql.exec.FunctionInfo;
-import org.apache.hadoop.hive.ql.exec.FunctionRegistry;
-import org.apache.hadoop.hive.ql.exec.GroupByOperator;
-import org.apache.hadoop.hive.ql.exec.JoinOperator;
-import org.apache.hadoop.hive.ql.exec.MapRedTask;
-import org.apache.hadoop.hive.ql.exec.ArchiveUtils;
-import org.apache.hadoop.hive.ql.exec.Operator;
-import org.apache.hadoop.hive.ql.exec.OperatorFactory;
-import org.apache.hadoop.hive.ql.exec.RecordReader;
-import org.apache.hadoop.hive.ql.exec.RecordWriter;
-import org.apache.hadoop.hive.ql.exec.ReduceSinkOperator;
-import org.apache.hadoop.hive.ql.exec.RowSchema;
-import org.apache.hadoop.hive.ql.exec.StatsTask;
-import org.apache.hadoop.hive.ql.exec.TableScanOperator;
-import org.apache.hadoop.hive.ql.exec.Task;
-import org.apache.hadoop.hive.ql.exec.TaskFactory;
-import org.apache.hadoop.hive.ql.exec.UnionOperator;
-import org.apache.hadoop.hive.ql.exec.Utilities;
+import org.apache.hadoop.hive.ql.exec.*;
 import org.apache.hadoop.hive.ql.hooks.ReadEntity;
 import org.apache.hadoop.hive.ql.hooks.WriteEntity;
 import org.apache.hadoop.hive.ql.io.CombineHiveInputFormat;
 import org.apache.hadoop.hive.ql.io.HiveFileFormatUtils;
 import org.apache.hadoop.hive.ql.io.HiveOutputFormat;
-import org.apache.hadoop.hive.ql.lib.DefaultGraphWalker;
-import org.apache.hadoop.hive.ql.lib.DefaultRuleDispatcher;
-import org.apache.hadoop.hive.ql.lib.Dispatcher;
-import org.apache.hadoop.hive.ql.lib.GraphWalker;
-import org.apache.hadoop.hive.ql.lib.Node;
-import org.apache.hadoop.hive.ql.lib.NodeProcessor;
-import org.apache.hadoop.hive.ql.lib.Rule;
-import org.apache.hadoop.hive.ql.lib.RuleRegExp;
-import org.apache.hadoop.hive.ql.metadata.DummyPartition;
-import org.apache.hadoop.hive.ql.metadata.Hive;
-import org.apache.hadoop.hive.ql.metadata.HiveException;
-import org.apache.hadoop.hive.ql.metadata.HiveUtils;
-import org.apache.hadoop.hive.ql.metadata.InvalidTableException;
-import org.apache.hadoop.hive.ql.metadata.Partition;
-import org.apache.hadoop.hive.ql.metadata.Table;
-import org.apache.hadoop.hive.ql.metadata.VirtualColumn;
-import org.apache.hadoop.hive.ql.optimizer.GenMRFileSink1;
-import org.apache.hadoop.hive.ql.optimizer.GenMROperator;
-import org.apache.hadoop.hive.ql.optimizer.GenMRProcContext;
+import org.apache.hadoop.hive.ql.lib.*;
+import org.apache.hadoop.hive.ql.metadata.*;
+import org.apache.hadoop.hive.ql.optimizer.*;
 import org.apache.hadoop.hive.ql.optimizer.GenMRProcContext.GenMapRedCtx;
-import org.apache.hadoop.hive.ql.optimizer.GenMRRedSink1;
-import org.apache.hadoop.hive.ql.optimizer.GenMRRedSink2;
-import org.apache.hadoop.hive.ql.optimizer.GenMRRedSink3;
-import org.apache.hadoop.hive.ql.optimizer.GenMRRedSink4;
-import org.apache.hadoop.hive.ql.optimizer.GenMRTableScan1;
-import org.apache.hadoop.hive.ql.optimizer.GenMRUnion1;
-import org.apache.hadoop.hive.ql.optimizer.GenMapRedUtils;
-import org.apache.hadoop.hive.ql.optimizer.MapJoinFactory;
-import org.apache.hadoop.hive.ql.optimizer.Optimizer;
 import org.apache.hadoop.hive.ql.optimizer.physical.PhysicalContext;
 import org.apache.hadoop.hive.ql.optimizer.physical.PhysicalOptimizer;
 import org.apache.hadoop.hive.ql.optimizer.ppr.PartitionPruner;
 import org.apache.hadoop.hive.ql.optimizer.unionproc.UnionProcContext;
 import org.apache.hadoop.hive.ql.parse.BaseSemanticAnalyzer.tableSpec.SpecType;
-import org.apache.hadoop.hive.ql.plan.AggregationDesc;
-import org.apache.hadoop.hive.ql.plan.CreateTableDesc;
-import org.apache.hadoop.hive.ql.plan.CreateTableLikeDesc;
-import org.apache.hadoop.hive.ql.plan.CreateViewDesc;
-import org.apache.hadoop.hive.ql.plan.DDLWork;
-import org.apache.hadoop.hive.ql.plan.DynamicPartitionCtx;
-import org.apache.hadoop.hive.ql.plan.ExprNodeColumnDesc;
-import org.apache.hadoop.hive.ql.plan.ExprNodeConstantDesc;
-import org.apache.hadoop.hive.ql.plan.ExprNodeDesc;
-import org.apache.hadoop.hive.ql.plan.ExprNodeGenericFuncDesc;
-import org.apache.hadoop.hive.ql.plan.ExprNodeNullDesc;
-import org.apache.hadoop.hive.ql.plan.ExtractDesc;
-import org.apache.hadoop.hive.ql.plan.FetchWork;
-import org.apache.hadoop.hive.ql.plan.FileSinkDesc;
-import org.apache.hadoop.hive.ql.plan.FilterDesc;
+import org.apache.hadoop.hive.ql.plan.*;
 import org.apache.hadoop.hive.ql.plan.FilterDesc.sampleDesc;
-import org.apache.hadoop.hive.ql.plan.ForwardDesc;
-import org.apache.hadoop.hive.ql.plan.GroupByDesc;
-import org.apache.hadoop.hive.ql.plan.HiveOperation;
-import org.apache.hadoop.hive.ql.plan.JoinCondDesc;
-import org.apache.hadoop.hive.ql.plan.JoinDesc;
-import org.apache.hadoop.hive.ql.plan.LateralViewForwardDesc;
-import org.apache.hadoop.hive.ql.plan.LateralViewJoinDesc;
-import org.apache.hadoop.hive.ql.plan.LimitDesc;
-import org.apache.hadoop.hive.ql.plan.LoadFileDesc;
-import org.apache.hadoop.hive.ql.plan.LoadTableDesc;
-import org.apache.hadoop.hive.ql.plan.MapJoinDesc;
-import org.apache.hadoop.hive.ql.plan.MapredWork;
-import org.apache.hadoop.hive.ql.plan.MoveWork;
-import org.apache.hadoop.hive.ql.plan.PartitionDesc;
-import org.apache.hadoop.hive.ql.plan.PlanUtils;
-import org.apache.hadoop.hive.ql.plan.ReduceSinkDesc;
-import org.apache.hadoop.hive.ql.plan.ScriptDesc;
-import org.apache.hadoop.hive.ql.plan.SelectDesc;
-import org.apache.hadoop.hive.ql.plan.TableDesc;
-import org.apache.hadoop.hive.ql.plan.TableScanDesc;
-import org.apache.hadoop.hive.ql.plan.UDTFDesc;
-import org.apache.hadoop.hive.ql.plan.UnionDesc;
 import org.apache.hadoop.hive.ql.session.SessionState;
 import org.apache.hadoop.hive.ql.session.SessionState.ResourceType;
 import org.apache.hadoop.hive.ql.udf.generic.GenericUDAFEvaluator;
@@ -170,6 +71,13 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.hadoop.mapred.InputFormat;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Implementation of the semantic analyzer.
@@ -2453,6 +2361,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     RowResolver groupByOutputRowResolver = new RowResolver();
     groupByOutputRowResolver.setIsExprResolver(true);
     ArrayList<ExprNodeDesc> groupByKeys = new ArrayList<ExprNodeDesc>();
+   ArrayList<ExprNodeDesc> keysOnlyInGroup = new ArrayList<ExprNodeDesc>();
     ArrayList<AggregationDesc> aggregations = new ArrayList<AggregationDesc>();
     ArrayList<String> outputColumnNames = new ArrayList<String>();
     Map<String, ExprNodeDesc> colExprMap = new HashMap<String, ExprNodeDesc>();
@@ -2464,9 +2373,10 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
       if (exprInfo == null) {
         throw new SemanticException(ErrorMsg.INVALID_COLUMN.getMsg(grpbyExpr));
       }
-
-      groupByKeys.add(new ExprNodeColumnDesc(exprInfo.getType(), exprInfo
-          .getInternalName(), "", false));
+      ExprNodeColumnDesc desc = new ExprNodeColumnDesc(exprInfo.getType(), exprInfo
+          .getInternalName(), "", false);
+      groupByKeys.add(desc);
+      keysOnlyInGroup.add(desc);
       String field = getColumnInternalName(i);
       outputColumnNames.add(field);
       groupByOutputRowResolver.putExpression(grpbyExpr,
@@ -2548,7 +2458,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     float groupByMemoryUsage = HiveConf.getFloatVar(conf, HiveConf.ConfVars.HIVEMAPAGGRHASHMEMORY);
     float memoryThreshold = HiveConf.getFloatVar(conf, HiveConf.ConfVars.HIVEMAPAGGRMEMORYTHRESHOLD);
     Operator op = putOpInsertMap(OperatorFactory.getAndMakeChild(
-        new GroupByDesc(mode, outputColumnNames, groupByKeys, aggregations,
+        new GroupByDesc(mode, outputColumnNames, groupByKeys,keysOnlyInGroup,  aggregations,
         false,groupByMemoryUsage,memoryThreshold), new RowSchema(groupByOutputRowResolver.getColumnInfos()),
         reduceSinkOperatorInfo), groupByOutputRowResolver);
     op.setColumnExprMap(colExprMap);
@@ -2579,6 +2489,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     RowResolver groupByOutputRowResolver = new RowResolver();
     groupByOutputRowResolver.setIsExprResolver(true);
     ArrayList<ExprNodeDesc> groupByKeys = new ArrayList<ExprNodeDesc>();
+    ArrayList<ExprNodeDesc> keysInGroup = new ArrayList<ExprNodeDesc>();
     ArrayList<AggregationDesc> aggregations = new ArrayList<AggregationDesc>();
     List<ASTNode> grpByExprs = getGroupByForClause(parseInfo, dest);
     Map<String, ExprNodeDesc> colExprMap = new HashMap<String, ExprNodeDesc>();
@@ -2589,10 +2500,12 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
       if (exprInfo == null) {
         throw new SemanticException(ErrorMsg.INVALID_COLUMN.getMsg(grpbyExpr));
       }
-
-      groupByKeys.add(new ExprNodeColumnDesc(exprInfo.getType(), exprInfo
+     ExprNodeColumnDesc columnDesc =  new ExprNodeColumnDesc(exprInfo.getType(), exprInfo
           .getInternalName(), exprInfo.getTabAlias(), exprInfo
-          .getIsVirtualCol()));
+          .getIsVirtualCol());
+      groupByKeys.add(columnDesc);
+      keysInGroup.add(columnDesc);
+
       String field = getColumnInternalName(i);
       outputColumnNames.add(field);
       groupByOutputRowResolver.putExpression(grpbyExpr,
@@ -2697,7 +2610,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     float groupByMemoryUsage = HiveConf.getFloatVar(conf, HiveConf.ConfVars.HIVEMAPAGGRHASHMEMORY);
     float memoryThreshold = HiveConf.getFloatVar(conf, HiveConf.ConfVars.HIVEMAPAGGRMEMORYTHRESHOLD);
     Operator op = putOpInsertMap(OperatorFactory.getAndMakeChild(
-        new GroupByDesc(mode, outputColumnNames, groupByKeys, aggregations,
+        new GroupByDesc(mode, outputColumnNames, groupByKeys, keysInGroup,  aggregations,
         distPartAgg,groupByMemoryUsage,memoryThreshold), new RowSchema(groupByOutputRowResolver
         .getColumnInfos()), reduceSinkOperatorInfo),
         groupByOutputRowResolver);
@@ -2730,6 +2643,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     RowResolver groupByOutputRowResolver = new RowResolver();
     groupByOutputRowResolver.setIsExprResolver(true);
     ArrayList<ExprNodeDesc> groupByKeys = new ArrayList<ExprNodeDesc>();
+    ArrayList<ExprNodeDesc> keysOnlyInGroupBy = new ArrayList<ExprNodeDesc>();
     ArrayList<String> outputColumnNames = new ArrayList<String>();
     ArrayList<AggregationDesc> aggregations = new ArrayList<AggregationDesc>();
     Map<String, ExprNodeDesc> colExprMap = new HashMap<String, ExprNodeDesc>();
@@ -2740,6 +2654,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
           groupByInputRowResolver);
 
       groupByKeys.add(grpByExprNode);
+      keysOnlyInGroupBy.add(grpByExprNode);
       String field = getColumnInternalName(i);
       outputColumnNames.add(field);
       groupByOutputRowResolver.putExpression(grpbyExpr,
@@ -2816,7 +2731,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     float groupByMemoryUsage = HiveConf.getFloatVar(conf, HiveConf.ConfVars.HIVEMAPAGGRHASHMEMORY);
     float memoryThreshold = HiveConf.getFloatVar(conf, HiveConf.ConfVars.HIVEMAPAGGRMEMORYTHRESHOLD);
     Operator op = putOpInsertMap(OperatorFactory.getAndMakeChild(
-        new GroupByDesc(mode, outputColumnNames, groupByKeys, aggregations,
+        new GroupByDesc(mode, outputColumnNames, groupByKeys, keysOnlyInGroupBy, aggregations,
         false,groupByMemoryUsage,memoryThreshold), new RowSchema(groupByOutputRowResolver.getColumnInfos()),
         inputOperatorInfo), groupByOutputRowResolver);
     op.setColumnExprMap(colExprMap);
@@ -3062,6 +2977,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     RowResolver groupByOutputRowResolver2 = new RowResolver();
     groupByOutputRowResolver2.setIsExprResolver(true);
     ArrayList<ExprNodeDesc> groupByKeys = new ArrayList<ExprNodeDesc>();
+     ArrayList<ExprNodeDesc> keysOnlyInGroupBy = new ArrayList<ExprNodeDesc>();
     ArrayList<AggregationDesc> aggregations = new ArrayList<AggregationDesc>();
     Map<String, ExprNodeDesc> colExprMap = new HashMap<String, ExprNodeDesc>();
     List<ASTNode> grpByExprs = getGroupByForClause(parseInfo, dest);
@@ -3074,8 +2990,10 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
       }
 
       String expression = exprInfo.getInternalName();
-      groupByKeys.add(new ExprNodeColumnDesc(exprInfo.getType(), expression,
-          exprInfo.getTabAlias(), exprInfo.getIsVirtualCol()));
+      ExprNodeColumnDesc columnDesc = new ExprNodeColumnDesc(exprInfo.getType(), expression,
+          exprInfo.getTabAlias(), exprInfo.getIsVirtualCol());
+      groupByKeys.add(columnDesc);
+      keysOnlyInGroupBy.add(columnDesc);
       String field = getColumnInternalName(i);
       outputColumnNames.add(field);
       groupByOutputRowResolver2.putExpression(grpbyExpr,
@@ -3124,7 +3042,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     float groupByMemoryUsage = HiveConf.getFloatVar(conf, HiveConf.ConfVars.HIVEMAPAGGRHASHMEMORY);
     float memoryThreshold = HiveConf.getFloatVar(conf, HiveConf.ConfVars.HIVEMAPAGGRMEMORYTHRESHOLD);
     Operator op = putOpInsertMap(OperatorFactory.getAndMakeChild(
-        new GroupByDesc(mode, outputColumnNames, groupByKeys, aggregations,
+        new GroupByDesc(mode, outputColumnNames, groupByKeys, keysOnlyInGroupBy, aggregations,
         false,groupByMemoryUsage,memoryThreshold), new RowSchema(groupByOutputRowResolver2.getColumnInfos()),
         reduceSinkOperatorInfo2), groupByOutputRowResolver2);
     op.setColumnExprMap(colExprMap);
@@ -4871,6 +4789,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
         .getRowResolver();
     RowResolver groupByOutputRowResolver = new RowResolver();
     ArrayList<ExprNodeDesc> groupByKeys = new ArrayList<ExprNodeDesc>();
+    ArrayList<ExprNodeDesc> keysOnlyInGroup = new ArrayList<ExprNodeDesc>();
     ArrayList<String> outputColumnNames = new ArrayList<String>();
     ArrayList<AggregationDesc> aggregations = new ArrayList<AggregationDesc>();
     Map<String, ExprNodeDesc> colExprMap = new HashMap<String, ExprNodeDesc>();
@@ -4886,7 +4805,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
       ExprNodeDesc grpByExprNode = genExprNodeDesc(colName,
           groupByInputRowResolver);
       groupByKeys.add(grpByExprNode);
-
+      keysOnlyInGroup.add(grpByExprNode);
       // generate output column names
       String field = getColumnInternalName(i);
       outputColumnNames.add(field);
@@ -4902,7 +4821,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     float groupByMemoryUsage = HiveConf.getFloatVar(conf, HiveConf.ConfVars.HIVEMAPAGGRHASHMEMORY);
     float memoryThreshold = HiveConf.getFloatVar(conf, HiveConf.ConfVars.HIVEMAPAGGRMEMORYTHRESHOLD);
     Operator op = putOpInsertMap(OperatorFactory.getAndMakeChild(
-        new GroupByDesc(mode, outputColumnNames, groupByKeys, aggregations,
+        new GroupByDesc(mode, outputColumnNames, groupByKeys, keysOnlyInGroup,  aggregations,
         false,groupByMemoryUsage,memoryThreshold), new RowSchema(groupByOutputRowResolver.getColumnInfos()),
         inputOperatorInfo), groupByOutputRowResolver);
 
