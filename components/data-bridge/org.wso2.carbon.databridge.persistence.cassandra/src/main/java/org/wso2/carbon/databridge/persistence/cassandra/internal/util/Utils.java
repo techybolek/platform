@@ -32,6 +32,11 @@ import java.util.Enumeration;
 public class Utils {
 
     private static final String STREAMDEFN_XML = "streamdefn.xml";
+    private static int replicationFactor;
+    private static String readConsistencyLevel;
+    private static String writeConsistencyLevel;
+    private static String strategyClass;
+    private static int nodeId;
 
     private static ConsistencyLevelPolicy globalConsistencyLevelPolicy;
 
@@ -51,12 +56,6 @@ public class Utils {
         return InetAddress.getLocalHost();
     }
 
-
-    private static int replicationFactor;
-    private static String readConsistencyLevel;
-    private static String writeConsistencyLevel;
-    private static String strategyClass;
-    private static int nodeId;
 
     public static void readConfigFile() {
 
