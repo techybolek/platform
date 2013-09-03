@@ -27,15 +27,11 @@ import java.util.Map;
  */
 public class Tenant {
 
-    private String key;
+
     private String domain;
     private User tenantAdmin;
     private Map<String, User> tenantUsers = new HashMap<String, User>();
 
-    public void setKey(String value) {
-
-        this.key = value;
-    }
 
     public void setDomain(String value) {
 
@@ -50,11 +46,6 @@ public class Tenant {
     public void setTenantUsers(Map<String, User> users) {
 
         this.tenantUsers = users;
-    }
-
-    public String getKey() {
-
-        return key;
     }
 
     public String getDomain() {
@@ -77,6 +68,11 @@ public class Tenant {
         return tenantUsers.get(tenantId);
     }
 
+    public void addTenatUsers(User user) {
+
+        tenantUsers.put(user.getKey(), user);
+
+    }
 
 }
 

@@ -20,6 +20,8 @@ package org.wso2.carbon.automation.core.context.platformcontext;
 
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 public class InstanceGroup {
 
@@ -47,7 +49,7 @@ public class InstanceGroup {
         this.groupName = groupName;
     }
 
-    public Boolean getClusteringEnabled() {
+    public Boolean isClusteringEnabled() {
         return clusteringEnabled;
     }
 
@@ -66,16 +68,34 @@ public class InstanceGroup {
         instances.put(name, instance);
     }
 
-    public HashMap<String, Instance> getInstances() {
-        return instances;
+    public List<Instance> getInstances() {
+        List<Instance> instanceList = new LinkedList<Instance>();
+
+        while (instances.values().iterator().hasNext()) {
+            instanceList.add(instances.values().iterator().next());
+        }
+        return instanceList;
+    }
+
+    public Instance getInstancesByName(String instanceName) {
+        return instances.get(instanceName);
     }
 
     public void setInstances(HashMap<String, Instance> instances) {
         this.instances = instances;
     }
 
-    public HashMap<String, Instance> getLoadBalancerInstances() {
-        return loadBalancerInstances;
+    public List<Instance> getLoadBalancerInstances() {
+        List<Instance> instanceList = new LinkedList<Instance>();
+
+        while (loadBalancerInstances.values().iterator().hasNext()) {
+            instanceList.add(loadBalancerInstances.values().iterator().next());
+        }
+        return instanceList;
+    }
+
+    public Instance getLoadBalancerInstanceByName(String instanceName) {
+        return loadBalancerInstances.get(instanceName);
     }
 
     public void setLoadBalancerInstances(HashMap<String, Instance> loadBalancerInstances) {
@@ -86,8 +106,16 @@ public class InstanceGroup {
         this.loadBalancerInstances.put(name, instance);
     }
 
-    public HashMap<String, Instance> getManagerInstances() {
-        return managerInstances;
+    public List<Instance> getManagerInstances() {
+        List<Instance> instanceList = new LinkedList<Instance>();
+        while (managerInstances.values().iterator().hasNext()) {
+            instanceList.add(managerInstances.values().iterator().next());
+        }
+        return instanceList;
+    }
+
+    public Instance getManagerInstanceByName(String instanceName) {
+        return managerInstances.get(instanceName);
     }
 
     public void setManagerInstances(HashMap<String, Instance> managerInstances) {
@@ -98,8 +126,16 @@ public class InstanceGroup {
         this.managerInstances.put(name, instance);
     }
 
-    public HashMap<String, Instance> getWorkerInstances() {
-        return workerInstances;
+    public List<Instance> getWorkerInstances() {
+        List<Instance> instanceList = new LinkedList<Instance>();
+        while (workerInstances.values().iterator().hasNext()) {
+            instanceList.add(workerInstances.values().iterator().next());
+        }
+        return instanceList;
+    }
+
+    public Instance getWorkerInstanceByName(String instanceName) {
+        return workerInstances.get(instanceName);
     }
 
     public void setWorkerInstances(HashMap<String, Instance> workerInstances) {
@@ -110,8 +146,16 @@ public class InstanceGroup {
         this.workerInstances.put(name, instance);
     }
 
-    public HashMap<String, Instance> getLoadBalanceWorkerInstances() {
-        return loadBalanceWorkerInstances;
+    public List<Instance> getLoadBalanceWorkerInstances() {
+        List<Instance> instanceList = new LinkedList<Instance>();
+        while (loadBalanceWorkerInstances.values().iterator().hasNext()) {
+            instanceList.add(loadBalanceWorkerInstances.values().iterator().next());
+        }
+        return instanceList;
+    }
+
+    public Instance getLoadBalanceWorkerInstancesByName(String instanceName) {
+        return loadBalanceWorkerInstances.get(instanceName);
     }
 
     public void setLoadBalanceWorkerInstances(HashMap<String, Instance> loadBalanceWorkerInstances) {
@@ -122,8 +166,17 @@ public class InstanceGroup {
         this.loadBalanceWorkerInstances.put(name, instance);
     }
 
-    public HashMap<String, Instance> getLoadBalanceManagerInstances() {
-        return loadBalanceManagerInstances;
+    public List<Instance> getLoadBalanceManagerInstances() {
+        List<Instance> instanceList = new LinkedList<Instance>();
+
+        while (loadBalanceManagerInstances.values().iterator().hasNext()) {
+            instanceList.add(loadBalanceManagerInstances.values().iterator().next());
+        }
+        return instanceList;
+    }
+
+    public Instance getLoadBalanceManagerInstanceByName(String instanceName) {
+        return loadBalanceManagerInstances.get(instanceName);
     }
 
     public void setLoadBalanceManagerInstances(HashMap<String, Instance> loadBalanceManagerInstances) {

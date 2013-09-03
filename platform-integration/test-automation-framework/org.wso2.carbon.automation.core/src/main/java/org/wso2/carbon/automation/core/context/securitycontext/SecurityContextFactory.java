@@ -41,26 +41,29 @@ public class SecurityContextFactory {
         securityContext = new SecurityContext();
     }
 
-    public void createSecurityContext(OMElement omElement) {
+    /**
+     * @param nodeElement OMElement input from the xml reader
+     */
+    public void createSecurityContext(OMElement nodeElement) {
 
 
-        Iterator children = omElement.getChildElements();
-        OMNode node;
+        Iterator children = nodeElement.getChildElements();
+        OMElement node;
         while (children.hasNext()) {
 
-            node = (OMNode) children.next();
-            String storeName = ((OMElementImpl) node).getLocalName();
+            node = (OMElement) children.next();
+            String storeName = node.getLocalName();
 
             //the store can be a key store and trust store
             //we have to explicitly add these two objects
             if (storeName.equals(ContextConstants.SECURITY_STORES_KETSTORE)) {
 
-                String keyStoreName = ((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants.SECURITY_KEYSTORE_NAME)).getAttributeValue();
+                String keyStoreName = node.getAttribute(QName.valueOf(ContextConstants.SECURITY_KEYSTORE_NAME)).getAttributeValue();
                 // add the key store to the key store list
                 keyStoreMap.put(keyStoreName, getKeyStore(node));
 
             } else if (storeName.equals(ContextConstants.SECURITY_STORES_TRUSTSTORE)) {
-                String trustStoreName = ((OMElementImpl) node).getAttribute(QName.valueOf(ContextConstants.SECURITY_TRUSTSTORE_NAME)).getAttributeValue();
+                String trustStoreName = node.getAttribute(QName.valueOf(ContextConstants.SECURITY_TRUSTSTORE_NAME)).getAttributeValue();
 
                 //add trust store to the trust store list
                 trustStoreMap.put(trustStoreName, getTrueStore(node));

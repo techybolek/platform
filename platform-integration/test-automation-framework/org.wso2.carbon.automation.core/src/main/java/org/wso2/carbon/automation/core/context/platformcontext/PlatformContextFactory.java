@@ -22,9 +22,11 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.llom.OMElementImpl;
 import org.wso2.carbon.automation.core.context.ContextConstants;
+import org.wso2.carbon.automation.core.context.contextenum.InstanceTypes;
 
 import javax.xml.namespace.QName;
 import java.util.Iterator;
+
 
 public class PlatformContextFactory {
     private PlatformContext platformContext;
@@ -34,34 +36,36 @@ public class PlatformContextFactory {
     }
 
 
-    /*
-     this method creates the platform object
-      */
+    /**
+     * this method creates the platform object
+     *
+     * @param nodeElement OMElement input from the xml reader
+     */
     public void createPlatformContext(OMElement nodeElement) {
 
         Iterator instanceGroupIterator = nodeElement.getChildElements();
-        OMNode instanceGroupNode;
+        OMElement instanceGroupNode;
 
         // Walk through the instance group list
         while (instanceGroupIterator.hasNext()) {
             InstanceGroup instanceGroup = new InstanceGroup();
-            instanceGroupNode = (OMNode) instanceGroupIterator.next();
+            instanceGroupNode = (OMElement) instanceGroupIterator.next();
 
             //set the attributes of the current instance group
-            String groupName = ((OMElementImpl) instanceGroupNode).getAttributeValue
+            String groupName = instanceGroupNode.getAttributeValue
                     (QName.valueOf(ContextConstants.PLATFORM_CONTEXT_INSTANCE_GROUP_NAME));
-            Boolean clusteringEnabled = Boolean.parseBoolean(((OMElementImpl) instanceGroupNode).getAttributeValue
+            Boolean clusteringEnabled = Boolean.parseBoolean(instanceGroupNode.getAttributeValue
                     (QName.valueOf(ContextConstants.PLATFORM_CONTEXT_INSTANCE_GROUP_CLUSTERING_ENABLED)));
             instanceGroup.setGroupName(groupName);
             instanceGroup.setClusteringEnabled(clusteringEnabled);
 
             // walk through the instances in the instance group
-            Iterator instances = ((OMElementImpl) instanceGroupNode).getChildElements();
-            OMNode instanceNode;
+            Iterator instances = instanceGroupNode.getChildElements();
+            OMElement instanceNode;
             while (instances.hasNext()) {
 
                 //adding the instance to the instance group
-                instanceNode = (OMNode) instances.next();
+                instanceNode = (OMElement) instances.next();
                 Instance currentInstance = createInstance(instanceNode);
                 addInstanceToTypeList(currentInstance, instanceGroup);
 
@@ -84,17 +88,17 @@ public class PlatformContextFactory {
         instanceGroup.instanceList.put(instance.getName(), instance);
 
         //add the instance to the separate lists
-        if (instance.getType().equals(InstanceTypeEnum.instance)) {
+        if (instance.getType().equals(InstanceTypes.instance)) {
             instanceGroup.addInstance(instance.getName(), instance);
-        } else if (instance.getType().equals(InstanceTypeEnum.worker)) {
+        } else if (instance.getType().equals(InstanceTypes.worker)) {
             instanceGroup.addWorkerInstance(instance.getName(), instance);
-        } else if (instance.getType().equals(InstanceTypeEnum.manager)) {
+        } else if (instance.getType().equals(InstanceTypes.manager)) {
             instanceGroup.addManagerInstance(instance.getName(), instance);
-        } else if (instance.getType().equals(InstanceTypeEnum.lb_worker.worker)) {
+        } else if (instance.getType().equals(InstanceTypes.lb_worker.worker)) {
             instanceGroup.addLoadBalanceWorkerInstance(instance.getName(), instance);
-        } else if (instance.getType().equals(InstanceTypeEnum.lb_manager)) {
+        } else if (instance.getType().equals(InstanceTypes.lb_manager)) {
             instanceGroup.addLoadBalanceManagerInstance(instance.getName(), instance);
-        } else if (instance.getType().equals(InstanceTypeEnum.lb)) {
+        } else if (instance.getType().equals(InstanceTypes.lb)) {
             instanceGroup.addLoadBalancerInstance(instance.getName(), instance);
         }
 
@@ -103,28 +107,28 @@ public class PlatformContextFactory {
     /*
      this method create and returns the instance object
       */
-    protected Instance createInstance(OMNode instanceNode) {
+    protected Instance createInstance(OMElement instanceNode) {
 
         Instance instance = new Instance();
 
 
-        String instanceName = ((OMElementImpl) instanceNode).getAttributeValue
+        String instanceName = instanceNode.getAttributeValue
                 (QName.valueOf(ContextConstants.PLATFORM_CONTEXT_INSTANCE_NAME));
-        String instanceType = ((OMElementImpl) instanceNode).getAttributeValue
+        String instanceType = instanceNode.getAttributeValue
                 (QName.valueOf(ContextConstants.PLATFORM_CONTEXT_INSTANCE_TYPE));
 
 
         instance.setName(instanceName);
         instance.setType(instanceType);
 
-        Iterator instancePropertiesIterator = ((OMElementImpl) instanceNode).getChildElements();
-        OMNode instancePropertyNode;
+        Iterator instancePropertiesIterator = instanceNode.getChildElements();
+        OMElement instancePropertyNode;
         while (instancePropertiesIterator.hasNext()) {
-            instancePropertyNode = (OMNode) instancePropertiesIterator.next();
+            instancePropertyNode = (OMElement) instancePropertiesIterator.next();
 
             //set the attribute values of the current instance
-            String attribute = ((OMElementImpl) instancePropertyNode).getLocalName();
-            String attributeValue = ((OMElementImpl) instancePropertyNode).getText();
+            String attribute = instancePropertyNode.getLocalName();
+            String attributeValue = instancePropertyNode.getText();
 
 
             //set the property values of the current instance

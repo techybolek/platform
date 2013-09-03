@@ -71,8 +71,7 @@ public class AutomationContextReader {
             try {
                 String nodeFile = ProductConstant.NODE_FILE_NAME;
 
-                //URL clusterXmlURL = new File(String.format("%s%s", ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION, nodeFile)).toURI().toURL();
-                URL clusterXmlURL = new File("/home/dharshana/wso2source/carbon/platform/trunk/products/is/modules/integration/tests/src/test/resources/automation.xml").toURI().toURL();
+                URL clusterXmlURL = new File(String.format("%s%s", ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION, nodeFile)).toURI().toURL();
                 handler = new DataHandler(clusterXmlURL);
                 xmlStream = XMLInputFactory.newInstance().createXMLStreamReader(handler.getInputStream());
                 getAutomationPlatform(xmlStream);
@@ -102,7 +101,7 @@ public class AutomationContextReader {
             nodeElement = (OMElement) elemChildren.next();
             if (nodeElement.getLocalName().equals(ContextConstants.CONFIGURATION_CONTEXT_NODE)) {
 
-                configContextFactory.createConfiguration(nodeElement);
+                configContextFactory.createConfigurationContext(nodeElement);
             }
             if (nodeElement.getLocalName().equals(ContextConstants.DATABASE_CONTEXT_NODE)) {
 
@@ -117,10 +116,10 @@ public class AutomationContextReader {
             }
             if (nodeElement.getLocalName().equals(ContextConstants.TOOLS_CONTEXT_NODE)) {
 
-                toolsContextFactory.createConfiguration(nodeElement);
+                toolsContextFactory.createToolContext(nodeElement);
             }
             if (nodeElement.getLocalName().equals(ContextConstants.USER_MANAGEMENT_CONTEXT_NODE)) {
-                userManagerContextFactory.createConfiguration(nodeElement);
+                userManagerContextFactory.createUserManagementContext(nodeElement);
             }
             if (nodeElement.getLocalName().equals(ContextConstants.FEATURE_MANAGEMENT_CONTEXT_NODE)) {
                 featureManagementContextFactory.createFeatureManagementContext(nodeElement);
@@ -132,6 +131,8 @@ public class AutomationContextReader {
         automationContext.setFeatureManagementContext(featureManagementContextFactory.getFeatureManagementContext());
         automationContext.setPlatformContext(platformContextFactory.getPlatformContext());
         automationContext.setSecurityContext(securityContextFactory.getSecurityContext());
+        automationContext.setUserManagerContext(userManagerContextFactory.getUserManagementContext());
+        automationContext.setToolContext(toolsContextFactory.getToolContext());
 
         return automationContext;
     }

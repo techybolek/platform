@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.automation.core.context.featuremanagementContext;
 
-/**
+/*
  * Represent the internal data structure of the features->P2Repositories->repository node in the automation.xml file
  */
 public class Repository {

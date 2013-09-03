@@ -16,12 +16,12 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.context.platformcontext;
+package org.wso2.carbon.automation.core.context.contextenum;
 
 /*
  * This enum class contains the type values of the instances
  */
-public enum InstanceTypeEnum {
+public enum InstanceTypes {
     instance,
     worker,
     manager,

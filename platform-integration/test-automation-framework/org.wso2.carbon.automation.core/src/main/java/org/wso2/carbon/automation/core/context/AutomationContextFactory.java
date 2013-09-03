@@ -18,21 +18,37 @@
 
 package org.wso2.carbon.automation.core.context;
 
+import org.wso2.carbon.automation.core.context.environmentcontext.EnvironmentContext;
 import org.wso2.carbon.automation.core.context.environmentcontext.EnvironmentContextFactory;
 
 public class AutomationContextFactory {
     AutomationContext automationContext;
-    public void createAutomationContext(String instanceGroupName,String instanceName,String domain,String tenantId)
-    {
+
+    public AutomationContextFactory() {
         automationContext = new AutomationContext();
-        AutomationContextReader automationContextReader = new AutomationContextReader();
-        automationContextReader.readAutomationContext();
-        automationContext = automationContextReader.getAutomationContext();
-        EnvironmentContextFactory environmentContextFactory = new EnvironmentContextFactory();
-        environmentContextFactory.createEnvironmentContext(automationContext,instanceGroupName,instanceName,domain,tenantId);
-        automationContext.setEnvironmentContext(environmentContextFactory.getEnvironmentContext());
     }
 
+    public void createAutomationContext(String instanceGroupName, String instanceName, String domain, String tenantId) {
+        AutomationContext tempContext = new AutomationContext();
 
 
+        AutomationContextReader automationContextReader = new AutomationContextReader();
+        automationContextReader.readAutomationContext();
+        tempContext = automationContextReader.getAutomationContext();
+        EnvironmentContextFactory environmentContextFactory = new EnvironmentContextFactory();
+        environmentContextFactory.createEnvironmentContext(tempContext, instanceGroupName, instanceName, domain, tenantId);
+        automationContext.setConfigurationContext(tempContext.getConfigurationContext());
+        automationContext.setUserManagerContext(tempContext.getUserManagerContext());
+        automationContext.setEnvironmentContext(environmentContextFactory.getEnvironmentContext());
+        automationContext.setToolContext(tempContext.getToolContext());
+        automationContext.setDatabaseContext(tempContext.getDatabaseContext());
+        automationContext.setPlatformContext(tempContext.getPlatformContext());
+        automationContext.setFeatureManagementContext(tempContext.getFeatureManagementContext());
+        automationContext.setSecurityContext(tempContext.getSecurityContext());
+
+    }
+
+    public AutomationContext getAutomationContext() {
+        return automationContext;
+    }
 }

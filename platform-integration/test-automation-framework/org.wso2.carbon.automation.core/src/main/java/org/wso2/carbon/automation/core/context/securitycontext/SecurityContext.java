@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.automation.core.context.securitycontext;
 
+import org.wso2.carbon.automation.core.context.AutomationContext;
+
 import java.util.HashMap;
 
 /*

@@ -18,13 +18,10 @@
 
 package org.wso2.carbon.automation.core.context.usermanagementcontext;
 
-import org.wso2.carbon.automation.core.context.AutomationContext;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-public class UserManagerContext extends AutomationContext {
+public class UserManagerContext {
 
     private HashMap<String, Tenant> tenant = new HashMap<String, Tenant>();
 

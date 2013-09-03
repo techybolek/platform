@@ -18,12 +18,9 @@
 
 
 package org.wso2.carbon.automation.core.context.platformcontext;
-
-import org.wso2.carbon.automation.core.context.AutomationContext;
-
 import java.util.HashMap;
 
-public class PlatformContext extends AutomationContext {
+public class PlatformContext{
 
     private HashMap<String, InstanceGroup> instanceGroupMap = new HashMap<String, InstanceGroup>();
 

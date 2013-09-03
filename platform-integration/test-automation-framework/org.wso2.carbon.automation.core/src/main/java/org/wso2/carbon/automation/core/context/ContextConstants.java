@@ -22,6 +22,7 @@ public class ContextConstants {
 
     //Root Context
     public static final String CONTEXT_FILE_NAME = "automation.xml";
+
     public static final String CONFIGURATION_CONTEXT_NODE = "configurations";
     public static final String CONFIGURATION_CONTEXT_DEPLOYMENT_DELAY = "deploymentDelay";
     public static final String CONFIGURATION_CONTEXT_EXECUTION_ENVIRONMENT = "executionEnvironment";
@@ -30,12 +31,16 @@ public class ContextConstants {
     public static final String CONFIGURATION_CONTEXT_CLUSTERING = "clustering";
     public static final String CONFIGURATION_CONTEXT_COVERAGE = "coverage";
     public static final String CONFIGURATION_CONTEXT_FRAMEWORK_DASHBOARD = "frameworkDashboard";
+
+
     public static final String TOOLS_CONTEXT_NODE = "tools";
-    public static final String DATABASE_CONTEXT_NODE = "databases";
+
     public static final String SECURITY_CONTEXT_NODE = "security";
     public static final String FEATURE_MANAGEMENT_CONTEXT_NODE = "featureManagement";
     public static final String USER_MANAGEMENT_CONTEXT_NODE = "userManagement";
     public static final String PLATFORM_CONTEXT_NODE = "platform";
+
+    public static final String DATABASE_CONTEXT_NODE = "databases";
     public static final String DATABASE_CONTEXT_NAME = "name";
     public static final String DATABASE_CONTEXT_URL = "url";
     public static final String DATABASE_CONTEXT_USERNAME = "username";
@@ -46,7 +51,7 @@ public class ContextConstants {
     public static final String SECURITY_KEYSTORE_TYPE = "type";
     public static final String SECURITY_KEYSTORE_PASSWORD = "password";
     public static final String SECURITY_KEYSTORE_KEYALIAS = "keyAlias";
-    public static final String SECURITY_KEYSTORE_KEYPASSWORD = "ketPassword";
+    public static final String SECURITY_KEYSTORE_KEYPASSWORD = "keyPassword";
     public static final String SECURITY_TRUSTSTORE_NAME = "name";
     public static final String SECURITY_TRUSTSTORE_FILENAME = "fileName";
     public static final String SECURITY_TRUSTSTORE_TYPE = "password";
@@ -57,7 +62,8 @@ public class ContextConstants {
     public static final String FEATURE_MANAGEMENT_CONTEXT_P2RESITORIES_NAME = "name";
     public static final String FEATURE_MANAGEMENT_CONTEXT_REPOSITORY_ID = "id";
     public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_KEY = "key";
-    public static final String USER_MANAGEMENT_CONTEXT_TENANT_KEY = "key";
+    public static final String USER_MANAGEMENT_TENANT_ADMIN_KEY = "super";
+    ;
     public static final String USER_MANAGEMENT_CONTEXT_TENANT_DOMAIN = "domain";
     public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_USERNAME = "userName";
     public static final String USER_MANAGEMENT_CONTEXT_TENANT_USERS_USER_PASSWORD = "password";
@@ -78,7 +84,6 @@ public class ContextConstants {
     public static final String PLATFORM_CONTEXT_INSTANCE_HTTP_PORT = "httpport";
     public static final String PLATFORM_CONTEXT_INSTANCE_HTTPS_PORT = "httpsport";
     public static final String PLATFORM_CONTEXT_INSTANCE_WEB_CONTEXT = "webContext";
-
 
 
     public static final String TENANT_ADMIN_KEY = "super";

@@ -20,19 +20,11 @@ package org.wso2.carbon.automation.core.context.environmentcontext;
 
 
 public class Environment {
-    private String sessionCookie;
+
     private String backEndUrl;
     private String serviceUrl;
     private String secureServiceUrl;
     private String webAppURL;
-
-    public String getSessionCookie() {
-        return sessionCookie;
-    }
-
-    public void setSessionCookie(String sessionCookie) {
-        this.sessionCookie = sessionCookie;
-    }
 
     public String getBackEndUrl() {
         return backEndUrl;

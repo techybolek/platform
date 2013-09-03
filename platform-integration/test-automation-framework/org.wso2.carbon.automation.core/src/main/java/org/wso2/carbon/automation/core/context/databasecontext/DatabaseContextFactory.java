@@ -34,31 +34,35 @@ public class DatabaseContextFactory {
     DatabaseContext databaseContext;
 
     public DatabaseContextFactory() {
+
         databaseContext = new DatabaseContext();
     }
 
-    /*
-     * this method returns the list of databases ojects in the provided OMElement
+    /**
+     * this method returns the list of databases objects in the provided OMElement
+     *
+     * @param nodeElement OMElement input from the xml reader
      */
-    public void createDatabaseContext(OMElement dataBaseElement) {
+    public void createDatabaseContext(OMElement nodeElement) {
 
 
         HashMap<String, Database> databaseMap = new HashMap<String, Database>();
-        OMNode node;
-        Iterator children = dataBaseElement.getChildElements();
+        OMElement node;
+        Iterator children = nodeElement.getChildElements();
         while (children.hasNext()) {
             Database database = new Database();
-            node = (OMNode) children.next();
-            String databaseName = (((OMElementImpl) node)
+            node = (OMElement) children.next();
+
+            String databaseName = node
                     .getAttribute(QName.valueOf(ContextConstants
-                            .DATABASE_CONTEXT_NAME))).getAttributeValue();
+                            .DATABASE_CONTEXT_NAME)).getAttributeValue();
             database.setName(databaseName);
-            Iterator configPropertiesIterator = ((OMElementImpl) node).getChildElements();
+            Iterator configPropertiesIterator = node.getChildElements();
             while (configPropertiesIterator.hasNext()) {
 
-                OMNode databaseNode = (OMNode) configPropertiesIterator.next();
-                String attribute = ((OMElementImpl) databaseNode).getLocalName();
-                String attributeValue = ((OMElementImpl) databaseNode).getText();
+                OMElement databaseNode = (OMElement) configPropertiesIterator.next();
+                String attribute = databaseNode.getLocalName();
+                String attributeValue = databaseNode.getText();
                 if (attribute.equals(ContextConstants.DATABASE_CONTEXT_URL))
                     database.setUrl(attributeValue);
                 else if (attribute.equals(ContextConstants.DATABASE_CONTEXT_USERNAME))
@@ -73,6 +77,7 @@ public class DatabaseContextFactory {
 
 
         }
+
         databaseContext.setDatabaseConfigurations(databaseMap);
     }
 

@@ -38,20 +38,23 @@ public class ConfigurationContextFactory {
     /**
      * this method creates and returns the internal data structure for the configuration node in automation.xml
      *
-     * @param nodeElement
+     * @param nodeElement OMElement input from the xml reader
      */
-    public void createConfiguration(OMElement nodeElement) {
+    public void createConfigurationContext(OMElement nodeElement) {
         Configuration configuration = new Configuration();
-        OMNode node;
+        OMElement node;
         OMElement omElement = nodeElement;
+
         //iterate through Configuration properties
         Iterator configurationPropertiesIterator = omElement.getChildElements();
 
         while (configurationPropertiesIterator.hasNext()) {
 
-            node = (OMNode) configurationPropertiesIterator.next();
-            String attribute = ((OMElementImpl) node).getLocalName();
-            String attributeValue = ((OMElementImpl) node).getText();
+            node = (OMElement) configurationPropertiesIterator.next();
+
+
+            String attribute = node.getLocalName();
+            String attributeValue = node.getText();
 
             //here check for the each configuration property
             if (attribute.equals(ContextConstants.CONFIGURATION_CONTEXT_DEPLOYMENT_DELAY)) {

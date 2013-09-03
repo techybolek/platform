@@ -50,14 +50,14 @@ public class UrlGenerationUtil {
         hostName = automationInstance.getHost();
         webContextRoot = automationInstance.getWebContext();
         automationContext.getUserManagerContext().getTenant(domain).getTenantUser(tenantUserId);
-        if ((nhttpPort == null && nhttpsPort == null) || httpPort == null && httpsPort == null) {
+        if ((nhttpPort == null && nhttpsPort == null) && httpPort == null && httpsPort == null) {
             portEnabled = false;
         }
         if (automationContext.getConfigurationContext().getConfiguration().getExecutionMode().equals("tenant")) {
             isRunningOnCloud = true;
         }
         tenantDomain = domain;
-        if(webContextRoot==null)
+        if(webContextRoot!=null)
         {
             webContextEnabled= false;
         }

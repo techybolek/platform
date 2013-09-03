@@ -18,12 +18,9 @@
 
 package org.wso2.carbon.automation.core.context.featuremanagementContext;
 
-import org.apache.axiom.om.OMElement;
-import org.wso2.carbon.automation.core.context.AutomationContext;
-
 import java.util.HashMap;
 
-public class FeatureManagementContext extends AutomationContext {
+public class FeatureManagementContext{
 
 
     private HashMap<String, P2Repositories> p2Repositories = new HashMap<String, P2Repositories>();

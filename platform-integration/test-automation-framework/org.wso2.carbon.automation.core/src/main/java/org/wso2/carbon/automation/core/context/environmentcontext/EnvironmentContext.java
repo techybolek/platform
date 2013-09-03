@@ -19,7 +19,9 @@
 package org.wso2.carbon.automation.core.context.environmentcontext;
 
 
-public class EnvironmentContext {
+import org.wso2.carbon.automation.core.context.AutomationContext;
+
+public class EnvironmentContext extends AutomationContext {
     private Environment environment;
 
     public void setEnvironmentConfigurations(Environment environmentConfig) {

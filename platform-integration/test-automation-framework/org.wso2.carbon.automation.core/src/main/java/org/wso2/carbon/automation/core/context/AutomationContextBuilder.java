@@ -18,13 +18,26 @@
 
 package org.wso2.carbon.automation.core.context;
 
+import org.apache.axis2.AxisFault;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
+import org.wso2.carbon.automation.core.context.configurationcontext.ConfigurationContext;
+import org.wso2.carbon.automation.core.context.contextenum.Platforms;
 import org.wso2.carbon.automation.core.context.platformcontext.Instance;
 import org.wso2.carbon.automation.core.context.usermanagementcontext.User;
+import org.wso2.carbon.automation.core.context.utils.UserAuthenticationUtil;
 
+import java.rmi.RemoteException;
+import java.util.List;
+
+/**
+ * The builder class for the automation context based on the automation.xml
+ */
 public class AutomationContextBuilder {
     AutomationContext automationContext;
     String instanceGroup = null;
     String instanceName = null;
+    String domain = null;
+    String userId = null;
 
     public AutomationContextBuilder(String instanceGroup) {
         this.instanceGroup = instanceGroup;
@@ -42,9 +55,12 @@ public class AutomationContextBuilder {
      * @param runAsSuperAdmin Whether the test is running as a super tenant or not.
      */
     public void build(String domain, boolean runAsSuperAdmin) {
+        this.domain = domain;
+        this.userId = ContextConstants.TENANT_ADMIN_KEY;
         AutomationContextFactory automationContextFactory = new AutomationContextFactory();
-        automationContextFactory.createAutomationContext(instanceGroup,instanceName,
-                domain,ContextConstants.TENANT_ADMIN_KEY);
+        automationContextFactory.createAutomationContext(instanceGroup, instanceName,
+                domain, ContextConstants.TENANT_ADMIN_KEY);
+        automationContext = automationContextFactory.getAutomationContext();
     }
 
     /**
@@ -54,29 +70,64 @@ public class AutomationContextBuilder {
      * @param tenantUserKey The key of the user expect
      */
     public void build(String domain, String tenantUserKey) {
+        this.domain = domain;
+        this.userId = tenantUserKey;
         AutomationContextFactory automationContextFactory = new AutomationContextFactory();
-        automationContextFactory.createAutomationContext(instanceGroup,instanceName,
-                domain,tenantUserKey);
+        automationContextFactory.createAutomationContext(instanceGroup, instanceName,
+                domain, tenantUserKey);
+        automationContext = automationContextFactory.getAutomationContext();
     }
+
 
     /**
-     * Runs as random domain with random user selecting admin or not
+     * Logs with initiated user and returns the session cookie for the respective session.
      *
-     * @param runAsSuperAdmin State whether test should run as a carbon.super admin
+     * @return sessionCookie
      */
-    public void build(boolean runAsSuperAdmin) {
-        AutomationContextFactory automationContextFactory = new AutomationContextFactory();
+    public String login() throws RemoteException, LoginAuthenticationExceptionException {
+        String sessionCookie = null;
+        UserAuthenticationUtil util = new UserAuthenticationUtil
+                (automationContext.getEnvironmentContext()
+                        .getEnvironmentConfigurations().getBackEndUrl());
+        User user = automationContext.getUserManagerContext().getTenant(domain).getTenantUser(userId);
+        sessionCookie = util.login(user.getUserName(), user.getPassword(),
+                automationContext.getPlatformContext().getInstanceGroup(instanceGroup)
+                        .getInstance(instanceName).getHost());
+        return sessionCookie;
     }
 
-    private User getTenant(String domain,  String tenantUserKey){
+    private User getTenant(String domain, String tenantUserKey) {
         return automationContext.getUserManagerContext().getTenant(domain).getTenantUsers()
                 .get(tenantUserKey);
 
     }
 
+    private Instance getInstanceByGroup() {
+        Instance instance = new Instance();
+        ConfigurationContext configuration = new ConfigurationContext();
+        configuration = automationContext.getConfigurationContext();
+        List<Instance> lbManagerInstanceList = automationContext.getPlatformContext()
+                .getInstanceGroup(instanceGroup).getLoadBalanceManagerInstances();
+        List<Instance> managerInstanceList = automationContext.getPlatformContext()
+                .getInstanceGroup(instanceGroup).getManagerInstances();
+        List<Instance> instanceList = automationContext.getPlatformContext()
+                .getInstanceGroup(instanceGroup).getInstances();
+        if (configuration.getConfiguration().getExecutionEnvironment().equals(Platforms.platform.name())) {
+            if (automationContext.getPlatformContext().getInstanceGroup(instanceGroup).isClusteringEnabled()) {
+                if (!lbManagerInstanceList.isEmpty()) {
+                    instance = lbManagerInstanceList.get(0);
+                } else if (!managerInstanceList.isEmpty()) {
+                    instance = managerInstanceList.get(0);
+                } else {
+                    instance = instanceList.get(0);
+                }
+            }
+        }
+        return instance;
+    }
 
-    public AutomationContext getAutomationContext()
-    {
+
+    public AutomationContext getAutomationContext() {
         return automationContext;
     }
 }

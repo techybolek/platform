@@ -37,24 +37,28 @@ public class FeatureManagementContextFactory {
 
     public FeatureManagementContext getFeatureManagementContext() {
         return featureManagementContext;
+
     }
 
-    /*
+    /**
      * List all P2repositories
+     *
+     * @param nodeElement OMElement input from the xml reader
      */
-    public void createFeatureManagementContext(OMNode element) {
+
+    public void createFeatureManagementContext(OMElement nodeElement) {
 
         HashMap<String, P2Repositories> p2RepositoriesMap = new HashMap<String, P2Repositories>();
-        OMNode node;
-        Iterator children = ((OMElementImpl) element).getChildElements();
+        OMElement node;
+        Iterator children = nodeElement.getChildElements();
         String p2RepoName = null;
         while (children.hasNext()) {
 
             P2Repositories p2Repositories = new P2Repositories();
-            node = (OMNode) children.next();
-            p2RepoName = ((OMElementImpl) node).getAttributeValue(QName.valueOf(ContextConstants.FEATURE_MANAGEMENT_CONTEXT_P2RESITORIES_NAME));
+            node = (OMElement) children.next();
+            p2RepoName = node.getAttributeValue(QName.valueOf(ContextConstants.FEATURE_MANAGEMENT_CONTEXT_P2RESITORIES_NAME));
             p2Repositories.setName(p2RepoName);
-            Iterator repoList = ((OMElementImpl) node).getChildElements();
+            Iterator repoList = node.getChildElements();
 
             //add all repositories to current p2repository
             while (repoList.hasNext()) {

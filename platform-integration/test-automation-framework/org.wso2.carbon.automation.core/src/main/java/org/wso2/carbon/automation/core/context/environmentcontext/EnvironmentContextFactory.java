@@ -34,40 +34,24 @@ public class EnvironmentContextFactory {
     EnvironmentContext context;
     Environment environment = new Environment();
 
-    public void EnvironmentContextFactory() {
+    public EnvironmentContextFactory() {
         context = new EnvironmentContext();
     }
 
     /**
      * Creates Environment context based on the selected platform instance and selected tenant
-     *
      * @param automationContext Current Automation context
      * @param instanceGroupName Instance Group
      * @param instanceName      Instance of the group needed to perform
-     * @param domain          Id of the tenant which platform is created
-     * @param tenantUserId          Id of the tenant which platform is created
+     * @param domain            Id of the tenant which platform is created
+     * @param tenantUserId      Id of the tenant which platform is created
      */
     public void createEnvironmentContext(AutomationContext automationContext,
                                          String instanceGroupName,
                                          String instanceName,
                                          String domain, String tenantUserId) {
         UrlGenerationUtil urlGenerationUtil =
-                new UrlGenerationUtil(automationContext, instanceGroupName
-                        , instanceName, domain, tenantUserId);
-        try {
-            UserAuthenticationUtil authenticationUtil =
-                    new UserAuthenticationUtil(urlGenerationUtil.getBackendUrl());
-            Tenant tenant = automationContext.getUserManagerContext().getTenant(domain);
-            environment.setSessionCookie(authenticationUtil.login(tenant.getTenantUser(tenantUserId).getUserName()
-                    , tenant.getTenantAdmin().getPassword(), automationContext.getPlatformContext()
-                    .getInstanceGroup(instanceGroupName).getInstance(instanceName).getHost()));
-        } catch (AxisFault axisFault) {
-            log.error("Authentication of the user " + tenantUserId + " failed:-" + axisFault.getMessage());
-        } catch (RemoteException e) {
-            log.error("Authentication of the user " + tenantUserId + " failed:-" + e.getMessage());
-        } catch (LoginAuthenticationExceptionException e) {
-            log.error("Authentication of the user " + tenantUserId + " failed:-" + e.getMessage());
-        }
+                new UrlGenerationUtil(automationContext, instanceGroupName, instanceName, tenantUserId);
         environment.setBackEndUrl(urlGenerationUtil.getBackendUrl());
         environment.setSecureServiceUrl(urlGenerationUtil.getHttpsServiceURL());
         environment.setServiceUrl(urlGenerationUtil.getHttpServiceURL());

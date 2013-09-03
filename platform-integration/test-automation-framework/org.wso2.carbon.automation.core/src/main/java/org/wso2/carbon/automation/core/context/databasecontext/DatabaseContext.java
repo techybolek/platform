@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.automation.core.context.databasecontext;
 
-import org.wso2.carbon.automation.core.context.usermanagementcontext.User;
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,17 +29,28 @@ import java.util.Map;
 public class DatabaseContext {
 
 
-    private Map<String, Database> databaseConfigurations = new HashMap<String, Database>();
+    private HashMap<String, Database> databaseConfigurations;
 
-    public void setDatabaseConfigurations(Map<String, Database> config) {
+    public DatabaseContext() {
+
+        databaseConfigurations = new HashMap<String, Database>();
+    }
+
+    public void setDatabaseConfigurations(HashMap<String, Database> config) {
 
         this.databaseConfigurations = config;
     }
 
 
-    public Map<String, Database> getDatabaseConfigurations() {
+    public HashMap<String, Database> getDatabaseConfigurations() {
 
         return databaseConfigurations;
+
+    }
+
+    public void addDatabase(Database database) {
+
+        databaseConfigurations.put(database.getName(), database);
 
     }
 }
