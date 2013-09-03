@@ -23,14 +23,14 @@ package org.wso2.carbon.automation.core.context.platformcontext;
  */
 public class Instance {
 
-    private String name;
-    private String type;
-    private String host;
-    private String httpPort;
-    private String httpsPort;
-    private String nhttpsPort;
-    private String nhttpPort;
-    private String webContext;
+    private String name = null;
+    private String type = null;
+    private String host = null;
+    private String httpPort = null;
+    private String httpsPort = null;
+    private String nhttpsPort = null;
+    private String nhttpPort = null;
+    private String webContext = null;
 
 
     public void setName(String name) {
@@ -68,6 +68,7 @@ public class Instance {
 
         this.nhttpPort = port;
     }
+
     public void setWebContext(String context) {
 
         this.webContext = context;

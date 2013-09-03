@@ -34,16 +34,21 @@ import java.util.List;
  */
 public class AutomationContextBuilder {
     AutomationContext automationContext;
+    AutomationContextFactory automationContextFactory;
     String instanceGroup = null;
     String instanceName = null;
     String domain = null;
     String userId = null;
 
     public AutomationContextBuilder(String instanceGroup) {
+        automationContextFactory = new AutomationContextFactory();
         this.instanceGroup = instanceGroup;
+        this.instanceName = getInstanceByGroup().getName();
+
     }
 
     public AutomationContextBuilder(String instanceGroup, String instanceName) {
+        automationContextFactory = new AutomationContextFactory();
         this.instanceGroup = instanceGroup;
         this.instanceName = instanceName;
     }
@@ -55,12 +60,12 @@ public class AutomationContextBuilder {
      * @param runAsSuperAdmin Whether the test is running as a super tenant or not.
      */
     public void build(String domain, boolean runAsSuperAdmin) {
+        automationContext = automationContextFactory.getAutomationContext();
         this.domain = domain;
         this.userId = ContextConstants.TENANT_ADMIN_KEY;
-        AutomationContextFactory automationContextFactory = new AutomationContextFactory();
         automationContextFactory.createAutomationContext(instanceGroup, instanceName,
                 domain, ContextConstants.TENANT_ADMIN_KEY);
-        automationContext = automationContextFactory.getAutomationContext();
+
     }
 
     /**
@@ -72,7 +77,6 @@ public class AutomationContextBuilder {
     public void build(String domain, String tenantUserKey) {
         this.domain = domain;
         this.userId = tenantUserKey;
-        AutomationContextFactory automationContextFactory = new AutomationContextFactory();
         automationContextFactory.createAutomationContext(instanceGroup, instanceName,
                 domain, tenantUserKey);
         automationContext = automationContextFactory.getAutomationContext();
@@ -85,7 +89,7 @@ public class AutomationContextBuilder {
      * @return sessionCookie
      */
     public String login() throws RemoteException, LoginAuthenticationExceptionException {
-        String sessionCookie = null;
+        String sessionCookie;
         UserAuthenticationUtil util = new UserAuthenticationUtil
                 (automationContext.getEnvironmentContext()
                         .getEnvironmentConfigurations().getBackEndUrl());
@@ -103,17 +107,25 @@ public class AutomationContextBuilder {
     }
 
     private Instance getInstanceByGroup() {
+        AutomationContext basicContext = new AutomationContext();
         Instance instance = new Instance();
-        ConfigurationContext configuration = new ConfigurationContext();
-        configuration = automationContext.getConfigurationContext();
-        List<Instance> lbManagerInstanceList = automationContext.getPlatformContext()
+        basicContext = automationContextFactory.getBasicContext();
+        ConfigurationContext configuration = basicContext.getConfigurationContext();
+        List<Instance> lbManagerInstanceList = basicContext.getPlatformContext()
                 .getInstanceGroup(instanceGroup).getLoadBalanceManagerInstances();
-        List<Instance> managerInstanceList = automationContext.getPlatformContext()
+        List<Instance> managerInstanceList = basicContext.getPlatformContext()
                 .getInstanceGroup(instanceGroup).getManagerInstances();
-        List<Instance> instanceList = automationContext.getPlatformContext()
+        List<Instance> instanceList = basicContext.getPlatformContext()
                 .getInstanceGroup(instanceGroup).getInstances();
+        List<Instance> lbList = basicContext.getPlatformContext()
+                .getInstanceGroup(instanceGroup).getLoadBalancerInstances();
+        //If the execution mode is platform it looks for whetherinstance group is clustered
         if (configuration.getConfiguration().getExecutionEnvironment().equals(Platforms.platform.name())) {
-            if (automationContext.getPlatformContext().getInstanceGroup(instanceGroup).isClusteringEnabled()) {
+           /*if clustered default instance is manager fronted LB
+            if no manger fronted LB is assigned it will go for a lb instance
+            otherwise it will take general manager instance
+            if manager instance in null it goes for normal instance*/
+            if (basicContext.getPlatformContext().getInstanceGroup(instanceGroup).isClusteringEnabled()) {
                 if (!lbManagerInstanceList.isEmpty()) {
                     instance = lbManagerInstanceList.get(0);
                 } else if (!managerInstanceList.isEmpty()) {
@@ -121,7 +133,25 @@ public class AutomationContextBuilder {
                 } else {
                     instance = instanceList.get(0);
                 }
+            } else {
+                /*if not clustered default will go for a lb if lb is null
+                * selection would be instance*/
+                if (!lbManagerInstanceList.isEmpty()) {
+                    instance = lbList.get(0);
+                } else {
+                    instance = instanceList.get(0);
+                }
             }
+        } else if (configuration.getConfiguration().getExecutionEnvironment().equals(Platforms.cloud.name())) {
+            if (!lbManagerInstanceList.isEmpty()) {
+                instance = lbManagerInstanceList.get(0);
+            } else if (!managerInstanceList.isEmpty()) {
+                instance = managerInstanceList.get(0);
+            } else {
+                instance = instanceList.get(0);
+            }
+        } else {
+            instance = instanceList.get(0);
         }
         return instance;
     }

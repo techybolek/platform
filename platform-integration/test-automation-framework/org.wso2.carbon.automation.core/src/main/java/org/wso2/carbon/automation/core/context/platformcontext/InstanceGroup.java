@@ -20,6 +20,7 @@ package org.wso2.carbon.automation.core.context.platformcontext;
 
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -70,9 +71,9 @@ public class InstanceGroup {
 
     public List<Instance> getInstances() {
         List<Instance> instanceList = new LinkedList<Instance>();
-
-        while (instances.values().iterator().hasNext()) {
-            instanceList.add(instances.values().iterator().next());
+        Iterator<Instance> instanceIterator = instances.values().iterator();
+        while (instanceIterator.hasNext()) {
+            instanceList.add(instanceIterator.next());
         }
         return instanceList;
     }
@@ -87,9 +88,9 @@ public class InstanceGroup {
 
     public List<Instance> getLoadBalancerInstances() {
         List<Instance> instanceList = new LinkedList<Instance>();
-
-        while (loadBalancerInstances.values().iterator().hasNext()) {
-            instanceList.add(loadBalancerInstances.values().iterator().next());
+        Iterator<Instance> instanceIterator = loadBalancerInstances.values().iterator();
+        while (instanceIterator.hasNext()) {
+            instanceList.add(instanceIterator.next());
         }
         return instanceList;
     }
@@ -108,9 +109,11 @@ public class InstanceGroup {
 
     public List<Instance> getManagerInstances() {
         List<Instance> instanceList = new LinkedList<Instance>();
-        while (managerInstances.values().iterator().hasNext()) {
-            instanceList.add(managerInstances.values().iterator().next());
+        Iterator<Instance> instanceIterator = managerInstances.values().iterator();
+        while (instanceIterator.hasNext()) {
+            instanceList.add(instanceIterator.next());
         }
+
         return instanceList;
     }
 
@@ -128,8 +131,9 @@ public class InstanceGroup {
 
     public List<Instance> getWorkerInstances() {
         List<Instance> instanceList = new LinkedList<Instance>();
-        while (workerInstances.values().iterator().hasNext()) {
-            instanceList.add(workerInstances.values().iterator().next());
+        Iterator<Instance> instanceIterator = workerInstances.values().iterator();
+        while (instanceIterator.hasNext()) {
+            instanceList.add(instanceIterator.next());
         }
         return instanceList;
     }
@@ -148,8 +152,9 @@ public class InstanceGroup {
 
     public List<Instance> getLoadBalanceWorkerInstances() {
         List<Instance> instanceList = new LinkedList<Instance>();
-        while (loadBalanceWorkerInstances.values().iterator().hasNext()) {
-            instanceList.add(loadBalanceWorkerInstances.values().iterator().next());
+        Iterator<Instance> instanceIterator = loadBalanceWorkerInstances.values().iterator();
+        while (instanceIterator.hasNext()) {
+            instanceList.add(instanceIterator.next());
         }
         return instanceList;
     }
@@ -168,9 +173,9 @@ public class InstanceGroup {
 
     public List<Instance> getLoadBalanceManagerInstances() {
         List<Instance> instanceList = new LinkedList<Instance>();
-
-        while (loadBalanceManagerInstances.values().iterator().hasNext()) {
-            instanceList.add(loadBalanceManagerInstances.values().iterator().next());
+        Iterator<Instance> instanceIterator = loadBalanceManagerInstances.values().iterator();
+        while (instanceIterator.hasNext()) {
+            instanceList.add(instanceIterator.next());
         }
         return instanceList;
     }

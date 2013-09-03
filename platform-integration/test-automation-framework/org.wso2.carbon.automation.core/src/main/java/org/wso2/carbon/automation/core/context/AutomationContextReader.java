@@ -70,10 +70,12 @@ public class AutomationContextReader {
             DataHandler handler;
             try {
                 String nodeFile = ProductConstant.NODE_FILE_NAME;
-
-                URL clusterXmlURL = new File(String.format("%s%s", ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION, nodeFile)).toURI().toURL();
+                URL clusterXmlURL = new File(String.format("%s%s", ProductConstant
+                        .SYSTEM_TEST_RESOURCE_LOCATION, nodeFile)).toURI().toURL();
+                //URL clusterXmlURL = new File("/home/dharshana/wso2source/carbon/platform/trunk/products/is/modules/integration/tests/src/test/resources/automation.xml").toURL();
                 handler = new DataHandler(clusterXmlURL);
-                xmlStream = XMLInputFactory.newInstance().createXMLStreamReader(handler.getInputStream());
+                xmlStream = XMLInputFactory.newInstance()
+                        .createXMLStreamReader(handler.getInputStream());
                 getAutomationPlatform(xmlStream);
 
             } catch (XMLStreamException e) {
@@ -94,7 +96,8 @@ public class AutomationContextReader {
         SecurityContextFactory securityContextFactory = new SecurityContextFactory();
         ToolContextFactory toolsContextFactory = new ToolContextFactory();
         UserManagerContextFactory userManagerContextFactory = new UserManagerContextFactory();
-        FeatureManagementContextFactory featureManagementContextFactory = new FeatureManagementContextFactory();
+        FeatureManagementContextFactory featureManagementContextFactory
+                = new FeatureManagementContextFactory();
         OMElement nodeElement;
         Iterator elemChildren = endPointElem.getChildElements();
         while (elemChildren.hasNext()) {
@@ -128,10 +131,12 @@ public class AutomationContextReader {
         }
         automationContext.setConfigurationContext(configContextFactory.getConfigurationContext());
         automationContext.setDatabaseContext(databaseContextFactory.getDatabaseContext());
-        automationContext.setFeatureManagementContext(featureManagementContextFactory.getFeatureManagementContext());
+        automationContext.setFeatureManagementContext(featureManagementContextFactory
+                .getFeatureManagementContext());
         automationContext.setPlatformContext(platformContextFactory.getPlatformContext());
         automationContext.setSecurityContext(securityContextFactory.getSecurityContext());
-        automationContext.setUserManagerContext(userManagerContextFactory.getUserManagementContext());
+        automationContext.setUserManagerContext(userManagerContextFactory
+                .getUserManagementContext());
         automationContext.setToolContext(toolsContextFactory.getToolContext());
 
         return automationContext;

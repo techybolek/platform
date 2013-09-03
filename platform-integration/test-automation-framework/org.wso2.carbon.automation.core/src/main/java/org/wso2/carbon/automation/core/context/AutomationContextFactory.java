@@ -23,16 +23,15 @@ import org.wso2.carbon.automation.core.context.environmentcontext.EnvironmentCon
 
 public class AutomationContextFactory {
     AutomationContext automationContext;
+    AutomationContextReader automationContextReader = new AutomationContextReader();
 
     public AutomationContextFactory() {
         automationContext = new AutomationContext();
+        automationContextReader = new AutomationContextReader();
     }
 
     public void createAutomationContext(String instanceGroupName, String instanceName, String domain, String tenantId) {
         AutomationContext tempContext = new AutomationContext();
-
-
-        AutomationContextReader automationContextReader = new AutomationContextReader();
         automationContextReader.readAutomationContext();
         tempContext = automationContextReader.getAutomationContext();
         EnvironmentContextFactory environmentContextFactory = new EnvironmentContextFactory();
@@ -46,6 +45,14 @@ public class AutomationContextFactory {
         automationContext.setFeatureManagementContext(tempContext.getFeatureManagementContext());
         automationContext.setSecurityContext(tempContext.getSecurityContext());
 
+    }
+
+    protected AutomationContext getBasicContext() {
+        AutomationContext tempContext = new AutomationContext();
+
+        automationContextReader.readAutomationContext();
+        tempContext = automationContextReader.getAutomationContext();
+        return tempContext;
     }
 
     public AutomationContext getAutomationContext() {

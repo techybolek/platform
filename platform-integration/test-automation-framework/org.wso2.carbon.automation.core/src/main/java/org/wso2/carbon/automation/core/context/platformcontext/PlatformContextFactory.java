@@ -88,17 +88,17 @@ public class PlatformContextFactory {
         instanceGroup.instanceList.put(instance.getName(), instance);
 
         //add the instance to the separate lists
-        if (instance.getType().equals(InstanceTypes.instance)) {
+        if (instance.getType().equals(InstanceTypes.instance.name())) {
             instanceGroup.addInstance(instance.getName(), instance);
-        } else if (instance.getType().equals(InstanceTypes.worker)) {
+        } else if (instance.getType().equals(InstanceTypes.worker.name())) {
             instanceGroup.addWorkerInstance(instance.getName(), instance);
-        } else if (instance.getType().equals(InstanceTypes.manager)) {
+        } else if (instance.getType().equals(InstanceTypes.manager.name())) {
             instanceGroup.addManagerInstance(instance.getName(), instance);
-        } else if (instance.getType().equals(InstanceTypes.lb_worker.worker)) {
+        } else if (instance.getType().equals(InstanceTypes.lb_worker.worker.name())) {
             instanceGroup.addLoadBalanceWorkerInstance(instance.getName(), instance);
-        } else if (instance.getType().equals(InstanceTypes.lb_manager)) {
+        } else if (instance.getType().equals(InstanceTypes.lb_manager.name())) {
             instanceGroup.addLoadBalanceManagerInstance(instance.getName(), instance);
-        } else if (instance.getType().equals(InstanceTypes.lb)) {
+        } else if (instance.getType().equals(InstanceTypes.lb.name())) {
             instanceGroup.addLoadBalancerInstance(instance.getName(), instance);
         }
 
