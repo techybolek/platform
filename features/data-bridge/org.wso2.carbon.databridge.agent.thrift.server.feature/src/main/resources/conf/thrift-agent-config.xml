@@ -16,12 +16,12 @@
 
 
 
-<thriftAgentConfiguration xmlns="http://wso2.org/carbon/databridge/agent/thrift">
+<thriftAgentConfiguration>
 
     <bufferedEventsSize>20000</bufferedEventsSize>
 
     <poolSize>50</poolSize>
-    <maxPoolSize>60</maxPoolSize>
+    <maxPoolSize>50</maxPoolSize>
 
     <maxTransportPoolSize>250</maxTransportPoolSize>
     <maxIdleConnections>250</maxIdleConnections>

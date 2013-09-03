@@ -17,17 +17,14 @@
 */
 package org.wso2.carbon.databridge.agent.thrift.internal.utils;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
-import org.wso2.carbon.utils.ServerConstants;
+import org.wso2.carbon.databridge.agent.thrift.internal.conf.ThriftAgentConfiguration;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,33 +45,27 @@ public final class AgentBuilder {
     /**
      * Helper method to load the agent config
      *
-     * @param agentConfiguration
      * @return the Agent configuration
      */
-    public static AgentConfiguration loadAgentConfiguration(AgentConfiguration agentConfiguration) {
+    public static AgentConfiguration loadAgentConfiguration() {
 
-        OMElement agentConfig = loadConfigXML();
+        ThriftAgentConfiguration agentConfig = loadConfigXML();
         if (agentConfig != null) {
-            if (!agentConfig.getQName().equals(
-                    new QName(AgentConstants.AGENT_CONF_NAMESPACE, AgentConstants.AGENT_CONF_ELE_ROOT))) {
-                log.error("Invalid root element in agent config");
-            }
             return buildAgentConfiguration(agentConfig);
         }
-        return agentConfiguration;
-
+        return new AgentConfiguration();
     }
 
     /**
      * Helper method to load the agent config
      *
-     * @return OMElement representation of the agent config
+     * @return ThriftAgentConfiguration representation of the agent config in xml file
      */
-    private static OMElement loadConfigXML() {
+    private static ThriftAgentConfiguration loadConfigXML() {
 
-        String carbonHome = System.getProperty(ServerConstants.CARBON_CONFIG_DIR_PATH);
+        String carbonHome = System.getProperty(AgentConstants.CARBON_CONFIG_DIR_PATH);
         String path = carbonHome + File.separator + AgentConstants.AGENT_CONF_DIR + File.separator
-                +AgentConstants.AGENT_CONF;
+                      + AgentConstants.AGENT_CONF;
 
         // if the agent config file not exists then simply return null.
         File agentConfigFile = new File(path);
@@ -82,162 +73,45 @@ public final class AgentBuilder {
             return null;
         }
 
-        BufferedInputStream inputStream = null;
         try {
-            inputStream = new BufferedInputStream(new FileInputStream(new File(path)));
-            XMLStreamReader parser = XMLInputFactory.newInstance().
-                    createXMLStreamReader(inputStream);
-            StAXOMBuilder builder = new StAXOMBuilder(parser);
-            OMElement omElement = builder.getDocumentElement();
-            omElement.build();
-            return omElement;
-        } catch (FileNotFoundException e) {
-            String errorMessage = AgentConstants.AGENT_CONF
-                    + "cannot be found in the path : " + path;
+            JAXBContext jaxbContext = JAXBContext.newInstance(ThriftAgentConfiguration.class);
+            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
+            return (ThriftAgentConfiguration)
+                    jaxbUnmarshaller.unmarshal(agentConfigFile);
+        } catch (JAXBException e) {
+            String errorMessage = "Unable to unmarshal config xml.";
             log.error(errorMessage, e);
-        } catch (XMLStreamException e) {
-            String errorMessage = "Invalid XML for " + AgentConstants.AGENT_CONF
-                    + " located in the path : " + path;
-            log.error(errorMessage, e);
-        } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException e) {
-                String errorMessage = "Can not close the input stream";
-                log.error(errorMessage, e);
-            }
         }
         return null;
     }
 
     private static AgentConfiguration buildAgentConfiguration(
-            OMElement agentServerConfig) {
+            ThriftAgentConfiguration agentServerConfig) {
+
+        return buildReceiverConfiguration(agentServerConfig);
+    }
+
+    private static AgentConfiguration buildReceiverConfiguration(
+            ThriftAgentConfiguration agentServerConfig) {
 
         AgentConfiguration agentConfiguration = new AgentConfiguration();
 
-        buildReceiverConfiguration(agentServerConfig, agentConfiguration);
-        buildKeyStoreConfiguration(agentServerConfig, agentConfiguration);
+        agentConfiguration.setMaxTransportPoolSize(agentServerConfig.getMaxTransportPoolSize());
+        agentConfiguration.setMaxIdleConnections(agentServerConfig.getMaxIdleConnections());
+        agentConfiguration.setMaxMessageBundleSize(agentServerConfig.getMaxMessageBundleSize());
+        agentConfiguration.setMinIdleTimeInPool(agentServerConfig.getMinIdleTimeInPool());
+        agentConfiguration.setBufferedEventsSize(agentServerConfig.getBufferedEventsSize());
+        agentConfiguration.setPoolSize(agentServerConfig.getPoolSize());
+        agentConfiguration.setMaxPoolSize(agentServerConfig.getMaxPoolSize());
+        agentConfiguration.setEvictionTimePeriod(agentServerConfig.getEvictionTimePeriod());
+        agentConfiguration.setSecureEvictionTimePeriod(agentServerConfig.getSecureEvictionTimePeriod());
+        agentConfiguration.setSecureMaxIdleConnections(agentServerConfig.getSecureMaxIdleConnections());
+        agentConfiguration.setSecureMaxTransportPoolSize(agentServerConfig.getSecureMaxTransportPoolSize());
+        agentConfiguration.setSecureMinIdleTimeInPool(agentServerConfig.getSecureMinIdleTimeInPool());
+        agentConfiguration.setAsyncDataPublisherBufferedEventSize(agentServerConfig.getAsyncDataPublisherBufferedEventSize());
+        agentConfiguration.setReconnectionInterval(agentServerConfig.getLoadBalancingReconnectionInterval());
 
         return agentConfiguration;
     }
-
-    private static void buildReceiverConfiguration(OMElement agentServerConfig,
-                                                   AgentConfiguration agentConfiguration) {
-        OMElement maxTransportPoolSize = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.MAX_TRANSPORT_POOL_SIZE));
-        if (maxTransportPoolSize != null) {
-            agentConfiguration.setMaxTransportPoolSize(Integer.parseInt(maxTransportPoolSize.getText()));
-        }
-
-        OMElement maxIdleConnections = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.MAX_IDLE_CONNECTIONS));
-        if (maxIdleConnections != null) {
-            agentConfiguration.setMaxIdleConnections(Integer.parseInt(maxIdleConnections.getText()));
-        }
-
-        OMElement maxMessageBundleSize = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.MAX_MESSAGE_BUNDLE_SIZE));
-        if (maxMessageBundleSize != null) {
-            agentConfiguration.setMaxMessageBundleSize(Integer.parseInt(maxMessageBundleSize.getText()));
-        }
-
-        OMElement minIdleTimeInPool = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.MIN_IDLE_TIME_IN_POOL));
-        if (minIdleTimeInPool != null) {
-            agentConfiguration.setMinIdleTimeInPool(Integer.parseInt(minIdleTimeInPool.getText()));
-        }
-
-
-        OMElement bufferedEventsSize = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.BUFFERED_EVENTS_SIZE));
-        if (bufferedEventsSize != null) {
-            agentConfiguration.setBufferedEventsSize(Integer.parseInt(bufferedEventsSize.getText()));
-        }
-
-        OMElement poolSize = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.POOL_SIZE));
-        if (poolSize != null) {
-            agentConfiguration.setPoolSize(Integer.parseInt(poolSize.getText()));
-        }
-
-        OMElement maxPoolSize = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.MAX_POOL_SIZE));
-        if (maxPoolSize != null) {
-            agentConfiguration.setMaxPoolSize(Integer.parseInt(maxPoolSize.getText()));
-        }
-        OMElement evictionTimePeriod = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.EVICTION_TIME_PERIOD));
-        if (evictionTimePeriod != null) {
-            agentConfiguration.setEvictionTimePeriod(Integer.parseInt(evictionTimePeriod.getText()));
-        }
-        OMElement secureEvictionTimePeriod = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.SECURE_EVICTION_TIME_PERIOD));
-        if (secureEvictionTimePeriod != null) {
-            agentConfiguration.setSecureEvictionTimePeriod(Integer.parseInt(secureEvictionTimePeriod.getText()));
-        }
-        OMElement secureMaxIdleConnections = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.SECURE_MAX_IDLE_CONNECTIONS));
-        if (secureMaxIdleConnections != null) {
-            agentConfiguration.setEvictionTimePeriod(Integer.parseInt(secureMaxIdleConnections.getText()));
-        }
-        OMElement secureMaxTransportPoolSize = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.SECURE_MAX_TRANSPORT_POOL_SIZE));
-        if (secureMaxTransportPoolSize != null) {
-            agentConfiguration.setEvictionTimePeriod(Integer.parseInt(secureMaxTransportPoolSize.getText()));
-        }
-        OMElement secureMinIdleTimeInPool = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.SECURE_MIN_IDLE_TIME_IN_POOL));
-        if (secureMinIdleTimeInPool != null) {
-            agentConfiguration.setEvictionTimePeriod(Integer.parseInt(secureMinIdleTimeInPool.getText()));
-        }
-        OMElement asyncBuffer = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.ASYNC_BUFFER_SIZE));
-        if (asyncBuffer != null) {
-            agentConfiguration.setAsyncDataPublisherBufferedEventSize(Integer.parseInt(asyncBuffer.getText()));
-        }
-        OMElement lbBuffer = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                          AgentConstants.LB_BUFFER_SIZE));
-        if (lbBuffer != null) {
-            agentConfiguration.setLoadBalancingDataPublisherBufferedEventSize(Integer.parseInt(lbBuffer.getText()));
-        }
-        OMElement reconnectionInterval = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.RECONNECTION_INTERVAL));
-        if (reconnectionInterval != null) {
-            agentConfiguration.setReconnectionInterval(Integer.parseInt(reconnectionInterval.getText()));
-        }
-    }
-
-    private static void buildKeyStoreConfiguration(OMElement agentServerConfig,
-                                                   AgentConfiguration agentConfiguration) {
-        OMElement trustStore = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.THRUST_STORE));
-        if (trustStore != null) {
-            agentConfiguration.setTrustStore(trustStore.getText());
-        }
-        OMElement trustStorePassword = agentServerConfig.getFirstChildWithName(
-                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
-                        AgentConstants.THRUST_STORE_PASSWORD));
-        if (trustStorePassword != null) {
-            agentConfiguration.setTrustStorePassword(trustStorePassword.getText());
-        }
-    }
-
 }

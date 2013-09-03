@@ -27,9 +27,10 @@ package org.wso2.carbon.databridge.agent.thrift.internal.utils;
 public final class AgentConstants {
 
 
-
     private AgentConstants() {
     }
+
+    public static final String CARBON_CONFIG_DIR_PATH = "carbon.config.dir.path";
 
     public static final String HOSTNAME_AND_PORT_SEPARATOR = ":";
     public static final String SEPARATOR = ",";
@@ -38,28 +39,6 @@ public final class AgentConstants {
     public static final String AGENT_CONF_NAMESPACE = "http://wso2.org/carbon/databridge/agent/thrift";
     public static final String AGENT_CONF_ELE_ROOT = "thriftAgentConfiguration";
     public static final String AGENT_CONF_DIR = "data-bridge";
-
-    public static final String BUFFERED_EVENTS_SIZE = "bufferedEventsSize";
-    public static final String POOL_SIZE = "poolSize";
-    public static final String MAX_POOL_SIZE = "maxPoolSize";
-
-    public static final String MAX_TRANSPORT_POOL_SIZE = "maxTransportPoolSize";
-    public static final String MAX_IDLE_CONNECTIONS = "maxIdleConnections";
-    public static final String EVICTION_TIME_PERIOD = "evictionTimePeriod";
-    public static final String MIN_IDLE_TIME_IN_POOL = "minIdleTimeInPool";
-
-    public static final String SECURE_MAX_TRANSPORT_POOL_SIZE = "secureMaxTransportPoolSize";
-    public static final String SECURE_MAX_IDLE_CONNECTIONS = "secureMaxIdleConnections";
-    public static final String SECURE_EVICTION_TIME_PERIOD = "secureEvictionTimePeriod";
-    public static final String SECURE_MIN_IDLE_TIME_IN_POOL = "secureMinIdleTimeInPool";
-    public static final String ASYNC_BUFFER_SIZE = "asyncDataPublisherBufferedEventSize";
-    public static final String LB_BUFFER_SIZE = "lbDataPublisherBufferedEventSize";
-    public static final String RECONNECTION_INTERVAL = "loadBalancingReconnectionInterval";
-
-    public static final String MAX_MESSAGE_BUNDLE_SIZE = "maxMessageBundleSize";
-
-    public static final String THRUST_STORE = "trustStore";
-    public static final String THRUST_STORE_PASSWORD = "trustStorePassword";
 
     public static final int AGENT_RECONNECTION_TIMES = 3;
 

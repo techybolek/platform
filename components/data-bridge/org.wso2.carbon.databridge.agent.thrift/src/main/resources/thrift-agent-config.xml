@@ -13,11 +13,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<thriftAgentConfiguration xmlns="http://wso2.org/carbon/databridge/agent/thrift">
+<thriftAgentConfiguration>
 
-    <bufferedEventsSize>200</bufferedEventsSize>
+    <bufferedEventsSize>20000</bufferedEventsSize>
 
-    <poolSize>30</poolSize>
+    <poolSize>50</poolSize>
     <maxPoolSize>50</maxPoolSize>
 
     <maxTransportPoolSize>250</maxTransportPoolSize>

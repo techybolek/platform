@@ -37,7 +37,7 @@ public class AgentHolder {
     public static Agent getOrCreateAgent() {
         if (agent == null) {
             if (agentConfiguration == null) {
-                agentConfiguration = AgentBuilder.loadAgentConfiguration(new AgentConfiguration());
+                agentConfiguration = AgentBuilder.loadAgentConfiguration();
                 log.info("Agent created !");
             }
             agent = new Agent(agentConfiguration);
