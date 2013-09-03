@@ -39,6 +39,8 @@ public class GenericJSONClient {
 
     public JSONObject doGet(String endpoint, String query, String contentType) throws Exception {
         String charset = "UTF-8";
+        OutputStream os = null;
+        InputStream is = null;
         try {
             if (contentType == null || "".equals(contentType)) {
                 contentType = "application/json";
@@ -46,13 +48,16 @@ public class GenericJSONClient {
             URLConnection conn = new URL(endpoint).openConnection();
             conn.setRequestProperty(GenericJSONClient.HEADER_CONTENT_TYPE, contentType);
             conn.setRequestProperty(GenericJSONClient.HEADER_ACCEPT_CHARSET, charset);
-            conn.setDoOutput(true);
-            OutputStream os = conn.getOutputStream();
-            os.write(query.getBytes(charset));
-            os.flush();
-            os.close();
+            conn.setRequestProperty("Content-Length", "1000");
+            conn.setReadTimeout(30000);
+            System.setProperty("java.net.preferIPv4Stack" , "true");
+            conn.setRequestProperty("Connection", "close");
 
-            InputStream is = conn.getInputStream();
+            conn.setDoOutput(true);
+            os = conn.getOutputStream();
+            os.write(query.getBytes(charset));
+
+            is = conn.getInputStream();
             String out = null;
             if (is != null) {
                 StringBuilder source = new StringBuilder();
@@ -65,9 +70,16 @@ public class GenericJSONClient {
             }
             return new JSONObject(out);
         } catch (IOException e) {
-            throw new Exception("Error occurred while executing the GET operation", e);
+                throw new Exception("Error occurred while executing the GET operation", e);
         } catch (JSONException e) {
             throw new Exception("Error occurred while parsing the response to a JSONObject", e);
+        } finally {
+            assert os != null;
+            os.flush();
+            os.close();
+            assert is != null;
+            is.close();
+
         }
     }
 

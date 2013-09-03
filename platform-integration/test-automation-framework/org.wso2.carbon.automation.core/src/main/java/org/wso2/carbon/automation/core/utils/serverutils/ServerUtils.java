@@ -206,7 +206,7 @@ public class ServerUtils {
             if (portOffset == 0) {
                 System.clearProperty(ServerConstants.CARBON_HOME);
             }
-            System.setProperty("user.dir", originalUserDir);
+            //System.setProperty("user.dir", originalUserDir);
         }
     }
 

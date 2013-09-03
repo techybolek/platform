@@ -83,6 +83,53 @@ public class HttpURLConnectionClient {
     }
 
     /**
+     * Sends an HTTP GET request to a url
+     *
+     * @param endpoint          - The URL of the server. (Example: " http://www.yahoo.com/search")
+     * @param requestParameters - all the request parameters (Example: "param1=val1&param2=val2").
+     *                          Note: This method will add the question mark (?) to the request - DO NOT add it yourself
+     * @param contentType       - content type
+     * @return - The response from the end point
+     * @throws java.io.IOException If an error occurs while sending the GET request
+     */
+    public static HttpResponse sendGetRequest(String endpoint,
+                                              String requestParameters, String contentType)
+            throws IOException {
+        if (endpoint.startsWith("http://")) {
+            String urlStr = endpoint;
+            if (requestParameters != null && requestParameters.length() > 0) {
+                urlStr += "?" + requestParameters;
+            }
+            URL url = new URL(urlStr);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-type", contentType);
+            conn.setRequestProperty("charset", "UTF-8");
+            conn.setReadTimeout(10000);
+            conn.connect();
+
+            // Get the response
+            StringBuilder sb = new StringBuilder();
+            BufferedReader rd = null;
+            try {
+                rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line;
+                while ((line = rd.readLine()) != null) {
+                    sb.append(line);
+                }
+            } catch (FileNotFoundException ignored) {
+            } finally {
+                if (rd != null) {
+                    rd.close();
+                }
+            }
+            return new HttpResponse(sb.toString(), conn.getResponseCode());
+        }
+        return null;
+    }
+
+    /**
      * Reads data from the data reader and posts it to a server via POST request.
      * data - The data you want to send
      * endpoint - The server's address
@@ -276,7 +323,8 @@ public class HttpURLConnectionClient {
      * @param contentType content type of the message
      * @throws Exception If an error occurs while POSTing
      */
-    public static String sendPostRequestAndReadResponse(Reader data, URL endpoint, Writer output, String contentType)
+    public static String sendPostRequestAndReadResponse(Reader data, URL endpoint, Writer output,
+                                                        String contentType)
             throws Exception {
         HttpURLConnection urlConnection = null;
         String resultData;
@@ -332,7 +380,7 @@ public class HttpURLConnectionClient {
      * @throws java.io.IOException If an error occurs while sending the GET request
      */
     public static HttpResponse sendDeleteRequest(URL endpoint,
-                                              String requestParameters) throws IOException {
+                                                 String requestParameters) throws IOException {
         if (endpoint.toString().startsWith("http://")) {
             String urlStr = endpoint.toString();
             if (requestParameters != null && requestParameters.length() > 0) {
