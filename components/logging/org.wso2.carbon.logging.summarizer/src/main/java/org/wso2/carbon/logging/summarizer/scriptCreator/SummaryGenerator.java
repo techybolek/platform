@@ -70,7 +70,7 @@ public class SummaryGenerator {
 				HiveExecutorService hiveExecutorService = SummaryDataHolder
 						.getInstance().getHiveExecutorService();
 				log.info("Executing hive Query for CF : "+entry.getKey());
-				hiveExecutorService.execute(entry.getValue());
+				hiveExecutorService.execute(null, entry.getValue());
             }
 
             ColumnFamilyHandler columnFamilyHandler = new ColumnFamilyHandler();
