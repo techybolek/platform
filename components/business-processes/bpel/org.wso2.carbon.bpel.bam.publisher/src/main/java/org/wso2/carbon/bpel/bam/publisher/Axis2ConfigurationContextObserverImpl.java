@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bpel.core.ode.integration.BPELServerImpl;
 import org.wso2.carbon.bpel.core.ode.integration.store.TenantProcessStore;
 import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -61,6 +62,8 @@ public class Axis2ConfigurationContextObserverImpl extends
                     EventPublisherConfig publisherConfig = iterator.next();
                     AsyncDataPublisher publisher = publisherConfig.getDataPublisher();
                     publisher.stop();
+                    LoadBalancingDataPublisher loadBalancingDataPublisher = publisherConfig.getLoadBalancingDataPublisher();
+                    loadBalancingDataPublisher.stop();
                 }
                 eventPublisherConfig.clear();
             }

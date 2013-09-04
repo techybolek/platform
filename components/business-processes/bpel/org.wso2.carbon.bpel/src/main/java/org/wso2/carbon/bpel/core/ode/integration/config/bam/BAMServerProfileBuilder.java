@@ -204,27 +204,20 @@ public class BAMServerProfileBuilder {
         OMElement connectionElement = bamServerConfig.getFirstChildWithName(
                 new QName(BPELConstants.BAM_SERVER_PROFILE_NS, "Connection"));
         if (connectionElement != null) {
-            OMAttribute secureAttr = connectionElement.getAttribute(new QName("secure"));
-            OMAttribute ipAttr = connectionElement.getAttribute(new QName("ip"));
-            OMAttribute authenticationPortAttr = connectionElement.getAttribute(new QName("authPort"));
-            OMAttribute receiverPortAttr = connectionElement.getAttribute(new QName("receiverPort"));
-            if (ipAttr != null && secureAttr != null && authenticationPortAttr != null &&
-                    receiverPortAttr != null && !ipAttr.getAttributeValue().equals("") &&
-                    !secureAttr.getAttributeValue().equals("") &&
-                    !authenticationPortAttr.getAttributeValue().equals("") &&
-                    !receiverPortAttr.getAttributeValue().equals("")) {
-                bamServerProfile.setIp(ipAttr.getAttributeValue());
-                if ("true".equals(secureAttr.getAttributeValue())) {
-                    bamServerProfile.setSecurityEnabled(true);
-                } else if ("false".equals(secureAttr.getAttributeValue())) {
-                    bamServerProfile.setSecurityEnabled(false);
+            OMAttribute loadBalanceAttr = connectionElement.getAttribute(new QName("enableLoadBalancing"));
+            OMAttribute urlAttr = connectionElement.getAttribute(new QName("url"));
+            if (urlAttr != null && loadBalanceAttr != null &&
+                    !urlAttr.getAttributeValue().equals("") && !loadBalanceAttr.getAttributeValue().equals("")) {
+                bamServerProfile.setUrl(urlAttr.getAttributeValue());
+                if ("true".equals(loadBalanceAttr.getAttributeValue())) {
+                    bamServerProfile.setLoadBalanced(true);
+                } else if ("false".equals(loadBalanceAttr.getAttributeValue())) {
+                    bamServerProfile.setLoadBalanced(false);
                 } else {
-                    String errMsg = "Invalid value found for secure element in BAM server profile: " +
+                    String errMsg = "Invalid value found for loadBalancing element in BAM server profile: " +
                             profileLocation;
                     handleError(errMsg);
                 }
-                bamServerProfile.setAuthenticationPort(authenticationPortAttr.getAttributeValue());
-                bamServerProfile.setReceiverPort(receiverPortAttr.getAttributeValue());
             } else {
                 String errMsg = "Connection details are missing for BAM server profile: " +
                         profileLocation;

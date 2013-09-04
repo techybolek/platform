@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.bpel.bam.publisher;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -45,12 +44,17 @@ import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
+import org.wso2.carbon.databridge.agent.thrift.lb.DataPublisherHolder;
+import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.lb.ReceiverGroup;
+import org.wso2.carbon.databridge.agent.thrift.util.DataPublisherUtil;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.exception.*;
 
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -64,34 +68,38 @@ public class BAMPublisherExtensionOperation extends AbstractSyncExtensionOperati
         String bamServerProfileName = element.getAttribute("bamServerProfile");
         String streamName = element.getAttribute(BAMPublisherConstants.STREAM_NAME_ATTR);
         String streamVersion = element.getAttribute(BAMPublisherConstants.STREAM_VERSION);
-
-
         Integer tenantId = getTenantId(extensionContext);
+        BAMServerProfile bamServerProfile = getBAMServerProfile(tenantId, bamServerProfileName);
         BAMStreamConfiguration stream = getEventStream(tenantId, bamServerProfileName, streamName, streamVersion);
+
         if(stream == null) {
             log.debug("Stream configuration is invalid");
             return;
         }
 
-        AsyncDataPublisher dataPublisher = createAsyncDataPublisher(extensionContext, tenantId, bamServerProfileName,
-                stream);
-        if(dataPublisher == null) {
-            String msg = "Error while creating data publisher";
-            handleException(msg);
-        }
-
-        try {
-            if(!dataPublisher.canPublish())  {
-                dataPublisher.reconnect();
+        if (!bamServerProfile.isLoadBalanced()) {
+            AsyncDataPublisher dataPublisher = createAsyncDataPublisher(extensionContext, tenantId, bamServerProfileName,
+                    stream);
+            if (dataPublisher == null) {
+                String msg = "Error while creating data publisher";
+                handleException(msg);
             }
-            dataPublisher.publish(stream.getName(), stream.getVersion(),
-                    createMetadata(stream, extensionContext, element),
-                    createCorrelationData(stream, extensionContext, element),
-                    createPayloadData(stream, extensionContext, element));
 
-        } catch (AgentException e) {
-            String errMsg = "Problem with Agent while publishing.";
-            handleException(errMsg);
+            try {
+                if (!dataPublisher.canPublish()) {
+                    dataPublisher.reconnect();
+                }
+                dataPublisher.publish(stream.getName(), stream.getVersion(),
+                        createMetadata(stream, extensionContext, element),
+                        createCorrelationData(stream, extensionContext, element),
+                        createPayloadData(stream, extensionContext, element));
+
+            } catch (AgentException e) {
+                String errMsg = "Problem with Agent while publishing.";
+                handleException(errMsg);
+            }
+        } else {
+            createLoadBalancingDataPublisher(extensionContext, tenantId, bamServerProfileName, stream, element);
         }
     }
 
@@ -107,29 +115,18 @@ public class BAMPublisherExtensionOperation extends AbstractSyncExtensionOperati
 
     private AsyncDataPublisher createAsyncDataPublisher(ExtensionContext context, int tenantId,
                                               String bamServerProfileName, BAMStreamConfiguration stream) throws FaultException {
-
         AsyncDataPublisher dataPublisher = null;
         EventPublisherConfig config = null;
         TenantProcessStore tenantsProcessStore =
                 BAMPublisherServiceComponent.getBPELServer().getMultiTenantProcessStore().getTenantsProcessStore(tenantId);
         String processName = context.getProcessModel().getName().toString();
         config = (EventPublisherConfig)tenantsProcessStore.getDataPublisher(processName);
+
         if(config == null) {
             BAMServerProfile bamServerProfile = getBAMServerProfile(tenantId, bamServerProfileName);
-                if (bamServerProfile.isSecurityEnabled()) {
-                    dataPublisher = new AsyncDataPublisher("ssl://" + bamServerProfile.getIp() + ":" +
-                            bamServerProfile.getAuthenticationPort(),
-                            "ssl://" + bamServerProfile.getIp() + ":" +
-                                    bamServerProfile.getAuthenticationPort(),
-                            bamServerProfile.getUserName(), bamServerProfile.getPassword());
-                } else {
-                    dataPublisher = new AsyncDataPublisher("ssl://" + bamServerProfile.getIp() + ":" +
-                            bamServerProfile.getAuthenticationPort(),
-                            "tcp://" + bamServerProfile.getIp() + ":" +
-                                    bamServerProfile.getReceiverPort(),
-                            bamServerProfile.getUserName(), bamServerProfile.getPassword());
-                }
-                log.info("BPEL BAM data publisher created");
+            dataPublisher = new AsyncDataPublisher(bamServerProfile.getUrl(), bamServerProfile.getUserName(), bamServerProfile.getPassword());
+
+            log.info("BPEL BAM data publisher created");
                 addEventStream(dataPublisher, stream);
                 config = new EventPublisherConfig(dataPublisher);
                 config.addEventStream(stream.getName(), stream.getVersion());
@@ -143,6 +140,68 @@ public class BAMPublisherExtensionOperation extends AbstractSyncExtensionOperati
         }
 
         return dataPublisher;
+    }
+
+    private void createLoadBalancingDataPublisher(ExtensionContext context, int tenantId, String bamServerProfileName, BAMStreamConfiguration stream, Element element) throws FaultException {
+        EventPublisherConfig config = null;
+        TenantProcessStore tenantsProcessStore =
+                BAMPublisherServiceComponent.getBPELServer().getMultiTenantProcessStore().getTenantsProcessStore(tenantId);
+        String processName = context.getProcessModel().getName();
+        config = (EventPublisherConfig) tenantsProcessStore.getDataPublisher(processName);
+
+        String streamName = element.getAttribute(BAMPublisherConstants.STREAM_NAME_ATTR);
+        String streamVersion = element.getAttribute(BAMPublisherConstants.STREAM_VERSION);
+        String streamId = element.getAttribute(BAMPublisherConstants.STREAM_ID);
+
+        if (config == null) {
+            BAMServerProfile bamServerProfile = getBAMServerProfile(tenantId, bamServerProfileName);
+
+            String streamDefinition = "{" +
+                    "  'name':'" + stream.getName() + "'," +
+                    "  '" + BAMPublisherConstants.STREAM_VERSION + "':'" + stream.getVersion() + "'," +
+                    "  '" + BAMPublisherConstants.STREAM_NICK_NAME + "': '" + stream.getNickName() + "'," +
+                    "  '" + BAMPublisherConstants.STREAM_DESCRIPTION + "': '" + stream.getDescription() + "'," +
+                    "  'metaData':[" +
+                    "{'name':'" + BAMPublisherConstants.TENANT_ID + "','type':'INT'}" +
+                    ", {'name':'" + BAMPublisherConstants.PROCESS_ID + "','type':'STRING'}" +
+                    getStreamDefinitionString(BAMKey.BAMKeyType.META, stream) +
+                    "  ]," +
+                    "  'payloadData':[" +
+                    getStreamDefinitionString(BAMKey.BAMKeyType.PAYLOAD, stream) +
+                    "  ]," +
+                    "  'correlationData':[" +
+                    "{'name':'" + BAMPublisherConstants.INSTANCE_ID + "','type':'STRING'}" +
+                    getStreamDefinitionString(BAMKey.BAMKeyType.CORRELATION, stream) +
+                    "  ]" +
+                    "}";
+
+            ArrayList<ReceiverGroup> allReceiverGroups = new ArrayList<ReceiverGroup>();
+            ArrayList<String> receiverGroupUrls = DataPublisherUtil.getReceiverGroups(bamServerProfile.getUrl());
+
+            for (String aReceiverGroupURL : receiverGroupUrls) {
+                ArrayList<DataPublisherHolder> dataPublisherHolders = new ArrayList<DataPublisherHolder>();
+                String[] urls = aReceiverGroupURL.split(",");
+                for (String aUrl : urls) {
+                    DataPublisherHolder aNode = new DataPublisherHolder(null, aUrl.trim(), bamServerProfile.getUserName(),
+                            bamServerProfile.getPassword());
+                    dataPublisherHolders.add(aNode);
+                }
+                ReceiverGroup group = new ReceiverGroup(dataPublisherHolders);
+                allReceiverGroups.add(group);
+            }
+
+            LoadBalancingDataPublisher loadBalancingDataPublisher = new LoadBalancingDataPublisher(allReceiverGroups);
+            loadBalancingDataPublisher.addStreamDefinition(streamDefinition, streamName, streamVersion);
+
+            try {
+                loadBalancingDataPublisher.publish(streamName, streamVersion, createEvent(streamId, stream, context, element));
+            } catch (AgentException e) {
+                String errMsg = "Problem with LoadBalancing data agent while publishing.";
+                handleException(errMsg);
+            }
+
+        }
+
     }
 
     private BAMServerProfile getBAMServerProfile(int tenantId, String bamServerProfileName) {
@@ -470,20 +529,7 @@ public class BAMPublisherExtensionOperation extends AbstractSyncExtensionOperati
         if(dataPublisher == null) {
             BAMServerProfile bamServerProfile = getBAMServerProfile(tenantId, bamServerProfileName);
             try {
-                if (bamServerProfile.isSecurityEnabled()) {
-
-                    dataPublisher = new DataPublisher("ssl://" + bamServerProfile.getIp() + ":" +
-                            bamServerProfile.getAuthenticationPort(),
-                            "ssl://" + bamServerProfile.getIp() + ":" +
-                                    bamServerProfile.getAuthenticationPort(),
-                            bamServerProfile.getUserName(), bamServerProfile.getPassword(), agent);
-                } else {
-                    dataPublisher = new DataPublisher("ssl://" + bamServerProfile.getIp() + ":" +
-                            bamServerProfile.getAuthenticationPort(),
-                            "tcp://" + bamServerProfile.getIp() + ":" +
-                                    bamServerProfile.getReceiverPort(),
-                            bamServerProfile.getUserName(), bamServerProfile.getPassword(), agent);
-                }
+                dataPublisher = new DataPublisher(bamServerProfile.getUrl(), bamServerProfile.getUserName(), bamServerProfile.getPassword(), agent);
             } catch (MalformedURLException e) {
                 String errorMsg = "Given URLs are incorrect.";
                 handleException(errorMsg, e);

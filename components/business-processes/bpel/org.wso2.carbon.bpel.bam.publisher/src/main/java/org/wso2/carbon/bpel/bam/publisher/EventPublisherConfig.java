@@ -17,6 +17,7 @@
 package org.wso2.carbon.bpel.bam.publisher;
 
 import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,11 +26,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EventPublisherConfig {
     private AsyncDataPublisher dataPublisher;
+    LoadBalancingDataPublisher loadBalancingDataPublisher;
 
     private ConcurrentHashMap<String, String>  addedStreamDefinitions;
 
     public EventPublisherConfig(AsyncDataPublisher publisher) {
         this.dataPublisher = publisher;
+        addedStreamDefinitions = new ConcurrentHashMap<String, String>();
+    }
+
+    public EventPublisherConfig(LoadBalancingDataPublisher loadBalancingDataPublisher) {
+        this.loadBalancingDataPublisher = loadBalancingDataPublisher;
         addedStreamDefinitions = new ConcurrentHashMap<String, String>();
     }
 
@@ -48,5 +55,9 @@ public class EventPublisherConfig {
 
     public AsyncDataPublisher getDataPublisher() {
         return dataPublisher;
+    }
+
+    public LoadBalancingDataPublisher getLoadBalancingDataPublisher() {
+        return loadBalancingDataPublisher;
     }
 }

@@ -39,6 +39,7 @@ public final class BAMPublisherConstants {
     public static final String EVENT_VALUE_TYPE_CORRELATION ="correlationData";
 
     public static final String STREAM_NAME_ATTR = "streamName";
+    public static final String STREAM_ID = "id";
     public static final String STREAM_VERSION = "version";
     public static final String STREAM_NICK_NAME = "nickName";
     public static final String STREAM_DESCRIPTION = "description";

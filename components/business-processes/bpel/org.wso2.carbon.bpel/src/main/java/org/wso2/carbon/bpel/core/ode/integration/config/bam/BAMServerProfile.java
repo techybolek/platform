@@ -25,12 +25,10 @@ public class BAMServerProfile {
     private String name;
     private String userName;
     private String password;
-    private String ip;
-    private String authenticationPort;
-    private String receiverPort;
+    private String url;
+    private boolean isLoadBalanced;
     private String keyStoreLocation;
     private String keyStorePassword;
-    private boolean isSecurityEnabled = true;
     private MultiKeyMap streamConfigurations = new MultiKeyMap();
 //    private Map<String, BAMStreamConfiguration> streamConfigurations =
 //            new HashMap<String, BAMStreamConfiguration>();
@@ -62,28 +60,12 @@ public class BAMServerProfile {
         return password;
     }
 
-    public String getIp() {
-        return ip;
-    }
-
-    public String getAuthenticationPort() {
-        return authenticationPort;
-    }
-
-    public String getReceiverPort() {
-        return receiverPort;
-    }
-
     public String getKeyStoreLocation() {
         return keyStoreLocation;
     }
 
     public String getKeyStorePassword() {
         return keyStorePassword;
-    }
-
-    public boolean isSecurityEnabled() {
-        return isSecurityEnabled;
     }
 
     public BAMStreamConfiguration getBAMStreamConfiguration(String streamName, String version) {
@@ -107,18 +89,6 @@ public class BAMServerProfile {
         this.password = password;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public void setAuthenticationPort(String authenticationPort) {
-        this.authenticationPort = authenticationPort;
-    }
-
-    public void setReceiverPort(String receiverPort) {
-        this.receiverPort = receiverPort;
-    }
-
     public void setKeyStoreLocation(String keyStoreLocation) {
         this.keyStoreLocation = keyStoreLocation;
     }
@@ -127,7 +97,19 @@ public class BAMServerProfile {
         this.keyStorePassword = keyStorePassword;
     }
 
-    public void setSecurityEnabled(boolean securityEnabled) {
-        isSecurityEnabled = securityEnabled;
+    public boolean isLoadBalanced() {
+        return isLoadBalanced;
+    }
+
+    public void setLoadBalanced(boolean loadBalanced) {
+        isLoadBalanced = loadBalanced;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
