@@ -31,6 +31,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.automation.api.clients.user.mgt.UserManagementClient;
+import org.wso2.carbon.automation.core.context.AutomationContext;
+import org.wso2.carbon.automation.core.context.AutomationContextBuilder;
 import org.wso2.carbon.automation.core.environmentcontext.ContextProvider;
 import org.wso2.carbon.automation.core.environmentcontext.environmentvariables.EnvironmentContext;
 import org.wso2.carbon.automation.core.environmentcontext.environmentvariables.GroupContext;
@@ -63,8 +65,18 @@ public class SCIMServiceProviderUserTestCase extends MasterSCIMInitiator {
     @BeforeClass(alwaysRun = true)
     public void initiate() throws RemoteException, LoginAuthenticationExceptionException {
         provider_userInfo = UserListCsvReader.getUserInfo(providerUserId);
-        GroupContextProvider consumerGroupContext = new GroupContextProvider();
-        GroupContext consumerGroup = consumerGroupContext.getGroupContext("node1");
+
+        AutomationContextBuilder automationContextBuilder= new AutomationContextBuilder("IS");
+        automationContextBuilder.build("carbon.super","user1");
+        sessionCookie=automationContextBuilder.login();
+        backendUrl=automationContextBuilder.getAssignedEnvironmentContext()
+                .getEnvironmentConfigurations().getBackEndUrl();
+        scim_url = "https://" + automationContextBuilder.getAssignedInstance().getHost()
+                + ":" + automationContextBuilder.getAssignedInstance().getHttpsPort()+ "/wso2/scim/";
+        userMgtClient = new UserManagementClient(backendUrl, sessionCookie);
+        serviceEndPoint =backendUrl;
+/*         GroupContext consumerGroup = consumerGroupContext.getGroupContext("node1");
+       GroupContextProvider consumerGroupContext = new GroupContextProvider();
 
         ContextProvider consumer = new ContextProvider();
         EnvironmentContext consumerNodeContext = consumer.getNodeContext(consumerGroup.getNode().getNodeId(), consumerUserId);
@@ -72,7 +84,7 @@ public class SCIMServiceProviderUserTestCase extends MasterSCIMInitiator {
         scim_url = "https://" + consumerNodeContext.getWorkerVariables().getHostName() + ":" + consumerNodeContext.getWorkerVariables().getHttpsPort() + "/wso2/scim/";
         serviceEndPoint = consumerNodeContext.getBackEndUrl();
         sessionCookie = consumerNodeContext.getSessionCookie();
-        userMgtClient = new UserManagementClient(backendUrl, sessionCookie);
+        userMgtClient = new UserManagementClient(backendUrl, sessionCookie);*/
     }
 
     @BeforeMethod
