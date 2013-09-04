@@ -127,31 +127,31 @@ public class AutomationContextBuilder {
             if manager instance in null it goes for normal instance*/
             if (basicContext.getPlatformContext().getInstanceGroup(instanceGroup).isClusteringEnabled()) {
                 if (!lbManagerInstanceList.isEmpty()) {
-                    instance = lbManagerInstanceList.get(0);
+                    instance = lbManagerInstanceList.get(instanceList.size() - 1);
                 } else if (!managerInstanceList.isEmpty()) {
-                    instance = managerInstanceList.get(0);
+                    instance = managerInstanceList.get(instanceList.size() - 1);
                 } else {
-                    instance = instanceList.get(0);
+                    instance = instanceList.get(instanceList.size() - 1);
                 }
             } else {
                 /*if not clustered default will go for a lb if lb is null
                 * selection would be instance*/
                 if (!lbManagerInstanceList.isEmpty()) {
-                    instance = lbList.get(0);
+                    instance = lbList.get(instanceList.size() - 1);
                 } else {
-                    instance = instanceList.get(0);
+                    instance = instanceList.get(instanceList.size() - 1);
                 }
             }
         } else if (configuration.getConfiguration().getExecutionEnvironment().equals(Platforms.cloud.name())) {
             if (!lbManagerInstanceList.isEmpty()) {
-                instance = lbManagerInstanceList.get(0);
+                instance = lbManagerInstanceList.get(instanceList.size() - 1);
             } else if (!managerInstanceList.isEmpty()) {
-                instance = managerInstanceList.get(0);
+                instance = managerInstanceList.get(instanceList.size() - 1);
             } else {
-                instance = instanceList.get(0);
+                instance = instanceList.get(instanceList.size() - 1);
             }
         } else {
-            instance = instanceList.get(0);
+            instance = instanceList.get(instanceList.size() - 1);
         }
         return instance;
     }
