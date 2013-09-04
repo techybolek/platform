@@ -113,6 +113,7 @@ public class RSSInstanceDAOImpl implements RSSInstanceDAO {
             stmt.setString(7, rssInstance.getName());
             stmt.setInt(8, tenantId);
             stmt.setString(9, environmentName);
+            stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RSSDAOException(
                     "Error occurred while editing the RSS instance '"
