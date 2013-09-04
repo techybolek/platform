@@ -8,24 +8,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.Test;
 import org.wso2.carbon.analytics.hive.stub.HiveExecutionServiceStub;
-import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
-import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.TransportException;
+import org.wso2.carbon.databridge.commons.exception.*;
 import org.wso2.carbon.integration.framework.LoginLogoutUtil;
 import org.wso2.carbon.integration.framework.utils.FrameworkSettings;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -96,7 +86,7 @@ public class BAMReceiverVariableFieldsTestCase {
     private void checkPublishedDataInCassandra() throws Exception {
         initializeHiveStub();
 
-        hiveStub.executeHiveScript("CREATE EXTERNAL TABLE IF NOT EXISTS BAMVarFieldTest" +
+        hiveStub.executeHiveScript(null, "CREATE EXTERNAL TABLE IF NOT EXISTS BAMVarFieldTest" +
                 " (eventId STRING, message STRING, publisherId INT) " +
                 "STORED BY 'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES" +
                 " ( \"cassandra.host\" = \"127.0.0.1\" , \"cassandra.port\" = \"9160\" , " +
@@ -104,7 +94,7 @@ public class BAMReceiverVariableFieldsTestCase {
                 " \"cassandra.ks.password\" = \"admin\" , \"cassandra.cf.name\" = \"org_wso2_carbon_bam_variable_fields_test\" ," +
                 " \"cassandra.columns.mapping\" = \":key,payload_message, payload_publisherId\" );");
 
-        HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript("SELECT Count(1) From BAMVarFieldTest");
+        HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(null, "SELECT Count(1) From BAMVarFieldTest");
 
         assertTrue(null != results || results.length == 0, "No results are returned to published test events");
 

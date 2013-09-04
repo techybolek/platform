@@ -303,8 +303,8 @@ public class RESTAPITestCase {
     private static void runHiveDataTypeTest() {
         try {
             String[] queries = getHiveQueries("TestScriptForRestDataTypes");
-            hiveStub.executeHiveScript(queries[0].trim());
-            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(queries[1].trim());
+            hiveStub.executeHiveScript(null, queries[0].trim());
+            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(null, queries[1].trim());
             assertTrue(null != results && results.length != 0, "No results are returned from jdbc handler test");
             HiveExecutionServiceStub.QueryResultRow[] rows = results[0].getResultRows();
             assertTrue(null != rows && rows.length != 0, "No results are returned from jdbc handler test");

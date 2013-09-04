@@ -14,9 +14,7 @@ import org.wso2.carbon.analytics.hive.stub.HiveExecutionServiceStub;
 import org.wso2.carbon.bam.cassandra.data.archive.stub.CassandraArchivalServiceException;
 import org.wso2.carbon.bam.cassandra.data.archive.stub.CassandraArchivalServiceStub;
 import org.wso2.carbon.bam.cassandra.data.archive.stub.util.ArchiveConfiguration;
-import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.Event;
@@ -160,8 +158,8 @@ public class CassandraDataArchiveTestCase {
     private void runJDBCHandlerTest() {
         String[] queries = getHiveQueries("ArchiveCassandraDataTest");
         try {
-            hiveStub.executeHiveScript(queries[0].trim());
-            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(queries[1].trim());
+            hiveStub.executeHiveScript(null, queries[0].trim());
+            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(null, queries[1].trim());
 
             assertTrue(null != results && results.length != 0, "No results are returned from jdbc handler test");
             HiveExecutionServiceStub.QueryResultRow[] rows = results[0].getResultRows();

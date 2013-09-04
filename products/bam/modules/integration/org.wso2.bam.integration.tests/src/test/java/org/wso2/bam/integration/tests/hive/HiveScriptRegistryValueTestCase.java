@@ -85,9 +85,9 @@ public class HiveScriptRegistryValueTestCase {
             String[] queries = getHiveQueries("HiveRegistryValueSampleScript");
 
             if (queries != null) {
-                hiveStub.executeHiveScript(queries[0].trim());
+                hiveStub.executeHiveScript(null, queries[0].trim());
 
-                HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(queries[1].trim());
+                HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(null, queries[1].trim());
 
                 if (results == null || results.length == 0) {
                     fail("No results returned..");

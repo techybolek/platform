@@ -67,9 +67,9 @@ public class HiveMapDataTypeTestCase {
         String[] queries = getHiveQueries("HiveMapSampleScript");
 
         try {
-            hiveStub.executeHiveScript(queries[0]); // Create table with map data type in schema
+            hiveStub.executeHiveScript(null, queries[0]); // Create table with map data type in schema
 
-            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(queries[1]);
+            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(null, queries[1]);
 
             if (results == null || results.length == 0) {
                 fail("No results returned..");
@@ -84,7 +84,7 @@ public class HiveMapDataTypeTestCase {
                 break;
             }
 
-            results = hiveStub.executeHiveScript(queries[2]);
+            results = hiveStub.executeHiveScript(null, queries[2]);
 
             for (HiveExecutionServiceStub.QueryResult result : results) {
                 if (result.getColumnNames().length != 5) {

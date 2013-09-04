@@ -70,7 +70,7 @@ public class HiveTempFileCleanupTestCase {
 
         try {
             for (String query : queries) {
-                hiveStub.executeHiveScript(query);
+                hiveStub.executeHiveScript(null, query);
             }
         } catch (HiveExecutionServiceHiveExecutionException e) {
             fail("Failed while excecuting hive script " + e.getMessage());

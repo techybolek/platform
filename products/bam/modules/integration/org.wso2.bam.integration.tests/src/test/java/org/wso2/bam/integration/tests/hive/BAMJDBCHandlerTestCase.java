@@ -101,11 +101,11 @@ public class BAMJDBCHandlerTestCase {
     private void runJDBCHandlerTest() {
         String[] queries = getHiveQueries("HiveJDBCHandlerPrimaryKeyTest");
         try {
-            hiveStub.executeHiveScript(queries[0].trim());
-            hiveStub.executeHiveScript(queries[1].trim());
-            hiveStub.executeHiveScript(queries[2].trim());
-            hiveStub.executeHiveScript(queries[3].trim());
-            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(queries[4].trim());
+            hiveStub.executeHiveScript(null, queries[0].trim());
+            hiveStub.executeHiveScript(null, queries[1].trim());
+            hiveStub.executeHiveScript(null, queries[2].trim());
+            hiveStub.executeHiveScript(null, queries[3].trim());
+            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(null, queries[4].trim());
 
             assertTrue(null != results && results.length != 0, "No results are returned from jdbc handler test");
             HiveExecutionServiceStub.QueryResultRow[] rows = results[0].getResultRows();
@@ -125,11 +125,11 @@ public class BAMJDBCHandlerTestCase {
             assertTrue(resultsAreCorrect,"Results are different from expected one: " + vals[2]+ ":" + vals[3]+ ":"
             +vals[4]+ ":" + vals[5] + ":" + vals[6]);
 
-            hiveStub.executeHiveScript(queries[5].trim());
-            hiveStub.executeHiveScript(queries[6].trim());
-            hiveStub.executeHiveScript(queries[7].trim());
+            hiveStub.executeHiveScript(null, queries[5].trim());
+            hiveStub.executeHiveScript(null, queries[6].trim());
+            hiveStub.executeHiveScript(null, queries[7].trim());
 
-            HiveExecutionServiceStub.QueryResult[] newResults = hiveStub.executeHiveScript(queries[8].trim());
+            HiveExecutionServiceStub.QueryResult[] newResults = hiveStub.executeHiveScript(null, queries[8].trim());
             assertTrue(null != newResults && newResults.length != 0, "No results are returned from jdbc handler test");
             HiveExecutionServiceStub.QueryResultRow[] newRow = newResults[0].getResultRows();
             assertTrue(null != newRow && newRow.length != 0, "No results are returned from jdbc handler test");
@@ -158,8 +158,8 @@ public class BAMJDBCHandlerTestCase {
     private void runHiveDataTypeTest() {
         try {
             String[] queries = getHiveQueries("TestScriptForHiveDataTypes");
-            hiveStub.executeHiveScript(queries[0].trim());
-            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(queries[1].trim());
+            hiveStub.executeHiveScript(null, queries[0].trim());
+            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(null, queries[1].trim());
             assertTrue(null != results && results.length != 0, "No results are returned from jdbc handler test");
             HiveExecutionServiceStub.QueryResultRow[] rows = results[0].getResultRows();
             assertTrue(null != rows && rows.length != 0, "No results are returned from jdbc handler test");

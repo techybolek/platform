@@ -6,11 +6,8 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.testng.annotations.Test;
 import org.wso2.carbon.analytics.hive.stub.HiveExecutionServiceStub;
-import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.exception.*;
@@ -86,7 +83,7 @@ public class BAMReceiverTestCase {
     private void checkPublishedDataInCassandra() throws Exception {
         initializeHiveStub();
 
-        hiveStub.executeHiveScript("CREATE EXTERNAL TABLE IF NOT EXISTS BAMTest" +
+        hiveStub.executeHiveScript(null, "CREATE EXTERNAL TABLE IF NOT EXISTS BAMTest" +
                 " (eventId STRING, message STRING, publisherId INT) " +
                 "STORED BY 'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES" +
                 " ( \"cassandra.host\" = \"127.0.0.1\" , \"cassandra.port\" = \"9160\" , " +
@@ -94,7 +91,7 @@ public class BAMReceiverTestCase {
                 " \"cassandra.ks.password\" = \"admin\" , \"cassandra.cf.name\" = \"org_wso2_carbon_bam_test\" ," +
                 " \"cassandra.columns.mapping\" = \":key,payload_message, payload_publisherId\" );");
 
-        HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript("SELECT Count(1) From BAMTest");
+        HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(null, "SELECT Count(1) From BAMTest");
 
         assertTrue(null != results || results.length == 0, "No results are returned to published test events");
 

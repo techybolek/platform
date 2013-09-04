@@ -30,9 +30,9 @@ public class BAMAnalyzerTestCase {
         String[] queries = getHiveQueries("BAMAnalyzerSampleScript");
 
         try {
-            hiveStub.executeHiveScript(queries[0]); // Create table with map data type in schema
+            hiveStub.executeHiveScript(null, queries[0]); // Create table with map data type in schema
 
-            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(queries[1]);
+            HiveExecutionServiceStub.QueryResult[] results = hiveStub.executeHiveScript(null, queries[1]);
 
             if (results == null || results.length == 0) {
                 fail("No results returned..");
