@@ -74,7 +74,7 @@ public class HiveQueryExecutor {
     
     public QueryResult[] execute(String query){
         try {
-            return hiveService.executeHiveScript(query);
+            return hiveService.executeHiveScript(null, query);
         } catch (RemoteException e) {
             handleException("Query : '"+query+"' - "+e.getMessage(), e);
         } catch (HiveExecutionServiceHiveExecutionException e) {
