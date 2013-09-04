@@ -64,13 +64,13 @@
     Database configuration to be used for data service testing. DB configuration in dbs files will be replaced with
                below configuration at test run time
     -->
-    <databases>
-        <database name="dataService">
+    <datasources>
+        <datasource name="dataService">
             <url>jdbc:h2:testDB</url>
             <username>wso2carbon</username>
             <password>wso2carbon</password>
             <driverClassName>org.h2.Driver</driverClassName>
-        </database>
+        </datasource>
         <database name="testDashboard">
             <url>jdbc:mysql://127.0.0.1:3306/FRAMEWORK_DB</url>
             <username>root</username>
@@ -81,7 +81,7 @@
             <username>testUser1</username>
             <password>testUser1</password>
         </database>
-    </databases>
+    </datasources>
     <security>
         <!--
                     KeyStore which will be used for encrypting/decrypting passwords
@@ -132,8 +132,8 @@
             </tenantAdmin>
             <tenantUsers>
                 <user key="user1">
-                    <userName>test1</userName>
-                    <password>123</password>
+                    <userName>testuser2</userName>
+                    <password>testuser2</password>
                 </user>
                 <user key="user2">
                     <userName>test1</userName>
@@ -174,8 +174,8 @@
                 <!--Types worker/manager/lb_worker/lb_manager-->
                 <instance name="asw001" type="worker">
                     <host>localhost</host>
-                    <httpport>9764</httpport>
-                    <httpsport>9444</httpsport>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
                     <webContext>/</webContext>
                 </instance>
                 <instance name="asw002" type="worker">
@@ -217,12 +217,11 @@
             <!--
             Product instance details to be used for integration test level
             -->
-        <instanceGroup id="ESB">
-            <instances clusteringEnabled="false">
+        <instanceGroup name="IS" clusteringEnabled="false">
                 <instance name="esbw001" type="instance">
                     <host>localhost</host>
-                    <httpport>9764</httpport>
-                    <httpsport>9444</httpsport>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
                     <webContext>/</webContext>
                 </instance>
                 <instance name="esbw002" type="instance">
@@ -237,7 +236,6 @@
                     <httpsport>9443</httpsport>
                     <webContext>/</webContext>
                 </instance>
-            </instances>
         </instanceGroup>
     </platform>
 </automation>
