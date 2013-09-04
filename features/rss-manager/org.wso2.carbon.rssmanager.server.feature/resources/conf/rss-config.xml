@@ -20,7 +20,9 @@
  -
  -->
 <RSSConfiguration>
-        <!--Provider>org.wso2.carbon.rssmanager.core.manager.impl.mysql.MySQLRSSManagerFactory</Provider-->
+        <!-- Supported Provider types H2|MYSQL|ORACLE|POSTGRES|SQLSERVER -->
+        <Provider>H2</Provider>
+
   	<!-- RSS database used to store database servers, database instance information, users etc.. -->
         <ManagementRepository>
             <DataSourceConfiguration>
