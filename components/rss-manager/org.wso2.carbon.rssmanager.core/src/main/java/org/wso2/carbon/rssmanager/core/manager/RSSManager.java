@@ -120,5 +120,7 @@ public interface RSSManager {
                                       int tenantId) throws RSSManagerException;
 
     String[] getEnvironmentNames();
+    public  boolean deleteTenantRSSData(RSSEnvironmentContext ctx,int tenantId) throws RSSManagerException;
+
 
 }

@@ -125,6 +125,30 @@ public class RSSManagerService {
         return databases;
     }
     
+
+	public boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId)
+			throws RSSManagerException {
+		boolean isDeleted = false;
+		if (!isSuperTenant()) {
+			throw new RSSManagerException(" Unahuthorization access ");
+		}
+		try {
+			isDeleted = getRSSManager().deleteTenantRSSData(ctx, tenantId);
+		} catch (RSSManagerException e) {
+			String tenantDomain = null;
+			try {
+				tenantDomain = RSSManagerUtil
+						.getTenantDomainFromTenantId(tenantId);
+			} catch (RSSManagerException e1) {
+				log.error(e1);
+			}
+			String msg = "Error occurred while retrieving the database list of the tenant '"
+					+ tenantDomain + "'";
+			handleException(msg, e);
+		}
+		return isDeleted;
+	}
+    
     public Database[] getDatabases(RSSEnvironmentContext ctx,
                                    int tenantId) throws RSSManagerException {
 

@@ -236,4 +236,11 @@ public class RSSManagerProxy implements RSSManager {
         //TODO Fix this
         return this.resolveRM(null).getEnvironmentNames();
     }
+
+	@Override
+    public boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId)
+                                                                               throws RSSManagerException {
+	    // TODO Auto-generated method stub
+	    return false;
+    }
 }

@@ -120,6 +120,11 @@ public class RSSAdmin extends AbstractAdmin {
         this.getRSSManager().dropDatabaseUser(ctx, ctx.getRssInstanceName(), username);
     }
 
+	public boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId)
+			throws RSSManagerException {
+		return this.getRSSManager().deleteTenantRSSData(ctx, tenantId);
+	}
+	
     public void editDatabaseUserPrivileges(RSSEnvironmentContext ctx,
                                            DatabasePrivilegeSet privileges,
                                            DatabaseUser user,
@@ -290,6 +295,8 @@ public class RSSAdmin extends AbstractAdmin {
     public String[] getRSSEnvironmentNames() throws RSSManagerException {
         return getRSSManager().getEnvironmentNames();
     }
+    
+
 
      /**
      * Test the RSS instance connection using a mock database connection test.

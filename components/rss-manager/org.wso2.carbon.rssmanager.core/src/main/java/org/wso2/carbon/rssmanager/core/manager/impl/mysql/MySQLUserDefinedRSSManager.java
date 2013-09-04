@@ -74,4 +74,11 @@ public class MySQLUserDefinedRSSManager extends UserDefinedRSSManager {
                                        UserDatabaseEntry ude) throws RSSManagerException {
         
     }
+
+	@Override
+	public boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId)
+			throws RSSManagerException {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

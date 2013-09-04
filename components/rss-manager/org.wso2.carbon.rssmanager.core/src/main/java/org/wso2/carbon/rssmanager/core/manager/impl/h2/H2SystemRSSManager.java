@@ -24,6 +24,7 @@ import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.Database;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeSet;
+import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeTemplate;
 import org.wso2.carbon.rssmanager.core.entity.DatabaseUser;
 import org.wso2.carbon.rssmanager.core.entity.UserDatabaseEntry;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
@@ -80,6 +81,57 @@ public class H2SystemRSSManager extends SystemRSSManager {
                                        UserDatabaseEntry ude) throws RSSManagerException {
 
     }
+    
+    @Override
+	public boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId)
+			throws RSSManagerException {
+		boolean inTx = false;
+		Database[] databases;
+		DatabaseUser[] dbUsers;
+		DatabasePrivilegeTemplate[] templates;
+		try {
+			// Delete tenant specific tables along with it's meta data
+			databases = getRSSDAO().getDatabaseDAO().getDatabases(
+					ctx.getEnvironmentName(), tenantId);
+			log.info("Deleting rss tables and meta data");
+			for (Database db : databases) {
+				String databaseName = db.getName();
+				String rssInstanceName = db.getRssInstanceName();
+				dropDatabase(ctx, rssInstanceName, databaseName);
+			}
+			dbUsers = getRSSDAO().getDatabaseUserDAO().getDatabaseUsers(
+					ctx.getEnvironmentName(), tenantId);
+			log.info("Deleting rss users and meta data");
+			for (DatabaseUser user : dbUsers) {
+				String userName = user.getName();
+				String rssInstanceName = user.getRssInstanceName();
+				dropDatabaseUser(ctx, rssInstanceName, userName);
+			}
+			log.info("Deleting rss templates and meta data");
+			templates = getRSSDAO().getDatabasePrivilegeTemplateDAO()
+					.getDatabasePrivilegesTemplates(ctx.getEnvironmentName(),
+							tenantId);
+			inTx = this.getEntityManager().beginTransaction();
+			for (DatabasePrivilegeTemplate template : templates) {
+				dropDatabasePrivilegesTemplate(ctx, template.getName());
+			}
+			log.info("Successfully deleted rss data");
+
+		} catch (Exception e) {
+			if (inTx && getEntityManager().hasNoActiveTransaction()) {
+				getEntityManager().rollbackTransaction();
+			}
+			String msg = "Error occurred while retrieving metadata "
+					+ "corresponding to databases, from RSS metadata repository : "
+					+ e.getMessage();
+			handleException(msg, e);
+		} finally {
+			if (inTx) {
+				getEntityManager().endTransaction();
+			}
+		}
+		return true;	
+	}
 
 
 }

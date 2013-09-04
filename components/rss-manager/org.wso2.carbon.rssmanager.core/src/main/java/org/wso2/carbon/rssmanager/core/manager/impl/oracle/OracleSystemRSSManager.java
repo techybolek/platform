@@ -73,4 +73,11 @@ public class OracleSystemRSSManager extends SystemRSSManager {
 
     }
 
+	@Override
+	public boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId)
+			throws RSSManagerException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
