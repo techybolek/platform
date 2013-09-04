@@ -29,6 +29,10 @@ public class FeatureManagementContext{
         return p2Repositories;
     }
 
+    public P2Repositories getP2Repository(String name) {
+        return p2Repositories.get(name);
+    }
+
     public void setP2Repositories(HashMap<String, P2Repositories> p2Repositories) {
         this.p2Repositories = p2Repositories;
     }

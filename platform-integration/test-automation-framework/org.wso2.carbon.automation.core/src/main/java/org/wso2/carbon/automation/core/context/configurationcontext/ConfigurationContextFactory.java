@@ -36,7 +36,8 @@ public class ConfigurationContextFactory {
     }
 
     /**
-     * this method creates and returns the internal data structure for the configuration node in automation.xml
+     * this method creates and returns the internal data structure for the
+     * configuration node in automation.xml
      *
      * @param nodeElement OMElement input from the xml reader
      */
@@ -87,7 +88,8 @@ public class ConfigurationContextFactory {
     }
 
     /*
-    this method interface: provides the configuration context providing the appropriate configuration xml node
+    this method interface: provides the configuration context providing the appropriate
+    configuration xml node
      */
 
     public ConfigurationContext getConfigurationContext() {

@@ -48,6 +48,10 @@ public class DatabaseContext {
 
     }
 
+    public Database getDatabase(String databaseName) {
+        return databaseConfigurations.get(databaseName);
+    }
+
     public void addDatabase(Database database) {
 
         databaseConfigurations.put(database.getName(), database);

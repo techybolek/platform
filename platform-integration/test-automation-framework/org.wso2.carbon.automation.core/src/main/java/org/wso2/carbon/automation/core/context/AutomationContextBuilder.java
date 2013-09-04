@@ -22,9 +22,11 @@ import org.apache.axis2.AxisFault;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.automation.core.context.configurationcontext.ConfigurationContext;
 import org.wso2.carbon.automation.core.context.contextenum.Platforms;
+import org.wso2.carbon.automation.core.context.environmentcontext.EnvironmentContext;
 import org.wso2.carbon.automation.core.context.platformcontext.Instance;
 import org.wso2.carbon.automation.core.context.usermanagementcontext.User;
 import org.wso2.carbon.automation.core.context.utils.UserAuthenticationUtil;
+
 
 import java.rmi.RemoteException;
 import java.util.List;
@@ -93,11 +95,40 @@ public class AutomationContextBuilder {
         UserAuthenticationUtil util = new UserAuthenticationUtil
                 (automationContext.getEnvironmentContext()
                         .getEnvironmentConfigurations().getBackEndUrl());
-        User user = automationContext.getUserManagerContext().getTenant(domain).getTenantUser(userId);
+        User user = automationContext.getUserManagerContext()
+                .getTenant(domain).getTenantUser(userId);
         sessionCookie = util.login(user.getUserName(), user.getPassword(),
                 automationContext.getPlatformContext().getInstanceGroup(instanceGroup)
                         .getInstance(instanceName).getHost());
         return sessionCookie;
+    }
+
+    /**
+     * Returns the platform Instance assigned for the test case
+     *
+     * @return Instance
+     */
+    public Instance getAssignedInstance() {
+        return automationContext.getPlatformContext()
+                .getInstanceGroup(instanceGroup).getInstance(instanceName);
+    }
+
+    /**
+     * Returns the User Instance assigned for the test case
+     *
+     * @return User
+     */
+    public User getAssignedUser() {
+        return automationContext.getUserManagerContext().getTenant(domain).getTenantUser(userId);
+    }
+
+    /**
+     * Returns Environment Context generated based on the Context
+     *
+     * @return EnvironmentContext
+     */
+    public EnvironmentContext getAssignedEnvironmentContext() {
+        return automationContext.getEnvironmentContext();
     }
 
     private User getTenant(String domain, String tenantUserKey) {
@@ -120,12 +151,14 @@ public class AutomationContextBuilder {
         List<Instance> lbList = basicContext.getPlatformContext()
                 .getInstanceGroup(instanceGroup).getLoadBalancerInstances();
         //If the execution mode is platform it looks for whetherinstance group is clustered
-        if (configuration.getConfiguration().getExecutionEnvironment().equals(Platforms.platform.name())) {
+        if (configuration.getConfiguration().getExecutionEnvironment()
+                .equals(Platforms.platform.name())) {
            /*if clustered default instance is manager fronted LB
             if no manger fronted LB is assigned it will go for a lb instance
             otherwise it will take general manager instance
             if manager instance in null it goes for normal instance*/
-            if (basicContext.getPlatformContext().getInstanceGroup(instanceGroup).isClusteringEnabled()) {
+            if (basicContext.getPlatformContext().getInstanceGroup(instanceGroup)
+                    .isClusteringEnabled()) {
                 if (!lbManagerInstanceList.isEmpty()) {
                     instance = lbManagerInstanceList.get(instanceList.size() - 1);
                 } else if (!managerInstanceList.isEmpty()) {
@@ -142,7 +175,8 @@ public class AutomationContextBuilder {
                     instance = instanceList.get(instanceList.size() - 1);
                 }
             }
-        } else if (configuration.getConfiguration().getExecutionEnvironment().equals(Platforms.cloud.name())) {
+        } else if (configuration.getConfiguration().getExecutionEnvironment()
+                .equals(Platforms.cloud.name())) {
             if (!lbManagerInstanceList.isEmpty()) {
                 instance = lbManagerInstanceList.get(instanceList.size() - 1);
             } else if (!managerInstanceList.isEmpty()) {

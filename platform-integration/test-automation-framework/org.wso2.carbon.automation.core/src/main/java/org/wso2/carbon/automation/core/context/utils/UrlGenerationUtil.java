@@ -53,7 +53,8 @@ public class UrlGenerationUtil {
         if ((nhttpPort == null && nhttpsPort == null) && httpPort == null && httpsPort == null) {
             portEnabled = false;
         }
-        if (automationContext.getConfigurationContext().getConfiguration().getExecutionMode().equals("tenant")) {
+        if (automationContext.getConfigurationContext().getConfiguration()
+                .getExecutionMode().equals("tenant")) {
             isRunningOnCloud = true;
         }
         tenantDomain = domain;
