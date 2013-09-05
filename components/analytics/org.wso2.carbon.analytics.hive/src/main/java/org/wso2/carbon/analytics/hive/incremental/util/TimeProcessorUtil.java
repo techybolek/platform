@@ -2,8 +2,6 @@ package org.wso2.carbon.analytics.hive.incremental.util;
 
 import org.wso2.carbon.analytics.hive.exception.HiveIncrementalProcessException;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Copyright (c) 2009, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  * <p/>
@@ -38,30 +36,21 @@ public class TimeProcessorUtil {
                         throw new HiveIncrementalProcessException("Unsupported time stamp received = "
                                 + stringTimeValue);
                     }
-                    timeStamp = timeStamp - TimeUnit.MILLISECONDS.convert(getTimeStampFromDays(timeSplits[1]), TimeUnit.DAYS);
+                    try{
+                    timeStamp = timeStamp - Long.parseLong(timeSplits[1]);
+                    }catch (NumberFormatException ex){
+                        throw new HiveIncrementalProcessException("Unsupported time stamp received = " +
+                                stringTimeValue, ex);
+                    }
                 } else {
+
                     throw new HiveIncrementalProcessException("Unsupported time stamp received = " + stringTimeValue);
                 }
+            } else {
+                timeStamp = Long.parseLong(stringTimeValue);
             }
         }
         return timeStamp;
     }
-
-
-    private static long getTimeStampFromDays(String daysString) throws HiveIncrementalProcessException {
-       daysString = daysString.toLowerCase().trim();
-       if(daysString.endsWith(IncrementalProcessingConstants.DAYS)){
-          daysString= daysString.replace(IncrementalProcessingConstants.DAYS, "");
-          try{
-              return  Long.parseLong(daysString);
-          }catch (NumberFormatException ex){
-              throw new HiveIncrementalProcessException("Unsupported days value in the time range - "+daysString, ex);
-          }
-       }else {
-            throw new HiveIncrementalProcessException("Unsupported time range provided." + daysString+
-                     " Only days are supported in the time range.");
-       }
-    }
-
 
 }
