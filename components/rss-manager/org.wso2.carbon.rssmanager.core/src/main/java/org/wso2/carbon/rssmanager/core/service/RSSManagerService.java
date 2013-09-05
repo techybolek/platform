@@ -61,7 +61,7 @@ public class RSSManagerService {
     public void editRSSInstance(RSSEnvironmentContext ctx,
                                 RSSInstance rssInstance) throws RSSManagerException {
         try {
-            getRSSManager().editRSSInstanceConfiguration(ctx, rssInstance);
+            getRSSManager().editRSSInstance(ctx, rssInstance);
         } catch (RSSManagerException e) {
             String msg = "Error occurred while editing the configuration of RSS instance '" +
                     rssInstance.getName() + "'";

@@ -55,7 +55,7 @@ public class RSSAdmin extends AbstractAdmin {
 
     public void editRSSInstance(RSSEnvironmentContext ctx,
                                 RSSInstance rssInstance) throws RSSManagerException {
-        this.getRSSManager().editRSSInstanceConfiguration(ctx, rssInstance);
+        this.getRSSManager().editRSSInstance(ctx, rssInstance);
     }
 
     public RSSInstance getRSSInstance(RSSEnvironmentContext ctx) throws RSSManagerException {

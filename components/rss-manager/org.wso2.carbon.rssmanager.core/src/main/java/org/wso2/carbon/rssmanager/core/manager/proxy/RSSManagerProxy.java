@@ -150,9 +150,9 @@ public class RSSManagerProxy implements RSSManager {
         this.resolveRM(ctx).dropRSSInstance(ctx, rssInstanceName);
     }
 
-    public void editRSSInstanceConfiguration(RSSEnvironmentContext ctx,
+    public void editRSSInstance(RSSEnvironmentContext ctx,
                                              RSSInstance rssInstance) throws RSSManagerException {
-        this.resolveRM(ctx).editRSSInstanceConfiguration(ctx, rssInstance);
+        this.resolveRM(ctx).editRSSInstance(ctx, rssInstance);
     }
 
     public RSSInstance[] getRSSInstances(RSSEnvironmentContext ctx) throws RSSManagerException {
@@ -219,7 +219,7 @@ public class RSSManagerProxy implements RSSManager {
         return this.resolveRM(ctx).getDatabasesRestricted(ctx, tenantId);
     }
 
-    public String[] getEnvironmentNames() {
+    public String[] getEnvironmentNames() throws RSSManagerException{
         //TODO Fix this
         return this.resolveRM(null).getEnvironmentNames();
     }

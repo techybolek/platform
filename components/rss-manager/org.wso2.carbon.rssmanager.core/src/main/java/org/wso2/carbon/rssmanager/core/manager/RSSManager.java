@@ -25,11 +25,39 @@ import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 
 public interface RSSManager {
 
+    /* Methods to manage RSS instances */
+
+    RSSInstance createRSSInstance(RSSEnvironmentContext ctx,
+                                  RSSInstance rssInstance) throws RSSManagerException;
+
+    void dropRSSInstance(RSSEnvironmentContext ctx,
+                         String rssInstanceName) throws RSSManagerException;
+
+    void editRSSInstance(RSSEnvironmentContext ctx,
+                         RSSInstance rssInstance) throws RSSManagerException;
+
+    RSSInstance[] getRSSInstances(RSSEnvironmentContext ctx) throws RSSManagerException;
+
+    RSSInstance getRSSInstance(RSSEnvironmentContext ctx,
+                               String rssInstanceName) throws RSSManagerException;
+
+    /* Methods to manage databases */
+
     Database createDatabase(RSSEnvironmentContext ctx,
                             Database database) throws RSSManagerException;
 
     void dropDatabase(RSSEnvironmentContext ctx, String rssInstanceName,
                       String databaseName) throws RSSManagerException;
+
+    Database[] getDatabases(RSSEnvironmentContext ctx) throws RSSManagerException;
+
+    boolean isDatabaseExist(RSSEnvironmentContext ctx, String rssInstanceName,
+                            String databaseName) throws RSSManagerException;
+
+    Database getDatabase(RSSEnvironmentContext ctx, String rssInstanceName,
+                         String databaseName) throws RSSManagerException;
+
+    /* Methods to manage database users */
 
     DatabaseUser createDatabaseUser(RSSEnvironmentContext ctx,
                                     DatabaseUser user) throws RSSManagerException;
@@ -37,22 +65,8 @@ public interface RSSManager {
     void dropDatabaseUser(RSSEnvironmentContext ctx, String rssInstanceName,
                           String username) throws RSSManagerException;
 
-    void editDatabaseUserPrivileges(RSSEnvironmentContext ctx,
-                                    DatabasePrivilegeSet privileges,
-                                    DatabaseUser databaseUser,
-                                    String databaseName) throws RSSManagerException;
-
-    void attachUserToDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude,
-                              String templateName) throws RSSManagerException;
-
-    void detachUserFromDatabase(RSSEnvironmentContext ctx,
-                                UserDatabaseEntry ude) throws RSSManagerException;
-
     DatabaseUser getDatabaseUser(RSSEnvironmentContext ctx, String rssInstanceName,
                                  String username) throws RSSManagerException;
-
-    Database getDatabase(RSSEnvironmentContext ctx, String rssInstanceName,
-                         String databaseName) throws RSSManagerException;
 
     DatabaseUser[] getUsersAttachedToDatabase(RSSEnvironmentContext ctx, String rssInstanceName,
                                               String databaseName) throws RSSManagerException;
@@ -61,45 +75,40 @@ public interface RSSManager {
             RSSEnvironmentContext ctx, String rssInstanceName,
             String databaseName) throws RSSManagerException;
 
-    DatabasePrivilegeSet getUserDatabasePrivileges(
-            RSSEnvironmentContext ctx, String rssInstanceName, String databaseName,
-            String username) throws RSSManagerException;
+    void attachUserToDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude,
+                              String templateName) throws RSSManagerException;
 
-    RSSInstance createRSSInstance(RSSEnvironmentContext ctx,
-                                  RSSInstance rssInstance) throws RSSManagerException;
-
-    void dropRSSInstance(RSSEnvironmentContext ctx,
-                         String rssInstanceName) throws RSSManagerException;
-
-    void editRSSInstanceConfiguration(RSSEnvironmentContext ctx,
-                                      RSSInstance rssInstance) throws RSSManagerException;
-
-    RSSInstance[] getRSSInstances(RSSEnvironmentContext ctx) throws RSSManagerException;
-
-    Database[] getDatabases(RSSEnvironmentContext ctx) throws RSSManagerException;
+    void detachUserFromDatabase(RSSEnvironmentContext ctx,
+                                UserDatabaseEntry ude) throws RSSManagerException;
 
     DatabaseUser[] getDatabaseUsers(RSSEnvironmentContext ctx) throws RSSManagerException;
-
-    void createDatabasePrivilegesTemplate(RSSEnvironmentContext ctx,
-                                          DatabasePrivilegeTemplate template) throws RSSManagerException;
-
-    void editDatabasePrivilegesTemplate(RSSEnvironmentContext ctx,
-                                        DatabasePrivilegeTemplate template) throws RSSManagerException;
-
-    RSSInstance getRSSInstance(RSSEnvironmentContext ctx,
-                               String rssInstanceName) throws RSSManagerException;
-
-    boolean isDatabaseExist(RSSEnvironmentContext ctx, String rssInstanceName,
-                            String databaseName) throws RSSManagerException;
 
     boolean isDatabaseUserExist(RSSEnvironmentContext ctx, String rssInstanceName,
                                 String databaseUsername) throws RSSManagerException;
 
-    boolean isDatabasePrivilegeTemplateExist(RSSEnvironmentContext ctx,
-                                             String templateName) throws RSSManagerException;
+    void editDatabaseUserPrivileges(RSSEnvironmentContext ctx,
+                                    DatabasePrivilegeSet privileges,
+                                    DatabaseUser databaseUser,
+                                    String databaseName) throws RSSManagerException;
+
+    DatabasePrivilegeSet getUserDatabasePrivileges(
+            RSSEnvironmentContext ctx, String rssInstanceName, String databaseName,
+            String username) throws RSSManagerException;
+
+
+    /* Methods to manage database privilege templates */
+
+    void createDatabasePrivilegesTemplate(RSSEnvironmentContext ctx,
+                                          DatabasePrivilegeTemplate template) throws RSSManagerException;
 
     void dropDatabasePrivilegesTemplate(RSSEnvironmentContext ctx,
                                         String templateName) throws RSSManagerException;
+
+    void editDatabasePrivilegesTemplate(RSSEnvironmentContext ctx,
+                                        DatabasePrivilegeTemplate template) throws RSSManagerException;
+
+    boolean isDatabasePrivilegeTemplateExist(RSSEnvironmentContext ctx,
+                                             String templateName) throws RSSManagerException;
 
     DatabasePrivilegeTemplate[] getDatabasePrivilegeTemplates(
             RSSEnvironmentContext ctx) throws RSSManagerException;
@@ -110,7 +119,7 @@ public interface RSSManager {
     Database[] getDatabasesRestricted(RSSEnvironmentContext ctx,
                                       int tenantId) throws RSSManagerException;
 
-    String[] getEnvironmentNames();
+    String[] getEnvironmentNames() throws RSSManagerException;
 
     boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId) throws RSSManagerException;
 

@@ -210,8 +210,8 @@ public abstract class AbstractRSSManager implements RSSManager {
         }
     }
 
-    public void editRSSInstanceConfiguration(RSSEnvironmentContext ctx,
-                                             RSSInstance rssInstance) throws RSSManagerException {
+    public void editRSSInstance(RSSEnvironmentContext ctx,
+                                RSSInstance rssInstance) throws RSSManagerException {
         boolean inTx = getEntityManager().beginTransaction();
         try {
             final int tenantId = RSSManagerUtil.getTenantId();
@@ -631,7 +631,7 @@ public abstract class AbstractRSSManager implements RSSManager {
         return entityManager;
     }
 
-    public String[] getEnvironmentNames() {
+    public String[] getEnvironmentNames() throws RSSManagerException {
 //        String[] environments = new String[config.getRSSEnvironments().length];
 //        int i = 0;
 //        for (RSSEnvironment environment : config.getRSSEnvironments()) {
