@@ -179,6 +179,13 @@
                 <checksumPolicy>ignore</checksumPolicy>
             </releases>
         </repository>
+        
+        <repository>
+            <id>wso2-maven2-snapshot-repository</id>
+            <name>WSO2 Maven2 Snapshot Repository</name>
+            <url>http://dist.wso2.org/snapshots/maven2/</url>
+        </repository>
+        
         <!--moved to nexus
 
         <repository>
@@ -344,7 +351,7 @@
         <axis2.version.bam>${orbit.version.axis2}</axis2.version.bam>
         <log4j.version.bam>1.2.13</log4j.version.bam>
         <axiom.version.bam>1.2.11.wso2v2</axiom.version.bam>
-        <!--<stratos.version></stratos.version>-->
+        <!--stratos.version>2.2.0</stratos.version-->
     </properties>
 
 </project> 
