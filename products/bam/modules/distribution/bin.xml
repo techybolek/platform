@@ -130,7 +130,13 @@
             <directory>bam-resources/ues/jaggeryapps/</directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaggeryapps/</outputDirectory>            
 	</fileSet>
-	-->		  
+	-->
+	
+	<fileSet>
+            <directory>bam-resources/caramel/modules/</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/modules</outputDirectory>
+            
+	</fileSet>		  
 
 	<!-- End UES integration files -->  
 	  
