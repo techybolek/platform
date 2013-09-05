@@ -402,7 +402,7 @@ public class AsyncDataPublisher {
                 String streamId = streamIdCache.get(streamKey);
                 if (null != streamId) {
                     dataPublisher.publish(streamId, metaDataArray,
-                                          correlationDataArray, payloadDataArray);
+                                          correlationDataArray, payloadDataArray, arbitraryDataMap);
                 } else {
                     boolean isAdded = publishDataQueue.offer(new PublishData(streamName,
                                                                              streamVersion,
