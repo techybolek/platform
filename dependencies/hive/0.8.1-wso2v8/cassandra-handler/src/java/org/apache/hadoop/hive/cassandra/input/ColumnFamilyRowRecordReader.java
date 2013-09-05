@@ -229,9 +229,6 @@ public class ColumnFamilyRowRecordReader extends ColumnFamilyRecordReader {
         } else {
             if (isCFIncremental) {
                 IncrementalStaticRowIterator incrIter = new IncrementalStaticRowIterator();
-//                String markerName = conf.get(HiveConf.ConfVars.HIVE_INCREMENTAL_MARKER_NAME.toString());
-//                incrIter.startTime = Long.parseLong(conf.get("hive.marker." + markerName + ".from.timestamp"));
-//                incrIter.endTimeStamp = Long.parseLong(conf.get("hive.marker." + markerName + ".to.timestamp"));
                 iter = incrIter;
             } else {
                 iter = new StaticRowIterator();
@@ -381,12 +378,7 @@ public class ColumnFamilyRowRecordReader extends ColumnFamilyRecordReader {
 
     private class IncrementalStaticRowIterator extends RowIterator {
         protected int i = 0;
-        //        private long lastAccessedRowTimeStamp = -1;
-//        private static final String INDEX_SPECIAL_ROW_KEY_NAME = "INDEX_ROW";
-//        private ArrayList<Long> indexRowKeyList = new ArrayList<Long>();
         private static final String EVENT_INDEX_TABLE_PREFIX = "event_index_";
-//        private long startTime;
-//        private long endTimeStamp;
 
         protected final AbstractType<?> indexCFComparator;
         protected final AbstractType<?> indexCFSubComparator;
@@ -432,17 +424,6 @@ public class ColumnFamilyRowRecordReader extends ColumnFamilyRecordReader {
             long aIndexRowKey = 0;
 
             rows = new ArrayList<KeySlice>();
-//             if(totalRead !=0){
-//                  iterStartTime = lastAccessedIndexColumnName + 1;
-//                  aIndexRowKey = lastAccessedIndexRowKey;
-//
-//                  if (incSplit.getEndKey() != -1 && iterStartTime >= incSplit.getEndKey()) {
-//                      // reached end of the split
-//                      i = 0;
-//                      rows = null;
-//                      return;
-//                  }
-//              }
 
             numberOdRowsLoaded = 0;
             boolean finishedSplit = false;
@@ -541,46 +522,6 @@ public class ColumnFamilyRowRecordReader extends ColumnFamilyRecordReader {
             calendar.add(Calendar.HOUR, 1);
             return calendar.getTime().getTime();
         }
-
-//        private void loadIndexCFProps(long startTimeStamp, long endTimeStamp) {
-//            try {
-//
-//                long startColumnName;
-//                if (lastAccessedIndexColumnName == -1) {
-//                    startColumnName = getColumnNameFromTimeStamp(startTimeStamp);
-//                } else {
-//                    startColumnName = getColumnNameFromTimeStamp(lastAccessedRowTimeStamp + 1);
-//                }
-//                long endColumnName = getColumnNameFromTimeStamp(endTimeStamp);
-//
-//                SlicePredicate predicate = new SlicePredicate();
-//
-//                SliceRange sliceRange = new SliceRange();
-//                sliceRange.setStart(ByteBufferUtil.bytes(startColumnName));
-//                sliceRange.setFinish(ByteBufferUtil.bytes(endColumnName));
-//                sliceRange.setCount(Integer.MAX_VALUE);
-//                predicate.setSlice_range(sliceRange);
-//
-//                indexClient.set_keyspace(indexKeySpace);
-//                indexClient.login(authRequest);
-//
-//
-//                List<ColumnOrSuperColumn> indexKeyList = indexClient.get_slice(ByteBuffer.wrap(INDEX_SPECIAL_ROW_KEY_NAME.getBytes()),
-//                        new ColumnParent(indexCfName), predicate, consistencyLevel);
-//
-//
-//                for (ColumnOrSuperColumn aColumn : indexKeyList) {
-//                    long key = aColumn.column.bufferForName().getLong();
-//                    indexRowKeyList.add(key);
-//                    lastAccessedIndexColumnName = key;
-//                }
-//
-//
-//            } catch (Exception ex) {
-//                throw new RuntimeException(ex);
-//            }
-//        }
-
 
         private long getColumnNameFromTimeStamp(long timeStamp) {
             Calendar calendar = Calendar.getInstance();

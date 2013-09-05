@@ -182,6 +182,8 @@ public class CassandraStorageHandler
 
         jobProperties.put(AbstractColumnSerDe.CASSANDRA_CF_COUNTERS,
                 tableProperties.getProperty(AbstractColumnSerDe.CASSANDRA_CF_COUNTERS, "false"));
+        jobProperties.put(AbstractColumnSerDe.CASSANDRA_INCREMENTAL_PROCESSING_ENABLED,
+                tableProperties.getProperty(AbstractColumnSerDe.CASSANDRA_INCREMENTAL_PROCESSING_ENABLED, "false"));
 
          if (Boolean.parseBoolean(conf.get(HiveConf.ConfVars.HIVE_INCREMENTAL_PROCESS_ENABLE.toString()))) {
             String cassandraTableAlias = keyspace + "::" + columnFamily;

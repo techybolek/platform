@@ -53,6 +53,7 @@ public abstract class AbstractColumnSerDe implements SerDe {
   public static final String CASSANDRA_JDBC_URL = "mapred.jdbc.url";
   public static final String CASSANDRA_JDBC_USERNAME = "mapred.jdbc.username";
   public static final String CASSANDRA_JDBC_PASSWORD = "mapred.jdbc.password";
+  public static final String CASSANDRA_INCREMENTAL_PROCESSING_ENABLED = "incremental.processing.enabled";
   public static final String CASSANDRA_SLICE_PREDICATE_COLUMN_NAMES = "cassandra.slice.predicate.column_names";
   public static final String CASSANDRA_SLICE_PREDICATE_RANGE_START = "cassandra.slice.predicate.range.start";
   public static final String CASSANDRA_SLICE_PREDICATE_RANGE_FINISH = "cassandra.slice.predicate.range.finish";
