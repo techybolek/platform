@@ -588,7 +588,7 @@ public class HiveConf extends Configuration {
       HIVE_INCREMENTAL_CASSANDRA_TABLES("hive.incremental.cassandra.tables", ""),
       HIVE_INCREMENTAL_VALID_TO_RUN_HIVE_QUERY("hive.incremental.execution.valid", ""),
       HIVE_INCREMENTAL_PROCESS_ENABLE("hive.incremental", ""),
-      HIVE_INCREMENTAL_PROCESS_KEYSPACE("hive.incremental.index.keyspace", ""),
+      HIVE_INCREMENTAL_PROCESS_KEYSPACE("hive.incremental.index.keyspace", "EVENT_INDEX_KS"),
       HIVE_INCREMENTAL_USERNAME("hive.incremental.index.username", ""),
       HIVE_INCREMENTAL_PASSWORD("hive.incremental.index.password", ""),
       HIVE_INCREMENTAL_TABLE_NAMES("hive.incremental.tables", ""),
