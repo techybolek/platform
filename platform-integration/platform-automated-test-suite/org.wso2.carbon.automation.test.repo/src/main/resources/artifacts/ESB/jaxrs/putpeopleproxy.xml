@@ -1,31 +1,286 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<proxy xmlns="http://ws.apache.org/ns/synapse"
-       name="peoplePutProxy"
-       transports="https,http"
-       statistics="disable"
-       trace="disable"
-       startOnLoad="true">
-    <target>
-        <inSequence>
-            <property name="HTTP_METHOD" value="GET" scope="axis2"/>
-            <property name="messageType"
-                      value="application/x-www-form-urlencoded"
-                      scope="axis2"/>
-            <send>
-                <endpoint>
-                    <http method="post"
-                          uri-template="http://localhost:8080/rest/api/people?email={uri.var.email}&firstName={uri.var.fname}&lastName={uri.var.lname}"/>
-                    <property name="uri.var.fname" value="dhar"/>
-                    <property name="uri.var.email" value="kasun@gmail.com"/>
-                    <property name="uri.var.lname" value="kasun"/>
-                </endpoint>
-            </send>
-        </inSequence>
-        <outSequence>
-            <log level="full"/>
-            <property name="messageType" value="text/xml" scope="axis2"/>
-            <send/>
-        </outSequence>
-    </target>
-    <description/>
-</proxy>
+<definitions xmlns="http://ws.apache.org/ns/synapse">
+    <registry provider="org.wso2.carbon.mediation.registry.WSO2Registry">
+        <parameter name="cachableDuration">15000</parameter>
+    </registry>
+    <proxy name="peoplePostProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <log level="full"/>
+                <property xmlns:per="http://samples.esb.wso2.org"
+                          name="uri.var.email"
+                          expression="//per:email"/>
+                <property xmlns:per="http://samples.esb.wso2.org"
+                          name="uri.var.fname"
+                          expression="//per:firstname"/>
+                <property xmlns:per="http://samples.esb.wso2.org"
+                          name="uri.var.lname"
+                          expression="//per:lastname"/>
+                <log level="custom">
+                    <property name="test" expression="get-property('uri.var.email')"/>
+                </log>
+                <send>
+                    <endpoint>
+                        <http method="post"
+                              uri-template="http://localhost:8080/rest/api/people?email={uri.var.email}&amp;firstName={uri.var.fname}&amp;lastName={uri.var.lname}"/>
+                    </endpoint>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log level="full"/>
+                <property name="messageType" value="text/xml" scope="axis2"/>
+                <payloadFactory media-type="xml">
+                    <format>
+                        <response xmlns="">
+                            <accepted>$1</accepted>
+                            <response_code>$2</response_code>
+                        </response>
+                    </format>
+                    <args>
+                        <arg value="OK"/>
+                        <arg evaluator="xml" expression="get-property('axis2','HTTP_SC')"/>
+                    </args>
+                </payloadFactory>
+                <property name="HTTP_SC" value="200" scope="axis2"/>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
+    <proxy name="peopleOptionProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <property name="HTTP_METHOD" value="OPTIONS" scope="axis2" type="STRING"/>
+                <send>
+                    <endpoint>
+                        <address uri="http://localhost:8080/rest/api/people/options" format="rest"/>
+                    </endpoint>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log>
+                    <property name="test" expression="get-property('axis2','HTTP_SC')"/>
+                </log>
+                <payloadFactory media-type="xml">
+                    <format>
+                        <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope"
+                                          xmlns:per="http://samples.esb.wso2.org">
+                            <soapenv:Header/>
+                            <soapenv:Body>
+                                <per:person>
+                                    <per:response_code>$1</per:response_code>
+                                    <per:Access-Control-Allow-Methods>$2</per:Access-Control-Allow-Methods>
+                                </per:person>
+                            </soapenv:Body>
+                        </soapenv:Envelope>
+                    </format>
+                    <args>
+                        <arg evaluator="xml" expression="get-property('axis2','HTTP_SC')"/>
+                        <arg evaluator="xml" expression="$trp:Access-Control-Allow-Methods"/>
+                    </args>
+                </payloadFactory>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
+    <proxy name="peopleGetProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <property xmlns:per="http://samples.esb.wso2.org"
+                          name="uri.var.email"
+                          expression="//per:email"/>
+                <log level="full"/>
+                <send>
+                    <endpoint>
+                        <http method="get"
+                              uri-template="http://localhost:8080/rest/api/people/{uri.var.email}"/>
+                    </endpoint>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log level="full"/>
+                <property name="HTTP_SC" value="200" scope="axis2"/>
+                <property name="messageType" value="application/soap+xml" scope="axis2"/>
+                <payloadFactory media-type="xml">
+                    <format>
+                        <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope"
+                                          xmlns:per="http://samples.esb.wso2.org">
+                            <soapenv:Header/>
+                            <soapenv:Body>
+                                <per:person>
+                                    <per:email>$1</per:email>
+                                    <per:firstname>$2</per:firstname>
+                                    <per:lastname>$3</per:lastname>
+                                </per:person>
+                            </soapenv:Body>
+                        </soapenv:Envelope>
+                    </format>
+                    <args>
+                        <arg evaluator="xml" expression="//email"/>
+                        <arg evaluator="xml" expression="//firstName"/>
+                        <arg evaluator="xml" expression="//lastName"/>
+                    </args>
+                </payloadFactory>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
+    <proxy name="peopleDeleteProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <log level="full"/>
+                <property xmlns:per="http://samples.esb.wso2.org"
+                          name="uri.var.email"
+                          expression="//per:email"/>
+                <log level="custom">
+                    <property name="test" expression="get-property('uri.var.email')"/>
+                </log>
+                <send>
+                    <endpoint>
+                        <http method="delete"
+                              uri-template="http://localhost:8080/rest/api/people/{uri.var.email}"/>
+                    </endpoint>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log level="full"/>
+                <property name="messageType" value="text/xml" scope="axis2"/>
+                <payloadFactory media-type="xml">
+                    <format>
+                        <response xmlns="">
+                            <accepted>$1</accepted>
+                            <response_code>$2</response_code>
+                        </response>
+                    </format>
+                    <args>
+                        <arg value="Deleted"/>
+                        <arg evaluator="xml" expression="get-property('axis2','HTTP_SC')"/>
+                    </args>
+                </payloadFactory>
+                <property name="HTTP_SC" value="200" scope="axis2"/>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
+    <proxy name="peopleHeadProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <property xmlns:per="http://samples.esb.wso2.org"
+                          name="uri.var.email"
+                          expression="//per:email"/>
+                <property name="messageType" value="application/json" scope="axis2"/>
+                <log level="full"/>
+                <send>
+                    <endpoint>
+                        <http method="head"
+                              uri-template="http://localhost:8080/rest/api/people/{uri.var.email}"/>
+                    </endpoint>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log level="full"/>
+                <property name="messageType" value="application/soap+xml" scope="axis2"/>
+                <payloadFactory media-type="xml">
+                    <format>
+                        <response xmlns="">
+                            <accepted>$1</accepted>
+                            <response_code>$2</response_code>
+                        </response>
+                    </format>
+                    <args>
+                        <arg value="OK"/>
+                        <arg evaluator="xml" expression="get-property('axis2','HTTP_SC')"/>
+                    </args>
+                </payloadFactory>
+                <log level="full"/>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
+    <proxy name="peoplePutProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <log level="full"/>
+                <property xmlns:per="http://samples.esb.wso2.org"
+                          name="uri.var.email"
+                          expression="//per:email"/>
+                <property xmlns:per="http://samples.esb.wso2.org"
+                          name="uri.var.fname"
+                          expression="//per:firstname"/>
+                <property xmlns:per="http://samples.esb.wso2.org"
+                          name="uri.var.lname"
+                          expression="//per:lastname"/>
+                <log level="custom">
+                    <property name="test" expression="get-property('uri.var.email')"/>
+                </log>
+                <send>
+                    <endpoint>
+                        <http method="put"
+                              uri-template="http://localhost:8080/rest/api/people/{uri.var.email}?firstName={uri.var.fname}&amp;lastName={uri.var.lname}"/>
+                    </endpoint>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log level="full"/>
+                <property name="HTTP_SC" value="200" scope="axis2"/>
+                <property name="messageType" value="application/soap+xml" scope="axis2"/>
+                <payloadFactory media-type="xml">
+                    <format>
+                        <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope"
+                                          xmlns:per="http://samples.esb.wso2.org">
+                            <soapenv:Header/>
+                            <soapenv:Body>
+                                <per:person>
+                                    <per:email>$1</per:email>
+                                    <per:firstname>$2</per:firstname>
+                                    <per:lastname>$3</per:lastname>
+                                </per:person>
+                            </soapenv:Body>
+                        </soapenv:Envelope>
+                    </format>
+                    <args>
+                        <arg evaluator="xml" expression="//email"/>
+                        <arg evaluator="xml" expression="//firstName"/>
+                        <arg evaluator="xml" expression="//lastName"/>
+                    </args>
+                </payloadFactory>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
+    <sequence name="fault">
+        <log level="full">
+            <property name="MESSAGE" value="Executing default &#34;fault&#34; sequence"/>
+            <property name="ERROR_CODE" expression="get-property('ERROR_CODE')"/>
+            <property name="ERROR_MESSAGE" expression="get-property('ERROR_MESSAGE')"/>
+        </log>
+        <drop/>
+    </sequence>
+    <sequence name="main">
+        <log/>
+        <drop/>
+    </sequence>
+</definitions>
