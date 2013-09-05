@@ -22,7 +22,6 @@
     <workerThreads>10</workerThreads>
     <eventBufferCapacity>10000</eventBufferCapacity>
     <clientTimeoutMS>30000</clientTimeoutMS>
-    <keySpaceName>EVENT_KS</keySpaceName>
 
 <!-- Default configuration for thriftDataReceiver -->
     <thriftDataReceiver>
