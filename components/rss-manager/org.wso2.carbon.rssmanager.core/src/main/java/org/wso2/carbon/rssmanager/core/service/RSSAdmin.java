@@ -291,8 +291,6 @@ public class RSSAdmin extends AbstractAdmin {
     public String[] getRSSEnvironmentNames() throws RSSManagerException {
         return getRSSManager().getEnvironmentNames();
     }
-    
-
 
      /**
      * Test the RSS instance connection using a mock database connection test.

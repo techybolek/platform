@@ -139,7 +139,7 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
 
         RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
-            throw new RSSManagerException("RSS instance " + rssInstanceName + " does not exist");
+            throw new RSSManagerException("Database " + databaseName + " does not exist");
         }
 
         RSSManagerUtil.checkIfParameterSecured(databaseName);

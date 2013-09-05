@@ -129,7 +129,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
 
         RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
-            String msg = "RSS instance " + rssInstanceName + " does not exist";
+            String msg = "Database " + databaseName + " does not exist";
             log.error(msg);
             throw new EntityNotFoundException(msg);
         }
@@ -143,6 +143,8 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
 
             inTx = getEntityManager().beginTransaction();
             int tenantId = RSSManagerUtil.getTenantId();
+            this.getRSSDAO().getDatabaseUserDAO().deleteUserDatabasePrivilegeEntriesByDatabase(
+                    rssInstance, databaseName, tenantId);
             this.getRSSDAO().getUserDatabaseEntryDAO().removeUserDatabaseEntriesByDatabase(
                     ctx.getEnvironmentName(), rssInstance.getId(), databaseName,
                     rssInstance.getInstanceType(), tenantId);
