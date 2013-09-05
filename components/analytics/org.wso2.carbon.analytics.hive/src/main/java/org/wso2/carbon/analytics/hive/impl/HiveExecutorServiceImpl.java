@@ -402,10 +402,16 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
             incrParameters.put(IncrementalProcessingConstants.SCRIPT_NAME, scriptName);
             incrAnalyzer.setParameters(incrParameters);
             incrAnalyzer.execute();
+            boolean executionSuccess = false;
             try {
-                if (incrAnalyzer.isValidToRunQuery())
+                if (incrAnalyzer.isValidToRunQuery()) {
                     executeHiveQuery(result, hiveQuery, stmt);
-            } finally {
+                }
+                executionSuccess = true;
+            }finally {
+                if (executionSuccess) {
+                    incrAnalyzer.finalizeExecution();
+                }
                 incrAnalyzer.cleanUp();
             }
         }

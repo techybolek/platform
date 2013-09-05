@@ -11,6 +11,7 @@ import org.wso2.carbon.analytics.hive.incremental.util.TimeProcessorUtil;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -45,6 +46,8 @@ public class IncrementalProcessingAnalyzer extends AbstractHiveAnalyzer {
     private long fromTime;
     private long toTime;
 
+    private long lastAccessedTime;
+
 
     public IncrementalProcessingAnalyzer(int tenantId) {
         this.tenantId = tenantId;
@@ -58,18 +61,25 @@ public class IncrementalProcessingAnalyzer extends AbstractHiveAnalyzer {
         init();
         try {
             HashMap<String, String> props = IncrementalMetaStoreManager.getInstance().
-                    getAndUpdateMetaStoreProperties(scriptName, markerName, bufferTime, tenantId, fromTime, toTime);
+                    getMetaStoreProperties(scriptName, markerName, bufferTime, tenantId, fromTime, toTime);
+
+            setLastAccessedTime(props);
 
             for (String aKey : props.keySet()) {
                 setProperty(aKey, props.get(aKey));
             }
-
             isValid = Boolean.parseBoolean(props.get(
                     HiveConf.ConfVars.HIVE_INCREMENTAL_VALID_TO_RUN_HIVE_QUERY.toString()));
         } catch (HiveIncrementalProcessException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
+    }
+
+    private void setLastAccessedTime(Map<String, String> props){
+         lastAccessedTime = Long.parseLong(props.
+                 get(IncrementalProcessingConstants.LAST_ACCESSED_TIME));
+        props.remove(IncrementalProcessingConstants.LAST_ACCESSED_TIME);
     }
 
 
@@ -125,6 +135,11 @@ public class IncrementalProcessingAnalyzer extends AbstractHiveAnalyzer {
             removeProperty(property);
         }
         removeProperty(HiveConf.ConfVars.HIVE_INCREMENTAL_CASSANDRA_TABLES.toString());
+    }
+
+    public void finalizeExecution() throws HiveIncrementalProcessException {
+      IncrementalMetaStoreManager.getInstance().
+              updateMetaStoreProperties(scriptName, markerName, tenantId, lastAccessedTime);
     }
 
     public boolean isValidToRunQuery(){

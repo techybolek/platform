@@ -58,15 +58,17 @@ public class IncrementalMetaStoreManager {
     private IncrementalMetaStoreManager() {
     }
 
-    public HashMap<String, String> getAndUpdateMetaStoreProperties(String scriptName, String markerName, long bufferTimeInMilliS, int tenantId,
-                                                                   long fromTime, long toTime) throws
+    public HashMap<String, String> getMetaStoreProperties(String scriptName, String markerName, long bufferTimeInMilliS, int tenantId,
+                                                          long fromTime, long toTime) throws
             HiveIncrementalProcessException {
 
         HashMap<String, String> hiveExecutionProps = new HashMap<String, String>();
         long fromTimeStamp = 0;
         long toTimeStamp = 0;
+        
         String rowKeyName = getRowKeyForMarkerName(scriptName, markerName, tenantId);
         String cfName = IncrementalProcessingConstants.MARKER_CF_NAME;
+        
         HashMap<String, String> dbProps = getIncrementalDataSourceProperties(tenantId);
         String userName = dbProps.get(IncrementalProcessingConstants.DATASOURCE_PROPS_USERNAME);
         String password = dbProps.get(IncrementalProcessingConstants.DATASOURCE_PROPS_PASSWORD);
@@ -99,6 +101,7 @@ public class IncrementalMetaStoreManager {
         }
 
         hiveExecutionProps.put(getToTimeStampPropertyName(rowKeyName), String.valueOf(toTimeStamp));
+        hiveExecutionProps.put(IncrementalProcessingConstants.LAST_ACCESSED_TIME, String.valueOf(toTimeStamp));
 
         if (fromTimeStamp > toTimeStamp) {
             hiveExecutionProps.put(HiveConf.ConfVars.HIVE_INCREMENTAL_VALID_TO_RUN_HIVE_QUERY.toString(),
@@ -107,11 +110,31 @@ public class IncrementalMetaStoreManager {
             hiveExecutionProps.put(HiveConf.ConfVars.HIVE_INCREMENTAL_VALID_TO_RUN_HIVE_QUERY.toString(),
                     IncrementalProcessingConstants.TRUE);
         }
-        metaStore.updateColumn(cluster, ksName, cfName, rowKeyName,
-                IncrementalProcessingConstants.LAST_ACCESSED_TIME_COLUMN_NAME, toTimeStamp);
-
+        
         hiveExecutionProps.put(HiveConf.ConfVars.HIVE_INCREMENTAL_MARKER_NAME.toString(), rowKeyName);
         return hiveExecutionProps;
+    }
+    
+    public void updateMetaStoreProperties(String scriptName, String markerName, int tenantId, long lastAccessedTime) 
+            throws HiveIncrementalProcessException {
+        String cfName = IncrementalProcessingConstants.MARKER_CF_NAME;
+
+        HashMap<String, String> dbProps = getIncrementalDataSourceProperties(tenantId);
+        String userName = dbProps.get(IncrementalProcessingConstants.DATASOURCE_PROPS_USERNAME);
+        String password = dbProps.get(IncrementalProcessingConstants.DATASOURCE_PROPS_PASSWORD);
+        String ksName = dbProps.get(IncrementalProcessingConstants.DATASOURCE_PROPS_KEYSPACE);
+        if (null == ksName) {
+            ksName = MetaStore.DEFAULT_KS_NAME;
+        }
+
+        MetaStore metaStore = new MetaStore();
+        Cluster cluster = metaStore.getCluster(userName, password);
+
+        String rowKeyName = getRowKeyForMarkerName(scriptName, markerName, tenantId);
+        
+        metaStore.updateColumn(cluster, ksName, cfName, rowKeyName,
+                IncrementalProcessingConstants.LAST_ACCESSED_TIME_COLUMN_NAME, lastAccessedTime);
+        
     }
 
 

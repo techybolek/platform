@@ -40,6 +40,7 @@ public class IncrementalProcessingConstants {
     public static final String SCRIPT_NAME = "scriptName";
     public static final String TRUE = "true";
     public static final String FALSE = "false";
+    public static final String LAST_ACCESSED_TIME = "lastAccessedTime";
 
     public static final String CURRENT_TIME = "$now";
     public static final String DAYS = "d";
