@@ -69,7 +69,7 @@
         		<property name="strategyClass">org.apache.cassandra.locator.SimpleStrategy</property>
         		<property name="readConsistencyLevel">QUORUM</property>
         		<property name="writeConsistencyLevel">QUORUM</property>
-        		<property name="keyspaceName">HIVE_MARKER_META_DATA</property>
+        		<property name="keyspaceName">HIVE_INCREMENTAL_KS</property>
     		</dataSourceProps>
                 </configuration>
             </definition>
