@@ -5,6 +5,7 @@ import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.persistence.cassandra.datastore.CassandraConnector;
 import org.wso2.carbon.databridge.persistence.cassandra.datastore.DataType;
+import org.wso2.carbon.databridge.persistence.cassandra.internal.util.Utils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -30,7 +31,7 @@ public class CassandraSDSUtils {
         if (streamName == null) {
             return null;
         }
-        int keySpaceLength = KeySpaceUtils.getKeySpaceName().length();
+        int keySpaceLength = Utils.getKeySpaceName().length();
         if ((streamName.length() + keySpaceLength) > 48) {
             throw new RuntimeException("The stream name you provided is too long. This has caused the" +
                     " generated key (\"" + streamName + "\") to go " +

@@ -32,11 +32,23 @@ import java.util.Enumeration;
 public class Utils {
 
     private static final String STREAMDEFN_XML = "streamdefn.xml";
+    private static final String REPLICATION_FACTOR_ELEMENT = "ReplicationFactor";
+    private static final String READ_CONSISTENCY_LEVEL_ELEMENT = "ReadConsistencyLevel";
+    private static final String WRITE_CONSISTENCY_LEVEL_ELEMENT = "WriteConsistencyLevel";
+    private static final String STRATEGY_CLASS_ELEMENT = "StrategyClass";
+    private static final String NODE_ID_ELEMENT = "NodeId";
+    private static final String KEY_SPACE_NAME_ELEMENT = "keySpaceName";
+    private static final String INDEX_KEY_SPACE_NAME_ELEMENT = "eventIndexKeySpaceName";
+
+
     private static int replicationFactor;
     private static String readConsistencyLevel;
     private static String writeConsistencyLevel;
     private static String strategyClass;
     private static int nodeId;
+
+    private static String keySpaceName;
+    private static String indexKeySpaceName;
 
     private static ConsistencyLevelPolicy globalConsistencyLevelPolicy;
 
@@ -72,36 +84,48 @@ public class Utils {
 
         OMElement documentElement = builder.getDocumentElement();
 
-        OMElement replicationFactorEl = documentElement.getFirstChildWithName(new QName("ReplicationFactor"));
+        OMElement replicationFactorEl = documentElement.getFirstChildWithName(new QName(REPLICATION_FACTOR_ELEMENT));
         if (replicationFactorEl != null) {
             replicationFactor = Integer.parseInt(replicationFactorEl.getText());
         }
 
-        OMElement readLevelEl = documentElement.getFirstChildWithName(new QName("ReadConsistencyLevel"));
+        OMElement readLevelEl = documentElement.getFirstChildWithName(new QName(READ_CONSISTENCY_LEVEL_ELEMENT));
         if (replicationFactorEl != null) {
             readConsistencyLevel = readLevelEl.getText();
         }
 
-        OMElement writeLevelEl = documentElement.getFirstChildWithName(new QName("WriteConsistencyLevel"));
+        OMElement writeLevelEl = documentElement.getFirstChildWithName(new QName(WRITE_CONSISTENCY_LEVEL_ELEMENT));
         if (writeLevelEl != null) {
             writeConsistencyLevel = writeLevelEl.getText();
         }
 
         globalConsistencyLevelPolicy = new StreamDefnConsistencyLevelPolicy(readConsistencyLevel, writeConsistencyLevel);
         
-        OMElement strategyEl = documentElement.getFirstChildWithName(new QName("StrategyClass"));
+        OMElement strategyEl = documentElement.getFirstChildWithName(new QName(STRATEGY_CLASS_ELEMENT));
         if (strategyEl != null) {
             strategyClass = strategyEl.getText();
         }
 
-         OMElement nodeIdElement = documentElement.getFirstChildWithName(new QName("NodeId"));
+         OMElement nodeIdElement = documentElement.getFirstChildWithName(new QName(NODE_ID_ELEMENT));
         if (nodeIdElement != null){
             nodeId = Integer.parseInt(nodeIdElement.getText());
         }else {
             nodeId = DataReceiverConstants.DEFAULT_RECEIVER_NODE_ID;
         }
 
+        OMElement keySpaceElement = documentElement.getFirstChildWithName(new QName(KEY_SPACE_NAME_ELEMENT));
+        if (nodeIdElement != null){
+            keySpaceName = keySpaceElement.getText();
+        }else {
+            keySpaceName = DataReceiverConstants.DEFAULT_KEY_SPACE_NAME;
+        }
 
+       OMElement indexKeySpaceElement = documentElement.getFirstChildWithName(new QName(INDEX_KEY_SPACE_NAME_ELEMENT));
+        if (nodeIdElement != null){
+            indexKeySpaceName = indexKeySpaceElement.getText();
+        }else {
+            indexKeySpaceName = DataReceiverConstants.DEFAULT_INDEX_KEYSPACE_NAME;
+        }
     }
 
 
@@ -127,5 +151,13 @@ public class Utils {
 
     public static int getNodeId(){
         return nodeId;
+    }
+
+    public static String getKeySpaceName() {
+        return keySpaceName;
+    }
+
+    public static String getIndexKeySpaceName() {
+        return indexKeySpaceName;
     }
 }

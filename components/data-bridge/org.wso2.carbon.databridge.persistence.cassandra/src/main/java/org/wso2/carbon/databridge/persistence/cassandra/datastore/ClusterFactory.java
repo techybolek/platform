@@ -9,8 +9,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.cassandra.dataaccess.ClusterInformation;
 import org.wso2.carbon.databridge.commons.Credentials;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
-import org.wso2.carbon.databridge.persistence.cassandra.Utils.KeySpaceUtils;
 import org.wso2.carbon.databridge.persistence.cassandra.internal.util.ServiceHolder;
+import org.wso2.carbon.databridge.persistence.cassandra.internal.util.Utils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -83,16 +83,9 @@ public class ClusterFactory {
         CassandraConnector connector = ServiceHolder.getCassandraConnector();
         connector.createKeySpaceIfNotExisting(cluster, CassandraConnector.BAM_META_KEYSPACE);
 
-        connector.createKeySpaceIfNotExisting(cluster, KeySpaceUtils.getKeySpaceName());
+        connector.createKeySpaceIfNotExisting(cluster, Utils.getKeySpaceName());
         connector.createKeySpaceIfNotExisting(cluster, CassandraConnector.EVENT_INDEX_KS);
 
-        // Create BAM meta column families if not existing
-//        connector.createColumnFamily(cluster, CassandraConnector.BAM_META_KEYSPACE,
-//                CassandraConnector.BAM_META_STREAM_ID_CF, null);
-//        connector.createColumnFamily(cluster, CassandraConnector.BAM_META_KEYSPACE,
-//                CassandraConnector.BAM_META_STREAM_ID_KEY_CF, null);
-//        connector.createColumnFamily(cluster, CassandraConnector.BAM_META_KEYSPACE,
-//                CassandraConnector.BAM_META_STREAMID_TO_STREAM_ID_KEY);
         connector.createColumnFamily(cluster, CassandraConnector.BAM_META_KEYSPACE,
                 CassandraConnector.BAM_META_STREAM_DEF_CF, null);
     }

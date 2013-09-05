@@ -40,4 +40,7 @@ public final class DataReceiverConstants {
     public static final String HOSTPOOL_PROPERTY = "CASSANDRA_STREAM_DEF_HOST_POOL";
 
     public static final int DEFAULT_RECEIVER_NODE_ID = 0;
+    public static final String DEFAULT_KEY_SPACE_NAME = "EVENT_KS";
+    public static final String DEFAULT_INDEX_KEYSPACE_NAME = "EVENT_INDEX_KS";
+
 }

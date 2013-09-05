@@ -50,7 +50,6 @@ import org.wso2.carbon.databridge.commons.utils.DataBridgeCommonsUtils;
 import org.wso2.carbon.databridge.commons.utils.EventDefinitionConverterUtils;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 import org.wso2.carbon.databridge.persistence.cassandra.Utils.CassandraSDSUtils;
-import org.wso2.carbon.databridge.persistence.cassandra.Utils.KeySpaceUtils;
 import org.wso2.carbon.databridge.persistence.cassandra.caches.CFCache;
 import org.wso2.carbon.databridge.persistence.cassandra.exception.NullValueException;
 import org.wso2.carbon.databridge.persistence.cassandra.inserter.*;
@@ -126,7 +125,7 @@ public class CassandraConnector {
     private boolean IS_PERFORMANCE_MEASURED = false;
 
     public static final String EVENT_INDEX_CF_PREFIX = "event_index_";
-    public static final String EVENT_INDEX_KS = KeySpaceUtils.getIndexKeySpaceName();
+    public static final String EVENT_INDEX_KS = Utils.getIndexKeySpaceName();
     public static final String EVENT_INDEX_ROWS_COL_VAL = "null";
     public static final String EVENT_INDEX_ROWS_KEY = "INDEX_ROW";
 
@@ -381,7 +380,7 @@ public class CassandraConnector {
 
 
             if (log.isTraceEnabled()) {
-                KeyspaceDefinition keyspaceDefinition = cluster.describeKeyspace(KeySpaceUtils.getKeySpaceName());
+                KeyspaceDefinition keyspaceDefinition = cluster.describeKeyspace(Utils.getKeySpaceName());
                 log.trace("Keyspace desc. : " + keyspaceDefinition);
 
                 String CFInfo = "CFs present \n";
@@ -656,8 +655,8 @@ public class CassandraConnector {
 
         try {
             //todo move this to defineStream
-            if (!CFCache.getCF(cluster, KeySpaceUtils.getKeySpaceName(), CFName)) {
-                createColumnFamily(cluster, KeySpaceUtils.getKeySpaceName(), CFName, streamDefinition);
+            if (!CFCache.getCF(cluster, Utils.getKeySpaceName(), CFName)) {
+                createColumnFamily(cluster, Utils.getKeySpaceName(), CFName, streamDefinition);
             }
 
 
@@ -734,7 +733,7 @@ public class CassandraConnector {
 
     private void deleteDataFromStreamDefinition(Credentials credentials, Cluster cluster,
                                                 String streamId) {
-        Keyspace keyspace = getKeyspace(KeySpaceUtils.getKeySpaceName(), cluster);
+        Keyspace keyspace = getKeyspace(Utils.getKeySpaceName(), cluster);
 
         String CFName = CassandraSDSUtils.convertStreamNameToCFName(
                 DataBridgeCommonsUtils.getStreamNameFromStreamId(streamId));
@@ -859,17 +858,17 @@ public class CassandraConnector {
         ColumnFamilyDefinition cfDef = null;
         ColumnFamilyDefinition indexCfDef = null;
         try {
-            cfDef = getColumnFamily(cluster, KeySpaceUtils.getKeySpaceName(), CFName);
+            cfDef = getColumnFamily(cluster, Utils.getKeySpaceName(), CFName);
             indexCfDef = getColumnFamily(cluster, CassandraConnector.EVENT_INDEX_KS,
                     CassandraSDSUtils.getIndexColumnFamilyName(CFName));
 
-            if (!CFCache.getCF(cluster, KeySpaceUtils.getKeySpaceName(), CFName)) {
+            if (!CFCache.getCF(cluster, Utils.getKeySpaceName(), CFName)) {
                 if (cfDef == null) {
-                    cfDef = createColumnFamily(cluster, KeySpaceUtils.getKeySpaceName(), CFName,
+                    cfDef = createColumnFamily(cluster, Utils.getKeySpaceName(), CFName,
                             streamDefinition);
                     return;
                 } else {
-                    CFCache.putCF(cluster, KeySpaceUtils.getKeySpaceName(), CFName, true);
+                    CFCache.putCF(cluster, Utils.getKeySpaceName(), CFName, true);
                 }
             }
 
@@ -1154,7 +1153,7 @@ public class CassandraConnector {
     }
 
     Mutator<String> getMutator(Cluster cluster) throws StreamDefinitionStoreException {
-        Keyspace keyspace = getKeyspace(KeySpaceUtils.getKeySpaceName(), cluster);
+        Keyspace keyspace = getKeyspace(Utils.getKeySpaceName(), cluster);
         return HFactory.createMutator(keyspace, stringSerializer);
     }
 
