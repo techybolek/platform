@@ -30,6 +30,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.*;
 import org.apache.hadoop.hive.serde2.typeinfo.PrimitiveTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.StringUtils;
 
 import java.nio.ByteBuffer;
@@ -38,7 +39,8 @@ import java.util.ArrayList;
 /**
  * IncrementalUDAFAverage.
  */
-@Description(name = "avg", value = "_FUNC_(x) - Returns the mean of a set of numbers")
+@Description(name = "avg", value = "_FUNC_(x, id) - Returns the mean of a set by " +
+        "considering the last processed results")
 public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
 
     static final Log LOG = LogFactory.getLog(IncrementalUDAFAverage.class.getName());
@@ -46,11 +48,25 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
     @Override
     public GenericUDAFEvaluator getEvaluator(TypeInfo[] parameters)
             throws SemanticException {
+        if(parameters.length != 2){
+           throw new UDFArgumentTypeException(parameters.length - 1,
+          "Exactly two arguments are expected in incr_avg function. But found "+parameters.length);
+        }
+
         if (parameters[0].getCategory() != ObjectInspector.Category.PRIMITIVE) {
             throw new UDFArgumentTypeException(0,
                     "Only primitive type arguments are accepted but "
                             + parameters[0].getTypeName() + " is passed.");
         }
+
+        if (parameters[1].getCategory() != ObjectInspector.Category.PRIMITIVE ||
+                !((PrimitiveTypeInfo) parameters[1]).getPrimitiveCategory().
+                        equals(PrimitiveObjectInspector.PrimitiveCategory.STRING)) {
+            throw new UDFArgumentTypeException(1,
+                    "Only String type is accepted but "
+                            + parameters[0].getTypeName() + " is passed for operation Id.");
+        }
+
 
         switch (((PrimitiveTypeInfo) parameters[0]).getPrimitiveCategory()) {
             case BYTE:
@@ -74,20 +90,22 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
      * IncrementalUDAFAverageEvaluator.
      */
     public static class IncrementalUDAFAverageEvaluator extends IncrementalGenericUDAFEvaluator {
+        private static final String SUM_VARIABLE = "sum";
+        private static final String COUNT_VARIABLE = "count";
 
         // For PARTIAL1 and COMPLETE
         PrimitiveObjectInspector inputOI;
-//        PrimitiveObjectInspector[] groupByOI;
+        PrimitiveObjectInspector idOI;
 
-        // For PARTIAL2 and FINAL
+//        For PARTIAL2 and FINAL
         StructObjectInspector soi;
         StructField countField;
         StructField sumField;
+        StructField idField;
 
-        //        StructField groupByField;
         LongObjectInspector countFieldOI;
         DoubleObjectInspector sumFieldOI;
-        StringObjectInspector groupByFieldOI;
+        StringObjectInspector idFieldOI;
 
         // For PARTIAL1 and PARTIAL2
         Object[] partialResult;
@@ -105,23 +123,18 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
             // init input
             if (mode == Mode.PARTIAL1 || mode == Mode.COMPLETE) {
                 inputOI = (PrimitiveObjectInspector) parameters[0];
-//                if (parameters.length > 1) {
-//                    groupByOI = new PrimitiveObjectInspector[parameters.length - 1];
-//
-//                    for (int i = 1; i < parameters.length; i++) {
-//                        groupByOI[i-1] = (PrimitiveObjectInspector) parameters[i];
-//                    }
-//                }
+                idOI = (PrimitiveObjectInspector) parameters[1];
+
             } else {
                 soi = (StructObjectInspector) parameters[0];
                 countField = soi.getStructFieldRef("count");
                 sumField = soi.getStructFieldRef("sum");
-//                groupByField = soi.getStructFieldRef("groupByString");
+                idField = soi.getStructFieldRef("operationId");
 
                 countFieldOI = (LongObjectInspector) countField
                         .getFieldObjectInspector();
                 sumFieldOI = (DoubleObjectInspector) sumField.getFieldObjectInspector();
-//                groupByFieldOI = (StringObjectInspector) groupByField.getFieldObjectInspector();
+                idFieldOI = (StringObjectInspector) idField.getFieldObjectInspector();
             }
 
             // init output
@@ -132,15 +145,15 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
                 ArrayList<ObjectInspector> foi = new ArrayList<ObjectInspector>();
                 foi.add(PrimitiveObjectInspectorFactory.writableLongObjectInspector);
                 foi.add(PrimitiveObjectInspectorFactory.writableDoubleObjectInspector);
-//                foi.add(PrimitiveObjectInspectorFactory.writableStringObjectInspector);
+                foi.add(PrimitiveObjectInspectorFactory.writableStringObjectInspector);
                 ArrayList<String> fname = new ArrayList<String>();
                 fname.add("count");
                 fname.add("sum");
-//                fname.add("groupByString");
-                partialResult = new Object[2];
+                fname.add("operationId");
+                partialResult = new Object[3];
                 partialResult[0] = new LongWritable(0);
                 partialResult[1] = new DoubleWritable(0);
-//                partialResult[2] = new Text();
+                partialResult[2] = new Text();
                 return ObjectInspectorFactory.getStandardStructObjectInspector(fname,
                         foi);
 
@@ -155,11 +168,16 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
             long count;
             double sum;
             String groupByString;
-            String name;
+            String id;
 
             public void setRowKey(String key) {
                 groupByString = key;
             }
+
+            public void setId(String operationId){
+                id = operationId;
+            }
+
 
         }
 
@@ -176,7 +194,7 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
             myagg.count = 0;
             myagg.sum = 0;
             myagg.groupByString = "";
-            myagg.name = "";
+            myagg.id = "";
         }
 
         boolean warned = false;
@@ -186,14 +204,17 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
                 throws HiveException {
             assert (parameters.length == 1);
             Object p = parameters[0];
+            Object id = parameters[1];
 
             if (p != null) {
                 IncrementalAverageAgg myagg = (IncrementalAverageAgg) agg;
                 try {
                     double v = PrimitiveObjectInspectorUtils.getDouble(p, inputOI);
+                    String idValue = PrimitiveObjectInspectorUtils.getString(id, idOI);
 
                     myagg.count++;
                     myagg.sum += v;
+                    myagg.id = idValue;
                 } catch (NumberFormatException e) {
                     if (!warned) {
                         warned = true;
@@ -211,6 +232,7 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
             IncrementalAverageAgg myagg = (IncrementalAverageAgg) agg;
             ((LongWritable) partialResult[0]).set(myagg.count);
             ((DoubleWritable) partialResult[1]).set(myagg.sum);
+            ((Text) partialResult[2]).set(myagg.id);
             return partialResult;
         }
 
@@ -221,9 +243,11 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
                 IncrementalAverageAgg myagg = (IncrementalAverageAgg) agg;
                 Object partialCount = soi.getStructFieldData(partial, countField);
                 Object partialSum = soi.getStructFieldData(partial, sumField);
+                Object partialId = soi.getStructFieldData(partial, idField);
 
                 myagg.count += countFieldOI.get(partialCount);
                 myagg.sum += sumFieldOI.get(partialSum);
+                myagg.id = idFieldOI.getPrimitiveJavaObject(partialId);
             }
         }
 
@@ -243,11 +267,13 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
             IncrementalAverageAgg myagg = (IncrementalAverageAgg) agg;
             double lastProcessedSum = 0;
             long lastCount = 0;
-            ByteBuffer sumValue = getLastProcessedValue(myagg.groupByString, "sum_x");
+            ByteBuffer sumValue = getLastProcessedValue(myagg.groupByString,
+                    getVariableId(SUM_VARIABLE, myagg.id));
             if (null != sumValue) {
                 lastProcessedSum = sumValue.getDouble();
             }
-            ByteBuffer countValue = getLastProcessedValue(myagg.groupByString, "count_x");
+            ByteBuffer countValue = getLastProcessedValue(myagg.groupByString,
+                    getVariableId(COUNT_VARIABLE, myagg.id));
             if (null != countValue) {
                 lastCount = countValue.getLong();
             }
@@ -259,12 +285,18 @@ public class IncrementalUDAFAverage extends AbstractGenericUDAFResolver {
                 return null;
             } else {
                 result.set(finalSum / finalCount);
-                insertProcessedValue(myagg.groupByString, "sum_x", PrimitiveObjectInspector.PrimitiveCategory.DOUBLE,
+                insertProcessedValue(myagg.groupByString, getVariableId(SUM_VARIABLE, myagg.id),
+                        PrimitiveObjectInspector.PrimitiveCategory.DOUBLE,
                         ByteBufferUtil.bytes(finalSum).array());
-                insertProcessedValue(myagg.groupByString, "count_x", PrimitiveObjectInspector.PrimitiveCategory.LONG,
+                insertProcessedValue(myagg.groupByString, getVariableId(COUNT_VARIABLE, myagg.id),
+                        PrimitiveObjectInspector.PrimitiveCategory.LONG,
                         ByteBufferUtil.bytes(finalCount).array());
                 return result;
             }
+        }
+
+        private String getVariableId(String variableName, String id){
+          return variableName+"_"+id;
         }
 
 

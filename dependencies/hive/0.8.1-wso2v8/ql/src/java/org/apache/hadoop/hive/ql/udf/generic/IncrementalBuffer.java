@@ -17,4 +17,5 @@ package org.apache.hadoop.hive.ql.udf.generic;
  */
 public interface IncrementalBuffer {
     public void setRowKey(String key);
+    public void setId(String id);
 }

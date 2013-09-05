@@ -58,6 +58,12 @@ public class GenericUDAFAverage extends AbstractGenericUDAFResolver {
           "Only primitive type arguments are accepted but "
           + parameters[0].getTypeName() + " is passed.");
     }
+
+    if(parameters[0].getCategory() != ObjectInspector.Category.PRIMITIVE) {
+      throw new UDFArgumentTypeException(0,
+          "Only primitive type arguments are accepted but "
+          + parameters[0].getTypeName() + " is passed.");
+    }
     switch (((PrimitiveTypeInfo) parameters[0]).getPrimitiveCategory()) {
     case BYTE:
     case SHORT:
