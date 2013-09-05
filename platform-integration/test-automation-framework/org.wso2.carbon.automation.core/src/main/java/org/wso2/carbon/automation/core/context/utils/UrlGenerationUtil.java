@@ -51,7 +51,6 @@ public class UrlGenerationUtil {
         httpPort = automationInstance.getHttpPort();
         hostName = automationInstance.getHost();
         webContextRoot = automationInstance.getWebContext();
-        automationContext.getUserManagerContext().getTenant(domain).getTenantUser(tenantUserId);
         if ((nhttpPort == null && nhttpsPort == null) && httpPort == null && httpsPort == null) {
             portEnabled = false;
         }

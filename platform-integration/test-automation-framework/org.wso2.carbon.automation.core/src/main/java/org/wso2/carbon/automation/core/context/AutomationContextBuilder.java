@@ -41,7 +41,7 @@ public class AutomationContextBuilder {
     private String instanceGroup = null;
     private String instanceName = null;
     private String domain = null;
-    private String userId = null;
+    private User user;
 
     public AutomationContextBuilder(String instanceGroup) {
         automationContextFactory = new AutomationContextFactory();
@@ -61,13 +61,15 @@ public class AutomationContextBuilder {
      * Builds the environment with the given domain with either as tenant admin or tenant user
      *
      * @param domain          The Domain configured in automation.xml
-     * @param runAsSuperAdmin Whether the test is running as a super tenant or not.
+     * @param runAsTenantAdmin Whether the test is running as a super tenant or not.
      */
-    public void build(String domain, boolean runAsSuperAdmin) {
+    public void build(String domain, boolean runAsTenantAdmin) {
         automationContext = automationContextFactory.getAutomationContext();
+        this.user = new User();
         this.domain = domain;
-        if (runAsSuperAdmin) {
-            this.userId = ContextConstants.TENANT_ADMIN_KEY;
+        if (runAsTenantAdmin) {
+            this.user =automationContext.getUserManagerContext()
+                    .getTenant(domain).getTenantAdmin();
         }
         automationContextFactory.createAutomationContext(instanceGroup, instanceName,
                 domain, ContextConstants.TENANT_ADMIN_KEY);
@@ -82,7 +84,9 @@ public class AutomationContextBuilder {
      */
     public void build(String domain, String tenantUserKey) {
         this.domain = domain;
-        this.userId = tenantUserKey;
+        this.user = new User();
+        this.user =automationContext.getUserManagerContext()
+                .getTenant(domain).getTenantUser(tenantUserKey);
         automationContextFactory.createAutomationContext(instanceGroup, instanceName,
                 domain, tenantUserKey);
         automationContext = automationContextFactory.getAutomationContext();
@@ -99,8 +103,6 @@ public class AutomationContextBuilder {
         UserAuthenticationUtil util = new UserAuthenticationUtil
                 (automationContext.getEnvironmentContext()
                         .getEnvironmentConfigurations().getBackEndUrl());
-        User user = automationContext.getUserManagerContext()
-                .getTenant(domain).getTenantUser(userId);
         sessionCookie = util.login(user.getUserName(), user.getPassword(),
                 automationContext.getPlatformContext().getInstanceGroup(instanceGroup)
                         .getInstance(instanceName).getHost());
@@ -123,7 +125,7 @@ public class AutomationContextBuilder {
      * @return User
      */
     public User getAssignedUser() {
-        return automationContext.getUserManagerContext().getTenant(domain).getTenantUser(userId);
+       return user;
     }
 
     /**
