@@ -20,6 +20,7 @@ package org.wso2.carbon.rssmanager.core.manager.impl.oracle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.*;
@@ -72,7 +73,7 @@ public class OracleSystemRSSManager extends SystemRSSManager {
         /* Sets the fully qualified username */
         user.setName(qualifiedUsername);
         user.setRssInstanceName(user.getRssInstanceName());
-        user.setType(this.inferUserType(user.getRssInstanceName()));
+        user.setType(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
 
         RSSInstance rssInstance = this.getRoundRobinAssignedDatabaseServer(ctx);
         if (rssInstance == null) {
@@ -139,6 +140,7 @@ public class OracleSystemRSSManager extends SystemRSSManager {
 
             /* Initiating the transaction */
             inTx = this.getEntityManager().beginTransaction();
+
             final int tenantId = RSSManagerUtil.getTenantId();
             this.getRSSDAO().getDatabaseUserDAO().removeDatabasePrivileges(
                     ctx.getEnvironmentName(), rssInstance.getId(), username, tenantId);

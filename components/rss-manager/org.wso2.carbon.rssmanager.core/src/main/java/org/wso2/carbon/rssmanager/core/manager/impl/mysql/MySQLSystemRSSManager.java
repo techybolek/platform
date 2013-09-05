@@ -82,7 +82,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
             database.setRssInstanceName(rssInstance.getName());
             String databaseUrl = RSSManagerUtil.composeDatabaseUrl(rssInstance, qualifiedDatabaseName);
             database.setUrl(databaseUrl);
-            database.setType(this.inferEntityType(ctx, rssInstance.getName()));
+            database.setType(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
 
             final int tenantId = RSSManagerUtil.getTenantId();
             /* creates a reference to the database inside the metadata repository */
@@ -201,7 +201,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
             /* Sets the fully qualified username */
             user.setName(qualifiedUsername);
             user.setRssInstanceName(user.getRssInstanceName());
-            user.setType(this.inferUserType(user.getRssInstanceName()));
+            user.setType(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
 
             for (RSSInstanceDSWrapper wrapper :
                     getEnvironment(ctx).getDSWrapperRepository().getAllRSSInstanceDSWrappers()) {

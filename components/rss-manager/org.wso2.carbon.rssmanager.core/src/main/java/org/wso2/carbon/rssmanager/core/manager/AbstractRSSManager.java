@@ -666,20 +666,7 @@ public abstract class AbstractRSSManager implements RSSManager {
                 this.getRoundRobinAssignedDatabaseServer(ctx) :
                 this.getRSSInstance(ctx, rssInstanceName);
     }
-
-    protected String inferEntityType(RSSEnvironmentContext ctx,
-                                   String rssInstanceName) throws RSSManagerException {
-        return (getEnvironment(ctx).getDSWrapperRepository().getRSSInstanceDSWrapper(rssInstanceName) != null) ?
-                RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE :
-                RSSManagerConstants.USER_DEFINED_INSTANCE_TYPE;
-    }
-
-    protected String inferUserType(String rssInstanceName) throws RSSManagerException {
-        return (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) ?
-                RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE :
-                RSSManagerConstants.USER_DEFINED_INSTANCE_TYPE;
-    }
-
+    
     protected Connection getConnection(RSSEnvironmentContext ctx, String rssInstanceName) throws RSSManagerException {
         RSSInstanceDSWrapper dsWrapper = getEnvironment(ctx).getDSWrapperRepository().
                 getRSSInstanceDSWrapper(rssInstanceName);
