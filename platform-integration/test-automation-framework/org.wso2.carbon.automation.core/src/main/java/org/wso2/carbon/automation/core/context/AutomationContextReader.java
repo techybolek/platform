@@ -45,17 +45,15 @@ import java.util.List;
 
 public class AutomationContextReader {
     private static final Log log = LogFactory.getLog(AutomationContextReader.class);
-    AutomationContextReader contextReaderInstance;
-    AutomationContext automationContext;
-    XMLStreamReader xmlStream = null;
+    private AutomationContextReader contextReaderInstance;
+    private AutomationContext automationContext;
+    private XMLStreamReader xmlStream = null;
 
     public AutomationContextReader readAutomationContext() {
         if (contextReaderInstance == null) {
             synchronized (AutomationContextReader.class) {
-                if (contextReaderInstance == null) {
                     contextReaderInstance = new AutomationContextReader();
                     readContext();
-                }
             }
         }
         return contextReaderInstance;

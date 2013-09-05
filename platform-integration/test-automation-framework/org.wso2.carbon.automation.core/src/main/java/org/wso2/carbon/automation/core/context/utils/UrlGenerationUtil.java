@@ -24,6 +24,7 @@ import org.wso2.carbon.automation.core.context.platformcontext.Instance;
 public class UrlGenerationUtil {
 
     AutomationContext automationContext;
+    Instance automationInstance;
     String nhttpsPort;
     String nhttpPort;
     String httpsPort;
@@ -39,8 +40,9 @@ public class UrlGenerationUtil {
             (AutomationContext context, String instanceGroupName, String instanceName,
              String domain, String tenantUserId) {
         automationContext = new AutomationContext();
+        automationInstance = new Instance();
         automationContext = context;
-        Instance automationInstance = new Instance();
+
               automationInstance=  automationContext.getPlatformContext()
                 .getInstanceGroup(instanceGroupName).getInstance(instanceName);
         nhttpsPort = automationInstance.getNhttpsPort();

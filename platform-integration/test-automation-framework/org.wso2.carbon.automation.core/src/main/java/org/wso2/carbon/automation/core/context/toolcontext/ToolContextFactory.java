@@ -32,12 +32,12 @@ public class ToolContextFactory {
 
 
     ToolContext toolContext;
-
+    Selenium selenium;
 
 
     public ToolContextFactory() {
         toolContext = new ToolContext();
-
+        selenium = new Selenium();
     }
 
     public ToolContext getToolContext() {
@@ -52,7 +52,6 @@ public class ToolContextFactory {
      * @param nodeElement OMElement input from the xml reader
      */
     public void createToolContext(OMElement nodeElement) {
-
         Iterator children = nodeElement.getChildElements();
         OMElement element;
         while (children.hasNext()) {
@@ -62,7 +61,7 @@ public class ToolContextFactory {
 
             //here check for the each tool
             if (toolName.equals(ContextConstants.TOOL_CONTEXT_TOOL_SELENIUM)) {
-                Selenium selenium = new Selenium();
+
                 selenium = createSelenium(element);
                 toolContext.setSelenium(selenium);
 

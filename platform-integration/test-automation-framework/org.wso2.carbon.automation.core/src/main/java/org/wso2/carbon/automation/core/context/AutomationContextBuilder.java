@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.automation.core.context;
 
-import org.apache.axis2.AxisFault;
+
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.automation.core.context.configurationcontext.ConfigurationContext;
 import org.wso2.carbon.automation.core.context.contextenum.Platforms;
@@ -35,24 +35,26 @@ import java.util.List;
  * The builder class for the automation context based on the automation.xml
  */
 public class AutomationContextBuilder {
-    AutomationContext automationContext;
-    AutomationContextFactory automationContextFactory;
-    String instanceGroup = null;
-    String instanceName = null;
-    String domain = null;
-    String userId = null;
+    private AutomationContext automationContext;
+    private AutomationContextFactory automationContextFactory;
+    AutomationContext basicContext;
+    private String instanceGroup = null;
+    private String instanceName = null;
+    private String domain = null;
+    private String userId = null;
 
     public AutomationContextBuilder(String instanceGroup) {
         automationContextFactory = new AutomationContextFactory();
         this.instanceGroup = instanceGroup;
         this.instanceName = getInstanceByGroup().getName();
-
+        this.basicContext = new AutomationContext();
     }
 
     public AutomationContextBuilder(String instanceGroup, String instanceName) {
         automationContextFactory = new AutomationContextFactory();
         this.instanceGroup = instanceGroup;
         this.instanceName = instanceName;
+        this.basicContext = new AutomationContext();
     }
 
     /**
@@ -64,7 +66,9 @@ public class AutomationContextBuilder {
     public void build(String domain, boolean runAsSuperAdmin) {
         automationContext = automationContextFactory.getAutomationContext();
         this.domain = domain;
-        this.userId = ContextConstants.TENANT_ADMIN_KEY;
+        if (runAsSuperAdmin) {
+            this.userId = ContextConstants.TENANT_ADMIN_KEY;
+        }
         automationContextFactory.createAutomationContext(instanceGroup, instanceName,
                 domain, ContextConstants.TENANT_ADMIN_KEY);
 
@@ -138,7 +142,7 @@ public class AutomationContextBuilder {
     }
 
     private Instance getInstanceByGroup() {
-        AutomationContext basicContext = new AutomationContext();
+
         Instance instance = new Instance();
         basicContext = automationContextFactory.getBasicContext();
         ConfigurationContext configuration = basicContext.getConfigurationContext();
@@ -150,7 +154,7 @@ public class AutomationContextBuilder {
                 .getInstanceGroup(instanceGroup).getInstances();
         List<Instance> lbList = basicContext.getPlatformContext()
                 .getInstanceGroup(instanceGroup).getLoadBalancerInstances();
-        //If the execution mode is platform it looks for whetherinstance group is clustered
+        //If the execution mode is platform it looks for whether instance group is clustered
         if (configuration.getConfiguration().getExecutionEnvironment()
                 .equals(Platforms.platform.name())) {
            /*if clustered default instance is manager fronted LB

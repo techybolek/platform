@@ -32,13 +32,14 @@ import java.util.Iterator;
  * This class provided the SecurityContext object related to the autoconfig.xml security node
  */
 public class SecurityContextFactory {
-    XMLStreamReader xmlStream = null;
-    private HashMap<String, KeyStore> keyStoreMap = new HashMap<String, KeyStore>();
-    private HashMap<String, TrustStore> trustStoreMap = new HashMap<String, TrustStore>();
+    private HashMap<String, KeyStore> keyStoreMap;
+    private HashMap<String, TrustStore> trustStoreMap;
     SecurityContext securityContext;
 
     public SecurityContextFactory() {
         securityContext = new SecurityContext();
+        keyStoreMap = new HashMap<String, KeyStore>();
+        trustStoreMap = new HashMap<String, TrustStore>();
     }
 
     /**
