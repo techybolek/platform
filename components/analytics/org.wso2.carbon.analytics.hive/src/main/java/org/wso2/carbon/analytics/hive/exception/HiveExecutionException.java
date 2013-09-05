@@ -23,6 +23,12 @@ private String message;
         this.message = message;
     }
 
+    public HiveExecutionException(Throwable throwable) {
+        super(throwable.getMessage());
+        this.message = throwable.getMessage();
+    }
+
+
     public HiveExecutionException(String message, Throwable t) {
         super(message, t);
         this.message = message;

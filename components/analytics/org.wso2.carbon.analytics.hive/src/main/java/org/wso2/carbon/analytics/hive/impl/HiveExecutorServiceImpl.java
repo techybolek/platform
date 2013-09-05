@@ -680,7 +680,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
             result.addQueryResult(queryResult);
         }
 
-        private void executeClassAnalyzer(String trimmedCmdLine) {
+        private void executeClassAnalyzer(String trimmedCmdLine) throws HiveExecutionException {
             String[] tokens = trimmedCmdLine.split("\\s+");
             if (tokens != null && tokens.length >= 2) {
                 String className = tokens[1];

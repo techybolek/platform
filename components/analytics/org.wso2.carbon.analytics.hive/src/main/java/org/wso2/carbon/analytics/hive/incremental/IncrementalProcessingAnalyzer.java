@@ -7,6 +7,7 @@ import org.wso2.carbon.analytics.hive.exception.HiveIncrementalProcessException;
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
 import org.wso2.carbon.analytics.hive.incremental.metadb.IncrementalMetaStoreManager;
 import org.wso2.carbon.analytics.hive.incremental.util.IncrementalProcessingConstants;
+import org.wso2.carbon.analytics.hive.incremental.util.TimeProcessorUtil;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,22 +38,27 @@ public class IncrementalProcessingAnalyzer extends AbstractHiveAnalyzer {
     private boolean isValid;
 
     private String markerName;
-    private int bufferTime;
+    private long bufferTime;
     private String scriptName;
-    private int tenantId = -1;
+    private int tenantId;
+
+    private long fromTime;
+    private long toTime;
 
 
     public IncrementalProcessingAnalyzer(int tenantId) {
         this.tenantId = tenantId;
+        this.fromTime = -1;
+        this.toTime = -1;
     }
 
 
     @Override
-    public void execute() {
+    public void execute() throws HiveIncrementalProcessException {
         init();
         try {
             HashMap<String, String> props = IncrementalMetaStoreManager.getInstance().
-                    getAndUpdateMetaStoreProperties(scriptName, markerName, bufferTime, tenantId);
+                    getAndUpdateMetaStoreProperties(scriptName, markerName, bufferTime, tenantId, fromTime, toTime);
 
             for (String aKey : props.keySet()) {
                 setProperty(aKey, props.get(aKey));
@@ -62,6 +68,7 @@ public class IncrementalProcessingAnalyzer extends AbstractHiveAnalyzer {
                     HiveConf.ConfVars.HIVE_INCREMENTAL_VALID_TO_RUN_HIVE_QUERY.toString()));
         } catch (HiveIncrementalProcessException e) {
             log.error(e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -70,7 +77,7 @@ public class IncrementalProcessingAnalyzer extends AbstractHiveAnalyzer {
         this.params = properties;
     }
 
-    private void init() {
+    private void init() throws HiveIncrementalProcessException {
         markerName = params.get(IncrementalProcessingConstants.
                 INCREMENTAL_MARKER_NAME_PROPERY);
         String tableNames = params.get(IncrementalProcessingConstants
@@ -84,6 +91,11 @@ public class IncrementalProcessingAnalyzer extends AbstractHiveAnalyzer {
         if (null != bufferTimeStr) {
             bufferTime = Integer.parseInt(bufferTimeStr);
         }
+
+        fromTime = TimeProcessorUtil.getTimeStamp(params.
+                get(IncrementalProcessingConstants.INCREMENTAL_FROM_TIME));
+        toTime = TimeProcessorUtil.getTimeStamp(params.
+                get(IncrementalProcessingConstants.INCREMENTAL_TO_TIME));
 
         scriptName = params.get(IncrementalProcessingConstants.SCRIPT_NAME);
 
@@ -118,6 +130,7 @@ public class IncrementalProcessingAnalyzer extends AbstractHiveAnalyzer {
     public boolean isValidToRunQuery(){
       return isValid;
     }
+
 
 
 }

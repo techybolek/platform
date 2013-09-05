@@ -35,7 +35,14 @@ public class IncrementalProcessingConstants {
     public static final String INCREMENTAL_MARKER_NAME_PROPERY = "name";
     public static final String INCREMENTAL_MARKER_TABLES = "tables";
     public static final String INCREMENTAL_BUFFER_TIME = "bufferTime";
+    public static final String INCREMENTAL_FROM_TIME = "fromTime";
+    public static final String INCREMENTAL_TO_TIME = "toTime";
     public static final String SCRIPT_NAME = "scriptName";
     public static final String TRUE = "true";
     public static final String FALSE = "false";
+
+    public static final String CURRENT_TIME = "$now";
+    public static final String DAYS = "d";
 }
+
+

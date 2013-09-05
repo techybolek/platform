@@ -58,7 +58,7 @@ public class MetaStore {
     public static String DEFAULT_STRATEGY_CLASS = "org.apache.cassandra.locator.SimpleStrategy";
     public static String DEFAULT_CONSISTENCY_LEVEL = "QUORUM";
     public static int DEFAULT_REPLICATION_FACTOR = 1;
-    public static String DEFAULT_KS_NAME = "HIVE_META_KS";
+    public static String DEFAULT_KS_NAME = "HIVE_INCREMENTAL_KS";
 
     public Cluster getCluster(String username, String password) {
         ClusterInformation clusterInformation = new ClusterInformation(username, password);

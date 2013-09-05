@@ -15,11 +15,11 @@ package org.wso2.carbon.analytics.hive.exception;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class HiveIncrementalProcessException extends Exception {
+public class HiveIncrementalProcessException extends HiveExecutionException {
     private String message;
 
     public HiveIncrementalProcessException(String message) {
-        super();
+        super(message);
         this.message = message;
     }
 
