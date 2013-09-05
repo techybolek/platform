@@ -126,7 +126,7 @@ public class CassandraConnector {
     private boolean IS_PERFORMANCE_MEASURED = false;
 
     public static final String EVENT_INDEX_CF_PREFIX = "event_index_";
-    public static final String EVENT_META_KS = "EVENT_INDEX_KS";
+    public static final String EVENT_INDEX_KS = KeySpaceUtils.getIndexKeySpaceName();
     public static final String EVENT_INDEX_ROWS_COL_VAL = "null";
     public static final String EVENT_INDEX_ROWS_KEY = "INDEX_ROW";
 
@@ -361,7 +361,7 @@ public class CassandraConnector {
         StreamDefinition streamDef;
 
         Mutator<String> mutator = getMutator(cluster);
-        Mutator<String> eventIndexMutator = getMutator(cluster, CassandraConnector.EVENT_META_KS);
+        Mutator<String> eventIndexMutator = getMutator(cluster, CassandraConnector.EVENT_INDEX_KS);
 
         List<String> rowKeyList = new ArrayList<String>();
         startTimeMeasurement(IS_PERFORMANCE_MEASURED);
@@ -860,7 +860,7 @@ public class CassandraConnector {
         ColumnFamilyDefinition indexCfDef = null;
         try {
             cfDef = getColumnFamily(cluster, KeySpaceUtils.getKeySpaceName(), CFName);
-            indexCfDef = getColumnFamily(cluster, CassandraConnector.EVENT_META_KS,
+            indexCfDef = getColumnFamily(cluster, CassandraConnector.EVENT_INDEX_KS,
                     CassandraSDSUtils.getIndexColumnFamilyName(CFName));
 
             if (!CFCache.getCF(cluster, KeySpaceUtils.getKeySpaceName(), CFName)) {
@@ -874,14 +874,14 @@ public class CassandraConnector {
             }
 
             //Initializing the IndexCF
-            if (!CFCache.getCF(cluster, CassandraConnector.EVENT_META_KS,
+            if (!CFCache.getCF(cluster, CassandraConnector.EVENT_INDEX_KS,
                     CassandraSDSUtils.getIndexColumnFamilyName(CFName))) {
                 if (indexCfDef == null) {
-                    indexCfDef = createIndexColumnFamily(cluster, CassandraConnector.EVENT_META_KS,
+                    indexCfDef = createIndexColumnFamily(cluster, CassandraConnector.EVENT_INDEX_KS,
                             CassandraSDSUtils.getIndexColumnFamilyName(CFName));
                     return;
                 } else {
-                    CFCache.putCF(cluster, CassandraConnector.EVENT_META_KS,
+                    CFCache.putCF(cluster, CassandraConnector.EVENT_INDEX_KS,
                             CassandraSDSUtils.getIndexColumnFamilyName(CFName), true);
                 }
             }
