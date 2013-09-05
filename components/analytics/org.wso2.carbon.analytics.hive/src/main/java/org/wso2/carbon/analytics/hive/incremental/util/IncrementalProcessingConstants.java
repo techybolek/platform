@@ -17,17 +17,10 @@ package org.wso2.carbon.analytics.hive.incremental.util;
  */
 public class IncrementalProcessingConstants {
 
-//    public static final String HIVE_CONF_INCREMENTAL_KEY ="hive.incremental";
     public static final String ENABLED = "true";
-//    public static final String HIVE_CONF_INCREMENTAL_KEYSPACE = "hive.incremental.index.keyspace";
-//    public static final String HIVE_CONF_INCREMENTAL_USERNAME = "hive.incremental.index.username";
-//    public static final String HIVE_CONF_INCREMENTAL_PASSWORD = "hive.incremental.index.password";
-//    public static final String HIVE_CONF_INCREMENTAL_TABLE_NAMES = "hive.incremental.tables";
-//    public static final String HIVE_CONF_INCREMENTAL_MARKER_NAME = "hive.incremental.marker.name";
 
     public static final String HIVE_INCREMENTAL_METASTORE_DATASOURCE = "WSO2BAM_HIVE_INCREMENTAL_DATASOURCE";
     public static final String MARKER_CF_NAME = "HIVE_MARKER_META_DATA";
-    public static final String EVENT_INDEX_KS = "EVENT_INDEX_KS";
 
     public static final String LAST_ACCESSED_TIME_COLUMN_NAME = "lastAccessedTime";
 
@@ -43,7 +36,6 @@ public class IncrementalProcessingConstants {
     public static final String INCREMENTAL_MARKER_TABLES = "tables";
     public static final String INCREMENTAL_BUFFER_TIME = "bufferTime";
     public static final String SCRIPT_NAME = "scriptName";
-//    public static final String VALID_TO_RUN_HIVE_QUERY = "hive.incremental.execution.valid";
     public static final String TRUE = "true";
     public static final String FALSE = "false";
 }

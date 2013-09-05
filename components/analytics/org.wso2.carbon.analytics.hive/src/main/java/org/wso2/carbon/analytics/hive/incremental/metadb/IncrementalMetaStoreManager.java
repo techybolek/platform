@@ -76,9 +76,6 @@ public class IncrementalMetaStoreManager {
         Cluster cluster = metaStore.getCluster(userName, password);
 
         metaStore.createCFIfNotExists(cluster, ksName, cfName, dbProps);
-        hiveExecutionProps.put(HiveConf.ConfVars.HIVE_INCREMENTAL_PROCESS_KEYSPACE.toString(),
-                IncrementalProcessingConstants.EVENT_INDEX_KS);
-
         String rowKeyName = getRowKeyForMarkerName(scriptName, markerName, tenantId);
 
         List<HColumn<String, Long>> columns = metaStore.getColumnsOfRow(cluster, ksName, cfName, rowKeyName);
