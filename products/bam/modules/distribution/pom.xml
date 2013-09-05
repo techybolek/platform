@@ -24,6 +24,13 @@
     </organization>
 
     <dependencies>
+    	<dependency>
+            <groupId>org.apache.shindig</groupId>
+            <artifactId>shindig-server</artifactId>
+            <version>2.5.0-beta5</version>
+            <type>war</type>
+        </dependency>
+    
         <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart</artifactId>
@@ -191,6 +198,14 @@
                                     <overWrite>true</overWrite>
                                     <outputDirectory>target</outputDirectory>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.shindig</groupId>
+                                    <artifactId>shindig-server</artifactId>
+                                    <version>2.5.0-beta5</version>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>target/shindig</outputDirectory>
+                                </artifactItem>                                
                                 <!--<artifactItem>-->
                                 <!--<groupId>org.wso2.carbon</groupId>-->
                                 <!--<artifactId>wso2carbon-core</artifactId>-->
@@ -326,6 +341,7 @@
                                  <property name="password" value="wso2carbon"/>
                                  <property name="dbURL"
                                      value="jdbc:h2:file:${basedir}/${db.dir}/RSS_DATABASE;DB_CLOSE_ON_EXIT=FALSE"/>
+                                     
 
                                  <sql driver="org.h2.Driver"
                                     url="${dbURL}"
@@ -350,6 +366,8 @@
                         <configuration>
                             <tasks>
                                 <property name="tempdir" value="target/docs-temp"/>
+                                <property name="jardir" value="target/jars"/>
+                                <property name="shindig.version" value="2.5.0-beta5"/>
                                 <mkdir dir="${tempdir}"/>
                                 <unzip dest="${tempdir}">
                                     <fileset dir="target">
@@ -387,6 +405,24 @@
                                     </fileset>
                                     <mapper type="glob" from="*.html" to="*.xml"/>
                                 </move>
+                                
+                                <unzip src="target/shindig/WEB-INF/lib/shindig-common-${shindig.version}.jar"
+                                       dest="${jardir}/shindig-common-${shindig.version}">
+                                    <patternset>
+                                        <exclude name="**/shindig.properties"/>
+                                    </patternset>
+                                </unzip>
+                                <copy file="bam-resources/ues/resources/shindig/shindig.properties"
+                                      todir="${jardir}/shindig-common-${shindig.version}"/>
+                                <delete file="target/shindig/WEB-INF/lib/shindig-common-${shindig.version}.jar"></delete>
+                                <zip destfile="target/shindig/WEB-INF/lib/shindig-common-${shindig.version}.jar"
+                                     basedir="${jardir}/shindig-common-${shindig.version}"/>
+                                <delete>
+                                    <fileset dir="target/shindig/WEB-INF/lib" includes="slf4j*"/>
+                                </delete>
+                                <copy file="bam-resources/ues/resources/shindig/index.jsp"
+                                      todir="target/shindig"/>
+                                
                                 <mkdir dir="src/site/xdoc"/>
                                 <copy todir="src/site/xdoc" overwrite="false"
                                       includeemptydirs="false">
@@ -424,6 +460,9 @@
                         <phase>install</phase>
                         <configuration>
                             <tasks>
+                            	<delete dir="target/jars"/>
+                            	<delete dir="target/shindig"/>
+                            	
                                 <delete dir="target/archive-tmp"/>
                                 <delete dir="target/dependency-maven-plugin-markers"/>
                                 <delete dir="target/maven-archiver"/>

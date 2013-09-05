@@ -81,6 +81,60 @@
                 <include>*.sql</include>
             </includes>
 	  </fileSet>-->
+	  
+	  
+	  
+	  <!-- UES integration files -->
+	
+	<fileSet>
+            <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf</outputDirectory>
+            <includes>
+                <include>**/event-broker.xml</include>
+                <include>**/sso-idp-config.xml</include>
+            </includes>
+	</fileSet>
+	
+	<fileSet>
+            <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/modules</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/modules</outputDirectory>
+            <includes>
+                <include>**/**</include>
+            </includes>
+	</fileSet>
+	
+	<fileSet>
+            <directory>src/repository/resources/jaggery/modules/</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/modules</outputDirectory>
+            <includes>
+                <include>*/**</include>
+            </includes>
+        </fileSet>
+   
+        <fileSet>
+            <directory>bam-resources/ues/resources</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/resources/</outputDirectory>
+            
+	</fileSet>
+	
+	<fileSet>
+            <directory>target/shindig</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps/ROOT</outputDirectory>
+            <includes>
+                <include>**/**</include>
+            </includes>
+        </fileSet>
+        
+        <!-- commented for the time being, since jaggeryapps need to be moved to carbon 4.2.0
+        <fileSet>
+            <directory>bam-resources/ues/jaggeryapps/</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaggeryapps/</outputDirectory>            
+	</fileSet>
+	-->		  
+
+	<!-- End UES integration files -->  
+	  
+	  
 
 	<fileSet>
             <directory>bam-resources/sql/rss-manager</directory>
