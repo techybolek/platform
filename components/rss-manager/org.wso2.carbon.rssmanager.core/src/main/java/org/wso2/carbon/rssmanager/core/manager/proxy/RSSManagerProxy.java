@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.rssmanager.core.manager;
+package org.wso2.carbon.rssmanager.core.manager.proxy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +26,7 @@ import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.*;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.manager.*;
 
 public class RSSManagerProxy implements RSSManager {
 
@@ -108,11 +109,6 @@ public class RSSManagerProxy implements RSSManager {
         this.resolveRM(ctx).detachUserFromDatabase(ctx, ude);
     }
 
-    public RSSInstance resolveRSSInstance(RSSEnvironmentContext ctx,
-                                          String databaseName) throws RSSManagerException {
-        return this.resolveRM(ctx).resolveRSSInstance(ctx, databaseName);
-    }
-
     public DatabaseUser getDatabaseUser(RSSEnvironmentContext ctx, String rssInstanceName,
                                         String username) throws RSSManagerException {
         return this.resolveRM(ctx).getDatabaseUser(ctx, rssInstanceName, username);
@@ -171,11 +167,6 @@ public class RSSManagerProxy implements RSSManager {
         return this.resolveRM(ctx).getDatabaseUsers(ctx);
     }
 
-    public RSSInstance getRoundRobinAssignedDatabaseServer(
-            RSSEnvironmentContext ctx) throws RSSManagerException {
-        return this.resolveRM(ctx).getRoundRobinAssignedDatabaseServer(ctx);
-    }
-
     public void createDatabasePrivilegesTemplate(
             RSSEnvironmentContext ctx,
             DatabasePrivilegeTemplate template) throws RSSManagerException {
@@ -223,10 +214,6 @@ public class RSSManagerProxy implements RSSManager {
         return this.resolveRM(ctx).getDatabasePrivilegeTemplate(ctx, templateName);
     }
 
-    public int getSystemRSSInstanceCount(RSSEnvironmentContext ctx) throws RSSManagerException {
-        return this.resolveRM(ctx).getSystemRSSInstanceCount(ctx);
-    }
-
     public Database[] getDatabasesRestricted(RSSEnvironmentContext
             ctx, int tenantId) throws RSSManagerException {
         return this.resolveRM(ctx).getDatabasesRestricted(ctx, tenantId);
@@ -238,8 +225,8 @@ public class RSSManagerProxy implements RSSManager {
     }
 
 	@Override
-    public boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId)
-                                                                               throws RSSManagerException {
+    public boolean deleteTenantRSSData(RSSEnvironmentContext ctx,
+                                       int tenantId) throws RSSManagerException {
 	    // TODO Auto-generated method stub
 	    return false;
     }

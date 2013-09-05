@@ -137,7 +137,7 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
         boolean inTx = false;
         PreparedStatement delStmt = null;
 
-        RSSInstance rssInstance = resolveRSSInstance(ctx, databaseName);
+        RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
             throw new RSSManagerException("RSS instance " + rssInstanceName + " does not exist");
         }
@@ -471,7 +471,7 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
         String databaseName = entry.getDatabaseName();
         String username = entry.getUsername();
 
-        RSSInstance rssInstance = resolveRSSInstance(ctx, databaseName);
+        RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
             throw new RSSManagerException("Database '" + databaseName + "' does not exist in " +
                     "RSS instance '" + rssInstanceName + "'");
@@ -552,7 +552,7 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
             throw new RSSManagerException("Database '" + databaseName + "' does not exist");
         }
         /* Initiating the distributed transaction */
-        RSSInstance rssInstance = resolveRSSInstance(ctx, databaseName);
+        RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
             throw new RSSManagerException("RSS instance '" + rssInstanceName + "' does not exist");
         }

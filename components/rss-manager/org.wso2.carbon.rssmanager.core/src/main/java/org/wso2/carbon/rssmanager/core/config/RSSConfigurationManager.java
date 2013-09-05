@@ -23,7 +23,7 @@ import org.w3c.dom.Document;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.manager.RSSManager;
-import org.wso2.carbon.rssmanager.core.manager.RSSManagerProxyFactory;
+import org.wso2.carbon.rssmanager.core.manager.proxy.RSSManagerProxyFactory;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 

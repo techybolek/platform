@@ -34,25 +34,27 @@ public class OracleUserDefinedRSSManager extends UserDefinedRSSManager {
     @Override
     public Database createDatabase(RSSEnvironmentContext ctx,
                                    Database database) throws RSSManagerException {
-        return null;  
+        throw new UnsupportedOperationException("CreateDatabase operation is not supported " +
+                "for Oracle");
     }
 
     @Override
     public void dropDatabase(RSSEnvironmentContext ctx, String rssInstanceName,
                              String databaseName) throws RSSManagerException {
-        
+        throw new UnsupportedOperationException("CreateDatabase operation is not supported " +
+                "for Oracle");
     }
 
     @Override
     public DatabaseUser createDatabaseUser(RSSEnvironmentContext ctx,
                                            DatabaseUser user) throws RSSManagerException {
-        return null;  
+        return null;
     }
 
     @Override
     public void dropDatabaseUser(RSSEnvironmentContext ctx, String rssInstanceName,
                                  String username) throws RSSManagerException {
-        
+
     }
 
     @Override
@@ -60,25 +62,25 @@ public class OracleUserDefinedRSSManager extends UserDefinedRSSManager {
                                            DatabasePrivilegeSet privileges,
                                            DatabaseUser databaseUser,
                                            String databaseName) throws RSSManagerException {
-        
+
     }
 
     @Override
     public void attachUserToDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude,
                                      String templateName) throws RSSManagerException {
-        
+
     }
 
     @Override
     public void detachUserFromDatabase(RSSEnvironmentContext ctx,
                                        UserDatabaseEntry ude) throws RSSManagerException {
-        
+
     }
 
-	@Override
-	public boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId)
-			throws RSSManagerException {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    @Override
+    public boolean deleteTenantRSSData(RSSEnvironmentContext ctx,
+                                       int tenantId) throws RSSManagerException {
+        return false;
+    }
+
 }

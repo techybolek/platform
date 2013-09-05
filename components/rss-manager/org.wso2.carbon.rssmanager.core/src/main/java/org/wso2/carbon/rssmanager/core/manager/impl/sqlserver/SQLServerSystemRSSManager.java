@@ -127,7 +127,7 @@ public class SQLServerSystemRSSManager extends SystemRSSManager {
         Connection conn = null;
         PreparedStatement stmt = null;
 
-        RSSInstance rssInstance = resolveRSSInstance(ctx, databaseName);
+        RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
             throw new EntityNotFoundException("RSS instance " + rssInstanceName + " does not exist");
         }
@@ -448,7 +448,7 @@ public class SQLServerSystemRSSManager extends SystemRSSManager {
         String databaseName = entry.getDatabaseName();
         String username = entry.getUsername();
 
-        RSSInstance rssInstance = resolveRSSInstance(ctx, databaseName);
+        RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
             throw new EntityNotFoundException("RSS instance " + rssInstanceName + " does not exist");
         }
@@ -546,7 +546,7 @@ public class SQLServerSystemRSSManager extends SystemRSSManager {
         }
         /* Initiating the distributed transaction */
         RSSInstance rssInstance =
-                resolveRSSInstance(ctx, entry.getDatabaseName());
+                resolveRSSInstanceByDatabase(ctx, entry.getDatabaseName());
         if (rssInstance == null) {
             throw new EntityNotFoundException("RSS instance '" + entry.getRssInstanceName() +
                     "' does not exist");

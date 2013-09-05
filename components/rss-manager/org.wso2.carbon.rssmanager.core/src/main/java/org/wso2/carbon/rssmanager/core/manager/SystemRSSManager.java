@@ -221,16 +221,16 @@ public abstract class SystemRSSManager extends AbstractRSSManager {
         return privileges;
     }
 
-    @Override
-    public RSSInstance resolveRSSInstance(RSSEnvironmentContext ctx, String databaseName)
-            throws RSSManagerException {
+    public RSSInstance resolveRSSInstanceByDatabase(
+            RSSEnvironmentContext ctx, String databaseName) throws RSSManagerException {
         RSSInstance rssInstance;
         boolean inTx = this.getEntityManager().beginTransaction();
         try {
             int tenantId = RSSManagerUtil.getTenantId();
             rssInstance =
                     this.getRSSDAO().getRSSInstanceDAO().resolveRSSInstanceByDatabase(
-                            ctx.getEnvironmentName(), RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE, databaseName, tenantId);
+                            ctx.getEnvironmentName(), RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE,
+                            databaseName, tenantId);
             return rssInstance;
         } catch (RSSDAOException e) {
             if (inTx && this.getEntityManager().hasNoActiveTransaction()) {
@@ -243,4 +243,28 @@ public abstract class SystemRSSManager extends AbstractRSSManager {
             }
         }
     }
+
+    public RSSInstance resolveRSSInstanceByDatabaseUser(
+            RSSEnvironmentContext ctx, String username) throws RSSManagerException {
+        RSSInstance rssInstance;
+        boolean inTx = this.getEntityManager().beginTransaction();
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            rssInstance =
+                    this.getRSSDAO().getRSSInstanceDAO().resolveRSSInstanceByUser(
+                            ctx.getEnvironmentName(), RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE,
+                            username, tenantId);
+            return rssInstance;
+        } catch (RSSDAOException e) {
+            if (inTx && this.getEntityManager().hasNoActiveTransaction()) {
+                this.getEntityManager().rollbackTransaction();
+            }
+            throw new RSSManagerException("Error occurred while resolving RSS instance", e);
+        } finally {
+            if (inTx) {
+                this.getEntityManager().endTransaction();
+            }
+        }
+    }
+
 }

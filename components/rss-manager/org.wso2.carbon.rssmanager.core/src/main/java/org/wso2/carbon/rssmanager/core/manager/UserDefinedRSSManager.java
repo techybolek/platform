@@ -19,7 +19,6 @@
 
 package org.wso2.carbon.rssmanager.core.manager;
 
-import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
@@ -206,29 +205,6 @@ public abstract class UserDefinedRSSManager extends AbstractRSSManager {
                     "belongs to the RSS instance '" + rssInstanceName + " upon the database '" +
                     databaseName + "', from RSS metadata " +
                     "repository : " + e.getMessage(), e);
-        } finally {
-            if (inTx) {
-                this.getEntityManager().endTransaction();
-            }
-        }
-    }
-
-    @Override
-    public RSSInstance resolveRSSInstance(RSSEnvironmentContext ctx, String databaseName)
-            throws RSSManagerException {
-        RSSInstance rssInstance;
-        boolean inTx = this.getEntityManager().beginTransaction();
-        try {
-            int tenantId = RSSManagerUtil.getTenantId();
-            rssInstance =
-                    this.getRSSDAO().getRSSInstanceDAO().resolveRSSInstanceByDatabase(
-                            ctx.getEnvironmentName(), RSSManagerConstants.USER_DEFINED_INSTANCE_TYPE, databaseName, tenantId);
-            return rssInstance;
-        } catch (RSSDAOException e) {
-            if (inTx && this.getEntityManager().hasNoActiveTransaction()) {
-                this.getEntityManager().rollbackTransaction();
-            }
-            throw new RSSManagerException("Error occurred while resolving RSS instance", e);
         } finally {
             if (inTx) {
                 this.getEntityManager().endTransaction();

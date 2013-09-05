@@ -43,35 +43,33 @@ import java.util.Map;
 
 public abstract class AbstractRSSManager implements RSSManager {
 
-    private RSSConfig config;
     private RSSDAO rssDAO;
     private EntityManager entityManager;
     private static final Log log = LogFactory.getLog(RSSManager.class);
 
     public AbstractRSSManager(RSSConfig config) {
-        this.config = config;
-
         /* Initializing RSS transaction manager wrapper */
         RSSTransactionManager rssTxManager =
                 new RSSTransactionManager(RSSManagerDataHolder.getInstance().
                         getTransactionManager());
         this.entityManager = new EntityManager(rssTxManager);
         try {
-            this.rssDAO = RSSDAOFactory.getRSSDAO(config.getRSSManagementRepository(), getEntityManager());
+            this.rssDAO = 
+                    RSSDAOFactory.getRSSDAO(config.getRSSManagementRepository(), getEntityManager());
         } catch (RSSDAOException e) {
             throw new RuntimeException("Error occurred while initializing RSSDAO", e);
         }
 
         /* Initializing RSS environments managed by the RSS Manager */
         try {
-            this.initEnvironments();
+            this.initEnvironments(config);
         } catch (RSSManagerException e) {
             throw new RuntimeException("Error occurred while initializing the RSS Manager " +
                     "environments", e);
         }
     }
 
-    private void initEnvironments() throws RSSManagerException {
+    private void initEnvironments(RSSConfig config) throws RSSManagerException {
         for (RSSEnvironment environment : config.getRSSEnvironments()) {
             this.initRSSEnvironment(environment);
             environment.init();
@@ -101,9 +99,6 @@ public abstract class AbstractRSSManager implements RSSManager {
     public abstract void detachUserFromDatabase(RSSEnvironmentContext ctx,
                                                 UserDatabaseEntry ude) throws RSSManagerException;
 
-    public abstract RSSInstance resolveRSSInstance(RSSEnvironmentContext ctx, String databaseName)
-            throws RSSManagerException;
-
     public abstract DatabaseUser getDatabaseUser(RSSEnvironmentContext ctx, String rssInstanceName,
                                                  String username) throws RSSManagerException;
 
@@ -121,7 +116,7 @@ public abstract class AbstractRSSManager implements RSSManager {
     public abstract DatabasePrivilegeSet getUserDatabasePrivileges(
             RSSEnvironmentContext ctx, String rssInstanceName, String databaseName,
             String username) throws RSSManagerException;
-
+    
     //TODO
     public void initRSSEnvironment(RSSEnvironment environment) throws RSSManagerException {
         boolean inTx = this.getEntityManager().beginTransaction();
@@ -637,20 +632,21 @@ public abstract class AbstractRSSManager implements RSSManager {
     }
 
     public String[] getEnvironmentNames() {
-        String[] environments = new String[config.getRSSEnvironments().length];
-        int i = 0;
-        for (RSSEnvironment environment : config.getRSSEnvironments()) {
-            environments[i] = environment.getName();
-        }
-        return environments;
+//        String[] environments = new String[config.getRSSEnvironments().length];
+//        int i = 0;
+//        for (RSSEnvironment environment : config.getRSSEnvironments()) {
+//            environments[i] = environment.getName();
+//        }
+//        return environments;
+        return new String[0];
     }
 
     public RSSEnvironment getEnvironment(RSSEnvironmentContext ctx) {
-        for (RSSEnvironment environment : config.getRSSEnvironments()) {
-            if (environment.getName().equals(ctx.getEnvironmentName())) {
-                return environment;
-            }
-        }
+//        for (RSSEnvironment environment : config.getRSSEnvironments()) {
+//            if (environment.getName().equals(ctx.getEnvironmentName())) {
+//                return environment;
+//            }
+//        }
         return null;
     }
 

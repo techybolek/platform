@@ -35,7 +35,7 @@ public class PostgresRSSManagerFactory extends AbstractRSSManagerFactory {
     }
 
     public UserDefinedRSSManager getUserDefinedRSSManager() {
-        return null;
+        return new PostgresUserDefinedRSSManager(getConfig());
     }
     
 }

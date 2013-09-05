@@ -48,9 +48,6 @@ public interface RSSManager {
     void detachUserFromDatabase(RSSEnvironmentContext ctx,
                                 UserDatabaseEntry ude) throws RSSManagerException;
 
-    RSSInstance resolveRSSInstance(RSSEnvironmentContext ctx,
-                                   String databaseName) throws RSSManagerException;
-
     DatabaseUser getDatabaseUser(RSSEnvironmentContext ctx, String rssInstanceName,
                                  String username) throws RSSManagerException;
 
@@ -58,7 +55,7 @@ public interface RSSManager {
                          String databaseName) throws RSSManagerException;
 
     DatabaseUser[] getUsersAttachedToDatabase(RSSEnvironmentContext ctx, String rssInstanceName,
-            String databaseName) throws RSSManagerException;
+                                              String databaseName) throws RSSManagerException;
 
     DatabaseUser[] getAvailableUsersToAttachToDatabase(
             RSSEnvironmentContext ctx, String rssInstanceName,
@@ -83,14 +80,11 @@ public interface RSSManager {
 
     DatabaseUser[] getDatabaseUsers(RSSEnvironmentContext ctx) throws RSSManagerException;
 
-    RSSInstance getRoundRobinAssignedDatabaseServer(
-            RSSEnvironmentContext ctx) throws RSSManagerException;
-
     void createDatabasePrivilegesTemplate(RSSEnvironmentContext ctx,
-            DatabasePrivilegeTemplate template) throws RSSManagerException;
+                                          DatabasePrivilegeTemplate template) throws RSSManagerException;
 
     void editDatabasePrivilegesTemplate(RSSEnvironmentContext ctx,
-            DatabasePrivilegeTemplate template) throws RSSManagerException;
+                                        DatabasePrivilegeTemplate template) throws RSSManagerException;
 
     RSSInstance getRSSInstance(RSSEnvironmentContext ctx,
                                String rssInstanceName) throws RSSManagerException;
@@ -113,14 +107,11 @@ public interface RSSManager {
     DatabasePrivilegeTemplate getDatabasePrivilegeTemplate(
             RSSEnvironmentContext ctx, String templateName) throws RSSManagerException;
 
-
-    int getSystemRSSInstanceCount(RSSEnvironmentContext ctx) throws RSSManagerException;
-
     Database[] getDatabasesRestricted(RSSEnvironmentContext ctx,
                                       int tenantId) throws RSSManagerException;
 
     String[] getEnvironmentNames();
-    public  boolean deleteTenantRSSData(RSSEnvironmentContext ctx,int tenantId) throws RSSManagerException;
 
+    boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId) throws RSSManagerException;
 
 }

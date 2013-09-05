@@ -350,23 +350,6 @@ public class RSSManagerService {
 //        }
 //    }
 
-    private void handleException(String msg, Exception e) throws RSSManagerException {
-        log.error(msg, e);
-        throw new RSSManagerException(msg, e);
-    }
-
-    public int getSystemRSSInstanceCount(RSSEnvironmentContext ctx) throws RSSManagerException {
-        int count = 0;
-        try {
-            count = getRSSManager().getSystemRSSInstanceCount(ctx);
-            return count;
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while retrieving the system RSS instance count";
-            handleException(msg, e);
-        }
-        return count;
-    }
-
     public void attachUserToDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude,
                                      String templateName) throws RSSManagerException {
         try {
@@ -458,6 +441,11 @@ public class RSSManagerService {
             handleException(msg, e);
         }
         return privileges;
+    }
+
+    private void handleException(String msg, Exception e) throws RSSManagerException {
+        log.error(msg, e);
+        throw new RSSManagerException(msg, e);
     }
 
 }

@@ -169,10 +169,6 @@ public class RSSAdmin extends AbstractAdmin {
         return this.getRSSManager().getDatabasePrivilegeTemplate(ctx, templateName);
     }
 
-    public int getSystemRSSInstanceCount(RSSEnvironmentContext ctx) throws RSSManagerException {
-        return this.getRSSManager().getSystemRSSInstanceCount(ctx);
-    }
-
     public void attachUserToDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude,
                                      String templateName) throws RSSManagerException {
         this.getRSSManager().attachUserToDatabase(ctx, ude, templateName);

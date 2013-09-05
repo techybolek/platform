@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.rssmanager.core.manager;
+package org.wso2.carbon.rssmanager.core.manager.proxy;
 
 import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 

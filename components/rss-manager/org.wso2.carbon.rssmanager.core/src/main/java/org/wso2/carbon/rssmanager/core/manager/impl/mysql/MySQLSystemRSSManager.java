@@ -87,7 +87,8 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
             final int tenantId = RSSManagerUtil.getTenantId();
             /* creates a reference to the database inside the metadata repository */
             this.getRSSDAO().getDatabaseDAO().addDatabase(ctx.getEnvironmentName(), database, tenantId);
-            this.getRSSDAO().getDatabaseDAO().incrementSystemRSSDatabaseCount(ctx.getEnvironmentName(), Connection.TRANSACTION_SERIALIZABLE);
+            this.getRSSDAO().getDatabaseDAO().incrementSystemRSSDatabaseCount(
+                    ctx.getEnvironmentName(), Connection.TRANSACTION_SERIALIZABLE);
 
             /* Actual database creation is committed just before committing the meta info into RSS
              * management repository. This is done as it is not possible to control CREATE, DROP,
@@ -126,7 +127,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
         PreparedStatement stmt = null;
         PreparedStatement delStmt = null;
 
-        RSSInstance rssInstance = resolveRSSInstance(ctx, databaseName);
+        RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
             String msg = "RSS instance " + rssInstanceName + " does not exist";
             log.error(msg);
@@ -419,7 +420,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
         String databaseName = entry.getDatabaseName();
         String username = entry.getUsername();
 
-        RSSInstance rssInstance = resolveRSSInstance(ctx, databaseName);
+        RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
             String msg = "RSS instance " + rssInstanceName + " does not exist";
             log.error(msg);
@@ -507,9 +508,8 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
             log.error(msg);
             throw new EntityNotFoundException(msg);
         }
-        /* Initiating the distributed transaction */
-        RSSInstance rssInstance =
-                resolveRSSInstance(ctx, entry.getDatabaseName());
+
+        RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, entry.getDatabaseName());
         if (rssInstance == null) {
             String msg = "RSS instance '" + entry.getRssInstanceName() + "' does not exist";
             log.error(msg);
