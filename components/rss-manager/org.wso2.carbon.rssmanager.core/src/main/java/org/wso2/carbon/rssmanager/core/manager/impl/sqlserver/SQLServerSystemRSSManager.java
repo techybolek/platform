@@ -185,8 +185,8 @@ public class SQLServerSystemRSSManager extends SystemRSSManager {
             boolean isExist =
                     this.isDatabaseUserExist(ctx, user.getRssInstanceName(), qualifiedUsername);
             if (isExist) {
-                throw new RSSManagerException("Database user '" + qualifiedUsername + "' " +
-                        "already exists");
+                throw new EntityAlreadyExistsException("Database user '" + qualifiedUsername +
+                        "' already exists");
             }
 
             /* Sets the fully qualified username */
@@ -360,12 +360,12 @@ public class SQLServerSystemRSSManager extends SystemRSSManager {
                     user.getRssInstanceName() + "'");
         }
         if (rssInstance == null) {
-            throw new RSSManagerException("Database '" + databaseName + "' does not exist in " +
+            throw new EntityNotFoundException("Database '" + databaseName + "' does not exist in " +
                     "RSS instance '" + user.getRssInstanceName() + "'");
         }
         Database database = this.getDatabase(ctx, rssInstance.getInstanceType(), databaseName);
         if (database == null) {
-            throw new RSSManagerException("Database '" + databaseName + "' does not exist");
+            throw new EntityNotFoundException("Database '" + databaseName + "' does not exist");
         }
         if (privileges == null) {
             throw new RSSManagerException("Database privileges-set is null");

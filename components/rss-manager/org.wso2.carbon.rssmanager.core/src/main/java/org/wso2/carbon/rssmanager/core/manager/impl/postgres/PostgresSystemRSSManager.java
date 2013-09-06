@@ -195,32 +195,6 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
         }
     }
 
-    /*private RSSInstance getRSSInstanceDatabaseBelongTo(String rssInstanceName,
-                                                       String databaseName) throws RSSManagerException {
-        RSSInstance rssInstance;
-        boolean inTransaction = false;
-        if (!this.isInTransaction()) {
-            if (this.getRSSTransactionManager().hasNoActiveTransaction()) {
-                this.beginTransaction();
-                inTransaction = true;
-            }
-        }
-        try {
-            int tenantId = RSSManagerUtil.getTenantId();
-            rssInstance = this.getDAO().findRSSInstanceDatabaseBelongsTo(ctx.getEnvironmentName(),
-                    rssInstanceName, databaseName, tenantId);
-            if (inTransaction) {
-                this.endTransaction();
-            }
-            return rssInstance;
-        } catch (RSSManagerException e) {
-            if (inTransaction) {
-                this.rollbackTransaction();
-            }
-            throw e;
-        }
-    }*/
-
     @Override
     public DatabaseUser createDatabaseUser(RSSEnvironmentContext ctx,
                                            DatabaseUser user) throws RSSManagerException {
@@ -265,7 +239,7 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
                     StringBuilder sql = new StringBuilder(" CREATE USER " + qualifiedUsername);
                     if (hasPassword) {
                         RSSManagerUtil.checkIfParameterSecured(user.getPassword());
-                        sql.append(" WITH PASSWORD '" + user.getPassword() + "'");
+                        sql.append(" WITH PASSWORD '").append(user.getPassword()).append("'");
                     }
                     stmt = conn.prepareStatement(sql.toString());
                     /* Initiating the distributed transaction */
@@ -550,12 +524,13 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
         String username = entry.getUsername();
         Database database = this.getDatabase(ctx, rssInstanceName, databaseName);
         if (database == null) {
-            throw new RSSManagerException("Database '" + databaseName + "' does not exist");
+            throw new EntityNotFoundException("Database '" + databaseName + "' does not exist");
         }
         /* Initiating the distributed transaction */
         RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
-            throw new RSSManagerException("RSS instance '" + rssInstanceName + "' does not exist");
+            throw new EntityNotFoundException("RSS instance '" + rssInstanceName +
+                    "' does not exist");
         }
 
         RSSManagerUtil.checkIfParameterSecured(username);
