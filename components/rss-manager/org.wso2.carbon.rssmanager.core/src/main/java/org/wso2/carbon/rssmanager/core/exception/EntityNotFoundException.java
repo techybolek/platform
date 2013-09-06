@@ -19,7 +19,7 @@
 
 package org.wso2.carbon.rssmanager.core.exception;
 
-public class EntityNotFoundException extends RSSManagerException {
+public class EntityNotFoundException extends RuntimeException {
     
     private String errorMessage;
     private static final long serialVersionUID = 2021891706072918874L;

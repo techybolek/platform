@@ -19,7 +19,7 @@
 
 package org.wso2.carbon.rssmanager.core.exception;
 
-public class EntityAlreadyExistsException extends RSSManagerException {
+public class EntityAlreadyExistsException extends RuntimeException {
     
     private String errorMessage;
     private static final long serialVersionUID = 2021891706072918884L;

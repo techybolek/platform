@@ -650,22 +650,12 @@ public abstract class AbstractRSSManager implements RSSManager {
         return null;
     }
 
-    public void handleException(String msg, Exception e) throws RSSManagerException {
-        log.error(msg, e);
-        throw new RSSManagerException(msg, e);
-    }
-
-    public void handleException(String msg) throws RSSManagerException {
-        log.error(msg);
-        throw new RSSManagerException(msg);
-    }
-
-    protected RSSInstance lookupRSSInstance(RSSEnvironmentContext ctx,
-                                          String rssInstanceName) throws RSSManagerException {
-        return (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) ?
-                this.getRoundRobinAssignedDatabaseServer(ctx) :
-                this.getRSSInstance(ctx, rssInstanceName);
-    }
+//    protected RSSInstance lookupRSSInstance(RSSEnvironmentContext ctx,
+//                                          String rssInstanceName) throws RSSManagerException {
+//        return (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) ?
+//                this.getRoundRobinAssignedDatabaseServer(ctx) :
+//                this.getRSSInstance(ctx, rssInstanceName);
+//    }
     
     protected Connection getConnection(RSSEnvironmentContext ctx, String rssInstanceName) throws RSSManagerException {
         RSSInstanceDSWrapper dsWrapper = getEnvironment(ctx).getDSWrapperRepository().
@@ -686,6 +676,16 @@ public abstract class AbstractRSSManager implements RSSManager {
                     "associated with '" + rssInstanceName + "' RSS instance is null.");
         }
         return dsWrapper.getConnection(dbName);
+    }
+
+    public void handleException(String msg, Exception e) throws RSSManagerException {
+        log.error(msg, e);
+        throw new RSSManagerException(msg, e);
+    }
+
+    public void handleException(String msg) throws RSSManagerException {
+        log.error(msg);
+        throw new RSSManagerException(msg);
     }
     
 }

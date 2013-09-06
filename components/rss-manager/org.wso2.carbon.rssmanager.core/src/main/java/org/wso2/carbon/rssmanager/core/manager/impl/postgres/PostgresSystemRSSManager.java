@@ -26,6 +26,8 @@ import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 import org.wso2.carbon.rssmanager.core.entity.*;
+import org.wso2.carbon.rssmanager.core.exception.EntityAlreadyExistsException;
+import org.wso2.carbon.rssmanager.core.exception.EntityNotFoundException;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
@@ -60,13 +62,13 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
         boolean isExist =
                 this.isDatabaseExist(ctx, database.getRssInstanceName(), qualifiedDatabaseName);
         if (isExist) {
-            throw new RSSManagerException("Database '" + qualifiedDatabaseName + "' " +
+            throw new EntityAlreadyExistsException("Database '" + qualifiedDatabaseName + "' " +
                     "already exists");
         }
 
-        RSSInstance rssInstance = this.lookupRSSInstance(ctx, database.getRssInstanceName());
+        RSSInstance rssInstance = this.getRoundRobinAssignedDatabaseServer(ctx);
         if (rssInstance == null) {
-            throw new RSSManagerException("RSS instance " + database.getRssInstanceName() +
+            throw new EntityNotFoundException("RSS instance " + database.getRssInstanceName() +
                     " does not exist");
         }
 
@@ -108,7 +110,6 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
             if (inTx) {
                 this.getEntityManager().rollbackTransaction();
             }
-
             throw new RSSManagerException("Error while creating the database '" +
                     qualifiedDatabaseName + "' on RSS instance '" + rssInstance.getName() + "' : " +
                     e.getMessage(), e);
@@ -139,7 +140,7 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
 
         RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
-            throw new RSSManagerException("Database " + databaseName + " does not exist");
+            throw new EntityNotFoundException("RSS instance " + rssInstanceName + " does not exist");
         }
 
         RSSManagerUtil.checkIfParameterSecured(databaseName);
@@ -232,8 +233,8 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
             boolean isExist =
                     this.isDatabaseUserExist(ctx, user.getRssInstanceName(), qualifiedUsername);
             if (isExist) {
-                throw new RSSManagerException("Database user '" + qualifiedUsername + "' " +
-                        "already exists");
+                throw new EntityAlreadyExistsException("Database user '" + qualifiedUsername +
+                        "' already exists");
             }
 
             /* Sets the fully qualified username */
@@ -423,8 +424,8 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
                 if (inTx) {
                     this.getEntityManager().rollbackTransaction();
                 }
-                throw new RSSManagerException("Database '" + databaseName + "' does not exist " +
-                        "in RSS instance '" + user.getRssInstanceName() + "'");
+                throw new EntityNotFoundException("Database '" + databaseName + "' does not " +
+                        "exist in RSS instance '" + user.getRssInstanceName() + "'");
             }
             dbConn = getConnection(ctx, rssInstance.getName(), databaseName);
             dbConn.setAutoCommit(true);
@@ -473,18 +474,18 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
 
         RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
-            throw new RSSManagerException("Database '" + databaseName + "' does not exist in " +
+            throw new EntityNotFoundException("Database '" + databaseName + "' does not exist in " +
                     "RSS instance '" + rssInstanceName + "'");
         }
 
         Database database = this.getDatabase(ctx, rssInstanceName, databaseName);
         if (database == null) {
-            throw new RSSManagerException("Database '" + databaseName + "' does not exist");
+            throw new EntityNotFoundException("Database '" + databaseName + "' does not exist");
         }
 
         DatabasePrivilegeTemplate template = this.getDatabasePrivilegeTemplate(ctx, templateName);
         if (template == null) {
-            throw new RSSManagerException("Database privilege template '" + templateName +
+            throw new EntityNotFoundException("Database privilege template '" + templateName +
                     "' does not exist");
         }
         try {
@@ -522,7 +523,6 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
             if (inTx) {
                 this.getEntityManager().rollbackTransaction();
             }
-
             String msg = "Error occurred while attaching the database user '" + username + "' to " +
                     "the database '" + databaseName + "' : " + e.getMessage();
             throw new RSSManagerException(msg, e);
@@ -530,8 +530,9 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
             if (inTx) {
                 this.getEntityManager().rollbackTransaction();
             }
-
-            throw new RSSManagerException(e);
+            String msg = "Error occurred while adding metadata into the RSS Management " +
+                    "Repository on user attachment";
+            throw new RSSManagerException(msg, e);
         } finally {
             RSSManagerUtil.cleanupResources(null, null, conn);
             RSSManagerUtil.cleanupResources(null, null, dbConn);
@@ -863,7 +864,7 @@ public class PostgresSystemRSSManager extends SystemRSSManager {
 				getEntityManager().endTransaction();
 			}
 		}
-		return true;	
+		return true;
 	}
 
 }

@@ -64,7 +64,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
             throw new EntityAlreadyExistsException(msg);
         }
 
-        RSSInstance rssInstance = this.lookupRSSInstance(ctx, database.getRssInstanceName());
+        RSSInstance rssInstance = this.getRoundRobinAssignedDatabaseServer(ctx);
         if (rssInstance == null) {
             String msg = "RSS instance " + database.getRssInstanceName() + " does not exist";
             log.error(msg);
@@ -197,7 +197,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
             if (isExist) {
                 String msg = "Database user '" + qualifiedUsername + "' already exists";
                 log.error(msg);
-                throw new RSSManagerException(msg);
+                throw new EntityAlreadyExistsException(msg);
             }
 
             /* Sets the fully qualified username */
@@ -390,8 +390,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
                 }
                 String msg = "Database '" + databaseName + "' does not exist " +
                         "in RSS instance '" + user.getRssInstanceName() + "'";
-                log.error(msg);
-                throw new RSSManagerException(msg);
+                throw new EntityNotFoundException(msg);
             }
             if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(user.getRssInstanceName())) {
                 user.setRssInstanceName(rssInstance.getName());
