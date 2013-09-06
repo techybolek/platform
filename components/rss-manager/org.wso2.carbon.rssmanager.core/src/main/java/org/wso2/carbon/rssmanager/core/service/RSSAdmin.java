@@ -120,11 +120,22 @@ public class RSSAdmin extends AbstractAdmin {
         this.getRSSManager().dropDatabaseUser(ctx, ctx.getRssInstanceName(), username);
     }
 
-	public boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId)
+    public boolean deleteTenantRSSData(RSSEnvironmentContext ctx, int tenantId)
 			throws RSSManagerException {
+	try {
+		PrivilegedCarbonContext.startTenantFlow();
+		PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+				tenantId);
 		return this.getRSSManager().deleteTenantRSSData(ctx, tenantId);
+	} catch (RSSManagerException e) {
+		String msg = "Error occurred while deleting RSS tenant data tenantId '"
+				+ tenantId + "'";
+		throw new RSSManagerException(msg, e);
+	} finally {
+		PrivilegedCarbonContext.endTenantFlow();
 	}
-	
+    }
+
     public void editDatabaseUserPrivileges(RSSEnvironmentContext ctx,
                                            DatabasePrivilegeSet privileges,
                                            DatabaseUser user,
