@@ -129,7 +129,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
 
         RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
-            String msg = "Database " + databaseName + " does not exist";
+            String msg = "Unresolvable RSS Instance. Database " + databaseName + " does not exist";
             log.error(msg);
             throw new EntityNotFoundException(msg);
         }

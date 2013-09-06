@@ -129,7 +129,8 @@ public class SQLServerSystemRSSManager extends SystemRSSManager {
 
         RSSInstance rssInstance = resolveRSSInstanceByDatabase(ctx, databaseName);
         if (rssInstance == null) {
-            throw new EntityNotFoundException("RSS instance " + rssInstanceName + " does not exist");
+            throw new EntityNotFoundException("Unresolvable RSS Instance. Database "
+                    + databaseName + " does not exist");
         }
         try {
             conn = getConnection(ctx, rssInstance.getName());
@@ -139,6 +140,8 @@ public class SQLServerSystemRSSManager extends SystemRSSManager {
 
             inTx = this.getEntityManager().beginTransaction();
             int tenantId = RSSManagerUtil.getTenantId();
+            this.getRSSDAO().getDatabaseUserDAO().deleteUserDatabasePrivilegeEntriesByDatabase(
+                    rssInstance, databaseName, tenantId);
             this.getRSSDAO().getUserDatabaseEntryDAO().removeUserDatabaseEntriesByDatabase(
                     ctx.getEnvironmentName(), rssInstance.getId(), databaseName,
                     rssInstance.getInstanceType(), tenantId);
