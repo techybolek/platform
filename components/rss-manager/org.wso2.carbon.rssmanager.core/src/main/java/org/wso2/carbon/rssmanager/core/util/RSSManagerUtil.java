@@ -33,6 +33,7 @@ import org.wso2.carbon.rssmanager.common.RSSManagerHelper;
 import org.wso2.carbon.rssmanager.common.exception.RSSManagerCommonException;
 import org.wso2.carbon.rssmanager.core.config.datasource.RDBMSConfig;
 import org.wso2.carbon.rssmanager.core.entity.Database;
+import org.wso2.carbon.rssmanager.core.entity.DatabaseUser;
 import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.internal.RSSManagerDataHolder;
@@ -328,6 +329,15 @@ public final class RSSManagerUtil {
         } catch (Exception e) {
             throw new RuntimeException("Error in looking up data source: " + e.getMessage(), e);
         }
+    }
+
+    public static void validateDatabaseUserInfo(DatabaseUser user) throws RSSManagerException {
+        checkIfParameterSecured(user.getName());
+        checkIfParameterSecured(user.getPassword());
+    }
+
+    public static void validateDatabaseInfo(Database database) throws RSSManagerException {
+        checkIfParameterSecured(database.getName());
     }
 
 }

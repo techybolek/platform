@@ -33,7 +33,6 @@ import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -72,6 +71,9 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
         }
 
         try {
+            /* Validating database name to avoid any possible SQL injection attack */
+            RSSManagerUtil.checkIfParameterSecured(qualifiedDatabaseName);
+
             conn = this.getConnection(ctx, rssInstance.getName());
             conn.setAutoCommit(false);
             String sql = "CREATE DATABASE " + qualifiedDatabaseName;
@@ -134,6 +136,9 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
             throw new EntityNotFoundException(msg);
         }
         try {
+            /* Validating database name to avoid any possible SQL injection attack */
+            RSSManagerUtil.checkIfParameterSecured(databaseName);
+
             conn = getConnection(ctx, rssInstance.getName());
             conn.setAutoCommit(false);
             String sql = "DROP DATABASE " + databaseName;
@@ -205,6 +210,9 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
             user.setRssInstanceName(user.getRssInstanceName());
             user.setType(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
 
+            /* Validating user information to avoid any possible SQL injection attacks */
+            RSSManagerUtil.validateDatabaseUserInfo(user);
+
             for (RSSInstanceDSWrapper wrapper :
                     getEnvironment(ctx).getDSWrapperRepository().getAllRSSInstanceDSWrappers()) {
                 try {
@@ -221,15 +229,10 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
                     conn = getConnection(ctx, rssInstance.getName());
                     conn.setAutoCommit(false);
 
-                    String sql = "INSERT INTO mysql.user (Host, User, Password, ssl_cipher, x509_issuer, x509_subject, authentication_string) VALUES (?, ?, PASSWORD(?), ?, ?, ?, ?)";
+                    String sql =
+                            "CREATE DATABASE USER '" + qualifiedUsername + "'@'%' IDENTIFIED BY '" +
+                                    user.getPassword() + "'";
                     stmt = conn.prepareStatement(sql);
-                    stmt.setString(1, "%");
-                    stmt.setString(2, qualifiedUsername);
-                    stmt.setString(3, user.getPassword());
-                    stmt.setBlob(4, new ByteArrayInputStream(new byte[0]));
-                    stmt.setBlob(5, new ByteArrayInputStream(new byte[0]));
-                    stmt.setBlob(6, new ByteArrayInputStream(new byte[0]));
-                    stmt.setString(7, "");
 
                     /* Initiating the distributed transaction */
                     inTx = getEntityManager().beginTransaction();
