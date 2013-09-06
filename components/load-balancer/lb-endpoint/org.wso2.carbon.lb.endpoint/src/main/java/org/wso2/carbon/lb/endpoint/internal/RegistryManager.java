@@ -17,11 +17,14 @@ package org.wso2.carbon.lb.endpoint.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.lb.endpoint.util.ConfigHolder;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.lb.common.util.DomainMapping;
+import org.wso2.carbon.lb.endpoint.util.ConfigHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class RegistryManager {
     UserRegistry governanceRegistry = ConfigHolder.getInstance().getGovernanceRegistry();
@@ -34,8 +37,14 @@ public class RegistryManager {
     public static final String ACTUAL_HOST = "actual.host";
 
     public DomainMapping getMapping(String hostName) {
+    	
         DomainMapping domainMapping;
         try {
+        	//setting the tenant flow as ST flow as ELB is code it self is not tenantaware at the time this code block is called
+        	PrivilegedCarbonContext.startTenantFlow();
+        	PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        	ctx.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+			ctx.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             if (governanceRegistry.resourceExists(HOST_INFO + hostName)) {
                 resource = governanceRegistry.get(HOST_INFO + hostName);
                 domainMapping = new DomainMapping(hostName);
@@ -45,6 +54,8 @@ public class RegistryManager {
         } catch (RegistryException e) {
             log.info("Error while getting registry resource");
             throw new RuntimeException(e);
+        } finally {
+        	 PrivilegedCarbonContext.endTenantFlow();
         }
         return null;
     }
