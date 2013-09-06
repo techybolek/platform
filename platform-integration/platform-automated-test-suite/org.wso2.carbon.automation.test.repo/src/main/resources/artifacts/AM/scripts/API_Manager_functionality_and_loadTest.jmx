@@ -56,12 +56,12 @@
           </elementProp>
           <elementProp name="apinm" elementType="Argument">
             <stringProp name="Argument.name">apinm</stringProp>
-            <stringProp name="Argument.value">Youtube</stringProp>
+            <stringProp name="Argument.value">GOOG_Stock_API</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="context" elementType="Argument">
             <stringProp name="Argument.name">context</stringProp>
-            <stringProp name="Argument.value">/geodata</stringProp>
+            <stringProp name="Argument.value">/GStock</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="storeIP" elementType="Argument">
@@ -1149,7 +1149,7 @@ Failure=true;
                   <stringProp name="script">String resp = prev.getResponseDataAsString();
 
 int def = resp.indexOf(&quot;id&quot;);
-String appid = resp.substring(def+6, resp.indexOf(&quot;,&quot; ));
+String appid = resp.substring(def+6, resp.indexOf(&quot;, \&quot;callbackUrl\&quot;&quot; ));
 System.out.println(appid);
 vars.put(&quot;appid&quot;, appid);</stringProp>
                 </BeanShellPostProcessor>
@@ -1607,7 +1607,7 @@ print(&quot;domain&quot;+ tenant_count+&quot;.com&quot; + &quot;@@@&quot; + acce
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get ALL APIs" enabled="false">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get ALL APIs" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
@@ -1955,7 +1955,7 @@ FileWriter writer = new FileWriter(outPath);
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get Recently Added APIs" enabled="false">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get Recently Added APIs" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
@@ -2316,7 +2316,7 @@ FileWriter writer = new FileWriter(outPath);
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get Tags" enabled="false">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Get Tags" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
@@ -2678,7 +2678,7 @@ FileWriter writer = new FileWriter(outPath);
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
-        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="Server Parameter variables" enabled="true">
+        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="Server Parameter variables" enabled="false">
           <collectionProp name="Arguments.arguments">
             <elementProp name="server" elementType="Argument">
               <stringProp name="Argument.name">server</stringProp>
@@ -2840,7 +2840,7 @@ vars.put(&quot;contextAndAPIId&quot;,contextAndAPIId);</stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/t/${domain}${contextAndAPIId}/${version}/most_popular</stringProp>
+          <stringProp name="HTTPSampler.path">/t/${domain}${contextAndAPIId}/${version}/api?stock=WSO2</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -2866,11 +2866,11 @@ vars.put(&quot;contextAndAPIId&quot;,contextAndAPIId);</stringProp>
           <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
-              <stringProp name="-1498428454">xmlns=&quot;http://www.w3.org/2005/Atom&quot;</stringProp>
+              <stringProp name="-575879071">&lt;no_data_message data=&quot;No data found&quot;/&gt;</stringProp>
             </collectionProp>
             <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
             <boolProp name="Assertion.assume_success">false</boolProp>
-            <intProp name="Assertion.test_type">2</intProp>
+            <intProp name="Assertion.test_type">6</intProp>
           </ResponseAssertion>
           <hashTree/>
           <DebugPostProcessor guiclass="TestBeanGUI" testclass="DebugPostProcessor" testname="Debug PostProcessor" enabled="true">
