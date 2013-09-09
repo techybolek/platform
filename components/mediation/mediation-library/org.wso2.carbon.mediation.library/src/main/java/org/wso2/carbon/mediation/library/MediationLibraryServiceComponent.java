@@ -18,6 +18,7 @@
 package org.wso2.carbon.mediation.library;
 
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
@@ -29,6 +30,7 @@ import org.apache.synapse.deployers.ImportDeployer;
 import org.apache.synapse.deployers.LibraryArtifactDeployer;
 import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
 import org.apache.synapse.libraries.imports.SynapseImport;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.mediation.dependency.mgt.services.DependencyManagementService;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
@@ -36,11 +38,14 @@ import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
 import org.wso2.carbon.mediation.initializer.services.SynapseConfigurationService;
 import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 import org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsService;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.mediation.library.util.*;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 import java.io.File;
 import java.util.Map;
@@ -57,16 +62,24 @@ import java.util.Set;
  * bind="setSynapseConfigurationService" unbind="unsetSynapseConfigurationService"
  * @scr.reference name="synapse.env.service"
  * interface="org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService"
- * cardinality="1..1" policy="dynamic"
+ * cardinality="1..n" policy="dynamic"
  * bind="setSynapseEnvironmentService" unbind="unsetSynapseEnvironmentService"
  * @scr.reference name="registry.service"
  * interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic"
  * bind="setRegistryService" unbind="unsetRegistryService"
+ * @scr.reference name="dependency.mgt.service"
+ * interface="org.wso2.carbon.mediation.dependency.mgt.services.DependencyManagementService"
+ * cardinality="0..1" policy="dynamic"
+ * bind="setDependencyManager" unbind="unsetDependencyManager"
+ * @scr.reference name="synapse.registrations.service"
+ * interface="org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsService"
+ * cardinality="1..n" policy="dynamic" bind="setSynapseRegistrationsService"
+ * unbind="unsetSynapseRegistrationsService"
  */
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class MediationLibraryServiceComponent {
+public class MediationLibraryServiceComponent extends AbstractAxis2ConfigurationContextObserver {
 
     private static Log log = LogFactory.getLog(MediationLibraryServiceComponent.class);
 
@@ -74,6 +87,9 @@ public class MediationLibraryServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         try {
+            BundleContext bndCtx = ctxt.getBundleContext();
+            bndCtx.registerService(Axis2ConfigurationContextObserver.class.getName(), this, null);
+
             SynapseEnvironmentService synEnvService =
                     ConfigHolder.getInstance().getSynapseEnvironmentService(
                             MultitenantConstants.SUPER_TENANT_ID);
@@ -280,6 +296,23 @@ public class MediationLibraryServiceComponent {
             String carbonRepoPath = axisConfig.getRepository().getPath();
             String libsPath = carbonRepoPath + File.separator + "synapse-libs";
             deploymentEngine.removeDeployer(libsPath, "zip");
+        }
+    }
+
+    public void createdConfigurationContext(ConfigurationContext configContext) {
+        AxisConfiguration axisConfig = configContext.getAxisConfiguration();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId();
+
+        if (axisConfig != null) {
+            SynapseEnvironmentService synEnvService = ConfigHolder.getInstance().getSynapseEnvironmentService(tenantId);
+            if (synEnvService != null) {
+                try {
+                    registerDeployer(axisConfig, synEnvService.getSynapseEnvironment());
+                }
+                catch (Exception e) {
+                    log.error("Error while initializing MediationLibrary Admin",e);
+                }
+            }
         }
     }
 }

@@ -22,9 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
-import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
-import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceManager;
+
 
 import java.util.Properties;
 
@@ -34,9 +32,6 @@ import java.util.Properties;
 public class ProxyServiceDeployer extends org.apache.synapse.deployers.ProxyServiceDeployer {
 
 	private static final Log log = LogFactory.getLog(ProxyAdminServiceComponent.class);
-
-	  
-    MediationPersistenceManager mpm;
 
     @Override
     public void init(ConfigurationContext configCtx) {

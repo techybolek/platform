@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.sequences.internal;
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
@@ -27,6 +28,7 @@ import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.dependency.mgt.services.DependencyManagementService;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
@@ -36,6 +38,8 @@ import org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsServic
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.sequences.SequenceDeploymentInterceptor;
 import org.wso2.carbon.sequences.common.SequenceEditorException;
+import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -70,7 +74,7 @@ import java.util.Set;
  * unbind="unsetSynapseRegistrationsService"
  */
 @SuppressWarnings({"UnusedDeclaration", "JavaDoc"})
-public class SequenceEditorServiceComponent {
+public class SequenceEditorServiceComponent extends AbstractAxis2ConfigurationContextObserver {
 
     private static final Log log = LogFactory.getLog(SequenceEditorServiceComponent.class);
 
@@ -80,6 +84,10 @@ public class SequenceEditorServiceComponent {
 
     protected void activate(ComponentContext context) {
         try {
+            BundleContext bndCtx = context.getBundleContext();
+            bndCtx.registerService(
+                    Axis2ConfigurationContextObserver.class.getName(), this, null);
+        	
             SynapseEnvironmentService synEnvService =
                     ConfigHolder.getInstance().getSynapseEnvironmentService(
                             MultitenantConstants.SUPER_TENANT_ID);
@@ -259,6 +267,23 @@ public class SequenceEditorServiceComponent {
                     getAxisConfiguration();
             if (axisConfig != null) {
                     unregisterDeployer(axisConfig, env);
+            }
+        }
+    }
+    
+    public void createdConfigurationContext(ConfigurationContext configContext) {
+
+        AxisConfiguration axisConfig = configContext.getAxisConfiguration();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId();
+
+        if (axisConfig != null) {
+            SynapseEnvironmentService synEnvService = ConfigHolder.getInstance().getSynapseEnvironmentService(tenantId);
+            if (synEnvService != null) {
+                try {
+                    registerDeployer(axisConfig, synEnvService.getSynapseEnvironment());
+                } catch (SequenceEditorException e) {
+                    log.error("Error while initializing SequenceEditor Admin",e);
+                }
             }
         }
     }

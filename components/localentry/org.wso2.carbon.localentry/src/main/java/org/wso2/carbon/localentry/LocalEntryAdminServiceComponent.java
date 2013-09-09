@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.localentry;
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
@@ -25,7 +26,9 @@ import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.localentry.util.ConfigHolder;
 import org.wso2.carbon.mediation.dependency.mgt.services.DependencyManagementService;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
@@ -35,6 +38,8 @@ import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 import org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -70,7 +75,7 @@ import java.util.Set;
  * unbind="unsetSynapseRegistrationsService"
  */
 @SuppressWarnings({"UnusedDeclaration", "JavaDoc"})
-public class LocalEntryAdminServiceComponent {
+public class LocalEntryAdminServiceComponent extends AbstractAxis2ConfigurationContextObserver {
 
     private static final Log log = LogFactory.getLog(LocalEntryAdminServiceComponent.class);
 
@@ -78,6 +83,9 @@ public class LocalEntryAdminServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         try {
+            BundleContext bndCtx = ctxt.getBundleContext();
+            bndCtx.registerService(Axis2ConfigurationContextObserver.class.getName(), this, null);
+            
             SynapseEnvironmentService synEnvService =
                     ConfigHolder.getInstance().getSynapseEnvironmentService(
                             MultitenantConstants.SUPER_TENANT_ID);
@@ -274,5 +282,21 @@ public class LocalEntryAdminServiceComponent {
             log.debug("Dependency management service unbound from the endpoint component");
         }
         ConfigHolder.getInstance().setDependencyManager(null);
+    }
+    
+    public void createdConfigurationContext(ConfigurationContext configContext) {
+        AxisConfiguration axisConfig = configContext.getAxisConfiguration();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId();
+
+        if (axisConfig != null) {
+            SynapseEnvironmentService synEnvService = ConfigHolder.getInstance().getSynapseEnvironmentService(tenantId);
+            if (synEnvService != null) {
+                try {
+                    registerDeployer(axisConfig, synEnvService.getSynapseEnvironment());
+                } catch (LocalEntryAdminException e) {
+                    log.error("Error while initializing LocalEntry Admin",e);
+                }
+            }
+        }
     }
 }

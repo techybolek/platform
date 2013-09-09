@@ -18,6 +18,7 @@
 package org.wso2.carbon.message.store;
 
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
@@ -28,6 +29,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.deployers.MessageStoreDeployer;
 import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
 import org.apache.synapse.message.store.MessageStore;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.mediation.dependency.mgt.services.DependencyManagementService;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
@@ -39,6 +41,9 @@ import org.wso2.carbon.message.store.util.ConfigHolder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.service.mgt.ServiceAdmin;
+import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -57,7 +62,7 @@ import java.util.Set;
  * bind="setSynapseConfigurationService" unbind="unsetSynapseConfigurationService"
  * @scr.reference name="synapse.env.service"
  * interface="org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService"
- * cardinality="1..1" policy="dynamic"
+ * cardinality="1..n" policy="dynamic"
  * bind="setSynapseEnvironmentService" unbind="unsetSynapseEnvironmentService"
  * @scr.reference name="service.admin.service" interface="org.wso2.carbon.service.mgt.ServiceAdmin"
  * cardinality="1..1" policy="dynamic"
@@ -66,10 +71,18 @@ import java.util.Set;
  * interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic"
  * bind="setRegistryService" unbind="unsetRegistryService"
+ * @scr.reference name="dependency.mgt.service"
+ * interface="org.wso2.carbon.mediation.dependency.mgt.services.DependencyManagementService"
+ * cardinality="0..1" policy="dynamic"
+ * bind="setDependencyManager" unbind="unsetDependencyManager"
+ * @scr.reference name="synapse.registrations.service"
+ * interface="org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsService"
+ * cardinality="1..n" policy="dynamic" bind="setSynapseRegistrationsService"
+ * unbind="unsetSynapseRegistrationsService"
  */
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class MessageStoreAdminServiceComponent {
+public class MessageStoreAdminServiceComponent extends AbstractAxis2ConfigurationContextObserver {
 
     private static Log log = LogFactory.getLog(MessageStoreAdminServiceComponent.class);
 
@@ -77,6 +90,9 @@ public class MessageStoreAdminServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         try {
+            BundleContext bndCtx = ctxt.getBundleContext();
+            bndCtx.registerService(Axis2ConfigurationContextObserver.class.getName(), this, null);
+
             SynapseEnvironmentService synEnvService =
                     ConfigHolder.getInstance().getSynapseEnvironmentService(
                             MultitenantConstants.SUPER_TENANT_ID);
@@ -284,6 +300,23 @@ public class MessageStoreAdminServiceComponent {
                     + File.separator + MultiXMLConfigurationBuilder.MESSAGE_STORE_DIR;
             deploymentEngine.removeDeployer(
                     storeDirPath, ServiceBusConstants.ARTIFACT_EXTENSION);
+        }
+    }
+
+    public void createdConfigurationContext(ConfigurationContext configContext) {
+        AxisConfiguration axisConfig = configContext.getAxisConfiguration();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId();
+
+        if (axisConfig != null) {
+            SynapseEnvironmentService synEnvService = ConfigHolder.getInstance().getSynapseEnvironmentService(tenantId);
+            if (synEnvService != null) {
+                try {
+                    registerDeployer(axisConfig, synEnvService.getSynapseEnvironment());
+                }
+                catch (Exception e) {
+                    log.error("Error while initializing MessageStore Admin",e);
+                }
+            }
         }
     }
 }

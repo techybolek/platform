@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
@@ -30,7 +31,9 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.deployers.APIDeployer;
 import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
 import org.apache.synapse.rest.API;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.dependency.mgt.services.DependencyManagementService;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
@@ -39,6 +42,8 @@ import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 import org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -69,7 +74,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
  * unbind="unsetSynapseRegistrationsService"
  */
 @SuppressWarnings({"UnusedDeclaration", "JavaDoc"})
-public class APIServiceComponent {
+public class APIServiceComponent extends AbstractAxis2ConfigurationContextObserver {
 
     private static final Log log = LogFactory.getLog(APIServiceComponent.class);
 
@@ -77,6 +82,10 @@ public class APIServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         try {
+            BundleContext bndCtx = ctxt.getBundleContext();
+            bndCtx.registerService(
+                    Axis2ConfigurationContextObserver.class.getName(), this, null);
+
             SynapseEnvironmentService synEnvService =
                     ConfigHolder.getInstance().getSynapseEnvironmentService(
                             MultitenantConstants.SUPER_TENANT_ID);
@@ -272,6 +281,23 @@ public class APIServiceComponent {
                     unregisterDeployer(axisConfig, env);
                 } catch (APIException e) {
                     log.warn("Couldn't remove the APIDeployer");
+                }
+            }
+        }
+    }
+
+    public void createdConfigurationContext(ConfigurationContext configContext) {
+
+        AxisConfiguration axisConfig = configContext.getAxisConfiguration();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId();
+
+        if (axisConfig != null) {
+            SynapseEnvironmentService synEnvService = ConfigHolder.getInstance().getSynapseEnvironmentService(tenantId);
+            if (synEnvService != null) {
+                try {
+                    registerDeployer(axisConfig, synEnvService.getSynapseEnvironment());
+                } catch (APIException e) {
+                    log.error("Error while initializing API admin",e);
                 }
             }
         }

@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.priority.executors;
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.synapse.commons.executors.PriorityExecutor;
@@ -24,9 +25,13 @@ import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
 import org.apache.synapse.endpoints.Endpoint;
+import org.osgi.framework.BundleContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
 import org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsService;
+import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -64,7 +69,7 @@ import java.util.Map;
  * cardinality="1..n" policy="dynamic" bind="setSynapseRegistrationsService"
  * unbind="unsetSynapseRegistrationsService"
  */
-public class PriorityServiceComponent {
+public class PriorityServiceComponent extends AbstractAxis2ConfigurationContextObserver {
 
     private static final Log log = LogFactory.getLog(PriorityServiceComponent.class);
 
@@ -75,6 +80,9 @@ public class PriorityServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         try {
+            BundleContext bndCtx = ctxt.getBundleContext();
+            bndCtx.registerService(Axis2ConfigurationContextObserver.class.getName(), this, null);
+
             SynapseEnvironmentService synEnvService =
                     synapseEnvironmentServices.get(
                             MultitenantConstants.SUPER_TENANT_ID);
@@ -226,6 +234,23 @@ public class PriorityServiceComponent {
                     getAxisConfiguration();
             if (axisConfig != null) {
                 unRegisterDeployer(axisConfig, env);
+            }
+        }
+    }
+
+    public void createdConfigurationContext(ConfigurationContext configContext) {
+        AxisConfiguration axisConfig = configContext.getAxisConfiguration();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId();
+
+        if (axisConfig != null) {
+            SynapseEnvironmentService synEnvService = synapseEnvironmentServices.get(tenantId);
+            if (synEnvService != null) {
+                try {
+                    registerDeployer(axisConfig, synEnvService.getSynapseEnvironment());
+                }
+                catch (Exception e) {
+                    log.error("Error while initializing PriorityExecutor Admin",e);
+                }
             }
         }
     }
