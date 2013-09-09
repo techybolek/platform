@@ -45,7 +45,7 @@ function isValidURL(url) {
     if (url.search(/['",]/) != -1) { // we have , ' " in the URL
         return false;
     }
-    var regx = RegExp("^\\w\\w+:/.*|file:.*|mailto:.*");
+    var regx = RegExp("^\\w\\w+:/.*|file:.*|mailto:.*|vfs:.*");
     if (!(url.match(regx))) {
         return false;
     }
