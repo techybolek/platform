@@ -632,6 +632,127 @@
                                 <featureArtifactDef>
                                     org.wso2.dss:org.wso2.dss.styling.nested.category.feature:${dss.version}
                                 </featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.proxyadmin.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.transport.vfs.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.transport.fix.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.ndatasource.ui.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+                                    org.wso2.carbon:org.apache.synapse.transport.vfs.feature:${synapse.version}
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.carbon:org.apache.synapse.transport.vfs.smb.feature:${synapse.version}
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.carbon:org.apache.synapse.transport.fix.feature:${synapse.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.mediation.library.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.task.feature:${carbon.platform.version}
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.mediation.artifactuploader.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.mediation.security.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.localentry.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.endpoint.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.sequences.feature:${carbon.platform.version}
+				</featureArtifactDef>                    
+                                <featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.mediators.feature:${carbon.platform.version}
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.rule.mediation.feature:${carbon.platform.version}
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.esb:org.wso2.esb.styles.feature:${esb.version}
+				</featureArtifactDef> 
+				<featureArtifactDef>
+				    org.wso2.esb:org.wso2.esb.samples.feature:${esb.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.discovery.ui.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.priority.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.identity.oauth.mediator.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.identity.xacml.mediator.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.server.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature:${carbon.platform.version}
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.smooks.feature:${carbon.platform.version}	
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.application.mgt.synapse.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.application.deployer.synapse.feature:${carbon.platform.version}
+				</featureArtifactDef>
+			        <featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.transports.sap.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.mediation.templates.feature:${carbon.platform.version}
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.message.store.feature:${carbon.platform.version}
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.message.processor.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.load.balance.agent.ui.feature:${stratos.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.reporting.server.feature:${carbon.platform.version}
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.reporting.ui.feature:${carbon.platform.version}
+				</featureArtifactDef>
+                                <featureArtifactDef>
+				    org.wso2.esb:org.wso2.stratos.esb.login.ui.feature:${stratos.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.bam.mediation.agent.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.mediator.bam.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				
+				<!-- Start of ESB related features -->
+				<featureArtifactDef>
+				    org.wso2.esb:org.wso2.esb.esb-manager.nested.category.feature:${esb.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.esb:org.wso2.esb.esb-worker.nested.category.feature:${esb.version}
+				</featureArtifactDef>
+				<!-- End of ESB related features -->
+
 
                                 <!--featureArtifactDef>
                                     org.wso2.bps:org.wso2.bps.attachment-mgt.nested.category.feature:${bps.version}
@@ -877,6 +998,26 @@
                                         </catFeature>
                                     </features>
                                 </category>
+				
+				<!--Start of ESB feature categories-->
+                                 <category>
+                                    <id>org.wso2.esb.category</id>
+                                    <label>Enterprise Service Bus</label>
+                                    <description>This category contains features required for WSO2 Enterprise Service Bus
+                                    </description>
+                                    <features>
+                                        <catFeature>
+                                            <id>org.wso2.esb.esb-manager.nested.category</id>
+                                            <version>${esb.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.esb.esb-worker.nested.category</id>
+                                            <version>${esb.version}</version>
+                                        </catFeature>
+                                    </features>
+                                </category>
+				<!--End of ESB feature categories-->
+
                                 <!--Start of BPS feature categories-->
                                 <!--category>
                                     <id>org.wso2.bps.category</id>
@@ -995,7 +1136,7 @@
         <dss.version>3.1.0-SNAPSHOT</dss.version>
         <bps.version>3.1.0-SNAPSHOT</bps.version>
 	<af.version>1.1.0-SNAPSHOT</af.version>
-
+	<esb.version>4.8.0</esb.version>
         <!-- Stratos Version -->
         <stratos.version>2.2.0-SNAPSHOT</stratos.version>
 
