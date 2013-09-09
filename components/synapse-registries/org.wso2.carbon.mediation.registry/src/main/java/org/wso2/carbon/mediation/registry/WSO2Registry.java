@@ -81,7 +81,8 @@ public class WSO2Registry extends AbstractRegistry {
                     CarbonContext.getCurrentContext().getTenantId());
             governanceRegistry = registryService.getGovernanceSystemRegistry(
                     CarbonContext.getCurrentContext().getTenantId());
-            localRegistry = registryService.getLocalRepository();
+            localRegistry = registryService.getLocalRepository(
+                    CarbonContext.getCurrentContext().getTenantId());
         } catch (RegistryException e) {
             handleException("Error while initializing the mediation registry adapter", e);
         }
