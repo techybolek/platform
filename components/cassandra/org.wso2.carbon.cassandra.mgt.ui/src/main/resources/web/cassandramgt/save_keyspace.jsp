@@ -41,9 +41,9 @@
         keyspaceInformation.setReplicationFactor(replicationFactor);
         keyspaceInformation.setStrategyClass(replicationStrategy);
         if ("add".equals(mode)) {
-            cassandraKeyspaceAdminClient.addKeyspace(keyspaceInformation);
+            cassandraKeyspaceAdminClient.addKeyspace(keyspaceInformation, session);
         } else {
-            cassandraKeyspaceAdminClient.updateKeyspace(keyspaceInformation);
+            cassandraKeyspaceAdminClient.updateKeyspace(keyspaceInformation, session);
         }
     } catch (Exception e) {
         CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);

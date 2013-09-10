@@ -77,7 +77,7 @@
 
 <table width="100%" cellspacing="0" cellpadding="0" border="0">
 <tr>
-<td width="50%">
+<td width="50%" colspan="2">
     <table class="styledLeft" id="cfInfoTable" style="margin-left: 0px;" width="100%">
         <thead>
         <tr>
@@ -229,7 +229,7 @@
 
     if (columnFamilyStats != null) {
 %>
-<td width="10px">&nbsp;</td>
+<td width="20%">&nbsp;</td>
 <td>
 
     <div id="cfstatsTableDIv">
@@ -237,7 +237,7 @@
                style="margin-left: 0px;" width="100%">
             <thead>
             <tr>
-                <th colspan="2">
+                <th width="50%" colspan="2">
                     <fmt:message key="cassandra.cf.stats"/>
                 </th>
             </tr>
@@ -357,14 +357,23 @@
         }
     %>
 
-    <td width="50%">
+    <td width="80%" colspan="3">
+        <div style="margin-top:0px;">
+            <% if(!keyspace.equals("system")) {%>
+            <a class="add-icon-link" onclick="addCL('<%=columnFamily%>','<%=keyspace%>');" href="#">
+                <fmt:message key="cassandra.add.new.cl"/></a>
+            <% } %>
+            <br><br><br>
+        </div>
         <div id="serviceClientDiv" style="<%=clTableDisplay%>">
-            <table class="styledLeft" id="clTable" style="margin-left: 0px;" width="100%">
+            <table class="styledLeft" id="clTable1" style="margin-left: 0px;" width="100%">
                 <thead>
                 <tr>
-                    <th width="20%"><fmt:message key="cassandra.cl.index.name"/></th>
+                    <th width="25%"><fmt:message key="cassandra.cl.name"/></th>
+                    <th width="25%"><fmt:message key="cassandra.cl.validator.type"/></th>
+                    <th width="25%"><fmt:message key="cassandra.field.indexname"/></th>
                     <% if(!keyspace.equals("system")) {%>
-                        <th width="60%"><fmt:message key="cassandra.actions"/></th>
+                        <th width="25%"><fmt:message key="cassandra.actions"/></th>
                     <% } %>
                 </tr>
                 </thead>
@@ -372,38 +381,40 @@
                 <%
                     int j = 0;
                     if (columns != null && columns.length != 0) {
-                        for (; j < columns.length; j++) {
-                            ColumnInformation column = columns[j];
+                        for (ColumnInformation column : columns) {
                             String name = column.getName();
+                            String indexName = column.getIndexName();
+                            if(column.getIndexName() == null || column.getIndexName().isEmpty()){
+                                indexName = "--NOT INDEXED--";
+                            }
+                            String validatorClass = column.getValidationClass();
+                            String[] splitValidator = validatorClass.split("\\.");
+                            String validator = splitValidator[splitValidator.length - 1];
+                            j++;
                 %>
-                <tr id="clRaw<%=j%>">
-                    <td id="clTD<%=j%>"><%=name%>
-                    </td>
-                    <% if(!keyspace.equals("system")) {%>
-                        <td>
-                            <input type="hidden" name="clName<%=j%>" id="clName<%=j%>"
-                                   value="<%=name%>"/>
-                            <a class="delete-icon-link"
-                               onclick="deleteCL('<%=columnFamily%>','<%=j%>');"
-                               href="#"><fmt:message
-                                    key="cassandra.actions.delete"/></a>
-                        </td>
-                    <% } %>
-                </tr>
+                            <tr id="clRaw<%=j%>">
+                                <td id="clTD<%=j%>"><%=name%></td>
+                                <td><%=validator%></td>
+                                <td><%=indexName%></td>
+                                <% if(!keyspace.equals("system")) {%>
+                                    <td>
+                                        <input type="hidden" name="clName<%=j%>" id="clName<%=j%>"
+                                               value="<%=name%>"/>
+                                        <a class="delete-icon-link"
+                                           onclick="deleteCL('<%=columnFamily%>','<%=j%>');"
+                                           href="#"><fmt:message
+                                                key="cassandra.actions.delete"/></a>
+                                    </td>
+                                <% } %>
+                            </tr>
                 <%
                         }
                     }
                 %>
                 <input type="hidden" name="clCount" id="clCount" value="<%=j%>"/>
                 </tbody>
-
             </table>
-        </div>
-        <div style="margin-top:0px;">
-            <% if(!keyspace.equals("system")) {%>
-            <a class="add-icon-link" onclick="addCL('<%=columnFamily%>','<%=keyspace%>');" href="#">
-                <fmt:message key="cassandra.new.cl"/></a>
-            <% } %>
+            <br>
         </div>
     </td>
 </tr>
@@ -411,7 +422,8 @@
 <script type="text/javascript">
     alternateTableRows('cfInfoTable', 'tableEvenRow', 'tableOddRow');
     alternateTableRows('cfstatsTable', 'tableEvenRow', 'tableOddRow');
-    alternateTableRows('clTable', 'tableEvenRow', 'tableOddRow');
+    alternateTableRows('clTable1', 'tableEvenRow', 'tableOddRow');
+    alternateTableRows('clTable2', 'tableEvenRow', 'tableOddRow');
 </script>
 </div>
 </div>

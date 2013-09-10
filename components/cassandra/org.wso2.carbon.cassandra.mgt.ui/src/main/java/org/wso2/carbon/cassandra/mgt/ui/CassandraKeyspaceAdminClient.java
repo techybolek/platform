@@ -33,6 +33,7 @@ import org.wso2.carbon.cassandra.mgt.stub.ks.xsd.TokenRangeInformation;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.utils.ServerConstants;
 
+import javax.servlet.http.HttpSession;
 import java.lang.String;
 
 /**
@@ -229,12 +230,13 @@ public class CassandraKeyspaceAdminClient {
      * @param keyspaceInformation keyspace information
      * @throws CassandraAdminClientException For errors during adding a keyspace
      */
-    public void addKeyspace(KeyspaceInformation keyspaceInformation)
+    public void addKeyspace(KeyspaceInformation keyspaceInformation, HttpSession session)
             throws CassandraAdminClientException {
         validateKeyspaceInformation(keyspaceInformation);
         try {
             cassandraAdminStub.addKeyspace(keyspaceInformation);
         } catch (Exception e) {
+            session.setAttribute(CassandraAdminClientConstants.CURRENT_KEYSPACE, null);
             throw new CassandraAdminClientException("Error adding the keyspace !", e, log);
         }
     }
@@ -245,12 +247,13 @@ public class CassandraKeyspaceAdminClient {
      * @param keyspaceInformation keyspace information
      * @throws CassandraAdminClientException For errors during adding a keyspace
      */
-    public void updateKeyspace(KeyspaceInformation keyspaceInformation)
+    public void updateKeyspace(KeyspaceInformation keyspaceInformation, HttpSession session)
             throws CassandraAdminClientException {
         validateKeyspaceInformation(keyspaceInformation);
         try {
             cassandraAdminStub.updatedKeyspace(keyspaceInformation);
         } catch (Exception e) {
+            session.setAttribute(CassandraAdminClientConstants.CURRENT_KEYSPACE, null);
             throw new CassandraAdminClientException("Error updating the keyspace !", e, log);
         }
     }
@@ -311,12 +314,13 @@ public class CassandraKeyspaceAdminClient {
      * @param columnFamilyInformation information about a CF
      * @throws CassandraAdminClientException for errors during adding a CF
      */
-    public void addColumnFamily(ColumnFamilyInformation columnFamilyInformation)
+    public void addColumnFamily(ColumnFamilyInformation columnFamilyInformation, HttpSession session)
             throws CassandraAdminClientException {
         validateColumnFamilyInformation(columnFamilyInformation);
         try {
             cassandraAdminStub.addColumnFamily(columnFamilyInformation);
         } catch (Exception e) {
+            session.setAttribute(CassandraAdminClientConstants.CURRENT_KEYSPACE, null);
             throw new CassandraAdminClientException("Error adding the CF !", e, log);
         }
     }
@@ -327,12 +331,13 @@ public class CassandraKeyspaceAdminClient {
      * @param columnFamilyInformation CF information
      * @throws CassandraAdminClientException for errors during adding a CF
      */
-    public void updateColumnFamily(ColumnFamilyInformation columnFamilyInformation)
+    public void updateColumnFamily(ColumnFamilyInformation columnFamilyInformation, HttpSession session)
             throws CassandraAdminClientException {
         validateColumnFamilyInformation(columnFamilyInformation);
         try {
             cassandraAdminStub.updateColumnFamily(columnFamilyInformation);
         } catch (Exception e) {
+            session.setAttribute(CassandraAdminClientConstants.CURRENT_KEYSPACE, null);
             throw new CassandraAdminClientException("Error updating the CF !", e, log);
         }
     }

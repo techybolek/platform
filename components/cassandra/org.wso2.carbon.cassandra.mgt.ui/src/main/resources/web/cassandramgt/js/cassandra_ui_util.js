@@ -179,8 +179,18 @@ function saveCL(mode, index, keyspace, cf) {
         return false;
     }
 
-//    var indextype = document.getElementById("cl_editor_indextype").value;
     var indexname = document.getElementById("cl_editor_indexname").value;
+    if (indexname == null || indexname == '') {
+        //non-indexed column which is valid
+    } else{
+        var pattern=/\W/;        //Capital W: for non-word characters
+        var match = pattern.test(indexname);
+        if (match == true) {
+            CARBON.showErrorDialog(cassandrajsi18n["cassandra.indexname.is.invalid"]);
+            return false;
+        }
+    }
+
     var validationclass = document.getElementById("cl_editor_validationclass").value;
 
     var url = 'save_cl-ajaxprocessor.jsp?name=' + name + '&indexname=' + indexname +
@@ -210,7 +220,7 @@ function savecf(mode, index, keyspace, id) {
         //CARBON.showErrorDialog(cassandrajsi18n["cassandra.cf.name.is.empty"]);
         //return false;
     }else{
-        var pattern=/\W/;        //checking for non-word characters
+        var pattern=/\W/;        //Capital W: for non-word characters
         var match = pattern.test(name);
         if (match == true) {
             formValidaterMesg = "<p>" + cassandrajsi18n["cassandra.cf.name.is.invalid"] + "</p><p/>";

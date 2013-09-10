@@ -52,7 +52,7 @@
                 //CassandraAdminClientHelper.addColumnInformation(columnFamilyInformation, columnInformation);
                 columnFamilyInformation.addColumns(columnInformation);
                 CassandraKeyspaceAdminClient cassandraKeyspaceAdminClient = new CassandraKeyspaceAdminClient(config.getServletContext(), session);
-                cassandraKeyspaceAdminClient.updateColumnFamily(columnFamilyInformation);
+                cassandraKeyspaceAdminClient.updateColumnFamily(columnFamilyInformation, session);
                 obj.put("status", "success");
             } else {
                 obj.put("status", "fail");
@@ -64,7 +64,7 @@
             columnInformation.setIndexName(indexName);
             columnInformation.setValidationClass(CassandraAdminClientHelper.getValidatorTypeClassForAlias(validationClass));
             CassandraKeyspaceAdminClient cassandraKeyspaceAdminClient = new CassandraKeyspaceAdminClient(config.getServletContext(), session);
-            cassandraKeyspaceAdminClient.updateColumnFamily(columnFamilyInformation);
+            cassandraKeyspaceAdminClient.updateColumnFamily(columnFamilyInformation, session);
             obj.put("status", "success");
         }
 

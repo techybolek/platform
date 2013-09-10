@@ -116,14 +116,14 @@
                 new CassandraKeyspaceAdminClient(config.getServletContext(), session);
         if ("add".equals(mode)) {
             if (!isColumnFamilyExist) {
-                cassandraKeyspaceAdminClient.addColumnFamily(columnFamilyInformation);
+                cassandraKeyspaceAdminClient.addColumnFamily(columnFamilyInformation, session);
                 CassandraAdminClientHelper.addColumnFamilyInformation(keyspaceInformation, columnFamilyInformation);
                 backendStatus.put("status", "success");
             } else {
                 backendStatus.put("status", "fail");
             }
         } else if ("edit".equals(mode)) {
-            cassandraKeyspaceAdminClient.updateColumnFamily(columnFamilyInformation);
+            cassandraKeyspaceAdminClient.updateColumnFamily(columnFamilyInformation, session);
             backendStatus.put("status", "success");
         }
         out.print(backendStatus);

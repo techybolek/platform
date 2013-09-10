@@ -43,7 +43,7 @@
             ColumnFamilyInformation columnFamilyInformation =
                     CassandraAdminClientHelper.getColumnFamilyInformationOfCurrentUser(keyspaceInformation, cf);
             CassandraAdminClientHelper.removeColumnInformation(columnFamilyInformation, name);
-            cassandraKeyspaceAdminClient.updateColumnFamily(columnFamilyInformation);
+            cassandraKeyspaceAdminClient.updateColumnFamily(columnFamilyInformation, session);
         }
     } catch (Exception e) {
 %>
