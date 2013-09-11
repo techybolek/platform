@@ -49,6 +49,7 @@ public class LoadBalancerConfigurationTest extends TestCase {
         assertEquals(1, loadBalancerConfig.getInstances());
         assertEquals(5000, loadBalancerConfig.getAutoscalerTaskInterval());
         assertEquals(15000, loadBalancerConfig.getServerStartupDelay());
+        assertEquals("org.wso2.lb.ep", loadBalancerConfig.getLbEndpointClass());
     }
 
     public final void testCreateServicesConfig() {

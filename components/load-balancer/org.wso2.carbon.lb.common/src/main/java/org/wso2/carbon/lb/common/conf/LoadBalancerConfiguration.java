@@ -772,6 +772,7 @@ public class LoadBalancerConfiguration implements Serializable {
         private boolean failOver;
         private int sessionTimeOut = -1;
         private String groupManagementAgentClass;
+        private String lbEndpointClass;
         private String autoscalerTaskClass;
         private String mbServerUrl;
         private boolean useEmbeddedAutoscaler = true;
@@ -889,6 +890,14 @@ public class LoadBalancerConfiguration implements Serializable {
         
         public void setAutoscaler_task(String autoscalerTaskClass){
             this.autoscalerTaskClass = autoscalerTaskClass;
+        }
+
+        public String getLbEndpointClass() {
+            return lbEndpointClass;
+        }
+
+        public void setLb_endpoint_class(String lbEndpointClass) {
+            this.lbEndpointClass = lbEndpointClass;
         }
     }
 
