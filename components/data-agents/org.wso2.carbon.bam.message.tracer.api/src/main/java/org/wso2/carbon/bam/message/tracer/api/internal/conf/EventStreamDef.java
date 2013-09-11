@@ -15,15 +15,13 @@
  */
 package org.wso2.carbon.bam.message.tracer.api.internal.conf;
 
-import org.wso2.carbon.databridge.commons.StreamDefinition;
-
 public class EventStreamDef {
 
     public static final String STREAM_NAME = "BAM_MESSAGE_TRACE";
 
     public static final String VERSION = "1.0.0";
 
-    public static final String NICK_NAME = "MessageTRacerAgent";
+    public static final String NICK_NAME = "MessageTracerAgent";
 
     public static final String DESCRIPTION = "Publish Message Tracing Event";
 

@@ -28,7 +28,7 @@ public class MessageTracerApiClient {
         serverConfig = new ServerConfig(url, username, password);
     }
 
-    void publishMessage(Message message) {
+    public void publishMessage(Message message) {
         EventPublisher eventPublisher = new EventPublisher();
         eventPublisher.publish(message, serverConfig);
     }

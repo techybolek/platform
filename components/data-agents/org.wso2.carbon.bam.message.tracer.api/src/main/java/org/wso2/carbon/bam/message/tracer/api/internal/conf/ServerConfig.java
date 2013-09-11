@@ -56,6 +56,6 @@ public class ServerConfig {
     }
 
     public boolean isLoadBalancingConfig() {
-        return (url != null && url.split(URL_SEPARATOR).length > 0);
+        return (url != null && url.contains(URL_SEPARATOR));
     }
 }

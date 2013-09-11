@@ -33,6 +33,7 @@ import org.wso2.carbon.databridge.commons.StreamDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class EventPublisher {
 
@@ -45,6 +46,7 @@ public class EventPublisher {
         List<Object> correlationData = EventConfigUtil.getCorrelationData(message);
         List<Object> metaData = EventConfigUtil.getMetaData(message);
         List<Object> payLoadData = EventConfigUtil.getEventData(message);
+        Map<String, String> arbitraryDataMap = EventConfigUtil.getArbitraryDataMap(message);
 
         StreamDefinition streamDef = StreamDefUtil.getStreamDefinition();
 
@@ -52,28 +54,37 @@ public class EventPublisher {
 
             String key = serverConfig.getUrl() + UNDERSCORE + serverConfig.getUsername() + UNDERSCORE + serverConfig.getPassword();
             EventPublisherConfig eventPublisherConfig = EventPublishConfigHolder.getEventPublisherConfig(key);
-            if (!serverConfig.isLoadBalancingConfig()) {
+            if (serverConfig.isLoadBalancingConfig()) {
                 try {
                     if (eventPublisherConfig == null) {
                         synchronized (EventPublisher.class) {
-                            eventPublisherConfig = EventPublishConfigHolder.getEventPublisherConfig(key);
-                            if (null == eventPublisherConfig) {
-                                eventPublisherConfig = new EventPublisherConfig();
-                                AsyncDataPublisher asyncDataPublisher = new AsyncDataPublisher(serverConfig.getUrl(),
-                                                                                               serverConfig.getUsername(),
-                                                                                               serverConfig.getPassword());
-                                asyncDataPublisher.addStreamDefinition(streamDef);
-                                eventPublisherConfig.setAsyncDataPublisher(asyncDataPublisher);
-                                EventPublishConfigHolder.getEventPublisherConfigMap().put(key, eventPublisherConfig);
+                            eventPublisherConfig = new EventPublisherConfig();
+                            ArrayList<ReceiverGroup> allReceiverGroups = new ArrayList<ReceiverGroup>();
+                            ArrayList<String> receiverGroupUrls = DataPublisherUtil.getReceiverGroups(serverConfig.getUrl());
+
+                            for (String aReceiverGroupURL : receiverGroupUrls) {
+                                ArrayList<DataPublisherHolder> dataPublisherHolders = new ArrayList<DataPublisherHolder>();
+                                String[] urls = aReceiverGroupURL.split(ServerConfig.URL_SEPARATOR);
+                                for (String aUrl : urls) {
+                                    DataPublisherHolder aNode = new DataPublisherHolder(null, aUrl.trim(), serverConfig.getUsername(),
+                                                                                        serverConfig.getPassword());
+                                    dataPublisherHolders.add(aNode);
+                                }
+                                ReceiverGroup group = new ReceiverGroup(dataPublisherHolders);
+                                allReceiverGroups.add(group);
                             }
+
+                            LoadBalancingDataPublisher loadBalancingDataPublisher = new LoadBalancingDataPublisher(allReceiverGroups);
+
+                            loadBalancingDataPublisher.addStreamDefinition(streamDef);
+                            eventPublisherConfig.setLoadBalancingDataPublisher(loadBalancingDataPublisher);
+                            EventPublishConfigHolder.getEventPublisherConfigMap().put(key, eventPublisherConfig);
                         }
                     }
+                    LoadBalancingDataPublisher loadBalancingDataPublisher = eventPublisherConfig.getLoadBalancingDataPublisher();
 
-                    AsyncDataPublisher asyncDataPublisher = eventPublisherConfig.getAsyncDataPublisher();
-
-                    asyncDataPublisher.publish(streamDef.getName(), streamDef.getVersion(), getObjectArray(metaData),
-                                               getObjectArray(correlationData),
-                                               getObjectArray(payLoadData));
+                    loadBalancingDataPublisher.publish(streamDef.getName(), streamDef.getVersion(), getObjectArray(metaData), getObjectArray(correlationData),
+                                                       getObjectArray(payLoadData), arbitraryDataMap);
 
                 } catch (AgentException e) {
                     log.error("Error occurred while sending the event", e);
@@ -82,38 +93,21 @@ public class EventPublisher {
                 try {
                     if (eventPublisherConfig == null) {
                         synchronized (EventPublisher.class) {
-
-                            eventPublisherConfig = EventPublishConfigHolder.getEventPublisherConfig(key);
-                            if (null == eventPublisherConfig) {
-                                eventPublisherConfig = new EventPublisherConfig();
-                                ArrayList<ReceiverGroup> allReceiverGroups = new ArrayList<ReceiverGroup>();
-                                ArrayList<String> receiverGroupUrls = DataPublisherUtil.getReceiverGroups(serverConfig.getUrl());
-
-                                for (String aReceiverGroupURL : receiverGroupUrls) {
-                                    ArrayList<DataPublisherHolder> dataPublisherHolders = new ArrayList<DataPublisherHolder>();
-                                    String[] urls = aReceiverGroupURL.split(ServerConfig.URL_SEPARATOR);
-                                    for (String aUrl : urls) {
-                                        DataPublisherHolder aNode = new DataPublisherHolder(null, aUrl.trim(), serverConfig.getUsername(),
-                                                                                            serverConfig.getPassword());
-                                        dataPublisherHolders.add(aNode);
-                                    }
-                                    ReceiverGroup group = new ReceiverGroup(dataPublisherHolders);
-                                    allReceiverGroups.add(group);
-                                }
-
-                                LoadBalancingDataPublisher loadBalancingDataPublisher = new LoadBalancingDataPublisher(allReceiverGroups);
-
-                                loadBalancingDataPublisher.addStreamDefinition(streamDef);
-                                eventPublisherConfig.setLoadBalancingDataPublisher(loadBalancingDataPublisher);
-                                EventPublishConfigHolder.getEventPublisherConfigMap().put(key, eventPublisherConfig);
-                            }
+                            eventPublisherConfig = new EventPublisherConfig();
+                            AsyncDataPublisher asyncDataPublisher = new AsyncDataPublisher(serverConfig.getUrl(),
+                                                                                           serverConfig.getUsername(),
+                                                                                           serverConfig.getPassword());
+                            asyncDataPublisher.addStreamDefinition(streamDef);
+                            eventPublisherConfig.setAsyncDataPublisher(asyncDataPublisher);
+                            EventPublishConfigHolder.getEventPublisherConfigMap().put(key, eventPublisherConfig);
                         }
                     }
 
-                    LoadBalancingDataPublisher loadBalancingDataPublisher = eventPublisherConfig.getLoadBalancingDataPublisher();
+                    AsyncDataPublisher asyncDataPublisher = eventPublisherConfig.getAsyncDataPublisher();
 
-                    loadBalancingDataPublisher.publish(streamDef.getName(), streamDef.getVersion(), getObjectArray(metaData), getObjectArray(correlationData),
-                                                       getObjectArray(payLoadData));
+                    asyncDataPublisher.publish(streamDef.getName(), streamDef.getVersion(), getObjectArray(metaData),
+                                               getObjectArray(correlationData),
+                                               getObjectArray(payLoadData), arbitraryDataMap);
 
                 } catch (AgentException e) {
                     log.error("Error occurred while sending the event", e);

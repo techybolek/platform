@@ -19,6 +19,7 @@ import org.wso2.carbon.bam.message.tracer.api.data.Message;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class EventConfigUtil {
 
@@ -37,10 +38,15 @@ public class EventConfigUtil {
     public static List<Object> getEventData(Message message) {
 
         List<Object> payloadData = new ArrayList<Object>();
-        payloadData.add(message.getType());
         payloadData.add(message.getPayload());
+        payloadData.add(message.getActivityId());
+        payloadData.add(message.getType());
         payloadData.add(message.getTimestamp());
 
         return payloadData;
+    }
+
+    public static Map<String, String> getArbitraryDataMap(Message message) {
+        return message.getAdditionalValues();
     }
 }

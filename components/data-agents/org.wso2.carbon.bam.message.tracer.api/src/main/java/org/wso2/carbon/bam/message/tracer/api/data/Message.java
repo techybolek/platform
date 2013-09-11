@@ -21,15 +21,22 @@
 
 package org.wso2.carbon.bam.message.tracer.api.data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Message {
 
     private String payload;
 
     private String host;
 
+    private String activityId;
+
     private String type;
 
     private String timestamp;
+
+    private Map<String, String> additionalValues = new HashMap<String, String>();
 
     public Message() {
     }
@@ -50,6 +57,14 @@ public class Message {
         this.host = host;
     }
 
+    public String getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
+    }
+
     public String getType() {
         return type;
     }
@@ -64,5 +79,13 @@ public class Message {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public Map<String, String> getAdditionalValues() {
+        return additionalValues;
+    }
+
+    public void setAdditionalValues(Map<String, String> additionalValues) {
+        this.additionalValues = additionalValues;
     }
 }

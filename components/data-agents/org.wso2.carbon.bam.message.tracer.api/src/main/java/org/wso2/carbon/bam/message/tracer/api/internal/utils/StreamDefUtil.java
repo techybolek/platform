@@ -55,7 +55,8 @@ public class StreamDefUtil {
     private static List<Attribute> getPayLoadDataDef() {
 
         List<Attribute> payLoadList = new ArrayList<Attribute>();
-        payLoadList.add(new Attribute("payload", AttributeType.STRING));
+        payLoadList.add(new Attribute("content", AttributeType.STRING));
+        payLoadList.add(new Attribute("activityId", AttributeType.STRING));
         payLoadList.add(new Attribute("type", AttributeType.STRING));
         payLoadList.add(new Attribute("timestamp", AttributeType.STRING));
 
