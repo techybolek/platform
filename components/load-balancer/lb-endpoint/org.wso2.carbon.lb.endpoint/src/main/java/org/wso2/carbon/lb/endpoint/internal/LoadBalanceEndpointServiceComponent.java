@@ -21,11 +21,13 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
 import org.apache.synapse.endpoints.Endpoint;
+import org.apache.synapse.endpoints.LoadbalanceEndpoint;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.mediators.builtin.SendMediator;
 import org.apache.synapse.mediators.filters.InMediator;
@@ -141,18 +143,40 @@ public class LoadBalanceEndpointServiceComponent {
                             
                             SendMediator sendMediator = (SendMediator) inChild;
                             
-                            /* add Tenant Aware LB endpoint */
+                            /* add LB endpoint */
                             
-                            TenantAwareLoadBalanceEndpoint tenantAwareEp = new TenantAwareLoadBalanceEndpoint();
+                            String lbEpClass =
+                                               ConfigHolder.getInstance().getLbConfig()
+                                                           .getLoadBalancerConfig()
+                                                           .getLbEndpointClass();
 
-                            tenantAwareEp.init(synapseEnv);
+                            LoadbalanceEndpoint lbEndpoint;
+
+                            if (lbEpClass != null) {
+                                try {
+                                    lbEndpoint =
+                                                 (LoadbalanceEndpoint) Class.forName(lbEpClass)
+                                                                            .newInstance();
+                                } catch (Exception e) {
+                                    String msg =
+                                                 "Cannot instantiate LBEndpoint. Class: " +
+                                                         lbEpClass;
+                                    log.error(msg, e);
+                                    throw new SynapseException(msg, e);
+                                }
+                            } else {
+                                lbEndpoint = new TenantAwareLoadBalanceEndpoint();
+                            }
                             
-                            sendMediator.setEndpoint(tenantAwareEp);
+
+                            lbEndpoint.init(synapseEnv);
+                            
+                            sendMediator.setEndpoint(lbEndpoint);
                             
                             successfullyRegistered = true;
 
                             if (log.isDebugEnabled()) {
-                                log.debug("Added Tenant Aware Endpoint: " +
+                                log.debug("Added Load Balancing Endpoint: " +
                                           sendMediator.getEndpoint().getName() + "" +
                                           " to Send Mediator.");
                             }
@@ -164,7 +188,7 @@ public class LoadBalanceEndpointServiceComponent {
             if(!successfullyRegistered){
                 String msg = "Failed to register Tenant Aware Load Balance Endpoint in Send Mediator.";
                 log.fatal(msg);
-                throw new TenantAwareLoadBalanceEndpointException(msg);
+                throw new SynapseException(msg);
             }
 
             if (log.isDebugEnabled()) {

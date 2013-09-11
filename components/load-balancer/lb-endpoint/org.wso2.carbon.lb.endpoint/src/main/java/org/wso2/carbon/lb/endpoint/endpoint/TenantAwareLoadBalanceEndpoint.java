@@ -309,7 +309,11 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         }
 
         TenantDynamicLoadBalanceFaultHandlerImpl faultHandler = new TenantDynamicLoadBalanceFaultHandlerImpl();
-        log.debug("************* Actual Host: "+actualHost +" ****** Target Host: "+targetHost);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Actual Host: " + actualHost + " - Target Host: " + targetHost);
+        }
+        
         faultHandler.setHost(actualHost != null ? actualHost : targetHost);
 
         if (sessionInformation != null && currentMember != null	) {
@@ -339,7 +343,10 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
 
                     actualHost = domainMapping.getActualHost();
 
-                    log.debug("************* Actual Host: "+actualHost +" ****** Target Host: "+targetHost);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Actual Host: " + actualHost + " - Target Host: " + targetHost);
+                    }
+                    
                     faultHandler.setHost(actualHost != null ? actualHost : targetHost);
                     if (actualHost.contains("/") && containsPort ) {
                     	 transportHeaders.put(HTTP.TARGET_HOST,actualHost.substring(0,actualHost.indexOf("/"))+ ":" + port+actualHost.substring(actualHost.indexOf("/"))) ;
@@ -445,7 +452,9 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         };
 
         public void setHost(String host) {
-            log.debug("Setting host name: "+host);
+            if (log.isDebugEnabled()) {
+                log.debug("Setting host name: "+host);
+            }
             this.host = host;
         }
 
