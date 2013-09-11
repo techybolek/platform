@@ -415,7 +415,7 @@ public class ZKGroup extends ZKSyncPrimitive implements Group {
 			return;
 		}
 		String path = event.getPath();
-		if (!this.isCommPath(path)) {
+		if (path != null && !this.isCommPath(path)) {
 			new Thread(new Runnable() {
 				/* we are creating a new thread here because, from zookeeper, when we are
 				 * in the same thread as the watch event happens, another watch event cannot
