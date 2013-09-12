@@ -42,7 +42,7 @@
     <sequence name="main">
         <in>
             <spring:spring xmlns:spring="http://ws.apache.org/ns/synapse" bean="springtest"
-                           key="conf:/spring/invalidSpringbean.xml"/>
+                           key="conf:/spring/invalidSpringbeammmn.xml"/>
             <send/>
         </in>
         <out>
