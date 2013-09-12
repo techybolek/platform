@@ -29,9 +29,10 @@
                 <args>
                     <arg xmlns:m0="http://services.samples"
                          evaluator="xml"
-                         expression="//m0:symbol/text()"/>
+                         expression="//m0:symbolBeforeLoopBack/text()"/>
                 </args>
             </payloadFactory>
+            <loopback/>
         </in>
         <out>
             <send/>
