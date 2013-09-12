@@ -73,6 +73,7 @@
                 <property name="uri.var.port" value="9009"/>
                 <property name="uri.var.servicePath" value="services"/>
                 <property name="uri.var.serviceName" value="StudentService"/>
+                <property name="uri.var.args" expression="$axis2:REST_URL_POSTFIX"/>
                 <send>
                     <endpoint key="GETEndpoint"/>
                 </send>
@@ -175,7 +176,7 @@
     </endpoint>
     <endpoint name="GETEndpoint">
         <http method="get"
-              uri-template="http://localhost:{uri.var.port}/{uri.var.servicePath}/{uri.var.serviceName}"/>
+              uri-template="http://localhost:{uri.var.port}/{uri.var.servicePath}/{uri.var.serviceName}{uri.var.args}"/>
     </endpoint>
     <endpoint name="PUTEndpoint">
         <http method="put"
