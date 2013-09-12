@@ -71,7 +71,7 @@
       <parameter name="store.jms.JMSSpecVersion">1.1</parameter>
    </messageStore>
 
-   <messageProcessor class="org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor"
+   <messageProcessor class="org.apache.synapse.message.processor.impl.sampler.SamplingProcessor"
                      name="SamplingProcessor1"
                      messageStore="RESTMessageStore">
       <parameter name="interval">4000</parameter>
