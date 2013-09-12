@@ -33,6 +33,7 @@
                 <property name="uri.var.port" value="9009"/>
                 <property name="uri.var.servicePath" value="services"/>
                 <property name="uri.var.serviceName" value="StudentService"/>
+                <property name="uri.var.args" expression="$axis2:REST_URL_POSTFIX"/>
                 <send>
                     <endpoint key="DELETEEndpoint"/>
                 </send>
@@ -160,7 +161,7 @@
     </proxy>
     <endpoint name="DELETEEndpoint">
         <http method="delete"
-              uri-template="http://localhost:{uri.var.port}/{uri.var.servicePath}/{uri.var.serviceName}"/>
+              uri-template="http://localhost:{uri.var.port}/{uri.var.servicePath}/{uri.var.serviceName}{uri.var.args}"/>
     </endpoint>
     <endpoint name="HTTPEndpoint">
         <http method="POST"
