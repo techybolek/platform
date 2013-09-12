@@ -120,14 +120,14 @@ public class KeyStoreGenerator {
      */
     public boolean isKeyStoreExists(int tenantId) throws KeyStoreMgtException{
     	String keyStoreName = generateKSNameFromDomainName();
+    	boolean isKeyStoreExists = false;
     	try {
-			govRegistry.resourceExists(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName);
+    		isKeyStoreExists = govRegistry.resourceExists(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName);
 		} catch (RegistryException e) {
-			String msg = "Error while checking the existance of keystore";
-            log.error(msg, e);
-            throw new KeyStoreMgtException(msg, e);
+			String msg = "Error while checking the existance of keystore.  ";
+            log.error(msg + e.getMessage());
 		}
-    	return true;
+    	return isKeyStoreExists;
     }
 
     /**
