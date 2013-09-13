@@ -86,4 +86,20 @@ public final class HumanTaskConstants {
     public static final String SOAP_ENV_NS = "http://schemas.xmlsoap.org/soap/envelope/";
 
     public static final String JAVAX_WSDL_VERBOSE_MODE_KEY = "javax.wsdl.verbose";
+
+    /** HumanTask Protocol and HumanTask Context related constants. See HT spec 8 and  8.4.1 sections*/
+    public static final String HT_CONTEXT_NAMESPACE = "http://docs.oasis-open.org/ns/bpel4people/ws-humantask/context/200803";
+    public static final String HT_CONTEXT_DEFAULT_PREFIX = "htc";
+    public static final String HT_CONTEXT_REQUEST = "humanTaskRequestContext";
+    public static final String HT_CONTEXT_IS_SKIPABLE = "isSkipable";
+    public static final String HT_CONTEXT_PRIORITY = "priority";
+
+    public static final String HT_PROTOCOL_NAMESPACE = "http://docs.oasis-open.org/ns/bpel4people/ws-humantask/protocol/200803";
+    public static final String HT_PROTOCOL_DEFAULT_PREFIX = "htcp";
+    public static final String HT_PROTOCOL_SKIPPED = "skipped";
+    public static final String HT_PROTOCOL_FAULT = "fault";
+
+    public static final String B4P_REGISTRATIONS_USERNAME_ALIAS = "B4P.Coordination.Registration.Username";
+    public static final String B4P_REGISTRATIONS_PASSWORD_ALIAS = "B4P.Coordination.Registration.Password";
+
 }

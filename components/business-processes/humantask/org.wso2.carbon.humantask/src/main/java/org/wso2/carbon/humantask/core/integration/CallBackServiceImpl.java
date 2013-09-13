@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.SOAPFault;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
@@ -31,6 +32,7 @@ import org.wso2.carbon.humantask.core.CallBackService;
 import org.wso2.carbon.humantask.core.HumanTaskConstants;
 import org.wso2.carbon.humantask.core.deployment.HumanTaskDeploymentException;
 import org.wso2.carbon.humantask.core.integration.utils.AxisServiceUtils;
+import org.wso2.carbon.humantask.core.integration.utils.SOAPUtils;
 import org.wso2.carbon.humantask.core.integration.utils.ServiceInvocationContext;
 import org.wso2.carbon.humantask.core.internal.HumanTaskServiceComponent;
 import org.wso2.carbon.unifiedendpoint.core.UnifiedEndpoint;
@@ -127,6 +129,60 @@ public class CallBackServiceImpl implements CallBackService {
         OMNamespace ns = OMAbstractFactory.getSOAP11Factory().createOMNamespace(HumanTaskConstants.B4P_NAMESPACE, "b4p");
         SOAPHeaderBlock header = mctx.getEnvelope().getHeader().addHeaderBlock(HumanTaskConstants.B4P_CORRELATION_HEADER, ns);
         header.addAttribute(HumanTaskConstants.B4P_CORRELATION_HEADER_ATTRIBUTE, Long.toString(taskId), ns);
+
+        AxisServiceUtils.invokeService(invocationContext,
+                HumanTaskServiceComponent.getHumanTaskServer().getTaskStoreManager().
+                        getHumanTaskStore(tenantId).getConfigContext());
+    }
+
+    @Override
+    public void invokeSkip(long taskID) throws AxisFault {
+        sendProtocolMessage( taskID, HumanTaskConstants.HT_PROTOCOL_SKIPPED, String.valueOf(taskID));
+    }
+
+    @Override
+    public void invokeFault(long taskID, String faultMessage) throws AxisFault {
+       sendProtocolMessage( taskID, HumanTaskConstants.HT_PROTOCOL_FAULT,faultMessage);
+    }
+
+    private void sendProtocolMessage(long taskID, String headerValue,String value) throws AxisFault
+    {
+        final MessageContext mctx = new MessageContext();
+
+        ServiceInvocationContext invocationContext = new ServiceInvocationContext();
+        invocationContext.setInMessageContext(mctx);
+        invocationContext.setUep(uep);
+        invocationContext.setService(serviceName);
+        invocationContext.setPort(portName);
+        invocationContext.setCaller(taskName.getLocalPart());
+        invocationContext.setWsdlBindingForCurrentMessageFlow(binding);
+        invocationContext.setOperationName(operation);
+
+        if (mctx.getEnvelope() == null) {
+            mctx.setEnvelope(getSoapFactory().createSOAPEnvelope());
+        }
+
+        if (mctx.getEnvelope().getBody() == null) {
+            getSoapFactory().createSOAPBody(mctx.getEnvelope());
+        }
+
+        if (mctx.getEnvelope().getHeader() == null) {
+            getSoapFactory().createSOAPHeader(mctx.getEnvelope());
+        }
+
+        //Creating Dummy Element
+        OMNamespace serviceNS = OMAbstractFactory.getSOAP11Factory().createOMNamespace(serviceName.getNamespaceURI(),"service");
+        OMElement payload = OMAbstractFactory.getOMFactory().createOMElement(operation,serviceNS);
+        mctx.getEnvelope().getBody().addChild(payload);
+
+        OMNamespace htpNS = OMAbstractFactory.getSOAP11Factory().createOMNamespace(HumanTaskConstants.HT_PROTOCOL_NAMESPACE, HumanTaskConstants.HT_PROTOCOL_DEFAULT_PREFIX );
+        SOAPHeaderBlock protocolHeader = mctx.getEnvelope().getHeader().addHeaderBlock(headerValue, htpNS);
+        protocolHeader.setText(value);
+        protocolHeader.addAttribute(HumanTaskConstants.B4P_CORRELATION_HEADER_ATTRIBUTE, Long.toString(taskID), htpNS);
+
+        OMNamespace b4pNS = OMAbstractFactory.getSOAP11Factory().createOMNamespace(HumanTaskConstants.B4P_NAMESPACE, "b4p");
+        SOAPHeaderBlock header = mctx.getEnvelope().getHeader().addHeaderBlock(HumanTaskConstants.B4P_CORRELATION_HEADER, b4pNS);
+        header.addAttribute(HumanTaskConstants.B4P_CORRELATION_HEADER_ATTRIBUTE, Long.toString(taskID), b4pNS);
 
         AxisServiceUtils.invokeService(invocationContext,
                 HumanTaskServiceComponent.getHumanTaskServer().getTaskStoreManager().

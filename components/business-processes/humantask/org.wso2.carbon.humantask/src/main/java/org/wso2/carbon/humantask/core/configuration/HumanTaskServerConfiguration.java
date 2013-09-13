@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.humantask.core.configuration;
 
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,11 +26,10 @@ import org.wso2.carbon.humantask.core.HumanTaskConstants;
 import org.wso2.carbon.humantask.core.dao.TaskStatus;
 import org.wso2.carbon.humantask.server.config.*;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.securevault.SecretResolver;
+import org.wso2.securevault.SecretResolverFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,6 +71,15 @@ public class HumanTaskServerConfiguration {
 
     private boolean uiRenderingEnabled = false;
 
+    //  HT-Coordination Related Properties
+    private boolean htCoordinationEnable = false;
+    private boolean enableTaskRegistration = true;
+    private String regServiceAuthUsername;
+    private String regServiceAuthPassword;
+    private boolean clusteredTaskEngines = false;
+    private String loadBalancerURL;
+
+    private File htServerConfigurationFile;
 
     /**
      * Create Human Task Server Configuration from a configuration file. If error occurred while parsing configuration
@@ -85,6 +94,8 @@ public class HumanTaskServerConfiguration {
             return;
         }
 
+        // This is for HT-Coordination configuration.
+        this.htServerConfigurationFile = htServerConfig;
         initConfigurationFromFile();
     }
 
@@ -95,6 +106,7 @@ public class HumanTaskServerConfiguration {
         this.dataSourceJNDIRepoProviderURL = "rmi://localhost:2199";
         this.peopleQueryEvaluatorClass = "org.wso2.carbon.humantask.core.integration.CarbonUserManagerBasedPeopleQueryEvaluator";
 //        this.threadPoolMaxSize = 50;
+        this.htCoordinationEnable = false;
     }
 
     private HumanTaskServerConfigDocument readConfigurationFromFile(File htServerConfiguration) {
@@ -145,6 +157,11 @@ public class HumanTaskServerConfiguration {
 
         if(tHumanTaskServerConfig.getUIRenderingEnabled()) {
             uiRenderingEnabled = true;
+        }
+
+        if(tHumanTaskServerConfig.getHumanTaskCoordination() !=null)
+        {
+            initCoordinationConfiguration(tHumanTaskServerConfig.getHumanTaskCoordination());
         }
     }
 
@@ -252,6 +269,72 @@ public class HumanTaskServerConfiguration {
 
         this.generateDdl = tPersistenceConfig.getGenerateDdl();
         this.showSql = tPersistenceConfig.getShowSql();
+    }
+
+    private void initCoordinationConfiguration(THumanTaskCoordination humanTaskCoordination) {
+        this.htCoordinationEnable = humanTaskCoordination.getEnable();
+        this.enableTaskRegistration = humanTaskCoordination.getEnableTaskRegistration();
+        if (humanTaskCoordination.getRegistrationServiceAuthentication() != null) {
+            getAuthenticationConfig(htServerConfigurationFile, humanTaskCoordination.getRegistrationServiceAuthentication());
+        }
+
+        if (humanTaskCoordination.getClusteredTaskEngines() != null) {
+            parseClusterDetails(humanTaskCoordination.getClusteredTaskEngines());
+        }
+    }
+
+    private void parseClusterDetails(TClusterConfig clusterConfig) {
+        this.clusteredTaskEngines = clusterConfig.getClusteredSetup();
+        if (clusterConfig.getLoadBalancerURL() != null) {
+            this.loadBalancerURL = clusterConfig.getLoadBalancerURL();
+        }
+    }
+
+    private void getAuthenticationConfig(File file, TRegServiceAuth authentication) {
+        //Since secretResolver only accept Element we have to build Element here.
+        SecretResolver secretResolver = null;
+        InputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            StAXOMBuilder builder = new StAXOMBuilder(in);
+            secretResolver = SecretResolverFactory.create(builder.getDocumentElement(), true);
+        } catch (Exception e) {
+            log.warn("Error occurred while retrieving secured TaskEngineProtocolHandler configuration.", e);
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) {
+                log.error(e.getLocalizedMessage(), e);
+            }
+        }
+        // Get Username
+        if (secretResolver != null && secretResolver.isInitialized()
+                && secretResolver.isTokenProtected(HumanTaskConstants.B4P_REGISTRATIONS_USERNAME_ALIAS)) {
+            this.regServiceAuthUsername = secretResolver.resolve(HumanTaskConstants.B4P_REGISTRATIONS_USERNAME_ALIAS);
+            if (log.isDebugEnabled()) {
+                log.debug("Loaded Registration service admin username from secure vault");
+            }
+        } else {
+            if (authentication.getUsername() != null) {
+                this.regServiceAuthUsername = authentication.getUsername();
+            }
+            log.warn("Using unsecured plan text username." +
+                    " It is recommended to configure secure vault for username in HumanTask Coordination configuration");
+        }
+        // Get Password
+        if (secretResolver != null && secretResolver.isInitialized()
+                && secretResolver.isTokenProtected(HumanTaskConstants.B4P_REGISTRATIONS_PASSWORD_ALIAS)) {
+            this.regServiceAuthPassword = secretResolver.resolve(HumanTaskConstants.B4P_REGISTRATIONS_PASSWORD_ALIAS);
+            if (log.isDebugEnabled()) {
+                log.debug("Loaded  Registration service admin password from secure vault");
+            }
+        } else {
+            if (authentication.getPassword() != null) {
+                this.regServiceAuthPassword = authentication.getPassword();
+            }
+            log.warn("Using unsecured plan text password." +
+                    " It is recommended to configure secure vault for password in HumanTask Coordination configuration");
+        }
     }
 
     //gets the carbon port offset value.
@@ -367,5 +450,39 @@ public class HumanTaskServerConfiguration {
 
     public boolean isUiRenderingEnabled() {
         return uiRenderingEnabled;
+    }
+
+    /**
+     * @return true if HumanTask coordination enabled.
+     */
+    public boolean isHtCoordinationEnable() {
+        return htCoordinationEnable;
+    }
+
+    public boolean isEnableTaskRegistration() {
+        return enableTaskRegistration;
+    }
+
+    /**
+     *
+     * @return Username of the B4P coordination component's registration service
+     */
+    public String getRegServiceAuthUsername() {
+        return regServiceAuthUsername;
+    }
+
+    /**
+     * @return User Password of the B4P coordination component's registration service.
+     */
+    public String getRegServiceAuthPassword() {
+        return regServiceAuthPassword;
+    }
+
+    public String getLoadBalancerURL() {
+        return loadBalancerURL;
+    }
+
+    public boolean isClusteredTaskEngines() {
+        return clusteredTaskEngines;
     }
 }

@@ -364,6 +364,8 @@
                             version="${carbon.platform.package.export.version}",
                             org.wso2.carbon.humantask.skeleton.mgt.services.*;
                             version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.humantask.skeleton.protocol.mgt.services.*;
+                            version="${carbon.platform.package.export.version}",
                             org.wso2.carbon.bpel.common.*; version="4.0.0",
                             org.apache.axis2.*; version="${axis2.osgi.version.range}",
                             *;resolution:=optional

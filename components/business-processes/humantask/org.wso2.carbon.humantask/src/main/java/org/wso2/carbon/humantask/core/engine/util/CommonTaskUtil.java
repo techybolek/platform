@@ -20,6 +20,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.wso2.carbon.humantask.TDeadline;
 import org.wso2.carbon.humantask.TDeadlines;
 import org.wso2.carbon.humantask.TPriorityExpr;
@@ -712,5 +714,34 @@ public final class CommonTaskUtil {
         eventInfo.setTaskInfo(populateTaskInfo(taskDAO));
 
         return eventInfo;
+    }
+
+    public static void setTaskOverrideContextAttributes(TaskDAO task, Map<String, Element> headerElements) {   //TODO fix this for remaining properties.
+        try {
+            if (headerElements != null) {
+                Element contextRequest = headerElements.get(HumanTaskConstants.HT_CONTEXT_REQUEST);
+                if (contextRequest != null) {
+                    if (!TaskType.NOTIFICATION.equals(task.getType())) {
+                        // Notification can't be skipped.
+                        NodeList nodeList = contextRequest.getElementsByTagNameNS(
+                                HumanTaskConstants.HT_CONTEXT_NAMESPACE, HumanTaskConstants.HT_CONTEXT_IS_SKIPABLE);
+                        if (nodeList != null && nodeList.getLength() > 0) {
+                            Node isSkipable = nodeList.item(0);
+                            task.setSkipable(Boolean.parseBoolean(isSkipable.getTextContent()));
+                        }
+                    }
+
+                    NodeList nodeList = contextRequest.getElementsByTagNameNS(
+                            HumanTaskConstants.HT_CONTEXT_NAMESPACE, HumanTaskConstants.HT_CONTEXT_PRIORITY);
+                    if (nodeList != null && nodeList.getLength() > 0) {
+                        Node priority = nodeList.item(0);
+                        task.setPriority(Integer.parseInt(priority.getTextContent()));
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            log.error("Error while setting override attributes to task",e);
+        }
     }
 }

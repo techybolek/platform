@@ -46,7 +46,6 @@ import org.wso2.carbon.humantask.core.engine.HumanTaskEngine;
 import org.wso2.carbon.humantask.core.engine.runtime.api.HumanTaskRuntimeException;
 import org.wso2.carbon.humantask.core.integration.AxisHumanTaskMessageReceiver;
 import org.wso2.carbon.humantask.core.integration.CallBackServiceImpl;
-import org.wso2.carbon.humantask.core.integration.HumanTaskSchemaURIResolver;
 import org.wso2.carbon.humantask.core.integration.HumanTaskWSDLLocator;
 import org.wso2.carbon.humantask.core.internal.HumanTaskServiceComponent;
 import org.wso2.carbon.utils.FileManipulator;
@@ -259,6 +258,11 @@ public class HumanTaskStore {
         transports.add(Constants.TRANSPORT_HTTPS);
         transports.add(Constants.TRANSPORT_HTTP);
         axisService.setExposedTransports(transports);
+        if (HumanTaskServiceComponent.getHumanTaskServer().getServerConfig().isHtCoordinationEnable()
+               && HumanTaskServiceComponent.getHumanTaskServer().getServerConfig().isEnableTaskRegistration() ) {
+            //TODO improve this code for Task only. We don't coordinate notifications.
+            axisService.engageModule(getConfigContext().getAxisConfiguration().getModule("htcoordination"));
+        }
         return axisService;
     }
 

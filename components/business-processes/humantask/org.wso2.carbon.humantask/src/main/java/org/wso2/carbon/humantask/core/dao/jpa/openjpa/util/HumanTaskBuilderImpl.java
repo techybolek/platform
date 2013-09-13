@@ -2,6 +2,7 @@ package org.wso2.carbon.humantask.core.dao.jpa.openjpa.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.humantask.core.HumanTaskConstants;
 import org.wso2.carbon.humantask.core.api.client.TransformerUtils;
 import org.wso2.carbon.humantask.core.dao.MessageDAO;
 import org.wso2.carbon.humantask.core.dao.TaskCreationContext;
@@ -79,6 +80,15 @@ public class HumanTaskBuilderImpl {
         task.setStatus(TaskStatus.CREATED);
         task.setActivationTime(new Date());
 
+        if (creationContext.getTaskConfiguration().isTask()) { // Attachments are only valid for Tasks.
+            //Setting the attachments to the task
+            try {
+                task.setAttachments(TransformerUtils.generateAttachmentDAOListFromIDs(task,
+                        creationContext.getAttachmentIDs()));
+            } catch (HumanTaskException e) {
+                log.error(e.getLocalizedMessage(), e);
+            }
+        }
         //Setting the attachments to the task
         try {
             task.setAttachments(TransformerUtils.generateAttachmentDAOListFromIDs(task,

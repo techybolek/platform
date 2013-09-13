@@ -66,6 +66,9 @@ public class HumanTaskDAOConnectionImpl implements HumanTaskDAOConnection {
             CommonTaskUtil.scheduleDeadlines(task);
         }
 
+        //Setting HumanTask context override attributes
+        CommonTaskUtil.setTaskOverrideContextAttributes(task,creationContext.getMessageHeaderParts());
+
         HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getEventProcessor().processEvent(CommonTaskUtil.createNewTaskEvent(task));
 
         return task;

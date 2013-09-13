@@ -16,12 +16,16 @@
 
 package org.wso2.carbon.humantask.core.engine.commands;
 
+import org.apache.axis2.util.XMLUtils;
 import org.wso2.carbon.humantask.core.dao.EventDAO;
 import org.wso2.carbon.humantask.core.dao.GenericHumanRoleDAO;
 import org.wso2.carbon.humantask.core.dao.TaskDAO;
 import org.wso2.carbon.humantask.core.dao.TaskStatus;
 import org.wso2.carbon.humantask.core.engine.runtime.api.HumanTaskRuntimeException;
+import org.wso2.carbon.humantask.core.internal.HumanTaskServiceComponent;
+import org.wso2.carbon.humantask.core.store.TaskConfiguration;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,7 +99,24 @@ public class Skip extends AbstractHumanTaskCommand {
         checkPreConditions();
         checkState();
         task.skip();
+        sendSkipProtocolMessage(task);
         processTaskEvent();
         checkPostConditions();
     }
+
+    private void sendSkipProtocolMessage(TaskDAO task) {
+        // Sending Skip Protocol Message if Coordination is enabled
+        if (HumanTaskServiceComponent.getHumanTaskServer().getServerConfig().isHtCoordinationEnable()) {
+
+            TaskConfiguration taskConf = (TaskConfiguration) HumanTaskServiceComponent.
+                    getHumanTaskServer().getTaskStoreManager().getHumanTaskStore(task.getTenantId()).
+                    getTaskConfiguration(QName.valueOf(task.getName()));
+            try {
+                taskConf.getCallBackService().invokeSkip(task.getId());
+            } catch (Exception e) {
+                throw new HumanTaskRuntimeException("Error occurred while sending skip protocol message to  callback service", e);
+            }
+        }
+    }
+
 }

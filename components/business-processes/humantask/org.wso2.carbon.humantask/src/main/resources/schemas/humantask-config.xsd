@@ -12,6 +12,7 @@
             <xsd:element name="TaskCleanupConfig" type="tns:tTaskCleanupConfig"/>
             <xsd:element name="TaskEventListeners" type="tns:tTaskEventListeners"/>
             <xsd:element name="UIRenderingEnabled" type="xsd:boolean"/>
+            <xsd:element name="HumanTaskCoordination" type="tns:tHumanTaskCoordination" />
         </xsd:sequence>
     </xsd:complexType>
     <xsd:complexType name="tPersistenceConfig">
@@ -48,6 +49,27 @@
     <xsd:complexType name="tTaskEventListeners">
         <xsd:sequence>
             <xsd:element name="ClassName" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <!-- HumanTask Coordination Related configuration -->
+    <xsd:complexType name="tHumanTaskCoordination">
+        <xsd:sequence>
+            <xsd:element name="Enable" type="xsd:boolean" />
+            <xsd:element name="EnableTaskRegistration" type="xsd:boolean"/>
+            <xsd:element name="RegistrationServiceAuthentication" type="tns:tRegServiceAuth"></xsd:element>
+            <xsd:element name="ClusteredTaskEngines" type="tns:tClusterConfig"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="tRegServiceAuth">
+        <xsd:sequence>
+            <xsd:element name="Username" type="xsd:string"/>
+            <xsd:element name="Password" type="xsd:string" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="tClusterConfig">
+        <xsd:sequence>
+            <xsd:element name="ClusteredSetup" type="xsd:boolean"/>
+            <xsd:element name="LoadBalancerURL" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
 </xsd:schema>
