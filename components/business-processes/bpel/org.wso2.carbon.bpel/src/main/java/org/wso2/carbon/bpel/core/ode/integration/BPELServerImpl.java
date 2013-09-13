@@ -291,7 +291,14 @@ public final class BPELServerImpl implements BPELServer {
      * @param eventListenerClass Fully qualified class name of BpelEventListener implementation.
      */
     public void registerEventListener(final String eventListenerClass) {
-
+        try {
+            odeBpelServer.registerBpelEventListener(
+                    (BpelEventListener) Class.forName(eventListenerClass).newInstance());
+            log.info("Registered custom BPEL event listener: " + eventListenerClass);
+        } catch (Exception e) {
+            log.warn("Couldn't register the event listener " + eventListenerClass
+                    + ", the class couldn't loaded properly: ", e);
+        }
     }
 
     /**
@@ -896,6 +903,7 @@ public final class BPELServerImpl implements BPELServer {
 
     }
 
-
-
+    public Scheduler getScheduler() {
+        return scheduler;
+    }
 }

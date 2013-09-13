@@ -58,6 +58,9 @@ import java.util.*;
  * Multitenancy is introduced through tenant's ConfigurationContext
  */
 public class ProcessConfigurationImpl implements ProcessConf, MultiTenantProcessConfiguration {
+
+    public static final String B4P_NAMESPACE = "http://docs.oasis-open.org/ns/bpel4people/bpel4people/200803";
+
     private static final Log log = LogFactory.getLog(ProcessConfigurationImpl.class);
 
     // Tenant's configuration context. Used to publish services into correct
@@ -112,6 +115,8 @@ public class ProcessConfigurationImpl implements ProcessConf, MultiTenantProcess
     private boolean undeploying = false;
 
     private String deployer = "";
+
+    private boolean isB4PTaskIncluded = false;
 
     //This attribute has been introduced in-order create a BPELDeploymentContext from a ProcessConfigurationImpl
     private String absolutePathForBpelArchive;
@@ -666,6 +671,13 @@ public class ProcessConfigurationImpl implements ProcessConf, MultiTenantProcess
             for (TProvide proivde : processInfo.getProvideList()) {
                 String plinkName = proivde.getPartnerLink();
                 TService service = proivde.getService();
+
+                if (proivde.getCorrelationFilter() != null) {
+                    if (B4P_NAMESPACE.equals(proivde.getCorrelationFilter().getNamespaceURI())) {
+                        isB4PTaskIncluded = true;
+                    }
+                }
+
                 /* NOTE:Service cannot be null for provider partner link*/
                 if (service == null) {
                     String errorMsg = "Error in <provide> element for process " +
@@ -863,5 +875,11 @@ public class ProcessConfigurationImpl implements ProcessConf, MultiTenantProcess
         }
 
     }
+
+
+    public boolean isB4PTaskIncluded() {
+        return isB4PTaskIncluded;
+    }
+
 
 }

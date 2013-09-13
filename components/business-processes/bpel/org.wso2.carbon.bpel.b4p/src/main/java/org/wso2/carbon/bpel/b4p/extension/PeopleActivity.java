@@ -43,17 +43,26 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.bpel.b4p.coordination.B4PCoordinationException;
+import org.wso2.carbon.bpel.b4p.coordination.configuration.CoordinationConfiguration;
+import org.wso2.carbon.bpel.b4p.coordination.dao.HTCoordinationDAOConnection;
+import org.wso2.carbon.bpel.b4p.coordination.dao.HTProtocolHandlerDAO;
 import org.wso2.carbon.bpel.b4p.internal.B4PContentHolder;
 import org.wso2.carbon.bpel.b4p.internal.B4PServiceComponent;
 import org.wso2.carbon.bpel.b4p.utils.SOAPHelper;
 import org.wso2.carbon.bpel.common.config.EndpointConfiguration;
 import org.wso2.carbon.bpel.core.ode.integration.BPELMessageContext;
+import org.wso2.carbon.bpel.core.ode.integration.BPELServerImpl;
 import org.wso2.carbon.bpel.core.ode.integration.store.ProcessConfigurationImpl;
 import org.wso2.carbon.bpel.core.ode.integration.utils.AxisServiceUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.unifiedendpoint.core.UnifiedEndpoint;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
@@ -62,9 +71,12 @@ import javax.wsdl.extensions.soap.SOAPBinding;
 import javax.wsdl.extensions.soap12.SOAP12Binding;
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 
 public class PeopleActivity {
     private final Log log = LogFactory.getLog(PeopleActivity.class);
@@ -445,7 +457,6 @@ public class PeopleActivity {
                 extensionContext.getProcessModel().getQName().getLocalPart() + "-" +
                         du.getStaticVersion());
 
-
         isTwoWay = activityType.equals(InteractionType.TASK);
 
         deriveServiceEPR(du, extensionContext);
@@ -660,7 +671,7 @@ public class PeopleActivity {
 
     public String invoke(ExtensionContext extensionContext) throws FaultException {
         BPELMessageContext taskMessageContext = new BPELMessageContext(hiWSDL);
-
+        UUID messageID = null;
         int tenantId = B4PServiceComponent.getBPELServer().getMultiTenantProcessStore().
                 getTenantId(processId);
         String tenantDomain = null;
@@ -680,6 +691,7 @@ public class PeopleActivity {
             //Setting the attachment id attachmentIDList
             List<Long> attachmentIDList = extractAttachmentIDsToBeSentToHumanTask(extensionContext,
                     taskMessageContext);
+
             taskMessageContext.setOperationName(getOperationName());
 
             SOAPHelper soapHelper = new SOAPHelper(getBinding(), getSoapFactory(), isRPC);
@@ -694,6 +706,20 @@ public class PeopleActivity {
             soapHelper.createSoapRequest(messageContext,
                     (Element) extensionContext.readVariable(inputVarName),
                     getOperation(extensionContext), attachmentIDList);
+
+            // Coordination Context and skipable attribute is only valid for a Task.
+            if (InteractionType.TASK.equals(activityType)) {
+
+                //Adding HumanTask Coordination context.
+                //Note: If registration service is not enabled, we don't need to send coor-context.
+                if (CoordinationConfiguration.getInstance().isEnable() && CoordinationConfiguration.getInstance().isRegistrationServiceEnabled()) {
+                    messageID = UUID.randomUUID();
+                    soapHelper.addCoordinationContext(messageContext, messageID.toString(), getRegistrationServiceURL());
+                }
+
+                //  Adding HumanTask Context overriding attributes.
+                soapHelper.addOverridingHumanTaskAttributes(messageContext, isSkipable);
+            }
 
             taskMessageContext.setInMessageContext(messageContext);
             taskMessageContext.setPort(getServicePort());
@@ -710,6 +736,10 @@ public class PeopleActivity {
             throw new FaultException(BPEL4PeopleConstants.B4P_FAULT,
                     "Error occurred while invoking service " + serviceName,
                     axisFault);
+        } catch (B4PCoordinationException coordinationFault) {
+            throw new FaultException(BPEL4PeopleConstants.B4P_FAULT,
+                    "Error occurred while generating Registration Service URL" + serviceName,
+                    coordinationFault);
         }
 // it seems the WSDLAwareMessage is not required.
 //        taskMessageContext.setRequestMessage();
@@ -724,14 +754,128 @@ public class PeopleActivity {
                     faultContext.getEnvelope().toString());
         }
 
-        return SOAPHelper.parseResponseFeedback(
+        String taskID = SOAPHelper.parseResponseFeedback(
                 taskMessageContext.getOutMessageContext().getEnvelope().getBody());
+
+        // HT-Coordination - Persisting taskID against message ID
+        // Ignore Notifications, since we are ignore coordination context for notification.
+        if (CoordinationConfiguration.getInstance().isEnable() && InteractionType.TASK.equals(activityType)) {
+            Long instanceID = extensionContext.getProcessId();
+            if (CoordinationConfiguration.getInstance().isRegistrationServiceEnabled()) {
+                try { // Already coordinated with Registration service.
+                    updateCoordinationData(messageID.toString(), Long.toString(instanceID), taskID);
+                } catch (Exception e) {
+                    log.error("Error occurred while updating humantask coordination data.", e);
+                }
+            } else {
+                // This is an special case. Registration service is disabled. So we are calculating Task engine protocol
+                // Handler URL by manually.
+                try {
+                    messageID = UUID.randomUUID();
+                    String protocolHandlerURL = generateTaskProtocolHandlerURL(taskMessageContext);
+                    if(log.isDebugEnabled())
+                    {
+                        log.debug("Generated Protocol Handler URL : " + protocolHandlerURL);
+                    }
+                    createCoordinationData(messageID.toString(), protocolHandlerURL, Long.toString(instanceID), taskID);
+                } catch (Exception e) {
+                    log.error("Error occurred while creating humantask coordination data for coordinated task.", e);
+                }
+            }
+        }
+        return taskID;
     }
 
     public String inferCorrelatorId(ExtensionContext extensionContext) throws FaultException {
         PartnerLinkInstance plink;
         plink = extensionContext.getPartnerLinkInstance(partnerLinkName);
         return plink.partnerLink.getName() + "." + callbackOperationName;
+    }
+
+    private void updateCoordinationData(final String messageID, final String instanceID, final String taskID) throws Exception {
+        ((BPELServerImpl) B4PContentHolder.getInstance().getBpelServer()).getScheduler().execTransaction(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                HTCoordinationDAOConnection daoConnection = B4PContentHolder.getInstance().getCoordinationController().getDaoConnectionFactory().getConnection();
+                daoConnection.updateProtocolHandler(messageID, instanceID, taskID);
+                return null;
+            }
+        });
+    }
+
+    private HTProtocolHandlerDAO createCoordinationData(final String messageID, final String participantProtocolService,
+                                        final String instanceID, final String taskID) throws Exception {
+        HTProtocolHandlerDAO htProtocolHandlerDAO = ((BPELServerImpl) B4PContentHolder.getInstance().getBpelServer()).getScheduler().execTransaction(new Callable<HTProtocolHandlerDAO>() {
+            @Override
+            public HTProtocolHandlerDAO call() throws Exception {
+                HTCoordinationDAOConnection daoConnection = B4PContentHolder.getInstance().getCoordinationController().getDaoConnectionFactory().getConnection();
+                return daoConnection.createCoordinatedTask(messageID, participantProtocolService,instanceID,taskID);
+            }
+        });
+        return htProtocolHandlerDAO;
+    }
+
+    private String generateServiceURLUpToWebContext() throws B4PCoordinationException, FaultException {
+        String baseURL = "";
+        if (CoordinationConfiguration.getInstance().isClusteredTaskEngines()) {
+            baseURL = CoordinationConfiguration.getInstance().getLoadBalancerURL();
+        } else {
+            ConfigurationContext serverConfigurationContext = getConfigurationContext();
+
+            String scheme = CarbonConstants.HTTPS_TRANSPORT;
+            String host;
+            try {
+                host = NetworkUtils.getLocalHostname();
+            } catch (SocketException e) {
+                log.error(e.getMessage(), e);
+                throw new B4PCoordinationException(e.getLocalizedMessage(), e);
+            }
+
+            int port = 9443;
+            port = CarbonUtils.getTransportProxyPort(serverConfigurationContext, scheme);
+            if (port == -1) {
+                port = CarbonUtils.getTransportPort(serverConfigurationContext, scheme);
+            }
+            baseURL = scheme + "://" + host + ":" + port;
+        }
+
+        String webContext = ServerConfiguration.getInstance().getFirstProperty("WebContextRoot");
+        if (webContext == null || webContext.equals("/")) {
+            webContext = "";
+        }
+
+        return baseURL + webContext;
+    }
+
+    private String getRegistrationServiceURL() throws B4PCoordinationException, FaultException {
+        String tenantDomain = "";
+        try {
+            tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
+        } catch (Throwable e) {
+            tenantDomain = null;
+        }
+        String protocolHandlerURL = generateServiceURLUpToWebContext() + ((tenantDomain != null &&
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) ?
+                "/" + MultitenantConstants.TENANT_AWARE_URL_PREFIX + "/" + tenantDomain : "") +
+                BPEL4PeopleConstants.CARBON_ADMIN_SERVICE_CONTEXT_ROOT + "/"
+                + BPEL4PeopleConstants.B4P_REGISTRATION_SERVICE + "/";
+        return protocolHandlerURL;
+    }
+
+    private String generateTaskProtocolHandlerURL(BPELMessageContext taskMessageContext) throws FaultException, B4PCoordinationException {
+        String tenantTaskService = taskMessageContext.getUep().getAddress();
+        int tenantDelimiterIndex = tenantTaskService.indexOf("/t/");
+        String tenantIdentifier = "";
+        if (tenantDelimiterIndex != -1) {
+            String temp = tenantTaskService.substring(tenantDelimiterIndex + 3);  // 3 = length("/t/")
+            int indexOfSlash = temp.indexOf('/');
+            tenantIdentifier = "/t/" + ((indexOfSlash != -1) ? temp.substring(0, indexOfSlash) : temp);
+        }
+        //Else super tenant. -> tenantIdentifier = ""
+        String protocolHandlerURL = generateServiceURLUpToWebContext() + tenantIdentifier +
+                BPEL4PeopleConstants.CARBON_ADMIN_SERVICE_CONTEXT_ROOT + "/"
+                + BPEL4PeopleConstants.HT_ENGINE_COORDINATION_PROTOCOL_HANDLER_SERVICE;
+        return protocolHandlerURL;
     }
 
     /**

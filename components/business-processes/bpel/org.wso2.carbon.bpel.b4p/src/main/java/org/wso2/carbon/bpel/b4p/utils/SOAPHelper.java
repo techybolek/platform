@@ -23,6 +23,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +33,8 @@ import org.apache.ode.il.OMUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.w3c.dom.Element;
+import org.wso2.carbon.bpel.b4p.coordination.context.CoordinationContext;
+import org.wso2.carbon.bpel.b4p.coordination.context.impl.HumanTaskCoordinationContextImpl;
 import org.wso2.carbon.bpel.b4p.extension.BPEL4PeopleConstants;
 import org.wso2.carbon.bpel.common.constants.Constants;
 
@@ -100,6 +103,37 @@ public class SOAPHelper {
         if (attachmentIDList != null && !attachmentIDList.isEmpty()) {
             addAttachmentIDHeader(header, attachmentIDList);
         }
+    }
+
+    /**
+     * Adding ws-Coordination context to soap request.
+     * @param msgCtx MessageContext
+     * @param messageID UUID as a WS-Coordination identifier
+     * @param registrationService URL of the ws-coordination registration service.
+     */
+    public void addCoordinationContext(MessageContext msgCtx, String messageID , String registrationService )
+    {
+        SOAPHeader header = msgCtx.getEnvelope().getHeader();
+        EndpointReference epr = new EndpointReference();
+        epr.setAddress(registrationService);
+        CoordinationContext context = new HumanTaskCoordinationContextImpl(messageID,epr);
+        header.addChild(context.toOM());
+    }
+
+    public void addOverridingHumanTaskAttributes(MessageContext msgCtx, boolean isSkipable) {
+        SOAPHeader header = msgCtx.getEnvelope().getHeader();
+        OMNamespace omNs = soapFactory.createOMNamespace(
+                BPEL4PeopleConstants.HT_CONTEXT_NAMESPACE, BPEL4PeopleConstants.HT_CONTEXT_DEFAULT_PREFIX);
+        OMElement contextRequest = header.getFirstChildWithName(
+                new QName(BPEL4PeopleConstants.HT_CONTEXT_NAMESPACE, BPEL4PeopleConstants.HT_CONTEXT_REQUEST));
+        //If context element is not exist create new one.
+        if (contextRequest == null) {
+            contextRequest = soapFactory.createOMElement(BPEL4PeopleConstants.HT_CONTEXT_REQUEST, omNs);
+        }
+        OMElement isSkipableElement = soapFactory.createOMElement(BPEL4PeopleConstants.HT_CONTEXT_IS_SKIPABLE, omNs);
+        isSkipableElement.setText(Boolean.toString(isSkipable));
+        contextRequest.addChild(isSkipableElement);
+        header.addChild(contextRequest);
     }
 
     /**

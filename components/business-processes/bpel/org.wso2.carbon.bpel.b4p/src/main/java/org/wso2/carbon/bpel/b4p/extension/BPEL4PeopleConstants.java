@@ -52,4 +52,15 @@ public final class BPEL4PeopleConstants {
             BPEL4PeopleConstants.NON_RECOVERABLE_ERROR);
 
     public static final String MESSAGE_TRACE = "org.wso2.carbon.bpel.messagetrace";
+
+    /** Carbon service related constants */
+    public static final String B4P_REGISTRATION_SERVICE = "RegistrationService";
+    public static final String HT_ENGINE_COORDINATION_PROTOCOL_HANDLER_SERVICE = "HumanTaskProtocolHandler";
+    public static final String CARBON_ADMIN_SERVICE_CONTEXT_ROOT = "/services";
+
+    /** HumanTask Context related constants. See HT spec 8.4.1*/
+    public static final String HT_CONTEXT_NAMESPACE = "http://docs.oasis-open.org/ns/bpel4people/ws-humantask/context/200803";
+    public static final String HT_CONTEXT_DEFAULT_PREFIX = "htc";
+    public static final String HT_CONTEXT_REQUEST = "humanTaskRequestContext";
+    public static final String HT_CONTEXT_IS_SKIPABLE = "isSkipable";
 }

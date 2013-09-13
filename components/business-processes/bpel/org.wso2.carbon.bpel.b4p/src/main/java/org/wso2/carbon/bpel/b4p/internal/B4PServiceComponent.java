@@ -19,6 +19,8 @@ package org.wso2.carbon.bpel.b4p.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.bpel.b4p.coordination.B4PCoordinationException;
+import org.wso2.carbon.bpel.b4p.coordination.CoordinationController;
 import org.wso2.carbon.bpel.core.BPELEngineService;
 import org.wso2.carbon.bpel.core.ode.integration.BPELServer;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -38,9 +40,15 @@ public class B4PServiceComponent {
     private static Log log = LogFactory.getLog(B4PServiceComponent.class);
 
     protected void activate(ComponentContext ctxt) {
-        if(log.isDebugEnabled()) {
-            log.debug("B4P bundle is activated.");
+        try {
+            initHumanTaskCoordination();
+            if(log.isDebugEnabled()) {
+                log.debug("B4P bundle is activated.");
+            }
+        } catch (Throwable t) {
+            log.error("Failed to activate the B4P component.", t);
         }
+
     }
 
     protected void setBPELServer(BPELEngineService bpelEngineService) {
@@ -68,5 +76,10 @@ public class B4PServiceComponent {
 
     protected void unsetRealmService(RealmService realmService) {
         B4PContentHolder.getInstance().setRealmService(null);
+    }
+
+    private void initHumanTaskCoordination() throws B4PCoordinationException {
+        B4PContentHolder.getInstance().setCoordinationController(new CoordinationController());
+        B4PContentHolder.getInstance().getCoordinationController().init();
     }
 }

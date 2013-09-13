@@ -24,7 +24,15 @@ import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.wso2.carbon.bpel.core.BPELConstants;
+import org.w3c.dom.NodeList;
+import org.wso2.carbon.bpel.b4p.coordination.configuration.CoordinationConfiguration;
+import org.wso2.carbon.bpel.b4p.coordination.context.WSConstants;
+import org.wso2.carbon.bpel.b4p.coordination.dao.HTCoordinationDAOConnection;
+import org.wso2.carbon.bpel.b4p.internal.B4PContentHolder;
+import org.wso2.carbon.bpel.core.ode.integration.BPELServerImpl;
+
+import javax.xml.namespace.QName;
+import java.util.concurrent.Callable;
 
 /**
  * Class that implements <code>&lt;peopleActivity&gt;</code> related to BPEL4People.
@@ -71,7 +79,7 @@ public class BPEL4PeopleExtensionOperation extends AbstractLongRunningExtensionO
      */
     @Override
     public void onRequestReceived(String mexId) throws FaultException {
-        log.info("Response received");
+        log.info("People Activity Response received");
         //((ExtensionContextImpl)extensionContext).setBpelRuntimeContext(context);
         Element notificationMessageEle = extensionContext.getInternalInstance().getMyRequest(mexId);
         Node part = extensionContext.getPartData(notificationMessageEle,
@@ -83,7 +91,53 @@ public class BPEL4PeopleExtensionOperation extends AbstractLongRunningExtensionO
                                   DOMUtils.domToString(part));
 
         }
+        if (CoordinationConfiguration.getInstance().isEnable() && notificationMessageEle.hasChildNodes()) {
+            String taskID = "";
+            Element correlationHeader = DOMUtils.findChildByName(notificationMessageEle, new QName(BPEL4PeopleConstants.B4P_NAMESPACE, BPEL4PeopleConstants.B4P_CORRELATION_HEADER), true);
+            if (correlationHeader != null) {
+                taskID = correlationHeader.getAttributeNS(BPEL4PeopleConstants.B4P_NAMESPACE, BPEL4PeopleConstants.B4P_CORRELATION_HEADER_ATTRIBUTE);
+                try {
+                    deleteCoordinationTaskData(taskID);
+                } catch (Exception e) {
+                    log.error("Error occurred while cleaning coordination data for task id " + taskID, e);
+                }
+            }
+
+            //Checking for fault
+            Element fault = DOMUtils.findChildByName(notificationMessageEle, new QName(WSConstants.WS_HT_COORDINATION_PROTOCOL_FAULT));
+            if (fault != null) {
+                if (fault.hasAttribute("headerPart")) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Throwing Fault to People Activity Scope since received Fault Protocol Message for task" + taskID + ".");
+                    }
+                    throw new FaultException(BPEL4PeopleConstants.B4P_FAULT, BPEL4PeopleConstants.NON_RECOVERABLE_ERROR);
+                }
+            }
+            //Checking for Skip
+            Element skipped = DOMUtils.findChildByName(notificationMessageEle, new QName(WSConstants.WS_HT_COORDINATION_PROTOCOL_SKIPPED));
+            if (skipped != null) {
+                if (skipped.hasAttribute("headerPart")) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Skipping People Activity since received Skipped Protocol Message for task " + taskID + ".");
+                    }
+                    //Set extension as complete, since task is skipped. No value write to output variable.
+                    extensionContext.complete(cid);
+                    return;
+                }
+            }
+        }
         extensionContext.writeVariable(outputVarName, notificationMessageEle);
         extensionContext.complete(cid);
+    }
+
+    private boolean deleteCoordinationTaskData(final String taskID) throws Exception {
+        boolean success = (Boolean) ((BPELServerImpl) B4PContentHolder.getInstance().getBpelServer()).getScheduler().execTransaction(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                HTCoordinationDAOConnection daoConnection = B4PContentHolder.getInstance().getCoordinationController().getDaoConnectionFactory().getConnection();
+                return daoConnection.deleteTaskData(taskID);
+            }
+        });
+        return success;
     }
 }

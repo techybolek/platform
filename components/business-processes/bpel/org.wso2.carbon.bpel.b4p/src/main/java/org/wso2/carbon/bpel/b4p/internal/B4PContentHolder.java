@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.bpel.b4p.internal;
 
+import org.wso2.carbon.bpel.b4p.coordination.CoordinationController;
 import org.wso2.carbon.bpel.core.ode.integration.BPELServer;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -30,6 +31,8 @@ public final class B4PContentHolder {
     private BPELServer bpelServer;
 
     private static RealmService realmService;
+
+    private CoordinationController coordinationController;
 
     private B4PContentHolder() {}
 
@@ -54,5 +57,13 @@ public final class B4PContentHolder {
     
     public RealmService getRealmService(){
         return this.realmService;
+    }
+
+    public CoordinationController getCoordinationController() {
+        return coordinationController;
+    }
+
+    public void setCoordinationController(CoordinationController coordinationController) {
+        this.coordinationController = coordinationController;
     }
 }
