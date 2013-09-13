@@ -491,8 +491,8 @@ public class ProfileManager extends RegistryAbstractAdmin {
         nonHeapCommitted.setAliasName("non_heap_mem_committed");
         nonHeapMBeanAttributeProperties[3] = nonHeapCommitted;
 
-        heapMemoryAttribute.setProperties(nonHeapMBeanAttributeProperties);
-        memoryMBeanAttributes[1] = heapMemoryAttribute;
+        nonHeapMemoryAttribute.setProperties(nonHeapMBeanAttributeProperties);
+        memoryMBeanAttributes[1] = nonHeapMemoryAttribute;
 
         memoryMBean.setAttributes(memoryMBeanAttributes);
 
