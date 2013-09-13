@@ -724,6 +724,15 @@
     .selected {
         background-color: #EDEDED;
     }
+.ui-dialog-container{
+  background-color:#ccc;
+}
+.ui-dialog-content{
+width:100% !important;
+height:85% !important;
+overflow:scroll;
+background:#fff;
+}
 </style>
 <script type="text/javascript" src="../yui/build/yahoo/yahoo-min.js"></script>
 <script type="text/javascript">
