@@ -64,11 +64,21 @@
                                     <classpath refid="maven.compile.classpath"/>
                                     <classpath refid="maven.runtime.classpath"/>
                                 </java>
+                                <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
+                                    <arg line="-uri src/main/resources/coordination/RegistrationService.wsdl -uw -ss -ssi -sd
+                                -o target/generated-code -p org.wso2.carbon.bpel.skeleton.b4p.coordination
+                                -ns2p http://docs.oasis-open.org/ws-tx/wscoor/2006/06=org.wso2.carbon.bpel.skeleton.b4p.coordination,http://schemas.xmlsoap.org/ws/2004/08/addressing=org.wso2.carbon.bpel.skeleton.b4p.coordination.addressing"/>
+                                    <classpath refid="maven.dependency.classpath"/>
+                                    <classpath refid="maven.compile.classpath"/>
+                                    <classpath refid="maven.runtime.classpath"/>
+                                </java>
                                 <delete file="target/generated-code/src/org/wso2/carbon/bpel/ode/integration/mgt/services/ProcessManagementServiceSkeleton.java"
                                         verbose="true" failonerror="true"/>
                                 <delete file="target/generated-code/src/org/wso2/carbon/bpel/ode/integration/mgt/services/InstanceManagementServiceSkeleton.java"
                                         verbose="true" failonerror="true"/>
                                 <delete file="target/generated-code/src/org/wso2/carbon/bpel/ode/integration/mgt/services/BPELPackageManagementServiceSkeleton.java"
+                                        verbose="true" failonerror="true"/>
+                                <delete file="target/generated-code/src/org/wso2/carbon/bpel/skeleton/b4p/coordination/RegistrationServiceSkeleton.java"
                                         verbose="true" failonerror="true"/>
                                 <!--copy file="target/generated-code/resources/bps_management.xsd"
                                       tofile="src/main/resources/META-INF/bps_management.xsd"
@@ -119,7 +129,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.bpel.skeleton.ode.integration.mgt.services.*; version="${carbon.platform.package.export.version}"
+                            org.wso2.carbon.bpel.skeleton.ode.integration.mgt.services.*; version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.bpel.skeleton.b4p.coordination.*; version="${carbon.platform.package.export.version}"
                         </Export-Package>
                         <_nouse>true</_nouse>
                         <DynamicImport-Package>*</DynamicImport-Package>
