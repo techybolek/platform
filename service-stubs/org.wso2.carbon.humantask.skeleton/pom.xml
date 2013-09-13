@@ -75,9 +75,19 @@
                                     <classpath refid="maven.compile.classpath"/>
                                     <classpath refid="maven.runtime.classpath"/>
                                 </java>
+                                <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
+                                    <arg line="-uri src/main/resources/ws-humantask-protocol.wsdl -uw -ss -ssi -sd
+                                    -o target/generated-code -p org.wso2.carbon.humantask.skeleton.protocol.mgt.services
+                                    -ns2p http://docs.oasis-open.org/ns/bpel4people/ws-humantask/protocol/200803=org.wso2.carbon.humantask.skeleton.protocol.mgt.services"/>
+                                    <classpath refid="maven.dependency.classpath"/>
+                                    <classpath refid="maven.compile.classpath"/>
+                                    <classpath refid="maven.runtime.classpath"/>
+                                </java>
                                 <delete file="target/generated-code/src/org/wso2/carbon/humantask/client/api/HumanTaskClientAPIAdminSkeleton.java"
                                         verbose="true" failonerror="true"/>
 								<delete file="/target/generated-code/src/org/wso2/carbon/humantask/skeleton/mgt/services/HumanTaskPackageManagementSkeleton.java"
+                                        verbose="true" failonerror="true"/>
+                                <delete file="/target/generated-code/src/org/wso2/carbon/humantask/skeleton/protocol/mgt/services/HumanTaskProtocolHandlerSkeleton.java"
                                         verbose="true" failonerror="true"/>
                             </tasks>
                         </configuration>
@@ -117,6 +127,7 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
                             org.wso2.carbon.humantask.client.api.*; version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.humantask.skeleton.protocol.mgt.services.*; version="${carbon.platform.package.export.version}",
 							org.wso2.carbon.humantask.skeleton.mgt.services.*; version="${carbon.platform.package.export.version}"
                         </Export-Package>
                         <_nouse>true</_nouse>
