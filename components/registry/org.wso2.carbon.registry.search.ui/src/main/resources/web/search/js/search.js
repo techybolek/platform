@@ -464,8 +464,8 @@ function setPropertyName() {
 }
 
 function validatePropertyValues() {
-    var leftVal = document.getElementById('valueLeft').value;
-    var rightVal = document.getElementById('valueRight').value;
+    var leftVal = parseInt(document.getElementById('valueLeft').value);
+    var rightVal = parseInt(document.getElementById('valueRight').value);
 
 	if(leftVal != "" && rightVal != ""){
 		if(leftVal >= rightVal){
