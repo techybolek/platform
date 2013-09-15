@@ -19,11 +19,13 @@ package org.wso2.carbon.registry.cmis.util;
 public class UserInfo {
     
     private String userName;
+    private String tenantDomain;
     private String ip;
 
-    public UserInfo(String ip, String userName) {
+    public UserInfo(String ip, String userName, String tDomain) {
         this.ip = ip;
         this.userName = userName;
+        this.tenantDomain = tDomain;
     }
 
     public String getIp() {
@@ -34,6 +36,10 @@ public class UserInfo {
         this.ip = ip;
     }
 
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -42,6 +48,8 @@ public class UserInfo {
         UserInfo userInfo = (UserInfo) o;
 
         if (ip != null ? !ip.equals(userInfo.ip) : userInfo.ip != null) return false;
+        if (tenantDomain != null ? !tenantDomain.equals(userInfo.tenantDomain) : userInfo.tenantDomain != null)
+            return false;
         if (userName != null ? !userName.equals(userInfo.userName) : userInfo.userName != null) return false;
 
         return true;
@@ -50,6 +58,7 @@ public class UserInfo {
     @Override
     public int hashCode() {
         int result = userName != null ? userName.hashCode() : 0;
+        result = 31 * result + (tenantDomain != null ? tenantDomain.hashCode() : 0);
         result = 31 * result + (ip != null ? ip.hashCode() : 0);
         return result;
     }

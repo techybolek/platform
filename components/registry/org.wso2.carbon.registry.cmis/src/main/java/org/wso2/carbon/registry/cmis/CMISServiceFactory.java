@@ -43,6 +43,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
 import java.math.BigInteger;
 import java.util.*;
 
@@ -104,15 +106,21 @@ public class CMISServiceFactory extends AbstractServiceFactory {
         //The registry clients are stored in the map "sessions"
         //If there is an existing session, use it. Otherwise make a new one.
 
-        CMISRepository repository = null;
-        String username = context.getUsername();
+        CMISRepository repository = null;        
 	
 	String ip = ((RequestFacade)context.get(context.HTTP_SERVLET_REQUEST)).getRemoteAddr();
-	String uri = ((RequestFacade)context.get(context.HTTP_SERVLET_REQUEST)).getRequestURI();
+        String url = ((RequestFacade)context.get(context.HTTP_SERVLET_REQUEST)).getRequestURL().toString();
 
-	UserInfo userInfoObj = new UserInfo(ip, username);
+	String tenant = MultitenantUtils.getTenantDomain((RequestFacade)context.get(context.HTTP_SERVLET_REQUEST));
+        String username = context.getUsername();	
 	
-        if(uri.contains(uriPart)) {
+	if (username != null) {
+            username = MultitenantUtils.getTenantAwareUsername(username);
+        }
+
+	UserInfo userInfoObj = new UserInfo(ip, username, tenant);
+	
+        if(url.contains(uriPart)) {
 	    repository = getRepo(userInfoObj);
 	   
 	    if (repository == null) {
@@ -123,10 +131,9 @@ public class CMISServiceFactory extends AbstractServiceFactory {
             //TODO check for session timeout
         } else{
             try {
-                repository = new CMISRepository(acquireGregRepository(context), pathManager, typeManager);
+                repository = new CMISRepository(acquireGregRepository(context, tenant, username), pathManager, typeManager);
                 //put to sessions for future reference
-                sessions.put(userInfoObj, repository);
-
+                sessions.put(new UserInfo(ip, username, tenant), repository);
             } catch (RegistryException e) {
                 e.printStackTrace();
                 throw new CmisRuntimeException(e.getMessage(), e);
@@ -155,7 +162,7 @@ public class CMISServiceFactory extends AbstractServiceFactory {
         CMISRepository repo = null;
 
         for (UserInfo uInfo : sessions.keySet()) {
-            if (uInfo.getIp().equals(obj.getIp())) {
+            if (uInfo.getIp().equals(obj.getIp()) && uInfo.getTenantDomain().equals(obj.getTenantDomain())) {
                 repo = sessions.get(uInfo);
                 break;
             }
@@ -169,22 +176,22 @@ public class CMISServiceFactory extends AbstractServiceFactory {
      * @return
      * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
      */
-    private Registry acquireGregRepository(CallContext context) throws RegistryException, AxisFault {
-
-
-        String username = context.getUsername();
-        String password = context.getPassword();
+    private Registry acquireGregRepository(CallContext context, String tenantDomain, String uName) throws RegistryException, AxisFault {
 
         UserRegistry userRegistry = null;
         try{
+	    PrivilegedCarbonContext.getThreadLocalCarbonContext().startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
              RegistryService registryService =
-                                      (RegistryService) PrivilegedCarbonContext.getCurrentContext().getOSGiService(RegistryService.class);
-             userRegistry = registryService.getRegistry(username, password);
+                                      (RegistryService) PrivilegedCarbonContext.getThreadLocalCarbonContext().getOSGiService(RegistryService.class);
+             userRegistry = registryService.getRegistry(uName, context.getPassword(), PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
 
-           }  catch (RegistryException e) {
+           }  catch (RegistryException e) { 
              log.error("unable to create registry instance for the respective enduser", e);
-           }
+           } finally {
+		PrivilegedCarbonContext.getThreadLocalCarbonContext().endTenantFlow();
+	   }
 
            return userRegistry;
     }
