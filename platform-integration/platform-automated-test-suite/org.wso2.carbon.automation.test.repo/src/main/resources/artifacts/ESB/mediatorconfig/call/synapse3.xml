@@ -76,7 +76,7 @@ STATE = RESOURCE 2 OUT SEQ S3
                     <format>
                         <m0:getQuote xmlns:m0="http://services.samples">
                             <m0:request>
-                                <m0:symbol>OUT SEQ</m0:symbol>
+                                <m0:symbol>WSO2</m0:symbol>
                             </m0:request>
                         </m0:getQuote>
                     </format>
@@ -128,7 +128,7 @@ STATE = RESOURCE 2 OUT SEQ S3
                     <format>
                         <m0:getQuote xmlns:m0="http://services.samples">
                             <m0:request>
-                                <m0:symbol>OUT SEQ</m0:symbol>
+                                <m0:symbol>WSO2</m0:symbol>
                             </m0:request>
                         </m0:getQuote>
                     </format>

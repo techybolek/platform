@@ -54,7 +54,7 @@ STATE = INSEQ S2
                     <property name="STATE" value="F1 S1"/>
                 </log>
                 <switch source="//m0:symbol">
-                    <case regex="1">
+                    <case regex="IBM">
                         <log level="custom">
                             <property name="STATE" value="SW CASE1 S1"/>
                         </log>
@@ -65,7 +65,7 @@ STATE = INSEQ S2
                             <property name="STATE" value="SW CASE1 S2"/>
                         </log>
                     </case>
-                    <case regex="2">
+                    <case regex="MSFT">
                         <log level="custom">
                             <property name="STATE" value="SW CASE2 S1"/>
                         </log>

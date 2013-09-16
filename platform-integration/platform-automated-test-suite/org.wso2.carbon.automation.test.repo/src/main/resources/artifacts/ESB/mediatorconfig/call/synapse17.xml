@@ -29,7 +29,6 @@ WARN EndpointContext Endpoint : EP2 will be marked SUSPENDED as it failed
                 <log level="custom">
                     <property name="STATE" value="IN SEQ S2"/>
                 </log>
-                <send/>
             </inSequence>
         </target>
     </proxy>
@@ -39,7 +38,7 @@ WARN EndpointContext Endpoint : EP2 will be marked SUSPENDED as it failed
     </endpoint>
 
     <endpoint name="EP2">
-        <address uri="http://localhost:9001/services/SimpleStockQuoteService"/>
+        <address uri="http://localhost:9010/services/SimpleStockQuoteService"/>
     </endpoint>
 
     <sequence name="faultSeq">

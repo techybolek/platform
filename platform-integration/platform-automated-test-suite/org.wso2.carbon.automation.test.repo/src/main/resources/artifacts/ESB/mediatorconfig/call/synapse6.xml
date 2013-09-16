@@ -12,7 +12,7 @@ STATE = DEFAULT CASE S2
 STATE = SEQ1 S2
 STATE = INSEQ S2
 
--Dsymbol=1
+-Dsymbol=IBM
 STATE = INSEQ S1
 STATE =  SEQ1 S1
 STATE = SW CASE1 S1
@@ -55,7 +55,7 @@ STATE = INSEQ S2
         <switch xmlns:ns="http://org.apache.synapse/xsd"
                 xmlns:m0="http://services.samples"
                 source="//m0:symbol">
-            <case regex="1">
+            <case regex="IBM">
                 <log level="custom">
                     <property name="STATE" value="SW CASE1 S1 "/>
                 </log>
@@ -66,7 +66,7 @@ STATE = INSEQ S2
                     <property name="STATE" value="SW CASE1 S2"/>
                 </log>
             </case>
-            <case regex="2">
+            <case regex="MSFT">
                 <log level="custom">
                     <property name="STATE" value="SW CASE2 S1"/>
                 </log>

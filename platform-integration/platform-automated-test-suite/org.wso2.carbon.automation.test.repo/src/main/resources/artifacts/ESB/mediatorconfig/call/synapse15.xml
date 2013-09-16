@@ -65,7 +65,7 @@ STATE = FAULT_SEQ S2
     </endpoint>
 
     <endpoint name="EP2">
-        <address uri="http://localhost:9001/services/SimpleStockQuoteService"/>
+        <address uri="http://localhost:9010/services/SimpleStockQuoteService"/>
     </endpoint>
 
 </definitions>

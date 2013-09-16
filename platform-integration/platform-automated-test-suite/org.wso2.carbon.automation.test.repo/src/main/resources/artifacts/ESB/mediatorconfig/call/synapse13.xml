@@ -14,7 +14,7 @@ STATE = MAIN OUT S1
 STATE = MAIN OUT S2
 
 -->
-                                              r
+
 
 <definitions xmlns="http://ws.apache.org/ns/synapse">
    
@@ -79,7 +79,7 @@ STATE = MAIN OUT S2
                <format>
                    <m0:getQuote xmlns:m0="http://services.samples">
                        <m0:request>
-                           <m0:symbol>OUT</m0:symbol>
+                           <m0:symbol>WSO2</m0:symbol>
                        </m0:request>
                    </m0:getQuote>
                </format>

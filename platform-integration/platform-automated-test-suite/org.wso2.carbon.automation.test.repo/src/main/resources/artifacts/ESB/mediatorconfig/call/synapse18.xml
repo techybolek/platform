@@ -76,7 +76,7 @@ STATE = IN SEQ S2
             <format>
                 <m0:getQuote xmlns:m0="http://services.samples">
                     <m0:request>
-                        <m0:symbol>LB</m0:symbol>
+                        <m0:symbol>FO</m0:symbol>
                     </m0:request>
                 </m0:getQuote>
             </format>
