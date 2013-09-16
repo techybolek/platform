@@ -26,14 +26,14 @@ import org.wso2.carbon.dataservices.objectmodel.types.ObjectModelException;
  */
 public class FieldContextException extends ObjectModelException {
 
-	private static final long serialVersionUID = 8359217188633670411L;
-	
-	public FieldContextException(String msg) {
-		super(msg);
-	}
-	
-	public FieldContextException(String msg, Exception e) {
-		super(msg, e);
-	}
-	
+    private static final long serialVersionUID = 8359217188633670411L;
+
+    public FieldContextException(String msg) {
+        super(msg);
+    }
+
+    public FieldContextException(String msg, Exception e) {
+        super(msg, e);
+    }
+
 }

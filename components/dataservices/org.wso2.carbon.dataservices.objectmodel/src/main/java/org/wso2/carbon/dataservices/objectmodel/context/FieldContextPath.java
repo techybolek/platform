@@ -22,128 +22,128 @@ package org.wso2.carbon.dataservices.objectmodel.context;
  * This class represents a field context path.
  */
 public class FieldContextPath {
-	
-	private PathComponent[] components;
-	
-	private int offset;
-	
-	private String absolutePath;
-	
-	private FieldContextPath tailPath;
-		
-	public FieldContextPath(PathComponent[] components) throws FieldContextException {
-		this (components, 0);
-	}
-	
-	private FieldContextPath(PathComponent[] components, int offset) throws FieldContextException {
-		this.components = components;
-		this.offset = offset;
-		if (this.offset + 1 < this.components.length) {
-			/* generate the tail path */
-			this.tailPath = new FieldContextPath(this.components, this.offset + 1);
-		}
-		this.populateAbsolutePath();
-	}
-	
-	private void populateAbsolutePath() {
-		StringBuilder builder = new StringBuilder(this.getHead().toString());
-		if (this.tailPath != null) {
-			String tail = this.tailPath.getAbsolutePath();
-			if (!tail.startsWith("[")) {
-				builder.append('.');
-			}
-			builder.append(tail);
-		}
-		this.absolutePath = builder.toString();
-	}
-	
-	public PathComponent getHead() {
-		return this.components[this.offset];
-	}
-	
-	public FieldContextPath getTailPath() {
-		return tailPath;
-	}
-	
-	public int getLength() {
-		return this.components.length - this.offset;
-	}
-	
-	protected PathComponent[] getComponents() {
-		return components;
-	}
-	
-	public PathComponent getComponentAt(int index) throws FieldContextException {
-		if (index + this.offset >= this.components.length) {
-			throw new FieldContextException("Invalid index for field context path: " +
-					"Length - " + this.getLength() + " Index - " + 
-					index + " Offset - " + this.offset);
-		}
-		return this.components[index + this.offset];
-	}
-	
-	public String getAbsolutePath() {
-		return absolutePath;
-	}
-	
-	@Override
-	public int hashCode() {
-		return this.getAbsolutePath().hashCode();
-	}
-	
-	@Override
-	public boolean equals(Object rhs) {
-		return this.getAbsolutePath().equals(rhs);
-	}
-	
-	@Override
-	public String toString() {
-		return this.getAbsolutePath();
-	}
-	
-	public static class PathComponent {
-		
-		private Object value;
-		
-		private boolean index;
-		
-		private String stringValue;
-		
-		public PathComponent(String name) {
-			this.value = name;
-			this.index = false;
-		}
-		
-		public PathComponent(int index) {
-			this.value = index;
-			this.index = true;
-		}
-		
-		public boolean isIndex() {
-			return index;
-		}
-		
-		public String getStringValue() {
-			return (String) value;
-		}
-		
-		public int getIndexValue() {
-			return (Integer) value;
-		}
-		
-		@Override
-		public String toString() {
-			if (this.stringValue != null) {
-				return this.stringValue;
-			}
-			if (this.isIndex()) {
-				this.stringValue = "[" + this.getIndexValue() + "]";
-			} else {
-				this.stringValue = this.getStringValue();
-			}
-			return this.stringValue;
-		}
-		
-	}
-	
+
+    private PathComponent[] components;
+
+    private int lastIndexOffset;
+
+    private String absolutePath;
+    
+    private FieldContextPath headPath;
+    
+    public FieldContextPath(PathComponent[] components) throws FieldContextException {
+        this(components, 0);
+    }
+
+    private FieldContextPath(PathComponent[] components, int lastIndexOffset) throws FieldContextException {
+        this.components = components;
+        this.lastIndexOffset = lastIndexOffset;
+        if (this.lastIndexOffset + 1 < this.components.length) {
+            /* generate the head path */
+            this.headPath = new FieldContextPath(this.components, this.lastIndexOffset + 1);
+        }
+        this.populateAbsolutePath();
+    }
+
+    private void populateAbsolutePath() {
+        StringBuilder builder = new StringBuilder();
+        PathComponent tail = this.getTail();
+        if (this.getHeadPath() != null) {
+            builder.append(this.getHeadPath());
+            if (!tail.isIndex()) {
+                builder.append(".");
+            }
+        }
+        builder.append(tail.toString());
+        this.absolutePath = builder.toString();
+    }
+
+    public FieldContextPath getHeadPath() {
+        return headPath;
+    }
+
+    public PathComponent getTail() {
+        return this.components[this.components.length - this.lastIndexOffset - 1];
+    }
+
+    public int getLength() {
+        return this.components.length - this.lastIndexOffset;
+    }
+
+    protected PathComponent[] getComponents() {
+        return components;
+    }
+
+    public PathComponent getComponentAt(int index) throws FieldContextException {
+        if (index + this.lastIndexOffset >= this.components.length) {
+            throw new FieldContextException("Invalid index for field context path: " + "Length - "
+                    + this.getLength() + " Index - " + index + " Offset - " + this.lastIndexOffset);
+        }
+        return this.components[index];
+    }
+
+    public String getAbsolutePath() {
+        return absolutePath;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getAbsolutePath().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object rhs) {
+        return this.getAbsolutePath().equals(rhs);
+    }
+
+    @Override
+    public String toString() {
+        return this.getAbsolutePath();
+    }
+
+    public static class PathComponent {
+
+        private Object value;
+
+        private boolean index;
+
+        private String stringValue;
+
+        public PathComponent(String name) {
+            this.value = name;
+            this.index = false;
+        }
+
+        public PathComponent(int index) {
+            this.value = index;
+            this.index = true;
+        }
+
+        public boolean isIndex() {
+            return index;
+        }
+
+        public String getStringValue() {
+            return (String) value;
+        }
+
+        public int getIndexValue() {
+            return (Integer) value;
+        }
+
+        @Override
+        public String toString() {
+            if (this.stringValue != null) {
+                return this.stringValue;
+            }
+            if (this.isIndex()) {
+                this.stringValue = "[" + this.getIndexValue() + "]";
+            } else {
+                this.stringValue = this.getStringValue();
+            }
+            return this.stringValue;
+        }
+
+    }
+
 }

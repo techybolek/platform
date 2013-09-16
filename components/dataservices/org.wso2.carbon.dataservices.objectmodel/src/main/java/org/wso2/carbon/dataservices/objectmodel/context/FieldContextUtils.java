@@ -28,37 +28,37 @@ import org.wso2.carbon.dataservices.objectmodel.context.FieldContextPath.PathCom
  */
 public class FieldContextUtils {
 
-	public static FieldContextPath parseFieldContextPath(String path) throws FieldContextException {
-		if (path == null || path.length() == 0) {
-			throw new FieldContextException("The field context path should not be empty");
-		}
-		String[] strComps = path.split("\\.");
-		List<PathComponent> pathComps = new ArrayList<FieldContextPath.PathComponent>();
-		for (int i = 0; i < strComps.length; i++) {
-			// sample: rs1.employees[0].address.name
-			if (strComps[i].startsWith("[")) {
-				throw new FieldContextException("A field context path component cannot " +
-						"start with \"[\" - " + strComps[i]);
-			} else if (strComps[i].endsWith("]")) {
-				int start = strComps[i].lastIndexOf('[');
-				if (start == -1 || start == 0) {
-					throw new FieldContextException("Invalid field context index path " +
-							"component: " + strComps[i]);
-				}
-				pathComps.add(new PathComponent(strComps[i].substring(0, start)));
-				try {
-					int index = Integer.parseInt(strComps[i].substring(start + 1, 
-							strComps[i].length() - 1));
-					pathComps.add(new PathComponent(index));
-				} catch (NumberFormatException e) {
-					throw new FieldContextException("Invalid field context index path " +
-							"component: " + strComps[i]);
-				}
-			} else {
-				pathComps.add(new PathComponent(strComps[i]));
-			}
-		}
-		return new FieldContextPath(pathComps.toArray(new PathComponent[pathComps.size()]));
-	}
-	
+    public static FieldContextPath parseFieldContextPath(String path) throws FieldContextException {
+        if (path == null || path.length() == 0) {
+            throw new FieldContextException("The field context path should not be empty");
+        }
+        String[] strComps = path.split("\\.");
+        List<PathComponent> pathComps = new ArrayList<FieldContextPath.PathComponent>();
+        for (int i = 0; i < strComps.length; i++) {
+            // sample: rs1.employees[0].address.name
+            if (strComps[i].startsWith("[")) {
+                throw new FieldContextException("A field context path component cannot "
+                        + "start with \"[\" - " + strComps[i]);
+            } else if (strComps[i].endsWith("]")) {
+                int start = strComps[i].lastIndexOf('[');
+                if (start == -1 || start == 0) {
+                    throw new FieldContextException("Invalid field context index path "
+                            + "component: " + strComps[i]);
+                }
+                pathComps.add(new PathComponent(strComps[i].substring(0, start)));
+                try {
+                    int index = Integer.parseInt(strComps[i].substring(start + 1,
+                            strComps[i].length() - 1));
+                    pathComps.add(new PathComponent(index));
+                } catch (NumberFormatException e) {
+                    throw new FieldContextException("Invalid field context index path "
+                            + "component: " + strComps[i]);
+                }
+            } else {
+                pathComps.add(new PathComponent(strComps[i]));
+            }
+        }
+        return new FieldContextPath(pathComps.toArray(new PathComponent[pathComps.size()]));
+    }
+
 }

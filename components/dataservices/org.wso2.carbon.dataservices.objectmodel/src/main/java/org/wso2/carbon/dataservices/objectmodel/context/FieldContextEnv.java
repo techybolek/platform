@@ -27,23 +27,23 @@ import java.util.Map;
  */
 public class FieldContextEnv {
 
-	private Map<String, Object> contexts = new HashMap<String, Object>();
-	
-	public void addRootFieldContext(String name, FieldContext fieldContext) {
-		this.contexts.put(name, fieldContext);
-	}
-	
-	public FieldContext getRootFieldContext() {
-		return null;
-	}
-	
-	/**
-	 * Returns the field context value in this environment. 
-	 * @param path The path to the field context in this environment
-	 * @return The FieldContext object value
-	 */
-	public FieldContext getValue(FieldContextPath path) {
-		return null;
-	}
-	
+    private Map<String, Object> contexts = new HashMap<String, Object>();
+
+    public void addRootFieldContext(String name, FieldContext fieldContext) {
+        this.contexts.put(name, fieldContext);
+    }
+
+    public FieldContext getRootFieldContext() {
+        return null;
+    }
+
+    /**
+     * Returns the field context value in this environment. 
+     * @param path The path to the field context in this environment
+     * @return The FieldContext object value
+     */
+    public FieldContext getValue(FieldContextPath path) {
+        return null;
+    }
+
 }

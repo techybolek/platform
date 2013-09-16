@@ -26,65 +26,71 @@ import org.junit.Test;
  */
 public class FieldContextPathTest {
 
-	@Test (expected=FieldContextException.class)
-	public void testFieldContextInvalidPathCreation() throws FieldContextException {
-		FieldContextUtils.parseFieldContextPath(null);
-	}
-	
-	@Test
-	public void testFieldContextPathCreation() throws FieldContextException {
-		FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees.address.name");
-		Assert.assertEquals(path.getComponentAt(0).getStringValue(), "rs1");
-		Assert.assertEquals(path.getComponentAt(1).getStringValue(), "employees");
-		Assert.assertEquals(path.getComponentAt(2).getStringValue(), "address");
-		Assert.assertEquals(path.getComponentAt(3).getStringValue(), "name");
-	}
-	
-	@Test
-	public void testFieldContextPathAbsolutePath() throws FieldContextException {
-		FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees.address.name");
-		Assert.assertEquals("rs1.employees.address.name", path.getAbsolutePath());
-	}
-	
-	@Test
-	public void testFieldContextPathLength() throws FieldContextException {
-		FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees.address.name");
-		Assert.assertEquals(4, path.getLength());
-	}
-	
-	@Test
-	public void testFieldContextPathHeadTail() throws FieldContextException {
-		FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees.address.name");
-		Assert.assertEquals("rs1", path.getHead().getStringValue());
-		Assert.assertEquals("employees.address.name", path.getTailPath().getAbsolutePath());
-	}
-	
-	@Test (expected=FieldContextException.class)
-	public void testFieldContextPathWithInvalidIndexCreation() throws FieldContextException {
-		FieldContextUtils.parseFieldContextPath("rs1.employees.[0].address.name");
-	}
-	
-	@Test
-	public void testFieldContextPathWithIndexCreation() throws FieldContextException {
-		FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees[1].address.name");
-		Assert.assertEquals(path.getComponentAt(0).getStringValue(), "rs1");
-		Assert.assertEquals(path.getComponentAt(1).getStringValue(), "employees");
-		Assert.assertTrue(path.getComponentAt(2).isIndex());
-		Assert.assertEquals(path.getComponentAt(2).getIndexValue(), 1);
-		Assert.assertEquals(path.getComponentAt(3).getStringValue(), "address");
-		Assert.assertEquals(path.getComponentAt(4).getStringValue(), "name");
-	}
-	
-	@Test
-	public void testFieldContextPathWithIndexAbsolutePath1() throws FieldContextException {
-		FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees[1].address.name");
-		Assert.assertEquals("rs1.employees[1].address.name", path.getAbsolutePath());
-	}
-	
-	@Test
-	public void testFieldContextPathWithIndexAbsolutePath2() throws FieldContextException {
-		FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees.address.name[0]");
-		Assert.assertEquals("rs1.employees.address.name[0]", path.getAbsolutePath());
-	}
-	
+    @Test(expected = FieldContextException.class)
+    public void testFieldContextInvalidPathCreation() throws FieldContextException {
+        FieldContextUtils.parseFieldContextPath(null);
+    }
+
+    @Test
+    public void testFieldContextPathCreation() throws FieldContextException {
+        FieldContextPath path = FieldContextUtils
+                .parseFieldContextPath("rs1.employees.address.name");
+        Assert.assertEquals(path.getComponentAt(0).getStringValue(), "rs1");
+        Assert.assertEquals(path.getComponentAt(1).getStringValue(), "employees");
+        Assert.assertEquals(path.getComponentAt(2).getStringValue(), "address");
+        Assert.assertEquals(path.getComponentAt(3).getStringValue(), "name");
+    }
+
+    @Test
+    public void testFieldContextPathAbsolutePath() throws FieldContextException {
+        FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees.address.name");
+        Assert.assertEquals("rs1.employees.address.name", path.getAbsolutePath());
+    }
+
+    @Test
+    public void testFieldContextPathLength() throws FieldContextException {
+        FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees.address.name");
+        Assert.assertEquals(4, path.getLength());
+    }
+
+    @Test
+    public void testFieldContextPathHeadTail() throws FieldContextException {
+        FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees.address.name");
+        Assert.assertEquals("rs1.employees.address", path.getHeadPath().getAbsolutePath());
+        Assert.assertEquals("name", path.getTail().toString());
+    }
+
+    @Test(expected = FieldContextException.class)
+    public void testFieldContextPathWithInvalidIndexCreation1() throws FieldContextException {
+        FieldContextUtils.parseFieldContextPath("rs1.employees.[0].address.name");
+    }
+
+    @Test(expected = FieldContextException.class)
+    public void testFieldContextPathWithInvalidIndexCreation2() throws FieldContextException {
+        FieldContextUtils.parseFieldContextPath("rs1.employees[abc].address.name");
+    }
+
+    @Test
+    public void testFieldContextPathWithIndexCreation() throws FieldContextException {
+        FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees[1].address.name");
+        Assert.assertEquals(path.getComponentAt(0).getStringValue(), "rs1");
+        Assert.assertEquals(path.getComponentAt(1).getStringValue(), "employees");
+        Assert.assertTrue(path.getComponentAt(2).isIndex());
+        Assert.assertEquals(path.getComponentAt(2).getIndexValue(), 1);
+        Assert.assertEquals(path.getComponentAt(3).getStringValue(), "address");
+        Assert.assertEquals(path.getComponentAt(4).getStringValue(), "name");
+    }
+
+    @Test
+    public void testFieldContextPathWithIndexAbsolutePath1() throws FieldContextException {
+        FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees[1].address.name");
+        Assert.assertEquals("rs1.employees[1].address.name", path.getAbsolutePath());
+    }
+
+    @Test
+    public void testFieldContextPathWithIndexAbsolutePath2() throws FieldContextException {
+        FieldContextPath path = FieldContextUtils.parseFieldContextPath("rs1.employees.address.name[0]");
+        Assert.assertEquals("rs1.employees.address.name[0]", path.getAbsolutePath());
+    }
+
 }

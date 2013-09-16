@@ -25,30 +25,30 @@ import org.wso2.carbon.dataservices.objectmodel.types.DataFormat;
  */
 public class PrimitiveTypeFieldContext implements FieldContext {
 
-	private Object object;
-	
-	public PrimitiveTypeFieldContext(Object object) {
-		this.object = object;
-	}
-	
-	@Override
-	public FieldContext getSubContext(FieldContextPath path, DataFormat format)
-			throws FieldContextException {
-		throw new FieldContextException("No subcontext for this context at: " + path);
-	}
+    private Object object;
 
-	@Override
-	public Object getCurrentValue() {
-		return object;
-	}
+    public PrimitiveTypeFieldContext(Object object) {
+        this.object = object;
+    }
 
-	@Override
-	public boolean nextListState() throws FieldContextException {
-		return false;
-	}
+    @Override
+    public FieldContext getSubContext(FieldContextPath path, DataFormat format)
+            throws FieldContextException {
+        throw new FieldContextException("No subcontext for this context at: " + path);
+    }
 
-	@Override
-	public void close() throws FieldContextException {
-	}
+    @Override
+    public Object getCurrentValue() {
+        return object;
+    }
+
+    @Override
+    public boolean nextListState() throws FieldContextException {
+        return false;
+    }
+
+    @Override
+    public void close() throws FieldContextException {
+    }
 
 }
