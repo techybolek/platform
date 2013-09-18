@@ -1477,6 +1477,8 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 if (this.isHasQueryTimeout()) {
                     stmt.setQueryTimeout(this.getQueryTimeout());
                 }
+                /* adding the try catch to avoid setting this for jdbc drivers that do not implement this method. */
+                try{
                 /* set fetch direction */
                 if (this.isHasFetchDirection()) {
                     stmt.setFetchDirection(this.getFetchDirection());
@@ -1495,6 +1497,9 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                     if (!this.hasOutParams()) {
                         stmt.setFetchSize(this.getOptimalRSFetchSize());
                     }
+                }
+               }catch(Throwable e){
+                	log.debug("Exception while setting fetch size: " + e.getMessage(), e);
                 }
                 /* set max field size */
                 if (this.isHasMaxFieldSize()) {
