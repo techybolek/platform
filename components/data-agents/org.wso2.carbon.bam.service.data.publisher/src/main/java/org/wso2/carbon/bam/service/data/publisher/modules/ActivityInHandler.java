@@ -15,16 +15,8 @@
  */
 package org.wso2.carbon.bam.service.data.publisher.modules;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.soap.SOAP11Constants;
-import org.apache.axiom.soap.SOAP12Constants;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axiom.soap.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
@@ -47,11 +39,8 @@ import org.wso2.carbon.bam.service.data.publisher.util.TenantEventConfigData;
 import org.wso2.carbon.core.util.SystemFilter;
 import org.wso2.carbon.statistics.StatisticsConstants;
 
-import javax.xml.namespace.QName;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 
 public class ActivityInHandler extends AbstractHandler {
@@ -66,67 +55,50 @@ public class ActivityInHandler extends AbstractHandler {
         Map<Integer, EventConfigNStreamDef> tenantSpecificEventConfig = TenantEventConfigData.getTenantSpecificEventingConfigData();
         EventConfigNStreamDef eventingConfigData = tenantSpecificEventConfig.get(tenantID);
 
+        String activityUUID = getUniqueId();
+
         if (eventingConfigData != null && eventingConfigData.isMsgDumpingEnable()) {
             Timestamp timestamp;
+
             AxisService service = messageContext.getAxisService();
 
             if (service == null || SystemFilter.isFilteredOutService(service.getAxisServiceGroup()) || service.isClientSide()) {
                 return InvocationResponse.CONTINUE;
             } else {
-                SOAPFactory soapFactory = null;
-                SOAPHeaderBlock soapHeaderBlock = null;
                 SOAPEnvelope soapEnvelope = messageContext.getEnvelope();
                 String soapNamespaceURI = soapEnvelope.getNamespace().getNamespaceURI();
-                String activityUUID = getUniqueId();
 
                 if (messageContext.getMessageID() == null) {
                     messageContext.setMessageID(getUniqueId());
                 }
 
-                if (soapNamespaceURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-                    soapFactory = OMAbstractFactory.getSOAP11Factory();
-                } else if (soapNamespaceURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-                    soapFactory = OMAbstractFactory.getSOAP12Factory();
-                } else {
+                if (! ((soapNamespaceURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) ||
+                        soapNamespaceURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI))) {
                     log.error("Not a standard soap message");
                 }
 
-                if (soapEnvelope.getHeader() != null) {
-                    Iterator itr = soapEnvelope.getHeader().getChildrenWithName(new QName(
-                            ActivityPublisherConstants.BAM_ACTIVITY_ID_HEADER_NAMESPACE_URI,
-                            ActivityPublisherConstants.ACTIVITY_ID_HEADER_BLOCK_NAME));
-                    //Go through the header and see whether the AID is present or not. If not add.
-                    if (!itr.hasNext()) {
-                        OMFactory fac = OMAbstractFactory.getOMFactory();
-                        OMNamespace omNs = fac.createOMNamespace(
-                                ActivityPublisherConstants.BAM_ACTIVITY_ID_HEADER_NAMESPACE_URI, "ns");
-                        soapHeaderBlock = soapEnvelope.getHeader().addHeaderBlock(
-                                ActivityPublisherConstants.ACTIVITY_ID_HEADER_BLOCK_NAME, omNs);
-                        soapHeaderBlock.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID, null);
-                    } else {
-                        OMElement element = (OMElement) itr.next();
-                        String aid = element.getAttributeValue(new QName(ActivityPublisherConstants.ACTIVITY_ID));
-                        if (aid != null) {
-                            if (aid.equals("")) {
-                                element.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID, null);
-                            } else {
-                                activityUUID = aid;
-                            }
+                //Engage transport headers
+
+                Object transportHeaders = messageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+
+                if(transportHeaders != null) {
+                    String aid = (String) ((Map) transportHeaders).get(ActivityPublisherConstants.ACTIVITY_ID);
+                    if (aid != null) {
+                        if (aid.equals("")) {
+                            ((Map)messageContext.getProperty(MessageContext.TRANSPORT_HEADERS)).
+                                    put(ActivityPublisherConstants.ACTIVITY_ID, activityUUID);
                         } else {
-                            element.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID, null);
+                            activityUUID = aid;
+                            log.info("IN using "+aid);
                         }
+                    } else {
+                        ((Map)messageContext.getProperty(MessageContext.TRANSPORT_HEADERS)).
+                                put(ActivityPublisherConstants.ACTIVITY_ID, activityUUID);
                     }
                 } else {
-                    if (soapFactory != null) {
-                        soapFactory.createSOAPHeader(soapEnvelope);
-                        OMFactory fac = OMAbstractFactory.getOMFactory();
-                        OMNamespace omNs = fac.createOMNamespace(
-                                ActivityPublisherConstants.BAM_ACTIVITY_ID_HEADER_NAMESPACE_URI, "ns");
-                        soapHeaderBlock = soapEnvelope.getHeader().addHeaderBlock(
-                                ActivityPublisherConstants.ACTIVITY_ID_HEADER_BLOCK_NAME, omNs);
-                        soapHeaderBlock.addAttribute(ActivityPublisherConstants.ACTIVITY_ID,
-                                                     activityUUID, null);
-                    }
+                    Map<String, String> headers = new TreeMap<String, String>();
+                    headers.put(ActivityPublisherConstants.ACTIVITY_ID, activityUUID);
+                    messageContext.setProperty(MessageContext.TRANSPORT_HEADERS, headers);
                 }
 
                 MessageContext inMessageContext = messageContext.getOperationContext().getMessageContext(
@@ -152,7 +124,9 @@ public class ActivityInHandler extends AbstractHandler {
                 publishData.setBamServerInfo(bamServerInfo);
 
                 if (!isInOnlyMEP(messageContext)) {
-                    inMessageContext.setProperty(BAMDataPublisherConstants.ACTIVITY_PUBLISH_DATA, publishData);
+                    if (inMessageContext != null) {
+                        inMessageContext.setProperty(BAMDataPublisherConstants.ACTIVITY_PUBLISH_DATA, publishData);
+                    }
                 }
 
                 Event event = ServiceAgentUtil.makeEventList(publishData, eventingConfigData);
@@ -175,16 +149,20 @@ public class ActivityInHandler extends AbstractHandler {
         String soapBody = null;
         String soapHeader = null;
         try {
-            soapHeader = envelope.getHeader().toString();
-            soapBody = envelope.getBody().toString();
+            SOAPHeader header = envelope.getHeader();
+            SOAPBody body = envelope.getBody();
+
+            soapHeader = (header == null) ? "" : header.toString();
+            soapBody = (body == null) ? "" : body.toString();
+
         } catch (OMException e) {
-            log.warn("Exception occurred while getting soap envelop", e);
+            log.warn("Exception occurred while getting SOAP envelope", e);
         }
 
         eventData.setMessageDirection(BAMDataPublisherConstants.IN_DIRECTION);
         eventData.setSOAPHeader(soapHeader);
         eventData.setSOAPBody(soapBody);
-        //eventData.setMessageDirection(ActivityPublisherConstants.ACTIVITY_DATA_MESSAGE_DIRECTION_IN);
+
         eventData.setServiceName(messageContext.getAxisService().getName());
         eventData.setOperationName(messageContext.getAxisOperation().getName().getLocalPart());
         eventData.setMessageId(messageContext.getMessageID());
@@ -196,14 +174,9 @@ public class ActivityInHandler extends AbstractHandler {
     private boolean isInOnlyMEP(MessageContext messageContext) {
         String mep = messageContext.getOperationContext().getAxisOperation().getMessageExchangePattern();
 
-        if (mep.equals(WSDL2Constants.MEP_URI_IN_ONLY) ||
-            mep.equals(WSDL2Constants.MEP_URI_IN_OPTIONAL_OUT) ||
-            mep.equals(WSDL2Constants.MEP_URI_ROBUST_IN_ONLY)) {
-
-            return true;
-        }
-
-        return false;
+        return mep.equals(WSDL2Constants.MEP_URI_IN_ONLY) ||
+                mep.equals(WSDL2Constants.MEP_URI_IN_OPTIONAL_OUT) ||
+                mep.equals(WSDL2Constants.MEP_URI_ROBUST_IN_ONLY);
 
     }
 
