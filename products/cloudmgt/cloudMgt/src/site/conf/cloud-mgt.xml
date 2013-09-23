@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <cloudmgt>
 	<subscriptions>
-		<type>app_cloud</type>
-		<type>integration_cloud</type>
-		<type>api_cloud</type>
+		<type display_name="APP Cloud">app_cloud</type>
+		<type display_name="Integration Cloud">integration_cloud</type>
+		<type display_name="API Cloud">api_cloud</type>
          </subscriptions>
 	<dbConfig name="cloud_mgt">
 		<url>jdbc:mysql://localhost:3306/cloud_mgt</url>

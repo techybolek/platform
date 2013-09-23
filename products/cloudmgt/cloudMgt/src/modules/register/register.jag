@@ -6,6 +6,13 @@ include("/jagg/config_reader.jag");
 var log = new Log();
 var modManager = jagg.module("manager");
 
+var file = new File("/site/conf/cloud-mgt.xml");
+file.open("r");
+var data = file.readAll();
+var doc= new XML(data);
+//var url = doc.dbConfig.(@name == "cloud_mgt").url.toString();
+//var userName = doc.dbConfig.(@name == "cloud_mgt").userName.toString();
+//var password = doc.dbConfig.(@name == "cloud_mgt").password.toString();
 var registerOrganization = function (organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan) {
 
 
@@ -160,10 +167,7 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
                         var secretKey = entry.*::secretKey.text();
 
                         captchaInfo.path = path;
-                        captchaInfo.secretKey = secretKey;[2013-09-18 13:54:15,705]  INFO {JAGGERY.modules.register.register:jag} -  Adding subscriptions
-[2013-09-18 13:54:15,713]  INFO {JAGGERY.modules.register.register:jag} -  len second 3
-[2013-09-18 13:54:15,713]  INFO {JAGGERY.modules.register.register:jag} -  app_cloud
-[2013-09-18 13:54:15,713]  INFO {JAGGERY.modules.register.register:jag} -  data app_cloud
+                        captchaInfo.secretKey = secretKey;
 
 
                         if (log.isDebugEnabled()) {
@@ -177,16 +181,26 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
         }
  var storeSubscription = function(options, domain) {
         log.info("Adding subscriptions");
-        var registry = new MetadataStore(getProperty(ADMIN_USERNAME), getProperty(ADMIN_PASSWORD));
-        var resource = registry.newResource();
+        //var db = new Database(url, userName, password);
+        var db = new Database("cloud_mgt");
+        var upperString = "INSERT INTO SUBSCRIPTIONS (tenantDomain, ";
+        var lowerString = "VALUES ('"+domain+"', ";
         for(var i=0;i<options.length;i++) {
              var isNull =options[i]!=null;
              if(isNull) {
-                resource.addProperty(options[i], "true");
+                if(i ==options.length-1) {
+                   upperString = upperString+options[i]+")"
+                   lowerString = lowerString+"1); "
+                } else {
+                  upperString = upperString+options[i]+", ";
+                  lowerString = lowerString+"1, ";
+                }
              }
              //
          }
-        registry.put("subscriptions/"+domain, resource);
+        var sqlString = upperString+" "+lowerString;
+        log.info(sqlString);
+        db.query(sqlString);
     }
 ;
 %>

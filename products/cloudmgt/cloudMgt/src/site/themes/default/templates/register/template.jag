@@ -11,8 +11,13 @@ var typeArr = new Array();
 for(var i=0;i<doc.subscriptions.type.length();i++) {
    typeArr[i] =types[i].toString();
 }
-
 file.close();
+var eulaFile = new File("/site/conf/eula.xml");
+eulaFile.open("r");
+var eulaData = eulaFile.readAll();
+var eulaDoc= new XML(eulaData);
+var eulaContent =  eulaDoc.EULA.text();
+eulaFile.close();
 %>
 
 <style>
@@ -126,6 +131,11 @@ span.error {
                   	}
                   });
                 }); 
+    }
+ 
+    function activateSubmit(fld) {
+    var submitButton = document.getElementById('submitbtn');
+    submitButton.disabled = !fld;
     }
 
     function validateEmail(){
@@ -271,14 +281,36 @@ function showKaptcha(captcha) {
 								%>
 
 							<div class="input_row_col">
-								<input type="checkbox" name="<%=types[i].toString()%>" id="<%=types[i].toString()%>"><span><%=types[i].toString()%></span>
+								<input type="checkbox" name="<%=types[i].toString()%>" id="<%=types[i].toString()%>"><span>
+<%=doc.subscriptions.type[i].@display_name.toString()%></span>
 							</div>
                                                     <% } %>
 						</div>
 						
+                                                 <div class="toggle_container">
+                            <table class="normal-nopadding" cellspacing="0">
+                                <tbody>
+                                <tr></tr>
+                                <tr>
+                                    <td>
+                                        <textarea rows="10" readonly="readonly" name="license-text"
+                                                  style="width:100%"><%=eulaContent%>
+                                        </textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" name="activateButton" id="activateButton"
+                                               onclick="activateSubmit(form.activateButton.checked)"/>
+                                        <label for="activateButton">I have read and accepted the terms in the license agreement above.</label></td>
+                                </tr>
+                         
+
+                                </tbody>
+                            </table>
+                        </div>
 						<div class="input_row btn_row">
 							
-							 <input id="submitbtn" type='submit' value='Create My Account' class='btn btn-primary' />
+							 <input id="submitbtn" type='submit' disabled="disabled" value='Create My Account' class='btn' />
 						</div>
 
 					</form>
