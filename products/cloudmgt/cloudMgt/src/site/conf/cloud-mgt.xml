@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<cloudmgt>
+	<subscriptions>
+		<type>app_cloud</type>
+		<type>integration_cloud</type>
+		<type>api_cloud</type>
+         </subscriptions>
+	<dbConfig name="cloud_mgt">
+		<url>jdbc:mysql://localhost:3306/cloud_mgt</url>
+		<userName>root</userName>
+		<password>root</password>
+		<driverName>com.mysql.jdbc.Driver</driverName>
+	</dbConfig>
+</cloudmgt>

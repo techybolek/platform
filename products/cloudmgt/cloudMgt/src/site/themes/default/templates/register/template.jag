@@ -1,0 +1,297 @@
+<% jagg.template("register", function(inputs, outputs, jagg) { %>
+<%
+var AFServerUrl = getProperty(APPFACTORY_SERVER_URL);
+var log = new Log();
+var file = new File("/site/conf/cloud-mgt.xml");
+file.open("r");
+var data = file.readAll();
+var doc= new XML(data);
+var types = doc.subscriptions.type;
+var typeArr = new Array();
+for(var i=0;i<doc.subscriptions.type.length();i++) {
+   typeArr[i] =types[i].toString();
+}
+
+file.close();
+%>
+
+<style>
+header{
+	display:none;
+}
+body#home{
+	background:none #292E38;
+}
+.sticky-wrapper{
+	position:relative;
+	height:auto !important;
+}
+
+.warning_message{
+	background-color:#ffffff;
+}
+.info_message .close_message {
+    position: absolute;
+    right: 13px;
+    top: 7px;
+}
+.info_message{
+	background-color:#ffffff;
+	width: 400px;
+}
+
+.txt-right{
+	text-align: right;
+}
+#tenantDomain{
+	width: 87%;
+	margin-left: 7px;
+}
+
+
+#captchaImgDiv img{
+	width:100%;
+	   height: 39px;
+}
+#aPaaS, #iPaaS{
+	width:20%;
+}
+#lblLoginID{
+	color:#888;
+	display:none;
+}
+
+#preAt{
+	margin-left: -3px;
+	margin-right: -3px;
+}
+.subs-cont{
+	margin-top:20px;
+}
+span.error {
+    padding-left: 0;
+}
+</style>
+ 
+<script type="text/javascript">
+
+
+    function doSubmit() {
+
+          jagg.post("../blocks/register/ajax/register.jag", {
+            action:"registerOrg",
+            firstName:$("#firstName").attr('value'),
+            lastName:$("#lastName").attr('value'),
+            email:$("#email").attr('value'),
+            adminUsername:$("#adminUsername").attr('value'),
+            adminPassword:$("#password").attr('value') ,
+            organizationDomain:$("#domainName").attr('value'),
+            usagePlan:'Demo',
+            imagePath:document.getElementById("imagePath").val,
+            secretKey:document.getElementById("secretKey").val,
+            userAnswer:$("#captcha-user-answer").attr('value')
+
+              },
+              function (result) {
+               var data = {
+                         action:"storeSubscription",
+                        domainName:$("#domainName").attr('value')
+                };
+                var max=<%=types.length() %>;
+                var input=<%=typeArr%>;
+             	for(var i = 0; i < input.length; i++)
+		{ 
+                   if(document.getElementById(input[i]).checked.toString() == "true") {
+                      data[input[i]] = input[i];
+                   }
+                   
+                }
+              	jagg.post("../blocks/register/ajax/register.jag", data,
+                  function (result) {
+                        jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
+                                window.location.href = "../../../appmgt";
+                        }
+                        });
+                  },
+                  function (jqXHR, textStatus, errorThrown) {
+                        jagg.message({content:'Error while storing subscription details.',type:'error',cbk:function(){
+                                window.location.href = "../../../appmgt";
+                        }
+                        });
+                  });
+              },
+              function (jqXHR, textStatus, errorThrown) {
+                  jagg.message({content:'Your request to register in WSO2 AppFactory has been submitted.',type:'info', cbk:function(){
+            		window.location.href = "../../../appmgt";
+                  	}
+                  });
+                }); 
+    }
+
+    function validateEmail(){
+    	  jagg.post("../blocks/application/users/get/ajax/list.jag", {
+    		action:"validateUser",
+    		userName:$("#email").attr('value')
+	      },
+	      function (result) {
+	    	result = result.replace(/[\r\n]/g, "");
+	    	if(result=="false"){
+	    		doSubmit();
+			}else{
+				jagg.message({content:'Your email address is already registered.',type:'warning'});
+			}
+	      },
+	      function (jqXHR, textStatus, errorThrown) {
+              jagg.message({content:jqXHR+textStatus+errorThrown,type:'error',id:'myuniqeid' });
+	    	  return false ;
+	      });
+
+    }
+
+function generateCaptcha() {
+
+            jagg.post("../blocks/register/ajax/register.jag", {
+            		action:"generateCaptcha"
+              },
+              function (result) {
+            		showKaptcha(result);
+              },
+              function (jqXHR, textStatus, errorThrown) {
+                  jagg.message({content:'getting captcha - ERROR.',type:'info', cbk:function(){
+            		window.location.href = "#";
+                  	}
+                  });
+        });
+    }
+
+function showKaptcha(captcha) {
+    var captchaInfo = jQuery.parseJSON(captcha);
+    var captchaPath = captchaInfo.path;
+    document.getElementById("secretKey").val = captchaInfo.secretKey;
+    document.getElementById("imagePath").val = captchaPath;
+
+    var AFServiceUrl = '<%=AFServerUrl%>';
+    var serverUrl = AFServiceUrl.split("services")[0];
+    var captchaURL = serverUrl+captchaPath;
+    var captchaImg = document.getElementById("captchaImgDiv");
+    captchaImg.innerHTML = '<img src= "' + captchaURL + '" alt="If you can not see the captcha image please refresh the page."/>';
+
+    // TODO so this part.........   >>  setTimeout("showKaptchaTimely()", 4000);
+
+}
+
+    $(document).ready(function($){
+        generateCaptcha();
+        jQuery.validator.setDefaults({
+                errorElement:'span'
+            });
+		$('#registerForm').validate({
+			submitHandler: function(form) {
+				doSubmit();
+		   }
+		});
+    });
+</script>
+
+
+
+<div class="wrapper">
+			<div class="branding">
+				<h1></h1>
+			</div>
+			<article class="start">
+				<div class="alert alert-error error" id="registerError"><% jagg.includeBlock("page/messages", null); %></div>
+				<section class="start_content">
+				 <form method='post' name="inputData" class='right_label hold' id='registerForm'>
+						<div class="input_row">
+							<div class="input_row_col">
+								<label for="firstName">First name</label>
+								<input type="text" id="firstName" name="firstName" class="required" />
+							</div>
+
+							<div class="input_row_col">
+								<label for="lastName">Last name</label>
+								<input type="text" id="lastName" name="lastName" class="required" />
+							</div>
+						</div>
+						<div class="input_row">
+							<label for="email">Email</label>
+							<input type="text" id="email" name="email" class="required email" />
+						</div>
+						<div class="input_row">
+                            <label for="adminUsername">Admin Username</label>
+                            <input type="text" id="adminUsername" name="adminUsername" class="required" />
+                        </div>
+						<div class="input_row">
+							<div class="input_row_col">
+								<label for="password">Password</label>
+								<input type="password" id="password" name="password" class="required password"  />
+							</div>
+
+							<div class="input_row_col">
+								<label for="password2">Confirm Password</label>
+								<input type="password" id="password2" name="password2" class="required password_match"  />
+							</div>
+							
+							
+						</div>
+						<div class="input_row">
+							<label for="organization">Organization</label>
+							<input type="text" id="organization" name="organization" class="required" />
+						</div>
+						<div class="input_row">
+							<i class="icon-ok-sign"></i>
+							<label for="domainName">Domain</label>
+							<input type="text" id="domainName" name="domainName" class="required domain" />
+						</div>						
+						<div class="input_row">
+							<label id="lblLoginID">Your Login ID: 
+								<span id="preAdmin"></span>
+								<span id="preAt">&#64;</span>
+								<span id="preDomain"></span>
+							</label>
+						</div>
+						<div class="input_row">
+							<label for="captcha-user-answer">Word Verification</label>
+
+							<div class="input_row_col">
+								<div id="captchaImgDiv"></div>
+							</div>
+
+							<div class="input_row_col">
+								<input type="text" id="captcha-user-answer" name="captcha-user-answer" class="required" />
+							</div>
+							
+							
+						</div>
+						<div class="input_row subs-cont">
+							<label for="captcha-user-answer">Subscriptions</label>
+							  <% 
+								for(var i=0;i<doc.subscriptions.type.length();i++) {
+								%>
+
+							<div class="input_row_col">
+								<input type="checkbox" name="<%=types[i].toString()%>" id="<%=types[i].toString()%>"><span><%=types[i].toString()%></span>
+							</div>
+                                                    <% } %>
+						</div>
+						
+						<div class="input_row btn_row">
+							
+							 <input id="submitbtn" type='submit' value='Create My Account' class='btn btn-primary' />
+						</div>
+
+					</form>
+
+                    <input type="hidden" name="secretKey" id="secretKey" value=""/>
+                     <input type="hidden" name="imagePath" id="imagePath" value=""/>
+
+				</section>
+				<div class="signin">
+					Already have an Account? <a href="<%='../../../appmgt'%>" class="link">Sign in</a>
+				</div>
+			</article>
+		</div><!-- /wrapper -->
+
+<% }); %>
+

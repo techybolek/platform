@@ -1,0 +1,193 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+var log = new Log();
+var modManager = jagg.module("manager");
+
+var registerOrganization = function (organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan) {
+
+
+var ws = require("ws");
+var creatTenant = new ws.WSRequest();
+var options = new Array();
+options.useSOAP = 1.1;
+options.action = "http://wso2.org/process";
+options.mep = "in-only";
+
+var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
+    '<admin xmlns="http://wso2.org/bps/sample">'+adminUsername+'</admin>'+
+    '<firstName xmlns="http://wso2.org/bps/sample">'+firstName+'</firstName>'+
+    '<lastName xmlns="http://wso2.org/bps/sample">'+lastName+'</lastName>'+
+    '<adminPassword xmlns="http://wso2.org/bps/sample">'+adminPassword+'</adminPassword>'+
+    '<tenantDomain xmlns="http://wso2.org/bps/sample">'+organizationDomain+'</tenantDomain>'+
+    '<email xmlns="http://wso2.org/bps/sample">'+email+'</email>'+
+    '<active xmlns="http://wso2.org/bps/sample">true</active>'+
+    '<successKey xmlns="http://wso2.org/bps/sample">key</successKey>'+
+    '<createdDate xmlns="http://wso2.org/bps/sample">2001-12-31T12:00:00</createdDate>'+
+    '<originatedService xmlns="http://wso2.org/bps/sample">WSO2 App Factory</originatedService>'+
+    '<usagePlan xmlns="http://wso2.org/bps/sample">'+usagePlan+'</usagePlan>'+
+    '</p:CreateTenantRequest>';
+
+
+log.info("[Test log] paylod deployTaggedArtifact----------------" + payload);
+
+var result;
+try {
+var endPoint = getProperty(BPS_SERVER_URL) + "CreateTenant";
+creatTenant.open(options,endPoint, false);
+creatTenant.send(payload);
+result = creatTenant.responseE4X;
+
+return result;
+} catch (e) {
+log.error("Error while registering organization " + organizationDomain + " : " + e.message);
+throw "Error while registering organization " + organizationDomain;
+}
+}
+
+var registerOrg = function (organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan, imagePath, secretKey, userAnswer) {
+
+    var ws = require("ws");
+    var creatTenant = new ws.WSRequest();
+    var options = new Array();
+    options.useSOAP = 1.1;
+    options.action = "urn:registerTenant";
+    options.timeout = 1000000;
+
+    options["HTTPHeaders"] = [
+        {name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL))}
+    ];
+
+    var payload = '<p:registerTenant xmlns:p="http://services.mgt.tenant.carbon.wso2.org">' +
+        '<tenantInfoBean xmlns="http://services.mgt.tenant.carbon.wso2.org">' +
+            '<active xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">true</active>' +
+            '<admin xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + adminUsername + '</admin>' +
+            '<adminPassword xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + adminPassword + '</adminPassword>' +
+            '<createdDate xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">2001-12-31T12:00:00</createdDate>' +
+            '<email xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + email + '</email>' +
+            '<firstname xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + firstName + '</firstname>' +
+            '<lastname xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + lastName + '</lastname>' +
+            '<originatedService xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">WSO2 Stratos Manager</originatedService>' +
+            '<tenantDomain xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + organizationDomain + '</tenantDomain>' +
+            '<tenantId xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">-1</tenantId>' +
+            '<usagePlan xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + usagePlan + '</usagePlan>' +
+        '</tenantInfoBean>' +
+        '<captchaInfoBean xmlns="http://services.mgt.tenant.carbon.wso2.org">' +
+          '<imagePath xmlns="http://beans.mgt.captcha.carbon.wso2.org/xsd">' + imagePath + '</imagePath> ' +
+           '<secretKey xmlns="http://beans.mgt.captcha.carbon.wso2.org/xsd">' + secretKey + '</secretKey> ' +
+            '<userAnswer xmlns="http://beans.mgt.captcha.carbon.wso2.org/xsd">' + userAnswer + '</userAnswer>' +
+        '</captchaInfoBean>' +
+    '</p:registerTenant>' ;
+
+    log.info("payload ------> "+payload);
+
+    var result;
+    try {
+        var endPoint = getProperty(APPFACTORY_SERVER_URL) + "TenantMgtService";
+        creatTenant.open(options,endPoint, false);
+        creatTenant.send(payload);
+        result = creatTenant.responseE4X;
+        registerOrganization(organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan); 
+
+        return result;
+    } catch (e) {
+        log.error("Error while registering the organization " + organizationDomain + ": " + e.message);
+        throw "Error while registering the organization " + organizationDomain ;
+    }
+}
+
+var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email, uuid) {
+
+    var ws = require("ws");
+    var creatTenant = new ws.WSRequest();
+    var options = new Array();
+    options.useSOAP = 1.1;
+    options.action = "urn:sendOrganizationRegistrationConfirmationEmail";
+    options.timeout = 1000000;
+
+    options["HTTPHeaders"] = [
+        {name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL))}
+    ];
+
+    var payload ='<p:sendOrganizationRegistrationConfirmationEmail xmlns:p="http://services.registration.user.appfactory.carbon.wso2.org">'+
+                 '<userName xmlns="http://services.registration.user.appfactory.carbon.wso2.org">testusername***</userName>'+
+                 '<firstName xmlns="http://services.registration.user.appfactory.carbon.wso2.org">'+firstName+'</firstName>'+
+                 '<uuid xmlns="http://services.registration.user.appfactory.carbon.wso2.org">'+uuid+'</uuid>'+
+                 '<email xmlns="http://services.registration.user.appfactory.carbon.wso2.org">'+email+'</email>'+
+                 '<organizationName xmlns="http://services.registration.user.appfactory.carbon.wso2.org">'+organizationDomain+'</organizationName>'+
+                 '</p:sendOrganizationRegistrationConfirmationEmail>';
+
+    var result;
+    try {
+        var endPoint = getProperty(APPFACTORY_SERVER_URL) + "EmailSenderService";
+        creatTenant.open(options,endPoint, false);
+        creatTenant.send(payload);
+        result = creatTenant.responseE4X;
+
+        return result;
+    } catch (e) {
+        log.error("Error while sending organization registration confirmation email " + organizationDomain + " to " + email + e.message);
+        throw "Error while sending organization registration confirmation email " + organizationDomain + " to " + email ;
+    }
+}
+        var generateCaptcha = function() {
+
+                    log.info("--------- gen captcha : module ----")
+                    var ws = require('ws');
+                    var request = new ws.WSRequest();
+                    var options = new Array();
+                    options.useSOAP = 1.1;
+                    options.timeout = 1000000;
+                    options.action = "urn:generateRandomCaptcha";
+                    options["HTTPHeaders"] = [
+                        { name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL)) }
+                    ];
+                    var payload = '<generateRandomCaptcha xmlns="http://services.mgt.tenant.carbon.wso2.org"></generateRandomCaptcha>';                  
+					var result;
+                    var captchaInfo = {};
+                    try {
+                        var endPoint = getProperty(APPFACTORY_SERVER_URL) + "TenantMgtService";
+                        request.open(options,endPoint, false);
+                        request.send(payload);
+                        result=request.responseE4X;
+                        log.info("################################## captcha result #########################################");
+                        log.info(result);
+                        var entry = result.*::["return"];
+
+                        var path = entry.*::imagePath.text();
+                        var secretKey = entry.*::secretKey.text();
+
+                        captchaInfo.path = path;
+                        captchaInfo.secretKey = secretKey;[2013-09-18 13:54:15,705]  INFO {JAGGERY.modules.register.register:jag} -  Adding subscriptions
+[2013-09-18 13:54:15,713]  INFO {JAGGERY.modules.register.register:jag} -  len second 3
+[2013-09-18 13:54:15,713]  INFO {JAGGERY.modules.register.register:jag} -  app_cloud
+[2013-09-18 13:54:15,713]  INFO {JAGGERY.modules.register.register:jag} -  data app_cloud
+
+
+                        if (log.isDebugEnabled()) {
+                            log.debug("Invoking service endpoint:" + endPoint + " returned result:" + result);
+                        }
+                    } catch (e) {
+                        log.error("Error while checking for application key \n" + e.message);
+                        throw "Error while checking for application key";
+                    }
+                    return captchaInfo;
+        }
+ var storeSubscription = function(options, domain) {
+        log.info("Adding subscriptions");
+        var registry = new MetadataStore(getProperty(ADMIN_USERNAME), getProperty(ADMIN_PASSWORD));
+        var resource = registry.newResource();
+        for(var i=0;i<options.length;i++) {
+             var isNull =options[i]!=null;
+             if(isNull) {
+                resource.addProperty(options[i], "true");
+             }
+             //
+         }
+        registry.put("subscriptions/"+domain, resource);
+    }
+;
+%>
+
