@@ -13,6 +13,8 @@ var doc= new XML(data);
 //var url = doc.dbConfig.(@name == "cloud_mgt").url.toString();
 //var userName = doc.dbConfig.(@name == "cloud_mgt").userName.toString();
 //var password = doc.dbConfig.(@name == "cloud_mgt").password.toString();
+var AFURL = doc.ServerUrls.AppFactory.toString();
+var BPSURL = doc.ServerUrls.AppFactory.toString();
 var registerOrganization = function (organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan) {
 
 
@@ -42,7 +44,7 @@ log.info("[Test log] paylod deployTaggedArtifact----------------" + payload);
 
 var result;
 try {
-var endPoint = getProperty(BPS_SERVER_URL) + "CreateTenant";
+var endPoint = BPSURL + "CreateTenant";
 creatTenant.open(options,endPoint, false);
 creatTenant.send(payload);
 result = creatTenant.responseE4X;
@@ -64,7 +66,7 @@ var registerOrg = function (organizationDomain,adminUsername,adminPassword, firs
     options.timeout = 1000000;
 
     options["HTTPHeaders"] = [
-        {name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL))}
+        {name : "Cookie", value :modManager.getAdminCookie(AFURL)}
     ];
 
     var payload = '<p:registerTenant xmlns:p="http://services.mgt.tenant.carbon.wso2.org">' +
@@ -92,7 +94,7 @@ var registerOrg = function (organizationDomain,adminUsername,adminPassword, firs
 
     var result;
     try {
-        var endPoint = getProperty(APPFACTORY_SERVER_URL) + "TenantMgtService";
+        var endPoint = AFURL + "TenantMgtService";
         creatTenant.open(options,endPoint, false);
         creatTenant.send(payload);
         result = creatTenant.responseE4X;
@@ -115,7 +117,7 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
     options.timeout = 1000000;
 
     options["HTTPHeaders"] = [
-        {name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL))}
+        {name : "Cookie", value :modManager.getAdminCookie(AFURL)}
     ];
 
     var payload ='<p:sendOrganizationRegistrationConfirmationEmail xmlns:p="http://services.registration.user.appfactory.carbon.wso2.org">'+
@@ -128,7 +130,7 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
 
     var result;
     try {
-        var endPoint = getProperty(APPFACTORY_SERVER_URL) + "EmailSenderService";
+        var endPoint = AFURL + "EmailSenderService";
         creatTenant.open(options,endPoint, false);
         creatTenant.send(payload);
         result = creatTenant.responseE4X;
@@ -149,13 +151,13 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
                     options.timeout = 1000000;
                     options.action = "urn:generateRandomCaptcha";
                     options["HTTPHeaders"] = [
-                        { name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL)) }
+                        { name : "Cookie", value :modManager.getAdminCookie(AFURL) }
                     ];
                     var payload = '<generateRandomCaptcha xmlns="http://services.mgt.tenant.carbon.wso2.org"></generateRandomCaptcha>';                  
 					var result;
                     var captchaInfo = {};
                     try {
-                        var endPoint = getProperty(APPFACTORY_SERVER_URL) + "TenantMgtService";
+                        var endPoint = AFURL + "TenantMgtService";
                         request.open(options,endPoint, false);
                         request.send(payload);
                         result=request.responseE4X;

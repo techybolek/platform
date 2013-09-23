@@ -11,4 +11,10 @@
 		<password>root</password>
 		<driverName>com.mysql.jdbc.Driver</driverName>
 	</dbConfig>
+     <ServerUrls>
+        <AppFactory>https://milestones.appfactory.wso2.com:9443/services/</AppFactory>
+        <BPS>https://milestones.appfactory.wso2.com:9543/services/</BPS>
+        <Greg>https://milestones.appfactory.wso2.com:9443/services/</Greg>
+    </ServerUrls>
+
 </cloudmgt>
