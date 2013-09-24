@@ -34,6 +34,7 @@
     String taskId = CharacterEncoder.getSafeText(request.getParameter("taskId"));
     String operation = CharacterEncoder.getSafeText(request.getParameter("operation"));
     String taskClient = CharacterEncoder.getSafeText(request.getParameter("taskClient"));
+    String webContext = (String) request.getAttribute(CarbonConstants.WEB_CONTEXT);
 
     String cookie = null;
     if (taskClient != null && !"".equals(taskClient) && "gadget".equals(taskClient)) {
@@ -55,6 +56,7 @@
             taskOperationsClient = new HumanTaskClientAPIServiceClient(cookie, backendServerURL,
                                                                        configContext);
             JSONObject taskOperationJsonObject = new JSONObject();
+	if (cookie != null) {
             if ("complete".equals(operation) && payLoad != null) {
                 taskOperationsClient.complete(new URI(taskId), payLoad);
                 taskOperationJsonObject.put("TaskCompleted", "true");
@@ -105,6 +107,13 @@
             }
 
             taskOperationJson = taskOperationJsonObject.toJSONString();
+
+	} else {
+		log.error("Session timeout");
+		String msg = "Session is expired";
+		CarbonUIMessage.sendCarbonUIMessage(msg, CarbonUIMessage.ERROR, request);
+		response.sendRedirect(webContext + "/admin/login.jsp");
+        }
         } catch (Exception e) {
             log.error("Error occurred in the task-operations " + operation + "method", e);
             response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);

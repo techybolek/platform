@@ -441,6 +441,8 @@ HUMANTASK.completeTask = function() {
                       alert('Error occurred while releasing task : ' + json.TaskCompleted);
                       return true;
                   }
+		}).error(function(){
+               	   location.reload(true);
               });
 };
 
