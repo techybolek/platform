@@ -1,6 +1,6 @@
 <% jagg.template("register", function(inputs, outputs, jagg) { %>
 <%
-var AFServerUrl = getProperty(APPFACTORY_SERVER_URL);
+
 var log = new Log();
 var file = new File("/site/conf/cloud-mgt.xml");
 file.open("r");
@@ -11,6 +11,8 @@ var typeArr = new Array();
 for(var i=0;i<doc.subscriptions.type.length();i++) {
    typeArr[i] =types[i].toString();
 }
+var AFServerUrl = doc.ServerUrls.AppFactory.toString();
+
 file.close();
 var eulaFile = new File("/site/conf/eula.xml");
 eulaFile.open("r");

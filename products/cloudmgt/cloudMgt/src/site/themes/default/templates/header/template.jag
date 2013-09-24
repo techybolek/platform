@@ -1,7 +1,15 @@
 <% 
 
-include("/jagg/config_reader.jag");
 include("/jagg/constants.jag");
+var file = new File("/site/conf/cloud-mgt.xml");
+file.open("r");
+var data = file.readAll();
+var doc= new XML(data);
+var SSO_NAME = doc.SSORelyingParty.Name.toString();
+var SSO_PROVIDER = doc.SSORelyingParty.IdentityProviderURL.toString();
+var SSO_KEYSTORE_PASSWORD = doc.SSORelyingParty.KeyStorePassword.toString();
+var SSO_KEY_ALIAS = doc.SSORelyingParty.IdentityKeyAlias.toString();
+var SSO_KEYSTORE_NAME = doc.SSORelyingParty.KeyStoreName.toString();
 
 jagg.template("header", function(inputs, outputs, jagg) { 
 	
@@ -11,10 +19,8 @@ jagg.template("header", function(inputs, outputs, jagg) {
     var security =require("sso");
 	var log = new Log();
 	
-	var ssoRelyingParty = new security.SSORelyingParty(getProperty(SSO_NAME));
+	var ssoRelyingParty = new security.SSORelyingParty(SO_NAME);
 	var sessionId = session.getId();
-	//var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
-	//session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
 	
 	var requestURI = request.getRequestURI();
 	var checkSSO = true;
@@ -26,14 +32,13 @@ jagg.template("header", function(inputs, outputs, jagg) {
 	}
 
 	
-	//if (checkSSO && !Boolean(isAuthenticated)) {
 	if (checkSSO && !session.get("LOGGED_IN_USER")) {
 	    log.info("User is not authenticated, redirecting to identity server for authentication.");
 	
-	    ssoRelyingParty.setProperty("identityProviderURL", getProperty(SSO_PROVIDER));
-	    ssoRelyingParty.setProperty("keyStorePassword", getProperty(SSO_KEYSTORE_PASSWORD));
-	    ssoRelyingParty.setProperty("identityAlias",getProperty(SSO_KEY_ALIAS));
-	    ssoRelyingParty.setProperty("keyStoreName", getProperty(SSO_KEYSTORE_NAME));
+	    ssoRelyingParty.setProperty("identityProviderURL", SSO_PROVIDER);
+	    ssoRelyingParty.setProperty("keyStorePassword", SSO_KEYSTORE_PASSWORD);
+	    ssoRelyingParty.setProperty("identityAlias",SSO_KEY_ALIAS);
+	    ssoRelyingParty.setProperty("keyStoreName", SSO_KEYSTORE_NAME);
 	
 	    var samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest();
 	    var encodedRequest = ssoRelyingParty.encode(samlAuthRequest);
