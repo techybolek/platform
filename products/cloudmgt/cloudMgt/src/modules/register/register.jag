@@ -1,7 +1,6 @@
-<%
+<%g
 include("/jagg/jagg.jag");
 include("/jagg/constants.jag");
-include("/jagg/config_reader.jag");
 
 var log = new Log();
 var modManager = jagg.module("manager");
