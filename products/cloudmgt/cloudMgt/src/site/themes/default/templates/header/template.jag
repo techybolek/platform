@@ -18,8 +18,8 @@ jagg.template("header", function(inputs, outputs, jagg) {
 <%
     var security =require("sso");
 	var log = new Log();
-	
-	var ssoRelyingParty = new security.SSORelyingParty(SO_NAME);
+	log.info("abc "+SSO_NAME);
+	var ssoRelyingParty = new security.SSORelyingParty(SSO_NAME);
 	var sessionId = session.getId();
 	
 	var requestURI = request.getRequestURI();

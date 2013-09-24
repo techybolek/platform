@@ -17,12 +17,15 @@
         <Greg>https://milestones.appfactory.wso2.com:9443/services/</Greg>
     </ServerUrls>
     <SSORelyingParty>
-        <Name>appfactory</Name>
+        <Name>appserver</Name>
                 <DashboardName>WSO2 AppFactory Dashboard</DashboardName>
         <IdentityProviderURL>https://localhost:9443/samlsso</IdentityProviderURL>
         <KeyStorePassword>wso2carbon</KeyStorePassword>
         <IdentityKeyAlias>wso2carbon</IdentityKeyAlias>
         <KeyStoreName>${carbon.home}/repository/resources/security/wso2carbon.jks</KeyStoreName>
+        <CookieRefreshInterval>300000</CookieRefreshInterval>
+         <AdminUserName>admin</AdminUserName>
+         <AdminPassword>admin</AdminPassword>
     </SSORelyingParty>
 
 
