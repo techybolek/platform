@@ -78,6 +78,10 @@ body#home{
 span.error {
     padding-left: 0;
 }
+#submitbtn {
+    background-color: #F9BFBB;
+    border: #F9BFBB;
+}
 </style>
  
 <script type="text/javascript">
@@ -105,7 +109,7 @@ span.error {
                         domainName:$("#domainName").attr('value')
                 };
                 var max=<%=types.length() %>;
-                var input=<%=typeArr%>;
+                var input=<%=typeArr %>;
              	for(var i = 0; i < input.length; i++)
 		{ 
                    if(document.getElementById(input[i]).checked.toString() == "true") {
@@ -115,7 +119,7 @@ span.error {
                 }
               	jagg.post("../blocks/register/ajax/register.jag", data,
                   function (result) {
-                        jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
+                        jagg.message({content:'You have successfully registered to WSO2 Cloud.',type:'info',cbk:function(){
                                 window.location.href = "https://cloudpreview.wso2.com";
                         }
                         });
@@ -128,7 +132,7 @@ span.error {
                   });
               },
               function (jqXHR, textStatus, errorThrown) {
-                  jagg.message({content:'Your request to register in WSO2 AppFactory has been submitted.',type:'info', cbk:function(){
+                  jagg.message({content:'Your request to register in WSO2 Cloud has been submitted.',type:'info', cbk:function(){
             		window.location.href = "https://cloudpreview.wso2.com";
                   	}
                   });
@@ -136,8 +140,14 @@ span.error {
     }
  
     function activateSubmit(fld) {
-    var submitButton = document.getElementById('submitbtn');
-    submitButton.disabled = !fld;
+    	var submitButton = document.getElementById('submitbtn');
+    	submitButton.disabled = !fld;
+	if(fld){
+            $('#submitbtn').css('background-color','#EB7067');
+        }else{
+            $('#submitbtn').css('background-color','#F9BFBB');
+        }
+
     }
 
     function validateEmail(){
