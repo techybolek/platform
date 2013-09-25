@@ -2,7 +2,7 @@
     "theme" : {
         "base" : "default"
     },
-    "context" : "/appmgt",
+    "context" : "/cloudmgt",
     "recentAPIsCount" : 5,
     "topRatedCount" : 5,
     "defaultUser" : {

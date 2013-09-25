@@ -1,7 +1,6 @@
 <%
 include("/jagg/jagg.jag");
 include("/jagg/constants.jag");
-include("/jagg/config_reader.jag");
 var file = new File("/site/conf/cloud-mgt.xml");
 file.open("r");
 var data = file.readAll();

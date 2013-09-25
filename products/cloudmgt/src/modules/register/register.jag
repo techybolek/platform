@@ -1,4 +1,4 @@
-<%g
+<%
 include("/jagg/jagg.jag");
 include("/jagg/constants.jag");
 
@@ -13,7 +13,9 @@ var doc= new XML(data);
 //var userName = doc.dbConfig.(@name == "cloud_mgt").userName.toString();
 //var password = doc.dbConfig.(@name == "cloud_mgt").password.toString();
 var AFURL = doc.ServerUrls.AppFactory.toString();
-var BPSURL = doc.ServerUrls.AppFactory.toString();
+var BPSURL = doc.ServerUrls.BPS.toString();
+file.close();
+
 var registerOrganization = function (organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan) {
 
 

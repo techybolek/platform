@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <cloudmgt>
 	<subscriptions>
-		<type display_name="APP Cloud">app_cloud</type>
+		<type display_name="App Cloud">app_cloud</type>
 		<type display_name="Integration Cloud">integration_cloud</type>
 		<type display_name="API Cloud">api_cloud</type>
          </subscriptions>
-	<dbConfig name="cloud_mgt">
-		<url>jdbc:mysql://localhost:3306/cloud_mgt</url>
-		<userName>root</userName>
-		<password>root</password>
-		<driverName>com.mysql.jdbc.Driver</driverName>
-	</dbConfig>
      <ServerUrls>
         <AppFactory>https://milestones.appfactory.wso2.com:9443/services/</AppFactory>
         <BPS>https://milestones.appfactory.wso2.com:9543/services/</BPS>

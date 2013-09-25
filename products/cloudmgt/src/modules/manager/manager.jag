@@ -19,7 +19,7 @@ var SSO_KEY_ALIAS = doc.SSORelyingParty.IdentityKeyAlias.toString();
 var SSO_KEYSTORE_NAME = doc.SSORelyingParty.KeyStoreName.toString();
 var COOKIE_REFRESH_INTERVAL = doc.SSORelyingParty.CookieRefreshInterval.toString();
 var AFURL = doc.ServerUrls.AppFactory.toString();
-doc.close();
+file.close();
 var cookieRefreshInterval = COOKIE_REFRESH_INTERVAL;
 var getAdminCookie = function (serverUrl) {
 	var timeNow = clock.getTime();
