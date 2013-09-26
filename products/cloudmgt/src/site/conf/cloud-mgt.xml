@@ -6,9 +6,9 @@
 		<type display_name="API Cloud">api_cloud</type>
          </subscriptions>
      <ServerUrls>
-        <AppFactory>https://milestones.appfactory.wso2.com:9443/services/</AppFactory>
-        <BPS>https://milestones.appfactory.wso2.com:9543/services/</BPS>
-        <Greg>https://milestones.appfactory.wso2.com:9443/services/</Greg>
+        <AppFactory>https://localhost:9443/services/</AppFactory>
+        <BPS>https://localhost:9543/services/</BPS>
+        <Greg>https://localhost:9443/services/</Greg>
     </ServerUrls>
     <SSORelyingParty>
         <Name>appserver</Name>
