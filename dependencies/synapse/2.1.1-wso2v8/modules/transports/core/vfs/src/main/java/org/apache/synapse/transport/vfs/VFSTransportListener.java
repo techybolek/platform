@@ -447,6 +447,9 @@ public class VFSTransportListener extends AbstractPollingTransportListener<PollT
             }
 
             if (moveToDirectoryURI != null) {
+               if (moveToDirectoryURI.contains("vfs:")){
+                   moveToDirectoryURI = moveToDirectoryURI.substring(moveToDirectoryURI.indexOf("vfs:") + 4);
+               }
                 FileObject moveToDirectory = fsManager.resolveFile(moveToDirectoryURI);
                 String prefix;
                 if(entry.getMoveTimestampFormat() != null) {
