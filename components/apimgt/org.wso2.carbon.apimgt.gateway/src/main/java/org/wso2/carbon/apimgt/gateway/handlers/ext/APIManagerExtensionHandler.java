@@ -110,7 +110,9 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         }
         try {
             String remoteIP = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("X-Forwarded-For");
-            if (remoteIP != null) {
+            String xffInfo = null;    
+        if (remoteIP != null) {
+                xffInfo = remoteIP;
                 if (remoteIP.indexOf(",") > 0) {
                     remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
                 }
@@ -121,6 +123,9 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             //null check before add it to log message
             if (remoteIP != null) {
                 logMessage = logMessage + " from clientIP=" + remoteIP;
+                if (xffInfo != null){
+                   logMessage = logMessage + " X-Forwarded-For Info=" + xffInfo;
+                }
             }
         } catch (Exception e) {
             //We do nothing here simply this parameter will skip in debug logs
