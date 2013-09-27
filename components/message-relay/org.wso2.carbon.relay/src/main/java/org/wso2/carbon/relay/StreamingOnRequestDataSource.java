@@ -83,4 +83,12 @@ public class StreamingOnRequestDataSource implements DataSource {
     public void setLastUse(boolean lastUse) {
         this.lastUse = lastUse;
 	}
+
+    /**
+     * Indicates whether or not the InputStream of the message has been consumed
+     * @return true if the InputStream has already been consumed, false otherwise.
+     */
+    public boolean isConsumed() {
+        return  lastUse;
+    }
 }
