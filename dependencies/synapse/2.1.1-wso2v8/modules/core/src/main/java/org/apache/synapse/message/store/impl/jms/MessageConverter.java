@@ -366,8 +366,8 @@ public final class MessageConverter {
         Iterator<Map.Entry> i = ((Map) headers).entrySet().iterator();
         while (i.hasNext()) {
             Map.Entry headerStr = i.next();
-            String fieldName = (String) headerStr.getKey();
-            String fieldValue = (String) headerStr.getValue();
+            String fieldName = String.valueOf(headerStr.getKey());
+            String fieldValue = String.valueOf(headerStr.getValue());
             fieldName = fieldName.replaceAll(RS_HYPHEN.CHAR, RS_HYPHEN.STRING);
             fieldValue = fieldValue.replaceAll(RS_HYPHEN.CHAR, RS_HYPHEN.STRING);
             fieldValue = fieldValue.replaceAll(RS_EQUAL.CHAR, RS_EQUAL.STRING);
