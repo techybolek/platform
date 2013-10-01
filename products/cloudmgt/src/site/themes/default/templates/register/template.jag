@@ -111,7 +111,7 @@ span.error {
                 var max=<%=types.length() %>;
                 var input=<%=typeArr %>;
              	for(var i = 0; i < input.length; i++)
-		{ 
+		        {
                    if(document.getElementById(input[i]).checked.toString() == "true") {
                       data[input[i]] = input[i];
                    }
@@ -132,17 +132,17 @@ span.error {
                   });
               },
               function (jqXHR, textStatus, errorThrown) {
-                  jagg.message({content:'Your request to register in WSO2 Cloud has been submitted.',type:'info', cbk:function(){
-            		window.location.href = "https://cloudpreview.wso2.com";
-                  	}
+              	  jagg.message({content:jqXHR.responseText, type:'error',cbk:function(){
+                               window.location.href = "register.jag";
+                  }
                   });
-                }); 
+              });
     }
  
     function activateSubmit(fld) {
     	var submitButton = document.getElementById('submitbtn');
     	submitButton.disabled = !fld;
-	if(fld){
+    	if(fld){
             $('#submitbtn').css('background-color','#EB7067');
         }else{
             $('#submitbtn').css('background-color','#F9BFBB');
@@ -192,7 +192,7 @@ function showKaptcha(captcha) {
     document.getElementById("secretKey").val = captchaInfo.secretKey;
     document.getElementById("imagePath").val = captchaPath;
 
-    var AFServiceUrl = '<%=AFServerUrl%>';
+    var AFServiceUrl = '<%=AFServerUrl %>';
     var serverUrl = AFServiceUrl.split("services")[0];
     var captchaURL = serverUrl+captchaPath;
     var captchaImg = document.getElementById("captchaImgDiv");
@@ -208,9 +208,21 @@ function showKaptcha(captcha) {
                 errorElement:'span'
             });
 		$('#registerForm').validate({
+			rules : {
+                password: {
+                    required: true,
+                    minlength: 5
+                }
+            },
+            messages: {
+                password: {
+                    minlength: "Minimum is 5 characters "
+                }
+            },
+
 			submitHandler: function(form) {
 				doSubmit();
-		   }
+		    }
 		});
     });
 </script>

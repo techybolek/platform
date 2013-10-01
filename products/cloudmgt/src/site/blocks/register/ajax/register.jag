@@ -16,25 +16,24 @@ mod = jagg.module("register"),
 site = require("/site/conf/site.json");
 
 if (action == "registerOrganization") {
-var organizationDomain = request.getParameter("organizationDomain");
-var adminUsername = request.getParameter("adminUsername");
-var firstName = request.getParameter("firstName");
-var lastName = request.getParameter("lastName");
-var email = request.getParameter("email");
-var adminPassword = request.getParameter("adminPassword");
-var usagePlan = request.getParameter("usagePlan");
-try {
-var result = mod.registerOrganization(organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan);
+    var organizationDomain = request.getParameter("organizationDomain");
+    var adminUsername = request.getParameter("adminUsername");
+    var firstName = request.getParameter("firstName");
+    var lastName = request.getParameter("lastName");
+    var email = request.getParameter("email");
+    var adminPassword = request.getParameter("adminPassword");
+    var usagePlan = request.getParameter("usagePlan");
+    try {
+        var result = mod.registerOrganization(organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan);
 
-if (result != null) {
-print(result);
-} else {
-throw "Error while registering an organization "+organizationDomain;
-}
-} catch(e) {
-throw "Error while registering an organization "+organizationDomain;
-}
-
+        if (result != null) {
+            print(result);
+        } else {
+            throw "Error while registering an organization "+organizationDomain;
+        }
+    } catch(e) {
+        throw "Error while registering an organization "+organizationDomain;
+    }
 } else if (action == "registerOrg") {
     var organizationDomain = request.getParameter("organizationDomain");
     var adminUsername = request.getParameter("adminUsername");
@@ -55,7 +54,17 @@ throw "Error while registering an organization "+organizationDomain;
             throw "Error while registering an organization " + organizationDomain;
         }
     } catch (e) {
-        throw "Error while registering an organization " + organizationDomain;
+        var message = e.toString();
+        if(message.indexOf("Captcha validation failed") !== -1){
+            response.status = 500
+            print("Captcha validation failed");
+        } else if(message.indexOf("Domain is not available to register") !== -1){
+            response.status = 500
+            print("Domain is not available to register");
+        }
+        else {
+            throw "Error while registering an organization" +organizationDomain;
+        }
     }
 
 } else if (action == "generateCaptcha") {

@@ -18,43 +18,43 @@ file.close();
 
 var registerOrganization = function (organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan) {
 
+    var ws = require("ws");
+    var creatTenant = new ws.WSRequest();
+    var options = new Array();
+    options.useSOAP = 1.1;
+    options.action = "http://wso2.org/process";
+    options.mep = "in-only";
 
-var ws = require("ws");
-var creatTenant = new ws.WSRequest();
-var options = new Array();
-options.useSOAP = 1.1;
-options.action = "http://wso2.org/process";
-options.mep = "in-only";
+    var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
+        '<admin xmlns="http://wso2.org/bps/sample">'+adminUsername+'</admin>'+
+        '<firstName xmlns="http://wso2.org/bps/sample">'+firstName+'</firstName>'+
+        '<lastName xmlns="http://wso2.org/bps/sample">'+lastName+'</lastName>'+
+        '<adminPassword xmlns="http://wso2.org/bps/sample">'+adminPassword+'</adminPassword>'+
+        '<tenantDomain xmlns="http://wso2.org/bps/sample">'+organizationDomain+'</tenantDomain>'+
+        '<email xmlns="http://wso2.org/bps/sample">'+email+'</email>'+
+        '<active xmlns="http://wso2.org/bps/sample">true</active>'+
+        '<successKey xmlns="http://wso2.org/bps/sample">key</successKey>'+
+        '<createdDate xmlns="http://wso2.org/bps/sample">2001-12-31T12:00:00</createdDate>'+
+        '<originatedService xmlns="http://wso2.org/bps/sample">WSO2 App Factory</originatedService>'+
+        '<usagePlan xmlns="http://wso2.org/bps/sample">'+usagePlan+'</usagePlan>'+
+        '</p:CreateTenantRequest>';
 
-var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
-    '<admin xmlns="http://wso2.org/bps/sample">'+adminUsername+'</admin>'+
-    '<firstName xmlns="http://wso2.org/bps/sample">'+firstName+'</firstName>'+
-    '<lastName xmlns="http://wso2.org/bps/sample">'+lastName+'</lastName>'+
-    '<adminPassword xmlns="http://wso2.org/bps/sample">'+adminPassword+'</adminPassword>'+
-    '<tenantDomain xmlns="http://wso2.org/bps/sample">'+organizationDomain+'</tenantDomain>'+
-    '<email xmlns="http://wso2.org/bps/sample">'+email+'</email>'+
-    '<active xmlns="http://wso2.org/bps/sample">true</active>'+
-    '<successKey xmlns="http://wso2.org/bps/sample">key</successKey>'+
-    '<createdDate xmlns="http://wso2.org/bps/sample">2001-12-31T12:00:00</createdDate>'+
-    '<originatedService xmlns="http://wso2.org/bps/sample">WSO2 App Factory</originatedService>'+
-    '<usagePlan xmlns="http://wso2.org/bps/sample">'+usagePlan+'</usagePlan>'+
-    '</p:CreateTenantRequest>';
+    log.info("[Test log] paylod deployTaggedArtifact----------------" + payload);
 
+    var result;
+    try {
+        var endPoint = BPSURL + "CreateTenant";
+        creatTenant.open(options,endPoint, false);
+        creatTenant.send(payload);
+        result = creatTenant.responseE4X;
 
-log.info("[Test log] paylod deployTaggedArtifact----------------" + payload);
-
-var result;
-try {
-var endPoint = BPSURL + "CreateTenant";
-creatTenant.open(options,endPoint, false);
-creatTenant.send(payload);
-result = creatTenant.responseE4X;
-
-return result;
-} catch (e) {
-log.error("Error while registering organization " + organizationDomain + " : " + e.message);
-throw "Error while registering organization " + organizationDomain;
-}
+        return result;
+    } catch (e) {
+        log.error("Error while registering organization " + organizationDomain + " : " + e.message +
+                    " : " + e.javaException.getCause().getMessage());
+        throw "Error while registering organization " + organizationDomain + " : " + e.message +
+                    " : " + e.javaException.getCause().getMessage();
+    }
 }
 
 var registerOrg = function (organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan, imagePath, secretKey, userAnswer) {
@@ -85,8 +85,8 @@ var registerOrg = function (organizationDomain,adminUsername,adminPassword, firs
             '<usagePlan xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + usagePlan + '</usagePlan>' +
         '</tenantInfoBean>' +
         '<captchaInfoBean xmlns="http://services.mgt.tenant.carbon.wso2.org">' +
-          '<imagePath xmlns="http://beans.mgt.captcha.carbon.wso2.org/xsd">' + imagePath + '</imagePath> ' +
-           '<secretKey xmlns="http://beans.mgt.captcha.carbon.wso2.org/xsd">' + secretKey + '</secretKey> ' +
+            '<imagePath xmlns="http://beans.mgt.captcha.carbon.wso2.org/xsd">' + imagePath + '</imagePath> ' +
+            '<secretKey xmlns="http://beans.mgt.captcha.carbon.wso2.org/xsd">' + secretKey + '</secretKey> ' +
             '<userAnswer xmlns="http://beans.mgt.captcha.carbon.wso2.org/xsd">' + userAnswer + '</userAnswer>' +
         '</captchaInfoBean>' +
     '</p:registerTenant>' ;
@@ -103,8 +103,10 @@ var registerOrg = function (organizationDomain,adminUsername,adminPassword, firs
 
         return result;
     } catch (e) {
-        log.error("Error while registering the organization " + organizationDomain + ": " + e.message);
-        throw "Error while registering the organization " + organizationDomain ;
+	    log.error("Error while registering organization " + organizationDomain + " : " + e.message +
+                " : " + e.javaException.getCause().getMessage());
+        throw "Error while registering organization " + organizationDomain + " : " + e.message +
+                " : " + e.javaException.getCause().getMessage();    
     }
 }
 
@@ -188,7 +190,8 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
         var db = new Database("cloud_mgt");
         var upperString = "INSERT INTO SUBSCRIPTIONS (tenantDomain, ";
         var lowerString = "VALUES ('"+domain+"', ";
-        for(var i=0;i<options.length;i++) {
+        for(var i=0;i<options.length;i++)
+        {
              var isNull =options[i]!=null;
              if(isNull) {
                 if(i ==options.length-1) {
