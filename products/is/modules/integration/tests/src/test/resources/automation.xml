@@ -27,13 +27,13 @@
         -->
         <deploymentDelay>60000</deploymentDelay>
         <!--
-         Change this to product|platform/cloud to execute test on specific environment
+         Change this to product/platform to execute test on specific environment
         -->
-        <executionEnvironment>product</executionEnvironment>
+        <executionEnvironment>cloud</executionEnvironment>
         <!--
-         Change this to user/tenant to execute test with user mode or tenant mode
+         Change this to true/false to execute test with user mode or tenant mode
         -->
-        <executionMode>user</executionMode>
+        <multiTenantMode>false</multiTenantMode>
         <!--
          Change this to true if you want to generate coverage statistics
         -->
@@ -54,6 +54,7 @@
 
             <!-- Type of the browser selenium tests are running" -->
             <browser>
+                <!-- firefox,chrome,ie, opera,safari-->
                 <browserType>firefox</browserType>
                 <!-- path to webDriver executable - required only for chrome-->
                 <webdriverPath enable="false">/home/test/name/webDriver</webdriverPath>
@@ -163,79 +164,79 @@
    the test suites.
 -->
     <platform>
+        <!--
+        cluster instance details to be used to platform test execution
+        -->
+        <productGroup name="AS" clusteringEnabled="true">
             <!--
-            cluster instance details to be used to platform test execution
+                 List of workers which will assign id the suite is directed to execute
+                     in a clustered environment with worker manager separation
             -->
-            <instanceGroup name="AS" clusteringEnabled="true">
-                <!--
-                     List of workers which will assign id the suite is directed to execute
-                         in a clustered environment with worker manager separation
-                -->
-                <!--Types worker/manager/lb_worker/lb_manager-->
-                <instance name="asw001" type="worker">
-                    <host>localhost</host>
-                    <httpport>9763</httpport>
-                    <httpsport>9443</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance name="asw002" type="worker">
-                    <host>localhost</host>
-                    <httpport>9764</httpport>
-                    <httpsport>9444</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <!--
-                    List of managers which will assign id the suite is directed to execute
-                        in a clustered environment with worker manager separation
-                   -->
-                <instance name="asm001" type="manager">
-                    <host>localhost</host>
-                    <httpport>9764</httpport>
-                    <httpsport>9444</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance name="asm002" type="manager">
-                    <host>localhost</host>
-                    <httpport>9764</httpport>
-                    <httpsport>9444</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <!--Configuration of the fronted LB on a LB fronted deployment-->
-                <instance name="lbw001" type="lb_worker">
-                    <host>localhost</host>
-                    <httpport>9763</httpport>
-                    <httpsport>9443</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance name="lbm001" type="lb_manager">
-                    <host>localhost</host>
-                    <httpport>9765</httpport>
-                    <httpsport>9445</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-            </instanceGroup>
+            <!--Types worker/manager/lb_worker/lb_manager-->
+            <instance name="asw001" type="worker">
+                <host>localhost</host>
+                <httpport>9763</httpport>
+                <httpsport>9443</httpsport>
+                <webContext>/</webContext>
+            </instance>
+            <instance name="asw002" type="worker">
+                <host>localhost</host>
+                <httpport>9764</httpport>
+                <httpsport>9444</httpsport>
+                <webContext>/</webContext>
+            </instance>
             <!--
-            Product instance details to be used for integration test level
-            -->
+                List of managers which will assign id the suite is directed to execute
+                    in a clustered environment with worker manager separation
+               -->
+            <instance name="asm001" type="manager">
+                <host>localhost</host>
+                <httpport>9764</httpport>
+                <httpsport>9444</httpsport>
+                <webContext>/</webContext>
+            </instance>
+            <instance name="asm002" type="manager">
+                <host>localhost</host>
+                <httpport>9764</httpport>
+                <httpsport>9444</httpsport>
+                <webContext>/</webContext>
+            </instance>
+            <!--Configuration of the fronted LB on a LB fronted deployment-->
+            <instance name="lbw001" type="lb_worker">
+                <host>localhost</host>
+                <httpport>9763</httpport>
+                <httpsport>9443</httpsport>
+                <webContext>/</webContext>
+            </instance>
+            <instance name="lbm001" type="lb_manager">
+                <host>localhost</host>
+                <httpport>9765</httpport>
+                <httpsport>9445</httpsport>
+                <webContext>/</webContext>
+            </instance>
+        </productGroup>
+        <!--
+        Product instance details to be used for integration test level
+        -->
         <instanceGroup name="IS" clusteringEnabled="false">
-                <instance name="esbw001" type="instance">
-                    <host>localhost</host>
-                    <httpport>9763</httpport>
-                    <httpsport>9443</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance name="esbw002" type="instance">
-                    <host>localhost</host>
-                    <httpport>9764</httpport>
-                    <httpsport>9444</httpsport>
-                    <webContext>/</webContext>
-                </instance>
-                <instance name="lb002" type="lb">
-                    <host>localhost</host>
-                    <httpport>9763</httpport>
-                    <httpsport>9443</httpsport>
-                    <webContext>/</webContext>
-                </instance>
+            <instance name="esbw001" type="instance">
+                <host>localhost</host>
+                <httpport>9763</httpport>
+                <httpsport>9443</httpsport>
+                <webContext>/</webContext>
+            </instance>
+            <instance name="esbw002" type="instance">
+                <host>localhost</host>
+                <httpport>9764</httpport>
+                <httpsport>9444</httpsport>
+                <webContext>/</webContext>
+            </instance>
+            <instance name="lb002" type="lb">
+                <host>localhost</host>
+                <httpport>9763</httpport>
+                <httpsport>9443</httpsport>
+                <webContext>/</webContext>
+            </instance>
         </instanceGroup>
     </platform>
 </automation>
