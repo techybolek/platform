@@ -26,6 +26,8 @@
 <%@ page import="org.apache.axiom.om.OMElement" %>
 <%@ page import="org.wso2.carbon.bpel.ui.BpelUIUtil" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
+<%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.Comparator" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
@@ -50,6 +52,13 @@
     String instanceId = CharacterEncoder.getSafeText(request.getParameter("iid"));
     String operation = CharacterEncoder.getSafeText(request.getParameter("operation"));
     String activityId = CharacterEncoder.getSafeText(request.getParameter("aid"));
+
+    Comparator<EventInfo> activityInfoComparator = new Comparator<EventInfo>() {
+
+        public int compare(EventInfo e1, EventInfo e2) {
+            return (int) (e1.getActivityId() - e2.getActivityId());
+        }
+    };
 
     boolean isAuthenticatedForInstanceManagement =
             CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/bpel/instances");
@@ -612,7 +621,7 @@
                                 </thead>
                                 <tbody>
 <%
-
+      Arrays.sort(infoArray, activityInfoComparator);
         for (int i = 0; i < infoArray.length; i++) {
             EventInfo info = infoArray[i];
 
