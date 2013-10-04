@@ -89,54 +89,68 @@ span.error {
 
     function doSubmit() {
 
-          jagg.post("../blocks/register/ajax/register.jag", {
-            action:"registerOrg",
-            firstName:$("#firstName").attr('value'),
-            lastName:$("#lastName").attr('value'),
-            email:$("#email").attr('value'),
-            adminUsername:$("#adminUsername").attr('value'),
-            adminPassword:$("#password").attr('value') ,
-            organizationDomain:$("#domainName").attr('value'),
-            usagePlan:'Demo',
-            imagePath:document.getElementById("imagePath").val,
-            secretKey:document.getElementById("secretKey").val,
-            userAnswer:$("#captcha-user-answer").attr('value')
+        var data = {
+            action:"storeSubscription",
+            domainName:$("#domainName").attr('value')
+        };
+        var max=<%=types.length() %>;
+        var input=<%=typeArr %>;
+        for(var i = 0; i < input.length; i++){
+            if(document.getElementById(input[i]).checked.toString() == "true") {
+                data[input[i]] = input[i];
+            }
+        }
+        var firstName = $("#firstName").attr('value');
+        var lastName  = $("#lastName").attr('value');
+        var email     = $("#email").attr('value');
+        var adminUsername = $("#adminUsername").attr('value');
+        var adminPassword = $("#password").attr('value');
+        var organizationDomain = $("#domainName").attr('value');
+        var imagePath = document.getElementById("imagePath").val;
+        var secretKey = document.getElementById("secretKey").val;
+        var userAnswer = $("#captcha-user-answer").attr('value');
 
-              },
-              function (result) {
-               var data = {
-                         action:"storeSubscription",
-                        domainName:$("#domainName").attr('value')
-                };
-                var max=<%=types.length() %>;
-                var input=<%=typeArr %>;
-             	for(var i = 0; i < input.length; i++)
-		        {
-                   if(document.getElementById(input[i]).checked.toString() == "true") {
-                      data[input[i]] = input[i];
-                   }
-                   
-                }
-              	jagg.post("../blocks/register/ajax/register.jag", data,
-                  function (result) {
+        document.getElementById('form_div').innerHTML = "";
+
+        jagg.message({content:'Your request to register in WSO2 Cloud has been submitted. Please wait.',type:'info'});
+
+        jagg.post("../blocks/register/ajax/register.jag", {
+                action:"registerOrg",
+                firstName:firstName,
+                lastName:lastName,
+                email:email,
+                adminUsername:adminUsername,
+                adminPassword:adminPassword ,
+                organizationDomain:organizationDomain,
+                usagePlan:'Demo',
+                imagePath:imagePath,
+                secretKey:secretKey,
+                userAnswer:userAnswer
+            },
+            function (result) {
+                jagg.post("../blocks/register/ajax/register.jag", data,
+                    function (result) {
+                        $('.message_box').empty();
                         jagg.message({content:'You have successfully registered to WSO2 Cloud.',type:'info',cbk:function(){
                                 window.location.href = "https://cloudpreview.wso2.com";
-                        }
+                            }
                         });
-                  },
-                  function (jqXHR, textStatus, errorThrown) {
+                    },
+                    function (jqXHR, textStatus, errorThrown) {
+                        $('.message_box').empty();
                         jagg.message({content:'Error while storing subscription details.',type:'error',cbk:function(){
                                 window.location.href = "https://cloudpreview.wso2.com";
-                        }
+                            }
                         });
-                  });
-              },
-              function (jqXHR, textStatus, errorThrown) {
-              	  jagg.message({content:jqXHR.responseText, type:'error',cbk:function(){
-                               window.location.href = "register.jag";
-                  }
-                  });
-              });
+                    });
+            },
+            function (jqXHR, textStatus, errorThrown) {
+                $('.message_box').empty();
+                jagg.message({content:jqXHR.responseText, type:'error',cbk:function(){
+                        window.location.href = "register.jag";
+                    }
+                });
+            });
     }
  
     function activateSubmit(fld) {
@@ -235,6 +249,7 @@ function showKaptcha(captcha) {
 			</div>
 			<article class="start">
 				<div class="alert alert-error error" id="registerError"><% jagg.includeBlock("page/messages", null); %></div>
+				<div id="form_div">
 				<section class="start_content">
 				 <form method='post' name="inputData" class='right_label hold' id='registerForm'>
 						<div class="input_row">
@@ -343,6 +358,7 @@ function showKaptcha(captcha) {
                      <input type="hidden" name="imagePath" id="imagePath" value=""/>
 
 				</section>
+				</div>
 				<div class="signin">
 					Already have an Account? <a href="<%='https://cloudpreview.wso2.com'%>" class="link">Sign in</a>
 				</div>
