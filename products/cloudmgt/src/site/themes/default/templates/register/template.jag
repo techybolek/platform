@@ -221,11 +221,32 @@ function showKaptcha(captcha) {
         jQuery.validator.setDefaults({
                 errorElement:'span'
             });
+        jQuery.validator.addMethod("domain", function(value, element) {
+            var isSuccess = false;
+            $.ajax({ url: "../blocks/register/ajax/register.jag",
+                    data: {
+                        action:"checkDomainAvailability",
+                        domainName:value
+                    },
+                    async: false,
+                success:
+                    function(msg) {
+                        msg = msg.replace(/[\r\n]/g, "");
+                        if(msg == "true"){
+                            isSuccess = true;
+                        }
+                     }
+            });
+            return isSuccess;
+        }, "Domain is not available");
 		$('#registerForm').validate({
 			rules : {
                 password: {
                     required: true,
                     minlength: 5
+                } ,
+                domainName: {
+                    domain: true
                 }
             },
             messages: {

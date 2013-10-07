@@ -99,7 +99,7 @@ var registerOrg = function (organizationDomain,adminUsername,adminPassword, firs
         creatTenant.open(options,endPoint, false);
         creatTenant.send(payload);
         result = creatTenant.responseE4X;
-        registerOrganization(organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan); 
+        registerOrganization(organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan);
 
         return result;
     } catch (e) {
@@ -108,6 +108,41 @@ var registerOrg = function (organizationDomain,adminUsername,adminPassword, firs
         throw "Error while registering organization " + organizationDomain + " : " + e.message +
                 " : " + e.javaException.getCause().getMessage();    
     }
+}
+
+var checkDomainAvailability = function (domainName) {
+    log.info("Checking Domain Availability : " + domainName);
+    var ws = require('ws');
+    var request = new ws.WSRequest();
+    var options = new Array();
+    options.useSOAP = 1.1;
+    options.timeout = 1000000;
+    options.action = "urn:checkDomainAvailability";
+    options["HTTPHeaders"] = [
+        {
+            name: "Cookie", value: modManager.getAdminCookie(AFURL) }
+    ];
+
+    var payload =   '<checkDomainAvailability xmlns="http://services.mgt.tenant.carbon.wso2.org">' +
+                        '<domainName xmlns="http://services.mgt.tenant.carbon.wso2.org">'+ domainName +'</domainName>' +
+                    '</checkDomainAvailability>';
+    var result;
+
+    try {
+        var endPoint = AFURL + "TenantMgtService";
+        request.open(options, endPoint, false);
+        request.send(payload);
+        result = request.responseE4X;
+        var availability = result.*::["return"].text();
+        log.info("Domain Availability : " + availability);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoking service endpoint:" + endPoint + " returned result:" + result);
+        }
+    } catch (e) {
+        log.error("Error while checking the domain availability \n" + e.message);
+        throw "Error while checking the domain availability";
+    }
+    return availability;
 }
 
 var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email, uuid) {

@@ -96,6 +96,19 @@ if (action == "registerOrganization") {
         throw "Error while adding subscription.";
     }
 
+}else if (action == "checkDomainAvailability") {
+    var domainName = request.getParameter("domainName");
+    try {
+        var result = mod.checkDomainAvailability(domainName);
+        if(result != null ) {
+            print(result);
+        } else {
+            throw "Error while checking domain validation.";
+        }
+    } catch (e) {
+        throw "Error while checking domain validation.";
+    }
+
 } else {
     throw new Error("No action specified");
 }
