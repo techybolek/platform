@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <cloudmgt>
-        <subscriptions>
-                <type display_name="App Cloud">app_cloud</type>
-                <type display_name="Integration Cloud">integration_cloud</type>
-                <type display_name="API Cloud">api_cloud</type>
+	<subscriptions>
+		<type display_name="App Cloud">app_cloud</type>
+		<type display_name="Integration Cloud">integration_cloud</type>
+		<type display_name="API Cloud">api_cloud</type>
          </subscriptions>
      <ServerUrls>
-        <AppFactory>https://appfactory.cloudpreview.wso2.com:9444/services/</AppFactory>
-        <BPS>https://process.cloudpreview.wso2.com:9444/services/</BPS>
-        <Greg>https://appfactory.cloudpreview.wso2.com:9444/services/</Greg>
-        <CloudMgt>https://management.cloudpreview.wso2.com:9446/services/</CloudMgt>
+        <AppFactory>https://localhost:9443/services/</AppFactory>
+        <BPS>https://localhost:9543/services/</BPS>
+        <Greg>https://localhost:9443/services/</Greg>
     </ServerUrls>
     <SSORelyingParty>
         <Name>appserver</Name>
                 <DashboardName>WSO2 AppFactory Dashboard</DashboardName>
-        <IdentityProviderURL>https://appfactory.cloudpreview.wso2.com:9444/samlsso</IdentityProviderURL>
+        <IdentityProviderURL>https://localhost:9443/samlsso</IdentityProviderURL>
         <KeyStorePassword>wso2carbon</KeyStorePassword>
         <IdentityKeyAlias>wso2carbon</IdentityKeyAlias>
         <KeyStoreName>${carbon.home}/repository/resources/security/wso2carbon.jks</KeyStoreName>
@@ -22,5 +21,6 @@
          <AdminUserName>admin</AdminUserName>
          <AdminPassword>admin</AdminPassword>
     </SSORelyingParty>
-</cloudmgt>
 
+
+</cloudmgt>
