@@ -27,13 +27,13 @@
 <%
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
     InfoServiceClient client = new InfoServiceClient(cookie, config, session);
-    TagBean tag;
+    TagBean tag = null;
     try {
         client.addTag(request);
         tag = client.getTags(request);
     } catch (Exception e) {
         response.setStatus(500);
-        %><%=e.getMessage()%><%
+	response.getWriter().println(e.getMessage());       
         return;
     }
 

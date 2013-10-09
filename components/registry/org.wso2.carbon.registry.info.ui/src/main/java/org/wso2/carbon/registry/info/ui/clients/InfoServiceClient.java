@@ -156,10 +156,8 @@ public class InfoServiceClient implements IInfoService {
 
         try {
             proxy.addTag(tag, path, sessionId);
-        } catch (Exception e) {
-            String msg = "Failed to add the tag.";
-            log.error(msg, e);
-            throw new Exception(msg);
+        } catch (Exception e) {                        
+            throw new Exception(e);
         }
     }
     
