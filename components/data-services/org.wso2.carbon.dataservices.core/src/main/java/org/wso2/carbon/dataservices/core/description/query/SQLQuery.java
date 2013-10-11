@@ -746,9 +746,14 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     /**
      * Post actions after a connection is used.
      */
-    public void finalizeConnection(Connection connection, boolean force) throws DataServiceFault {
+    public void finalizeConnection(Connection connection, boolean error) throws DataServiceFault {
         try {
-            if (connection == null) {
+            if (connection == null || connection.isClosed()) {
+                return;
+            }
+            if (error) {
+                connection.rollback();
+                connection.close();
                 return;
             }
             DataService dataService = this.getDataService();
@@ -759,8 +764,6 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 if (!connection.isClosed() && !connection.getAutoCommit()) {
                     connection.commit();
                 }
-                connection.close();
-            } else if (force) {
                 connection.close();
             }
         } catch (SQLException e) {
