@@ -269,6 +269,11 @@ public class ServerWorker implements Runnable {
             if (localAddr != null) {
                 servicePrefix = schemeName + "://" + localAddr.getHostName() + ":" + inetConn.getLocalPort() + servicePrefix;
             }
+            
+            if(inetConn.getLocalPort()>0){
+            	 msgContext.setProperty(NhttpConstants.SERVER_PORT, inetConn.getLocalPort());
+            }
+            
         }
         msgContext.setProperty(NhttpConstants.SERVICE_PREFIX, servicePrefix);
 

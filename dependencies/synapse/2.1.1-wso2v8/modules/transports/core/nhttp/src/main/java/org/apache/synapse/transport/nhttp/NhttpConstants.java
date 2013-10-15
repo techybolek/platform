@@ -172,4 +172,9 @@ public class NhttpConstants {
      */
     public static final String SO_TIMEOUT_RECEIVER = "http.socket.timeout.receiver";
     public static final String SO_TIMEOUT_SENDER = "http.socket.timeout.sender";
+
+    //property name of the server port
+    public static final String SERVER_PORT = "SERVER_PORT";
+
+
 }

@@ -31,6 +31,7 @@ import org.apache.synapse.aspects.AspectConfigurationDetectionStrategy;
 import org.apache.synapse.aspects.ComponentType;
 import org.apache.synapse.aspects.statistics.StatisticsReporter;
 import org.apache.synapse.mediators.MediatorFaultHandler;
+import org.apache.synapse.transport.nhttp.NhttpConstants;
 
 /**
  * This message receiver should be configured in the Axis2 configuration as the
@@ -46,6 +47,7 @@ public class SynapseMessageReceiver implements MessageReceiver {
 
         MessageContext synCtx = MessageContextCreatorForAxis2.getSynapseMessageContext(mc);
 
+              	
         StatisticsReporter.reportForComponent(synCtx,
                 AspectConfigurationDetectionStrategy.getAspectConfiguration(synCtx),
                 ComponentType.PROXYSERVICE);
@@ -77,6 +79,11 @@ public class SynapseMessageReceiver implements MessageReceiver {
         Log serviceLog = LogFactory.getLog(SynapseConstants.SERVICE_LOGGER_PREFIX +
             SynapseConstants.SYNAPSE_SERVICE_NAME);
         ((Axis2MessageContext) synCtx).setServiceLog(serviceLog);
+        
+        if(mc.getProperty(NhttpConstants.SERVER_PORT) != null){
+        	synCtx.setProperty(NhttpConstants.SERVER_PORT, mc.getProperty(NhttpConstants.SERVER_PORT));
+        }
+        	
 
         try {
             // invoke synapse message mediation through the main sequence
