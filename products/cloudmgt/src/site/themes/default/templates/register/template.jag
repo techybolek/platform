@@ -275,54 +275,55 @@ function showKaptcha(captcha) {
 				 <form method='post' name="inputData" class='right_label hold' id='registerForm'>
 						<div class="input_row">
 							<div class="input_row_col">
-								<label for="firstName">First name</label>
+								<label for="firstName" class="form-title">First name</label>
 								<input type="text" id="firstName" name="firstName" class="required" />
 							</div>
 
 							<div class="input_row_col">
-								<label for="lastName">Last name</label>
+								<label for="lastName" class="form-title">Last name</label>
 								<input type="text" id="lastName" name="lastName" class="required" />
 							</div>
 						</div>
 						<div class="input_row">
-							<label for="email">Email</label>
+							<label for="email" class="form-title">Email</label>
 							<input type="text" id="email" name="email" class="required email" />
-						</div>
-						<div class="input_row">
-                            <label for="adminUsername">Admin Username</label>
-                            <input type="text" id="adminUsername" name="adminUsername" class="required" />
-                        </div>
-						<div class="input_row">
-							<div class="input_row_col">
-								<label for="password">Password</label>
-								<input type="password" id="password" name="password" class="required password"  />
-							</div>
-
-							<div class="input_row_col">
-								<label for="password2">Confirm Password</label>
-								<input type="password" id="password2" name="password2" class="required password_match"  />
-							</div>
-							
-							
-						</div>
-						<div class="input_row">
-							<label for="organization">Organization</label>
+						</div> 
+                                                <div class="input_row">
+							<label for="organization" class="form-title">Organization</label>
 							<input type="text" id="organization" name="organization" class="required" />
 						</div>
 						<div class="input_row">
 							<i class="icon-ok-sign"></i>
-							<label for="domainName">Domain</label>
+							<label for="domainName" class="form-title">Domain</label>
 							<input type="text" id="domainName" name="domainName" class="required domain" />
 						</div>						
 						<div class="input_row">
-							<label id="lblLoginID">Your Login ID: 
+							<label id="lblLoginID" class="form-title">Your Login ID:
 								<span id="preAdmin"></span>
 								<span id="preAt">&#64;</span>
 								<span id="preDomain"></span>
 							</label>
 						</div>
 						<div class="input_row">
-							<label for="captcha-user-answer">Word Verification</label>
+                            <label for="adminUsername" class="form-title">Admin Username</label>
+                            <input type="text" id="adminUsername" name="adminUsername" class="required" />
+                        </div>
+						<div class="input_row">
+							<div class="input_row_col">
+								<label for="password" class="form-title">Password</label>
+								<input type="password" id="password" name="password" class="required password"  />
+							</div>
+
+							<div class="input_row_col">
+								<label for="password2" class="form-title">Confirm Password</label>
+								<input type="password" id="password2" name="password2" class="required password_match"  />
+							</div>
+							
+							
+						</div>
+						
+						<div class="input_row">
+							<label for="captcha-user-answer" class="form-title">Word Verification</label>
 							<label for="captcha-user-answer" style="font-size:10px;color:red">Captcha image is not visible due to untrusted certificates. Please open the image in a new tab to accept the certificate.</label>
 							<div class="input_row_col">
 								<div id="captchaImgDiv"></div>
@@ -335,56 +336,46 @@ function showKaptcha(captcha) {
 							
 						</div>
 						<div class="input_row subs-cont">
-							<label for="captcha-user-answer">Subscriptions</label>
+							<label for="captcha-user-answer" class="form-title">Subscriptions</label>
 							  <% 
 								for(var i=0;i<doc.subscriptions.type.length();i++) {
 								%>
 
 							<div class="input_row_col">
-								<input type="checkbox" style="width:1em" name="<%=types[i].toString()%>" id="<%=types[i].toString()%>"><span>
-<%=doc.subscriptions.type[i].@display_name.toString()%></span>
+                                <label>
+                                    <input type="checkbox" style="width:1em" name="<%=types[i].toString()%>" id="<%=types[i].toString()%>">
+                                    <%=doc.subscriptions.type[i].@display_name.toString()%>
+                                </label>
 							</div><br/>
                                                     <% } %>
 						</div>
-						
-                                                 <div class="toggle_container">
-                            <table class="normal-nopadding" cellspacing="0">
-                                <tbody>
-                                <tr></tr>
-                                <tr>
-                                    <td>
-                                        <textarea rows="10" readonly="readonly" name="license-text"
-                                                  style="width:100%"><%=eulaContent%>
-                                        </textarea>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" name="activateButton" style="width:1em" id="activateButton"
-                                               onclick="activateSubmit(form.activateButton.checked)"/>
-                                        <label for="activateButton">I have read and accepted the terms in the license agreement above.</label></td>
-                                </tr>
-                         
+                     <div class="input_row">
 
-                                </tbody>
-                            </table>
-                        </div>
-						<div class="input_row btn_row">
-							
-							 <input id="submitbtn" type='submit' disabled="disabled" value='Create My Account' class='btn' />
-						</div>
+                         <textarea rows="10" readonly="readonly" class="license_txt" name="license-text"
+                                   style="width:100%"><%=eulaContent%>
+                         </textarea>
+                     </div>
+                     <div class="input_row">
+                         <label><input type="checkbox" name="activateButton" style="width:1em" id="activateButton"
+                                       onclick="activateSubmit(form.activateButton.checked)"/>I have read and accepted
+                             the terms in the license agreement above.</label></td>
+                     </div>
+                     <div class="input_row btn_row">
+                         <input id="submitbtn" type='submit' disabled="disabled" value='Create My Account' class='btn'/>
+                     </div>
 
-					</form>
+                 </form>
 
                     <input type="hidden" name="secretKey" id="secretKey" value=""/>
-                     <input type="hidden" name="imagePath" id="imagePath" value=""/>
+                    <input type="hidden" name="imagePath" id="imagePath" value=""/>
 
-				</section>
-				</div>
-				<div class="signin">
-					Already have an Account? <a href="<%='https://cloudpreview.wso2.com'%>" class="link">Sign in</a>
-				</div>
-			</article>
-		</div><!-- /wrapper -->
+                </section>
+                </div>
+                <div class="signin">
+                    Already have an Account? <a href="<%='https://cloudpreview.wso2.com'%>" class="link">Sign in</a>
+                </div>
+            </article>
+</div><!-- /wrapper -->
 
 <% }); %>
 
