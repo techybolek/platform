@@ -16,6 +16,18 @@ var AFURL = doc.ServerUrls.AppFactory.toString();
 var BPSURL = doc.ServerUrls.BPS.toString();
 file.close();
 
+var emailFile = new File("/site/conf/email.xml");
+emailFile.open("r");
+var emailData = emailFile.readAll();
+var emailOM= new XML(emailData);
+var from = emailOM.from.toString();
+var subject =  emailOM.subject.toString();
+var body =  emailOM.body.toString();
+var senderEmail = emailOM.sender.username.toString();
+var senderPort = emailOM.sender.port.toString();
+var senderPassword= emailOM.sender.password.toString();
+var senderHost= emailOM.sender.host.toString();
+emailFile.close();
 var registerOrganization = function (organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan) {
 
     var ws = require("ws");
@@ -242,6 +254,26 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
         var sqlString = upperString+" "+lowerString;
         log.info(sqlString);
         db.query(sqlString);
+    }
+
+var sendEmail = function(name,adminName, domain,to) {
+       var username= adminName+"@"+domain;
+       body = body.replace("$name",name);
+       body = body.replace("$adminName",adminName);
+       body = body.replace("$tenant",domain);
+       body = body.replace("$username",username);
+       log.info("Body "+body);
+       var email = require('email');
+       var sender = new email.Sender(senderHost, senderPort, senderEmail,senderPassword, "tls");
+       sender.from = senderEmail;
+       log.info("sender.from  "+senderEmail);
+       log.info("sender.to  "+to);
+       sender.to = to;
+       sender.subject = subject;
+       sender.text = body;
+       sender.send();
+ 
+       log.info("email successfully sent to " + to);      
     }
 ;
 %>

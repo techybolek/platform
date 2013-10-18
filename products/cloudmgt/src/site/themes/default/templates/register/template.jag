@@ -87,7 +87,7 @@ span.error {
 <script type="text/javascript">
 
 
-    function doSubmit() {
+   function doSubmit() {
         var submitButton = document.getElementById('submitbtn');
     	submitButton.disabled = true;
         $('#submitbtn').css('background-color','#F9BFBB');
@@ -132,11 +132,25 @@ span.error {
             function (result) {
                 jagg.post("../blocks/register/ajax/register.jag", data,
                     function (result) {
-                        $('.message_box').empty();
-                        jagg.message({content:'You have successfully registered to WSO2 Cloud.',type:'info',cbk:function(){
-                                window.location.href = "https://cloudpreview.wso2.com";
-                            }
+                	jagg.post("../blocks/register/ajax/register.jag", {
+                		 action:"sendEmail",
+                         firstName:firstName,
+                         adminUsername:adminUsername,
+                         email:email,
+                         domainName:organizationDomain
+                  },
+                  function (result) {
+                        jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
+                                window.location.href = "../../../appmgt";
+                        }
                         });
+                  },
+                  function (jqXHR, textStatus, errorThrown) {
+                        jagg.message({content:'Error while storing subscription details.',type:'error',cbk:function(){
+                                window.location.href = "../../../appmgt";
+                        }
+                        });
+                  });
                     },
                     function (jqXHR, textStatus, errorThrown) {
                         $('.message_box').empty();
@@ -154,6 +168,7 @@ span.error {
                 });
             });
     }
+ 
  
     function activateSubmit(fld) {
     	var submitButton = document.getElementById('submitbtn');

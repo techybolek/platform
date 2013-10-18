@@ -96,7 +96,18 @@ if (action == "registerOrganization") {
         throw "Error while adding subscription.";
     }
 
-}else if (action == "checkDomainAvailability") {
+} else if (action == "sendEmail") {
+    var domainName = request.getParameter("domainName");
+    var adminUsername = request.getParameter("adminUsername");
+    var firstName = request.getParameter("firstName");
+    var email = request.getParameter("email");
+    try {
+        var result = mod.sendEmail(firstName,adminUsername, domainName,email);
+    } catch (e) {
+        throw "Error while sending the registration email.";
+    }
+
+} else if (action == "checkDomainAvailability") {
     var domainName = request.getParameter("domainName");
     try {
         var result = mod.checkDomainAvailability(domainName);
