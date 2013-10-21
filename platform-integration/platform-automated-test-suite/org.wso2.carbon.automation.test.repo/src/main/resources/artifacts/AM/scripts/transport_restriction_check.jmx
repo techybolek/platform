@@ -1017,7 +1017,7 @@ vars.put(&quot;accessToken&quot;, accessToken);</stringProp>
               <stringProp name="HTTPSampler.response_timeout"></stringProp>
               <stringProp name="HTTPSampler.protocol">http</stringProp>
               <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-              <stringProp name="HTTPSampler.path">${context}/${version}/api?stock=WSO2</stringProp>
+              <stringProp name="HTTPSampler.path">${context}/${version}/api?stock=AAPL</stringProp>
               <stringProp name="HTTPSampler.method">POST</stringProp>
               <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
               <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -1061,7 +1061,7 @@ vars.put(&quot;accessToken&quot;, accessToken);</stringProp>
               <stringProp name="HTTPSampler.response_timeout"></stringProp>
               <stringProp name="HTTPSampler.protocol">https</stringProp>
               <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-              <stringProp name="HTTPSampler.path">${context}/${version}/api?stock=WSO2</stringProp>
+              <stringProp name="HTTPSampler.path">${context}/${version}/api?stock=AAPL</stringProp>
               <stringProp name="HTTPSampler.method">POST</stringProp>
               <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
               <boolProp name="HTTPSampler.auto_redirects">false</boolProp>

@@ -1515,7 +1515,7 @@ print(&quot;domain&quot;+ tenant_count+&quot;.com&quot; + &quot;@@@&quot; + acce
                   <stringProp name="HTTPSampler.response_timeout"></stringProp>
                   <stringProp name="HTTPSampler.protocol"></stringProp>
                   <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-                  <stringProp name="HTTPSampler.path">/t/domain${input_value}.com${context}${api_id}/${version}/api?stock=WSO2</stringProp>
+                  <stringProp name="HTTPSampler.path">/t/domain${input_value}.com${context}${api_id}/${version}/api?stock=AAPL</stringProp>
                   <stringProp name="HTTPSampler.method">POST</stringProp>
                   <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
                   <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -2724,7 +2724,7 @@ vars.put(&quot;contextAndAPIId&quot;,contextAndAPIId);</stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/t/${domain}${contextAndAPIId}/${version}/api?stock=WSO2</stringProp>
+          <stringProp name="HTTPSampler.path">/t/${domain}${contextAndAPIId}/${version}/api?stock=AAPL</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
