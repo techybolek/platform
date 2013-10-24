@@ -36,6 +36,8 @@ var getAdminCookie = function (serverUrl) {
 
 var updateAdminCookie = function (serverUrl) {
 	var xhr = new XMLHttpRequest();
+	xhr.setRequestHeader('SOAPAction', 'urn:login');
+        xhr.setRequestHeader('Content-Type', 'application/soap+xml');
 	var endPoint = serverUrl + "AuthenticationAdmin";
 	xhr.open("POST", endPoint);
 	var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:aut="http://authentication.services.core.carbon.wso2.org"><soap:Header/><soap:Body><aut:login><aut:username>' + ADMIN_USERNAME + '</aut:username><aut:password>' + ADMIN_PASSWORD + '</aut:password><aut:remoteAddress>localhost</aut:remoteAddress></aut:login></soap:Body></soap:Envelope>';
