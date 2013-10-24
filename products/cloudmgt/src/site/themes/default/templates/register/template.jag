@@ -72,8 +72,15 @@ body#home{
 	margin-left: -3px;
 	margin-right: -3px;
 }
-.subs-cont{
+
+section.start_content div.subs-cont{
 	margin-top:20px;
+	margin-bottom:30px;
+}
+.subs-cont span.error{
+	position: absolute; 
+	margin-top: 71px; 
+	margin-left: -14px;
 }
 span.error {
     padding-left: 0;
@@ -82,6 +89,7 @@ span.error {
     background-color: #F9BFBB;
     border: #F9BFBB;
 }
+
 </style>
  
 <script type="text/javascript">
@@ -141,13 +149,13 @@ span.error {
                   },
                   function (result) {
                         jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
-                                window.location.href = "../../../appmgt";
+                                window.location.href = "https://cloudpreview.wso2.com";
                         }
                         });
                   },
                   function (jqXHR, textStatus, errorThrown) {
-                        jagg.message({content:'Error while storing subscription details.',type:'error',cbk:function(){
-                                window.location.href = "../../../appmgt";
+                        jagg.message({content:'Error while sending registration email.',type:'error',cbk:function(){
+                                window.location.href = "https://cloudpreview.wso2.com";
                         }
                         });
                   });
@@ -262,6 +270,10 @@ function showKaptcha(captcha) {
                     required: true,
                     minlength: 5
                 } ,
+                clouds: {	
+                    required: true,
+		    minlength: 1
+		},
                 domainName: {
                     domain: true
                 }
@@ -269,7 +281,8 @@ function showKaptcha(captcha) {
             messages: {
                 password: {
                     minlength: "Minimum is 5 characters "
-                }
+                },
+                clouds: "Select atleast one subscription.",
             },
 
 			submitHandler: function(form) {
@@ -359,9 +372,9 @@ function showKaptcha(captcha) {
 								%>
 
 							<div class="input_row_col">
-                                <label>
-                                    <input type="checkbox" style="width:1em" name="<%=types[i].toString()%>" id="<%=types[i].toString()%>">
-                                    <%=doc.subscriptions.type[i].@display_name.toString()%>
+                               
+                              <label for="clouds" class="form-title">
+                                    <input type="checkbox" name="clouds" style="width:1em" name="<%=types[i].toString()%>" id="<%=types[i].toString()%>"><%=doc.subscriptions.type[i].@display_name.toString()%>
                                 </label>
 							</div><br/>
                                                     <% } %>
