@@ -50,6 +50,7 @@ a{cursor: pointer}
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
+    margin-top:20px;
 }
 .logo-column{
     text-align: center;

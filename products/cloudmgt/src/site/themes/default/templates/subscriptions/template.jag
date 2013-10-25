@@ -45,7 +45,7 @@ file.close();
         <div class="af_container">
             <div class="af_row">
                 <div class="col-12 help-text-column">
-                    Text to display
+                    &nbsp; 
                 </div>
             </div>
         </div>
@@ -62,7 +62,7 @@ file.close();
 					<div class="col-4">
 						<i class="<%=types[i].toString()%>_disabled"></i>
 					</div>
-				  <% } %>
+				  <% } 
 				 } %>
 				 <input type="hidden" name="secretKey" id="secretKey" value=""/>
                  <input type="hidden" name="imagePath" id="imagePath" value=""/>
