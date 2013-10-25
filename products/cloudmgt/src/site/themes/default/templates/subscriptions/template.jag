@@ -24,117 +24,52 @@ file.close();
  db.close();
 
 %>
-
-<style>
-header{
-	display:none;
-}
-body#home{
-	background:none #292E38;
-}
-.sticky-wrapper{
-	position:relative;
-	height:auto !important;
-}
-
-.warning_message{
-	background-color:#ffffff;
-}
-.info_message .close_message {
-    position: absolute;
-    right: 13px;
-    top: 7px;
-}
-.info_message{
-	background-color:#ffffff;
-	width: 400px;
-}
-
-.txt-right{
-	text-align: right;
-}
-#tenantDomain{
-	width: 87%;
-	margin-left: 7px;
-}
-
-
-#captchaImgDiv img{
-	width:100%;
-	   height: 39px;
-}
-#aPaaS, #iPaaS{
-	width:20%;
-}
-#lblLoginID{
-	color:#888;
-	display:none;
-}
-
-#preAt{
-	margin-left: -3px;
-	margin-right: -3px;
-}
-.subs-cont{
-	margin-top:20px;
-}
-span.error {
-    padding-left: 0;
-}
-#submitbtn {
-    background-color: #F9BFBB;
-    border: #F9BFBB;
-}
-</style>
- 
-<script type="text/javascript">
-
-
-  
-
-    $(document).ready(function($){
-        
-      
-    });
-</script>
+<link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/index.css'))%>" />
+<link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/grid.css'))%>" />
 
 
 
 <div class="wrapper">
-			<div class="branding">
-				
-			<p align="right">  <a onclick="window.location.href='logout.jag'" href="#">Sign Out</a></p>
-                      
-
-			</div>
-			<article class="start">
-				<div class="alert alert-error error" id="registerError"><% jagg.includeBlock("page/messages", null); %></div>
-				<div id="form_div">
-				<section class="start_content">
-				 <h1>Welcome to cloud!!! </h1>
-                        <table>
-                          <% 
-			    for(var i=0;i<types.length();i++) {
-                             if(subscriptionInfo[types[i].toString()] == true) {
-                           %>
-                          <tr>
-                            <td><a href="<%=types[i].@url.toString()%>"><%=types[i].@display_name.toString()%></a>  </td>
-                          </tr>
-                           
-			 
-                          <% } 
-                         } %>
-                          
-                       </table>
-
-
-                    <input type="hidden" name="secretKey" id="secretKey" value=""/>
-                    <input type="hidden" name="imagePath" id="imagePath" value=""/>
-
-                </section>
+    <article class="start">
+        <div class="af_container">
+            <div class="af_row">
+                <div class="col-2"></div>
+                <div class="col-8 logo-column">
+                    <a><i class="wso2-cloud-logo"></i></a>
+                 </div>
+                <div class="col-2 sign-out-column">
+                    <a onclick="window.location.href='logout.jag'" href="#">Sign Out</a>
                 </div>
-                
-            </article>
+            </div>
+        </div>
+        <div class="af_container">
+            <div class="af_row">
+                <div class="col-12 help-text-column">
+                    Text to display
+                </div>
+            </div>
+        </div>
+        <div class="af_container main-link-container">
+            <div class="af_row">
+				<% 
+			    for(var i=0;i<types.length();i++) {
+					 if(subscriptionInfo[types[i].toString()] == true) {
+				   %>
+				   <div class="col-4">
+						<a title="Go to <%=types[i].@display_name.toString()%>" href="<%=types[i].@url.toString()%>"><i class="<%=types[i].toString()%>"></i></a>
+				   </div>
+				  <% }else{ %>
+					<div class="col-4">
+						<i class="<%=types[i].toString()%>_disabled"></i>
+					</div>
+				  <% } %>
+				 } %>
+				 <input type="hidden" name="secretKey" id="secretKey" value=""/>
+                 <input type="hidden" name="imagePath" id="imagePath" value=""/>
+            </div>
+        </div>
+
+    </article>
 </div><!-- /wrapper -->
  
   <% } 
