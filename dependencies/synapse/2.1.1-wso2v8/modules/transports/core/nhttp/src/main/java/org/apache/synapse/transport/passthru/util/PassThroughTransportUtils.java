@@ -167,7 +167,7 @@ public class PassThroughTransportUtils {
             httpStatus = HttpStatus.SC_ACCEPTED;
         } else {
             // is this a fault message
-            boolean handleFault = msgContext.getEnvelope() != null ?
+            boolean handleFault = (msgContext.getEnvelope() != null && msgContext.getEnvelope().getBody() != null) ?
                 (msgContext.getEnvelope().getBody().hasFault() || msgContext.isProcessingFault()):false;
 
             // shall faults be transmitted with HTTP 200
