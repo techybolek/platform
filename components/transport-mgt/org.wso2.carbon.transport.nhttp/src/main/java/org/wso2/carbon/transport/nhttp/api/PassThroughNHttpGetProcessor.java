@@ -16,24 +16,16 @@
 
 package org.wso2.carbon.transport.nhttp.api;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-
-import javax.servlet.ServletException;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.axiom.util.blob.OverflowBlob;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.axis2.util.XMLUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,6 +50,19 @@ import org.wso2.carbon.core.transports.CarbonHttpRequest;
 import org.wso2.carbon.core.transports.CarbonHttpResponse;
 import org.wso2.carbon.utils.ServerConstants;
 
+import javax.servlet.ServletException;
+import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+
 /**
  * Get Processor implementation for ESB. This implementation will be using GetProcessors
  * defined in the Carbon core.
@@ -72,8 +77,9 @@ public class PassThroughNHttpGetProcessor  implements HttpGetRequestProcessor{
     private SourceHandler sourceHandler;
     private static final QName ITEM_QN = new QName(ServerConstants.CARBON_SERVER_XML_NAMESPACE, "Item");
     private static final QName CLASS_QN = new QName(ServerConstants.CARBON_SERVER_XML_NAMESPACE, "Class");
-    
-  
+
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String TEXT_HTML = "text/html";
 
     private static final Log log = LogFactory.getLog(PassThroughNHttpGetProcessor.class);
 
@@ -245,10 +251,12 @@ public class PassThroughNHttpGetProcessor  implements HttpGetRequestProcessor{
                 (serviceName == null || serviceName.length() == 0)){
             //check if service listing request is blocked
             if (isServiceListBlocked(uri)) {
-                //response.setStatusCode(HttpStatus.SC_FORBIDDEN);
-                //serverHandler.commitResponseHideExceptions(conn,  response);
-            } else{
-                //generateServicesList(response, conn, outputStream, servicePath);
+                response.setStatusCode(HttpStatus.SC_FORBIDDEN);
+                sourceHandler.commitResponseHideExceptions(conn, response);
+            } else {
+                generateServicesList(response, conn, outputStream, servicePath);
+
+                messageContext.setProperty("WSDL_GEN_HANDLED", true);
             }
             try {
                 outputStream.flush();
@@ -327,10 +335,103 @@ public class PassThroughNHttpGetProcessor  implements HttpGetRequestProcessor{
         	messageContext.setProperty(PassThroughConstants.REST_GET_DELETE_INVOKE, true);
         }
     }
-    
-    
-    
-    
+
+    /**
+     * Generates the services list.
+     *
+     * @param response    HttpResponse
+     * @param conn        NHttpServerConnection
+     * @param os          OutputStream
+     * @param servicePath service path of the service
+     */
+    protected void generateServicesList(HttpResponse response,
+                                        NHttpServerConnection conn,
+                                        OutputStream os, String servicePath) {
+        try {
+            byte[] bytes = getServicesHTML(
+                    servicePath.endsWith("/") ? "" : servicePath + "/").getBytes();
+            response.addHeader(CONTENT_TYPE, TEXT_HTML);
+            SourceContext.updateState(conn, ProtocolState.WSDL_RESPONSE_DONE);
+            sourceHandler.commitResponseHideExceptions(conn, response);
+            os.write(bytes);
+
+        } catch (IOException e) {
+            handleBrowserException(response, conn, os,
+                    "Error generating services list", e);
+        }
+    }
+
+    /**
+     * Returns the HTML text for the list of services deployed.
+     * This can be delegated to another Class as well
+     * where it will handle more options of GET messages.
+     *
+     * @param prefix to be used for the Service names
+     * @return the HTML to be displayed as a String
+     */
+    protected String getServicesHTML(String prefix) {
+
+        Map services = cfgCtx.getAxisConfiguration().getServices();
+        Hashtable erroneousServices = cfgCtx.getAxisConfiguration().getFaultyServices();
+        boolean servicesFound = false;
+
+        StringBuffer resultBuf = new StringBuffer();
+        resultBuf.append("<html><head><title>Axis2: Services</title></head>" + "<body>");
+
+        if ((services != null) && !services.isEmpty()) {
+
+            servicesFound = true;
+            resultBuf.append("<h2>" + "Deployed services" + "</h2>");
+
+            for (Object service : services.values()) {
+
+                AxisService axisService = (AxisService) service;
+                Parameter parameter = axisService.getParameter(
+                        NhttpConstants.HIDDEN_SERVICE_PARAM_NAME);
+                if (axisService.getName().startsWith("__") ||
+                        (parameter != null && JavaUtils.isTrueExplicitly(parameter.getValue()))) {
+                    continue;    // skip private services
+                }
+
+                Iterator iterator = axisService.getOperations();
+                resultBuf.append("<h3><a href=\"").append(prefix).append(axisService.getName()).append(
+                        "?wsdl\">").append(axisService.getName()).append("</a></h3>");
+
+                if (iterator.hasNext()) {
+                    resultBuf.append("Available operations <ul>");
+
+                    for (; iterator.hasNext();) {
+                        AxisOperation axisOperation = (AxisOperation) iterator.next();
+                        resultBuf.append("<li>").append(
+                                axisOperation.getName().getLocalPart()).append("</li>");
+                    }
+                    resultBuf.append("</ul>");
+                } else {
+                    resultBuf.append("No operations specified for this service");
+                }
+            }
+        }
+
+        if ((erroneousServices != null) && !erroneousServices.isEmpty()) {
+            servicesFound = true;
+            resultBuf.append("<hr><h2><font color=\"blue\">Faulty Services</font></h2>");
+            Enumeration faultyservices = erroneousServices.keys();
+
+            while (faultyservices.hasMoreElements()) {
+                String faultyserviceName = (String) faultyservices.nextElement();
+                resultBuf.append("<h3><font color=\"blue\">").append(
+                        faultyserviceName).append("</font></h3>");
+            }
+        }
+
+        if (!servicesFound) {
+            resultBuf.append("<h2>There are no services deployed</h2>");
+        }
+
+        resultBuf.append("</body></html>");
+        return resultBuf.toString();
+    }
+
     /**
      * Is the incoming URI is requesting service list and http.block_service_list=true in
      * nhttp.properties
