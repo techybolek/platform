@@ -446,3 +446,13 @@ input.error {
     text-decoration: none;
     font-weight:600;
 }
+
+.helper_text {
+    color: #1190A5;
+    text-align: center;
+}
+
+.helper_text .helper_text_bold {
+    font-weight: bold;
+}
+

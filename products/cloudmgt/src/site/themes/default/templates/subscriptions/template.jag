@@ -70,6 +70,10 @@ file.close();
         </div>
 
     </article>
+	<div class="helper_text">
+		<p class="helper_text_bold">You are now signed in.</p> 
+		<p>Click the logo of the cloud you want to access.</p>
+	</div>
 </div><!-- /wrapper -->
  
   <% } 

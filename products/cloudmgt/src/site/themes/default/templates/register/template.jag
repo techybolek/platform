@@ -402,7 +402,7 @@ function showKaptcha(captcha) {
                 </section>
                 </div>
                 <div class="signin">
-                    Already have an Account? <a href="<%='https://cloudpreview.wso2.com'%>" class="link">Sign in</a>
+                    Already have an Account? <a href="<%='https://cloudmgt.cloudpreview.wso2.com/cloudmgt/'%>" class="link">Sign in</a>
                 </div>
             </article>
 </div><!-- /wrapper -->
