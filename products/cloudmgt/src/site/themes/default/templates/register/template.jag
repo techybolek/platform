@@ -140,25 +140,27 @@ span.error {
             function (result) {
                 jagg.post("../blocks/register/ajax/register.jag", data,
                     function (result) {
-                	jagg.post("../blocks/register/ajax/register.jag", {
-                		 action:"sendEmail",
-                         firstName:firstName,
-                         adminUsername:adminUsername,
-                         email:email,
-                         domainName:organizationDomain
-                  },
-                  function (result) {
-                        jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
-                                window.location.href = "https://cloudpreview.wso2.com";
-                        }
+                        jagg.post("../blocks/register/ajax/register.jag", {
+                             action:"sendEmail",
+                             firstName:firstName,
+                             adminUsername:adminUsername,
+                             email:email,
+                             domainName:organizationDomain
+                        },
+                        function (result) {
+                            $('.message_box').empty();
+                            jagg.message({content:'You have successfully registered to WSO2 Cloud.',type:'info',cbk:function(){
+                                    window.location.href = "https://cloudmgt.cloudpreview.wso2.com/cloudmgt";
+                                }
+                            });
+                        },
+                        function (jqXHR, textStatus, errorThrown) {
+                            $('.message_box').empty();
+                            jagg.message({content:'Error while sending registration email.',type:'error',cbk:function(){
+                                    window.location.href = "https://cloudpreview.wso2.com";
+                                }
+                            });
                         });
-                  },
-                  function (jqXHR, textStatus, errorThrown) {
-                        jagg.message({content:'Error while sending registration email.',type:'error',cbk:function(){
-                                window.location.href = "https://cloudpreview.wso2.com";
-                        }
-                        });
-                  });
                     },
                     function (jqXHR, textStatus, errorThrown) {
                         $('.message_box').empty();
