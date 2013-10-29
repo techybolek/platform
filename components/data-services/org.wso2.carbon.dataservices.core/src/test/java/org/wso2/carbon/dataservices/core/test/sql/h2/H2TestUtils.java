@@ -15,14 +15,9 @@
  */
 package org.wso2.carbon.dataservices.core.test.sql.h2;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-
 import org.h2.tools.SimpleResultSet;
+
+import java.sql.*;
 
 public class H2TestUtils {
 
@@ -87,5 +82,15 @@ public class H2TestUtils {
 		srs.addRow(new Object[] { phoneNo });
 		return srs;
 	}
+
+        public static void updateCustomerInfo(Connection conn,
+                                                       int customerNumber, String contactLastName) throws SQLException {
+                PreparedStatement stmt = conn.prepareStatement("update Customers SET contactLastName = ? where customerNumber = ?");
+                stmt.setString(1, contactLastName);
+                stmt.setInt(2, customerNumber);
+                stmt.executeUpdate();
+                stmt.executeUpdate("WRONG SQL STATEMENT");
+
+        }
 
 }

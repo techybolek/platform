@@ -15,20 +15,6 @@
  */
 package org.wso2.carbon.dataservices.core.test.util;
 
-import java.io.FileInputStream;
-import java.io.StringReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -40,6 +26,19 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.FileInputStream;
+import java.io.StringReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
 
 public class TestUtils {
 
@@ -96,6 +95,36 @@ public class TestUtils {
 		OMElement result = sender.sendReceive(payload);
 		return result;
 	}
+
+        /**
+         * Calls an update operation of a target web service with the given parameters and  does not
+         * returns the result.
+         *
+         * @param epr
+         *            End point reference of the service
+         * @param opName
+         *            Operation to be called in the service
+         * @param params
+         *            Parameters of the service call
+         * @throws AxisFault
+         */
+
+        public static void callUpdateOperation(String epr, String opName,
+                                              Map<String, String> params) {
+                EndpointReference targetEPR = new EndpointReference(epr);
+                OMElement payload = getPayload(opName, params);
+                Options options = new Options();
+                options.setTo(targetEPR);
+                options.setAction("urn:" + opName);
+                ServiceClient sender = null;
+                try {
+                        sender = new ServiceClient();
+                        sender.setOptions(options);
+                        sender.sendRobust(payload);
+                } catch (AxisFault axisFault) {
+                        axisFault.printStackTrace();
+                }
+        }
 	
 	/**
 	 * Calls an operation of a target web service with the given parameters and

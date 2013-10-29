@@ -51,4 +51,8 @@ public class H2StoredProcedureServiceTest extends AbstractStoredProcedureService
 		this.storedFuncWithParams();
 	}
 
+        public void testH2StoredProcWithFaulty() {
+                this.storedProcWithFaulty();
+        }
+
 }

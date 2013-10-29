@@ -15,12 +15,12 @@
  */
 package org.wso2.carbon.dataservices.core.test.sql;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.axiom.om.OMElement;
 import org.wso2.carbon.dataservices.core.test.DataServiceBaseTestCase;
 import org.wso2.carbon.dataservices.core.test.util.TestUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class to represent stored procedure test cases.
@@ -207,5 +207,26 @@ public abstract class AbstractStoredProcedureServiceTest extends
 			fail(e.getMessage());
 		}
 	}
+
+        /**
+         * Test with a stored function call with params.
+         */
+        protected void storedProcWithFaulty() {
+                TestUtils.showMessage(this.epr + " - storedProcWithFaulty");
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("customerNumber", "103");
+                params.put("contactLastName", "Scott");
+                try {
+                        TestUtils.callUpdateOperation(this.epr,
+                                "stored_procedure_withfaulty_op", params);
+                        OMElement result = TestUtils.callOperation(this.epr,
+                                        "stored_procedure_withparam_op", params);
+                        OMElement ss = result.getFirstElement();
+                        assertTrue(ss==null);
+
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+        }
 
 }

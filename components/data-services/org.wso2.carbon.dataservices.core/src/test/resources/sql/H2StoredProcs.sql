@@ -7,3 +7,5 @@ CREATE ALIAS getCustomerInfoWithIdLastName FOR "org.wso2.carbon.dataservices.cor
 CREATE ALIAS getCustomerCreditLimitWithId FOR "org.wso2.carbon.dataservices.core.test.sql.h2.H2TestUtils.getCustomerCreditLimitWithId";
 
 CREATE ALIAS getPaymentInfo FOR "org.wso2.carbon.dataservices.core.test.sql.h2.H2TestUtils.getPaymentInfo";
+
+CREATE ALIAS updateCustomerInfo FOR "org.wso2.carbon.dataservices.core.test.sql.h2.H2TestUtils.updateCustomerInfo";

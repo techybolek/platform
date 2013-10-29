@@ -116,6 +116,21 @@
          <with-param name="contactLastName" query-param="contactLastName" />
       </call-query>
    </operation>
+
+   <!-- Query for a stored procedure with exception -->
+      <query id="stored_procedure_withfaulty_query">
+         <sql>CALL updateCustomerInfo(?,?)</sql>
+         <param name="customerNumber" sqlType="INTEGER" />
+         <param name="contactLastName" sqlType="STRING" />
+
+      </query>
+
+   <operation name="stored_procedure_withfaulty_op">
+         <call-query href="stored_procedure_withfaulty_query">
+            <with-param name="customerNumber" query-param="customerNumber" />
+            <with-param name="contactLastName" query-param="contactLastName" />
+         </call-query>
+      </operation>
    
    <!-- Query for a stored procedure with params - 2 -->
    <query id="stored_procedure_withparam_query2">
