@@ -17,15 +17,6 @@
  */
 package org.wso2.carbon.mediator.autoscale.lbautoscale.task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -36,6 +27,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
 import org.apache.synapse.task.Task;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
+import org.wso2.carbon.lb.common.replication.RequestTokenReplicationCommand;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.callables.AppNodeSanityCheckCallable;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.callables.AutoscaleDeciderCallable;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.callables.InstanceCountCallable;
@@ -45,10 +37,15 @@ import org.wso2.carbon.mediator.autoscale.lbautoscale.clients.CloudControllerOsg
 import org.wso2.carbon.mediator.autoscale.lbautoscale.clients.CloudControllerStubClient;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.context.AppDomainContext;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.context.LoadBalancerContext;
-import org.wso2.carbon.lb.common.replication.RequestTokenReplicationCommand;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscaleConstants;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscaleUtil;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscalerTaskDSHolder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * Service request in flight autoscaler task for Stratos service level auto-scaling
@@ -94,7 +91,8 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
     /**
      * Thread pool used in this task to execute parallel tasks.
      */
-    private ExecutorService executor = Executors.newFixedThreadPool(100);
+    private ExecutorService executor = Executors.newCachedThreadPool(new
+            ServiceRequestsInFlightAutoscalerThreadFactory());
 
     /**
      * Check that all app nodes in all clusters meet the minimum configuration
@@ -522,4 +520,19 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
         }
 
     }
+
+    /**
+     * Custom ThreadFactory class to spawn threads for the ExecutorService in ServiceRequestsInFlightAutoscaler class
+     */
+    private class ServiceRequestsInFlightAutoscalerThreadFactory implements ThreadFactory {
+
+        ThreadGroup serviceRequestsInFlightAutoscalerThreadGroup =
+                new ThreadGroup("ServiceRequestsInFlightAutoscaler Group");
+
+        public Thread newThread(Runnable r) {
+            return new Thread(serviceRequestsInFlightAutoscalerThreadGroup ,r,
+                    "ServiceRequestsInFlightAutoscaler -- Thread ID: " + Thread.currentThread().getId());
+        }
+    }
+
 }

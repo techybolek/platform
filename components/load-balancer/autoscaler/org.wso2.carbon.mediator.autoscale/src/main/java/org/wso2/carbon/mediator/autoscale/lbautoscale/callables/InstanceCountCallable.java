@@ -17,10 +17,7 @@
 */
 package org.wso2.carbon.mediator.autoscale.lbautoscale.callables;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,8 +32,8 @@ public class InstanceCountCallable implements Callable<Boolean> {
     private String subDomain;
     private CloudControllerClient client;
     private AppDomainContext appCtxt;
-    private ExecutorService executor = Executors.newFixedThreadPool(10);
-    
+    private ExecutorService executor = Executors.newCachedThreadPool(new InstanceCountCallableThreadFactory());
+
     public InstanceCountCallable(String domain, String subDomain, CloudControllerClient client, AppDomainContext appCtxt){
         this.domain = domain;
         this.subDomain = subDomain;
@@ -72,6 +69,19 @@ public class InstanceCountCallable implements Callable<Boolean> {
             
         }
         return true;
+    }
+
+    /**
+     * Custom ThreadFactory class to spawn threads for the ExecutorService in InstanceCountCallable class
+     */
+    private class InstanceCountCallableThreadFactory implements ThreadFactory {
+
+        ThreadGroup instanceCountCallableThreadGroup = new ThreadGroup("InstanceCountCallable Group");
+
+        public Thread newThread(Runnable r) {
+            return new Thread(instanceCountCallableThreadGroup, r, "InstanceCountCallable -- Thread ID: " +
+                    Thread.currentThread().getId());
+        }
     }
 
 }
