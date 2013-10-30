@@ -74,7 +74,7 @@ public class InstanceCountCallable implements Callable<Boolean> {
     /**
      * Custom ThreadFactory class to spawn threads for the ExecutorService in InstanceCountCallable class
      */
-    private class InstanceCountCallableThreadFactory implements ThreadFactory {
+    static class InstanceCountCallableThreadFactory implements ThreadFactory {
 
         ThreadGroup instanceCountCallableThreadGroup = new ThreadGroup("InstanceCountCallable Group");
 

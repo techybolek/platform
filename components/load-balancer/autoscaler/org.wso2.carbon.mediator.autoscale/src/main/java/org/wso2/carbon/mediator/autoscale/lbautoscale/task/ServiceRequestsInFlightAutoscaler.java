@@ -524,7 +524,7 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
     /**
      * Custom ThreadFactory class to spawn threads for the ExecutorService in ServiceRequestsInFlightAutoscaler class
      */
-    private class ServiceRequestsInFlightAutoscalerThreadFactory implements ThreadFactory {
+    static class ServiceRequestsInFlightAutoscalerThreadFactory implements ThreadFactory {
 
         ThreadGroup serviceRequestsInFlightAutoscalerThreadGroup =
                 new ThreadGroup("ServiceRequestsInFlightAutoscaler Group");
