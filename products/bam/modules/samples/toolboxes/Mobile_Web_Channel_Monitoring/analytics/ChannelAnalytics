@@ -25,7 +25,7 @@ day(from_unixtime(cast(payload_timestamp/1000 as BIGINT),'yyyy-MM-dd HH:mm:ss.SS
 hour(from_unixtime(cast(payload_timestamp/1000 as BIGINT),'yyyy-MM-dd HH:mm:ss.SSS' )) as hour,
  minute(from_unixtime(cast(payload_timestamp/1000 as BIGINT),'yyyy-MM-dd HH:mm:ss.SSS' )) as minute,
 concat(substring(from_unixtime(cast(payload_timestamp/1000 as BIGINT), 'yyyy-MM-dd HH:mm:ss'),0,16),':00') as time 
-from AllTicketingStats group by 
+from AllTicketingStats where clientType is not NULL group by
 year(from_unixtime(cast(payload_timestamp/1000 as BIGINT),'yyyy-MM-dd HH:mm:ss.SSS' )), 
 month(from_unixtime(cast(payload_timestamp/1000 as BIGINT),'yyyy-MM-dd HH:mm:ss.SSS' )),
 day(from_unixtime(cast(payload_timestamp/1000 as BIGINT),'yyyy-MM-dd HH:mm:ss.SSS' )),
@@ -103,14 +103,3 @@ select clientType, operation, sum(total_count) as total_count,
 year, month,substr(time,0,7) as time from 
 TicketStatsPerHourDataFetcher group by 
 clientType, operation,year, month,substr(time,0,7);
-
-
-
-
-
-
-
-
-
-
-

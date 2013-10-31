@@ -28,9 +28,9 @@ CREATE EXTERNAL TABLE IF NOT EXISTS CategoryTable(host STRING, service_name STRI
     'CREATE TABLE CATEGORY ( host VARCHAR(100) NOT NULL, service_name VARCHAR(150), operation_name VARCHAR(150), version VARCHAR(30) )' );
 
 insert overwrite table CategoryTable select host, serviceName, operationName,version
-	from ActivityDataTable group by host,serviceName,operationName,version;
+	from ActivityDataTable where host is not NULL group by host,serviceName,operationName,version;
 
 insert overwrite table ActivitySummaryTable
 	select messageID, sentTimestamp, activityID, soapHeader, soapBody, host, serviceName, operationName
 	from ActivityDataTable
-	where version= "1.0.0";
+	where version= "1.0.0" and host is not NULL;
