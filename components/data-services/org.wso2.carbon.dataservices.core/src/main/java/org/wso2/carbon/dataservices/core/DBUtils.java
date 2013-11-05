@@ -132,6 +132,7 @@ public class DBUtils {
         conversionTypes.put(DBConstants.DataTypes.STRING, "java.lang.String");
         conversionTypes.put(DBConstants.DataTypes.QUERY_STRING, "java.lang.String");
         conversionTypes.put(DBConstants.DataTypes.VARCHAR, "java.lang.String");
+        conversionTypes.put(DBConstants.DataTypes.NVARCHAR, "java.lang.String");
         conversionTypes.put(DBConstants.DataTypes.TEXT, "java.lang.String");
         conversionTypes.put(DBConstants.DataTypes.NUMERIC, "java.math.BigDecimal");
         conversionTypes.put(DBConstants.DataTypes.DECIMAL, "java.math.BigDecimal");

@@ -40,6 +40,7 @@ public class DSSqlTypes {
 		definedTypeMap.put(java.sql.Types.REAL, "REAL");
 		definedTypeMap.put(java.sql.Types.DOUBLE, "DOUBLE");
 		definedTypeMap.put(java.sql.Types.VARCHAR, "STRING");
+                definedTypeMap.put(java.sql.Types.NVARCHAR, "STRING");
 		// typeMap.put(java.sql.Types.LONGNVARCHAR, "STRING");
 		// typeMap.put(java.sql.Types.NCHAR, "STRING");
 		// typeMap.put(java.sql.Types.LONGNVARCHAR, "STRING");
@@ -68,6 +69,7 @@ public class DSSqlTypes {
 		qnameTypeMap.put(java.sql.Types.REAL, "double");
 		qnameTypeMap.put(java.sql.Types.DOUBLE, "double");
 		qnameTypeMap.put(java.sql.Types.VARCHAR, "string");
+                qnameTypeMap.put(java.sql.Types.NVARCHAR, "string");
 		// typeMap.put(java.sql.Types.LONGNVARCHAR, "string");
 		// typeMap.put(java.sql.Types.NCHAR, "string");
 		// typeMap.put(java.sql.Types.NVARCHAR, "string");

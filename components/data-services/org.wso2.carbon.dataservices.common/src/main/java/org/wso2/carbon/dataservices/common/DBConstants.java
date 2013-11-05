@@ -117,6 +117,7 @@ public final class DBConstants {
         public static final String LONG = "LONG";
         public static final String STRING = "STRING";
         public static final String VARCHAR = "VARCHAR";
+        public static final String NVARCHAR = "NVARCHAR";
         public static final String TEXT = "TEXT";
         public static final String NUMERIC = "NUMERIC";
         public static final String DECIMAL = "DECIMAL";
