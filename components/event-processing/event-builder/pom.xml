@@ -73,7 +73,7 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.event.builder.stub</artifactId>
-                <version>${cep.stub.version}</version>
+                <version>${cep.stub.version.101}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -125,7 +125,8 @@
     <properties>
         <jsonpath.wso2.version>0.8.1.wso2v1</jsonpath.wso2.version>
         <junit4.version>4.11</junit4.version>
-        <cep.stub.version>1.0.0</cep.stub.version>
+        <cep.stub.version>1.0.0-SNAPSHOT</cep.stub.version>
+        <cep.stub.version.101>1.0.1-SNAPSHOT</cep.stub.version.101>
     </properties>
 
 

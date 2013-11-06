@@ -24,12 +24,10 @@
         <groupId>org.wso2.carbon</groupId>
         <artifactId>event-output-adaptor</artifactId>
         <version>1.1.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.event.output.adaptor.mysql</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Event Output Mysql Adaptor Module</name>
@@ -59,10 +57,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
             <version>4.9</version>
         </dependency>
         <dependency>

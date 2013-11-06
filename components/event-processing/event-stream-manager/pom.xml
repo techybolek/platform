@@ -80,6 +80,6 @@
     </modules>
 
     <properties>
-        <service.stub.version>1.0.0</service.stub.version>
+        <service.stub.version>1.0.0-SNAPSHOT</service.stub.version>
     </properties>
 </project>	

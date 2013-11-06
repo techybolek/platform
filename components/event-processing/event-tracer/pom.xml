@@ -75,7 +75,7 @@
     <properties>
         <wso2carbon.version.event-tracer>${wso2carbon.version}</wso2carbon.version.event-tracer>
         <commons-lang.wso2.version.event-tracer>${commons-lang.wso2.version}</commons-lang.wso2.version.event-tracer>
-        <cep.stub.version>1.0.0</cep.stub.version>
+        <cep.stub.version>1.0.0-SNAPSHOT</cep.stub.version>
     </properties>
 
 </project>

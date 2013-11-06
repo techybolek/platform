@@ -109,6 +109,6 @@
     </modules>
 
     <properties>
-        <service.stub.version>1.0.1</service.stub.version>
+        <service.stub.version>1.0.1-SNAPSHOT</service.stub.version>
     </properties>
 </project>	
