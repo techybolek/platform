@@ -20,28 +20,25 @@ package org.wso2.carbon.event.builder.core.internal.type.xml;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.databinding.utils.BeanUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
 import org.jaxen.JaxenException;
 import org.wso2.carbon.databridge.commons.Attribute;
-import org.wso2.carbon.databridge.commons.StreamDefinition;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
-import org.wso2.carbon.event.builder.core.config.EventDispatcher;
 import org.wso2.carbon.event.builder.core.config.InputMapper;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
-import org.wso2.carbon.event.builder.core.exception.EventBuilderValidationException;
 import org.wso2.carbon.event.builder.core.internal.config.InputMappingAttribute;
 import org.wso2.carbon.event.builder.core.internal.type.xml.config.ReflectionBasedObjectSupplier;
 import org.wso2.carbon.event.builder.core.internal.type.xml.config.XPathData;
 import org.wso2.carbon.event.builder.core.internal.type.xml.config.XPathDefinition;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
-import org.wso2.carbon.event.builder.core.internal.util.EventBuilderUtil;
+import org.wso2.carbon.event.builder.core.internal.util.helper.EventBuilderConfigHelper;
 
+import javax.xml.stream.XMLStreamException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -51,134 +48,112 @@ import java.util.List;
 public class XMLInputMapper implements InputMapper {
 
     private static final Log log = LogFactory.getLog(XMLInputMapper.class);
-    private Logger trace = Logger.getLogger(EventBuilderConstants.EVENT_TRACE_LOGGER);
     private EventBuilderConfiguration eventBuilderConfiguration = null;
     private List<XPathData> attributeXpathList = new ArrayList<XPathData>();
-    private StreamDefinition exportedStreamDefinition = null;
-    private EventDispatcher eventDispatcher = null;
-    private XPathDefinition xPathDefinition = null;
+    private List<XPathDefinition> xPathDefinitions = null;
     private ReflectionBasedObjectSupplier reflectionBasedObjectSupplier = new ReflectionBasedObjectSupplier();
+    private AXIOMXPath parentSelectorXpath = null;
 
-    public XMLInputMapper(EventBuilderConfiguration eventBuilderConfiguration,
-                          EventDispatcher eventDispatcher) {
+    public XMLInputMapper(EventBuilderConfiguration eventBuilderConfiguration) throws EventBuilderConfigurationException {
         this.eventBuilderConfiguration = eventBuilderConfiguration;
-        this.eventDispatcher = eventDispatcher;
-    }
-
-    public void createMapping(EventBuilderConfiguration eventBuilderConfiguration,
-                              StreamDefinition exportedStreamDefinition,
-                              List<XPathData> attributeXpathList) {
         if (eventBuilderConfiguration != null && eventBuilderConfiguration.getInputMapping() instanceof XMLInputMapping) {
-            XMLInputMapping xmlInputMapping = (XMLInputMapping) eventBuilderConfiguration.getInputMapping();
-            XPathDefinition xPathDefinition = xmlInputMapping.getXpathDefinition();
-            for (InputMappingAttribute inputMappingAttribute : xmlInputMapping.getInputMappingAttributes()) {
-                String xpathExpr = inputMappingAttribute.getFromElementKey();
-                try {
+            try {
+                XMLInputMapping xmlInputMapping = (XMLInputMapping) eventBuilderConfiguration.getInputMapping();
+                List<XPathDefinition> xPathDefinitions = xmlInputMapping.getXPathDefinitions();
+                for (InputMappingAttribute inputMappingAttribute : xmlInputMapping.getInputMappingAttributes()) {
+                    String xpathExpr = inputMappingAttribute.getFromElementKey();
+
                     AXIOMXPath xpath = new AXIOMXPath(xpathExpr);
-                    if (xPathDefinition != null && !xPathDefinition.isEmpty()) {
-                        xpath.addNamespace(xPathDefinition.getPrefix(), xPathDefinition.getNamespaceUri());
+                    for (XPathDefinition xPathDefinition : xPathDefinitions) {
+                        if (xPathDefinition != null && !xPathDefinition.isEmpty()) {
+                            xpath.addNamespace(xPathDefinition.getPrefix(), xPathDefinition.getNamespaceUri());
+                        }
                     }
                     String type = EventBuilderConstants.ATTRIBUTE_TYPE_CLASS_TYPE_MAP.get(inputMappingAttribute.getToElementType());
                     attributeXpathList.add(new XPathData(xpath, type, inputMappingAttribute.getDefaultValue()));
-                } catch (JaxenException e) {
-                    throw new EventBuilderConfigurationException("Error parsing XPath expression: " + xpathExpr, e);
                 }
-            }
-            if (!isStreamDefinitionValidForConfiguration(eventBuilderConfiguration, exportedStreamDefinition)) {
-                throw new EventBuilderValidationException("Exported stream definition does not match the specified configuration.");
-            }
-        }
-    }
-
-    @Override
-    public void processInputEvent(Object obj) {
-        XMLInputMapping xmlInputMapping = (XMLInputMapping) this.eventBuilderConfiguration.getInputMapping();
-        if (xmlInputMapping.isBatchProcessingEnabled()) {
-            processMultipleEvents(obj);
-        } else {
-            processSingleEvent(obj);
-        }
-    }
-
-    @Override
-    public boolean isStreamDefinitionValidForConfiguration(
-            EventBuilderConfiguration eventBuilderConfiguration,
-            StreamDefinition exportedStreamDefinition) {
-        if (!(eventBuilderConfiguration.getToStreamName().equals(exportedStreamDefinition.getName())
-              && eventBuilderConfiguration.getToStreamVersion().equals(exportedStreamDefinition.getVersion()))) {
-            return false;
-        }
-        if (eventBuilderConfiguration.getInputMapping() instanceof XMLInputMapping) {
-            XMLInputMapping xmlInputMapping = (XMLInputMapping) eventBuilderConfiguration.getInputMapping();
-            for (InputMappingAttribute inputMappingAttribute : xmlInputMapping.getInputMappingAttributes()) {
-                Attribute attribute = new Attribute(inputMappingAttribute.getToElementKey(), inputMappingAttribute.getToElementType());
-                if (!exportedStreamDefinition.getPayloadData().contains(attribute)) {
-                    return false;
+                if (xmlInputMapping.getParentSelectorXpath() != null && !xmlInputMapping.getParentSelectorXpath().isEmpty()) {
+                    this.parentSelectorXpath = new AXIOMXPath(xmlInputMapping.getParentSelectorXpath());
+                    for (XPathDefinition xPathDefinition : xPathDefinitions) {
+                        if (xPathDefinition != null && !xPathDefinition.isEmpty()) {
+                            this.parentSelectorXpath.addNamespace(xPathDefinition.getPrefix(), xPathDefinition.getNamespaceUri());
+                        }
+                    }
                 }
+            } catch (JaxenException e) {
+                throw new EventBuilderConfigurationException("Error parsing XPath expression: " + e.getMessage(), e);
             }
+
+        }
+
+    }
+
+    @Override
+    public Object convertToMappedInputEvent(Object obj) throws EventBuilderConfigurationException {
+        if (this.parentSelectorXpath != null) {
+            return processMultipleEvents(obj);
         } else {
-            return false;
+            return processSingleEvent(obj);
         }
-
-        return true;
     }
 
     @Override
-    public StreamDefinition createExportedStreamDefinition() {
-        String inputStreamName = this.eventBuilderConfiguration.getToStreamName();
-        String inputStreamVersion = this.eventBuilderConfiguration.getToStreamVersion();
-        StreamDefinition toStreamDefinition;
-        XMLInputMapping xmlInputMapping = (XMLInputMapping) this.eventBuilderConfiguration.getInputMapping();
-        try {
-            toStreamDefinition = new StreamDefinition(this.eventBuilderConfiguration.getToStreamName(), this.eventBuilderConfiguration.getToStreamVersion());
-        } catch (MalformedStreamDefinitionException e) {
-            throw new EventBuilderConfigurationException("Could not create stream definition with " + inputStreamName + EventBuilderConstants.STREAM_NAME_VER_DELIMITER + inputStreamVersion);
-        }
-
-        if (xmlInputMapping != null) {
-            EventBuilderUtil.addAttributesToStreamDefinition(toStreamDefinition, xmlInputMapping.getInputMappingAttributes(), EventBuilderConstants.PAYLOAD_DATA_VAL);
-        }
-        this.exportedStreamDefinition = toStreamDefinition;
-        return toStreamDefinition;
+    public Object convertToTypedInputEvent(Object obj) throws EventBuilderConfigurationException {
+        throw new UnsupportedOperationException("This feature is not yet supported for XMLInputMapping");
     }
 
     @Override
-    public void createMapping(Object eventDefinition) throws EventBuilderConfigurationException {
-        createMapping(this.eventBuilderConfiguration, this.exportedStreamDefinition, this.attributeXpathList);
+    public Attribute[] getOutputAttributes() {
+        XMLInputMapping xmlInputMapping = (XMLInputMapping) eventBuilderConfiguration.getInputMapping();
+        List<InputMappingAttribute> inputMappingAttributes = xmlInputMapping.getInputMappingAttributes();
+        return EventBuilderConfigHelper.getAttributes(inputMappingAttributes);
     }
 
-    @Override
-    public void validateInputStreamAttributes(StreamDefinition inputStreamDefinition)
-            throws EventBuilderConfigurationException {
-        //Not applicable to XML Input Mapping
-    }
-
-    private void processMultipleEvents(Object obj) {
+    private Object[][] processMultipleEvents(Object obj) throws EventBuilderConfigurationException {
         if (obj instanceof OMElement) {
-            OMElement events = (OMElement) obj;
-            Iterator childIterator = events.getChildElements();
-            while (childIterator.hasNext()) {
-                Object eventObj = childIterator.next();
-                processSingleEvent(eventObj);
-                /**
-                 * Usually the global lookup '//' is used in the XPATH expression which works fine for 'single event mode'.
-                 * However, if global lookup is used, it will return the first element from the whole document as specified in
-                 * XPATH-2.0 Specification. Therefore the same XPATH expression that works fine in 'single event mode' will
-                 * always return the first element of a batch in 'batch mode'. Therefore to return what the
-                 * user expects, each child element is removed after sending to simulate an iteration for the
-                 * global lookup.
-                 */
-                childIterator.remove();
+            OMElement events;
+            try {
+                events = (OMElement) this.parentSelectorXpath.selectSingleNode(obj);
+                List<Object[]> objArrayList = new ArrayList<Object[]>();
+                Iterator childIterator = events.getChildElements();
+                while (childIterator.hasNext()) {
+                    Object eventObj = childIterator.next();
+                    objArrayList.add(processSingleEvent(eventObj));
+                    /**
+                     * Usually the global lookup '//' is used in the XPATH expression which works fine for 'single event mode'.
+                     * However, if global lookup is used, it will return the first element from the whole document as specified in
+                     * XPATH-2.0 Specification. Therefore the same XPATH expression that works fine in 'single event mode' will
+                     * always return the first element of a batch in 'batch mode'. Therefore to return what the
+                     * user expects, each child element is removed after sending to simulate an iteration for the
+                     * global lookup.
+                     */
+                    childIterator.remove();
+                }
+                return objArrayList.toArray(new Object[objArrayList.size()][]);
+            } catch (JaxenException e) {
+                throw new EventBuilderConfigurationException("Unable to parse XPath for parent selector: " + e.getMessage(), e);
             }
         }
+        return null;
     }
 
-    private void processSingleEvent(Object obj) {
+    private Object[] processSingleEvent(Object obj) throws EventBuilderConfigurationException {
         Object[] outObjArray = null;
-        if (obj instanceof OMElement) {
-            OMElement eventOMElement = (OMElement) obj;
+        OMElement eventOMElement = null;
+        if (obj instanceof String) {
+            String textMessage = (String) obj;
+            try {
+                eventOMElement = AXIOMUtil.stringToOM(textMessage);
+            } catch (XMLStreamException e) {
+                throw new EventBuilderConfigurationException("Error parsing incoming XML event : " + e.getMessage(), e);
+            }
+        } else if (obj instanceof OMElement) {
+            eventOMElement = (OMElement) obj;
+        }
+
+        if (eventOMElement != null) {
             OMNamespace omNamespace = null;
-            if (this.xPathDefinition == null || this.xPathDefinition.isEmpty()) {
+            if (this.xPathDefinitions == null || this.xPathDefinitions.isEmpty()) {
                 omNamespace = eventOMElement.getNamespace();
             }
             List<Object> objList = new ArrayList<Object>();
@@ -195,7 +170,7 @@ public class XMLInputMapper implements InputMapper {
                     Object returnedObj = null;
                     if (omElementResult != null) {
                         returnedObj = BeanUtil.deserialize(beanClass,
-                                                           omElementResult, reflectionBasedObjectSupplier, null);
+                                omElementResult, reflectionBasedObjectSupplier, null);
                     } else if (xpathData.getDefaultValue() != null) {
                         if (!beanClass.equals(String.class)) {
                             Class<?> stringClass = String.class;
@@ -225,6 +200,6 @@ public class XMLInputMapper implements InputMapper {
             }
             outObjArray = objList.toArray(new Object[objList.size()]);
         }
-        eventDispatcher.dispatchEvent(outObjArray);
+        return outObjArray;
     }
 }

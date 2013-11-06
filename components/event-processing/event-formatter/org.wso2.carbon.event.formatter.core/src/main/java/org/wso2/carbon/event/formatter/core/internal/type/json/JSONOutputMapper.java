@@ -74,7 +74,8 @@ public class JSONOutputMapper implements OutputMapper {
     }
 
     @Override
-    public Object convert(Object obj) {
+    public Object convertToMappedInputEvent(Object obj)
+            throws EventFormatterConfigurationException {
         String eventText = mappingTextList.get(0);
         for (int i = 1; i < mappingTextList.size(); i++) {
             if (i % 2 == 0) {
@@ -90,6 +91,11 @@ public class JSONOutputMapper implements OutputMapper {
             throw new EventFormatterConfigurationException("Not valid JSON object : " + e.getMessage(), e);
         }
         return eventText;
+    }
+
+    @Override
+    public Object convertToTypedInputEvent(Object obj) throws EventFormatterConfigurationException {
+        throw new UnsupportedOperationException("This feature is not yet supported for JSONOutputMapping");
     }
 
     private void validateStreamDefinitionWithOutputProperties(int tenantId)

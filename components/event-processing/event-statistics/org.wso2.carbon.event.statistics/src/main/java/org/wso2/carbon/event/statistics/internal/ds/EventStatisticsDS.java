@@ -69,7 +69,7 @@ public class EventStatisticsDS {
 
         EventStatisticsServiceHolder.getInstance().setEventStatisticsManager(new EventStatisticsManager());
 
-        reporterThread = new StatisticsReporterThread(PrivilegedCarbonContext.getCurrentContext().getTenantId());
+        reporterThread = new StatisticsReporterThread(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
 
         // Set a custom interval value if required
         ServerConfiguration serverConf = ServerConfiguration.getInstance();

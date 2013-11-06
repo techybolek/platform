@@ -35,7 +35,7 @@ function fillTextIn(obj) {
 }
 
 
-function loadTransportAdaptorMessageProperties(messageProperty, eventFormatterInputTable,
+function loadEventAdaptorMessageProperties(messageProperty, eventFormatterInputTable,
                                                propertyLoop, propertyValue, requiredValue) {
 
     var property = messageProperty.localDisplayName.trim();
@@ -126,15 +126,15 @@ function showEventStreamDefinition() {
                 });
 }
 
-function loadTransportAdaptorRelatedProperties(toPropertyHeader) {
+function loadEventAdaptorRelatedProperties(toPropertyHeader) {
 
-    var selectedIndex = document.getElementById("transportAdaptorNameFilter").selectedIndex;
-    var selected_text = document.getElementById("transportAdaptorNameFilter").options[selectedIndex].text;
+    var selectedIndex = document.getElementById("eventAdaptorNameFilter").selectedIndex;
+    var selected_text = document.getElementById("eventAdaptorNameFilter").options[selectedIndex].text;
 
 
     jQuery.ajax({
                     type:"POST",
-                    url:"../eventformatter/get_mappings_ajaxprocessor.jsp?transportAdaptorName=" + selected_text + "",
+                    url:"../eventformatter/get_mappings_ajaxprocessor.jsp?eventAdaptorName=" + selected_text + "",
                     data:{},
                     contentType:"application/json; charset=utf-8",
                     dataType:"text",
@@ -144,7 +144,7 @@ function loadTransportAdaptorRelatedProperties(toPropertyHeader) {
                         if (mappingTypes != null) {
                             mappingTypes = mappingTypes.trim();
                             // properties are taken as | separated property names
-                            var mappings = mappingTypes.split("|");
+                            var mappings = mappingTypes.split("|=");
                             var propertyCount = mappings.length;
                             jQuery('#mappingTypeFilter').empty();
                             // for each property, add a text and input field in a row
@@ -167,7 +167,7 @@ function loadTransportAdaptorRelatedProperties(toPropertyHeader) {
 
     jQuery.ajax({
                     type:"POST",
-                    url:"../eventformatter/get_Message_Properties_ajaxprocessor.jsp?transportAdaptorName=" + selected_text + "",
+                    url:"../eventformatter/get_Message_Properties_ajaxprocessor.jsp?eventAdaptorName=" + selected_text + "",
                     data:{},
                     contentType:"application/json; charset=utf-8",
                     dataType:"text",
@@ -184,7 +184,7 @@ function loadTransportAdaptorRelatedProperties(toPropertyHeader) {
                                 var tableRow = eventFormatterInputTable.insertRow(eventFormatterInputTable.rows.length);
                                 tableRow.innerHTML = '<td colspan="2" ><b>' + toPropertyHeader + '</b></td> ';
                                 jQuery.each(jsonObject, function (index, messageProperty) {
-                                    loadTransportAdaptorMessageProperties(messageProperty, eventFormatterInputTable, propertyLoop, inputProperty, inputRequiredProperty);
+                                    loadEventAdaptorMessageProperties(messageProperty, eventFormatterInputTable, propertyLoop, inputProperty, inputRequiredProperty);
                                     propertyLoop = propertyLoop + 1;
                                 });
                             }

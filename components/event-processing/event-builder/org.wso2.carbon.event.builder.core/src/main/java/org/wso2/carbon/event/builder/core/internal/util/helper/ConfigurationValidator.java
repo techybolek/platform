@@ -22,17 +22,22 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
+import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
 import org.wso2.carbon.event.builder.core.internal.ds.EventBuilderServiceValueHolder;
+import org.wso2.carbon.event.builder.core.internal.type.json.JsonInputMappingConfigBuilder;
+import org.wso2.carbon.event.builder.core.internal.type.map.MapInputMappingConfigBuilder;
+import org.wso2.carbon.event.builder.core.internal.type.text.TextInputMappingConfigBuilder;
+import org.wso2.carbon.event.builder.core.internal.type.wso2event.Wso2EventBuilderConfigBuilder;
+import org.wso2.carbon.event.builder.core.internal.type.xml.XMLInputMappingConfigBuilder;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
-import org.wso2.carbon.input.transport.adaptor.core.InputTransportAdaptorDto;
-import org.wso2.carbon.input.transport.adaptor.core.InputTransportAdaptorService;
-import org.wso2.carbon.input.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
-import org.wso2.carbon.input.transport.adaptor.core.message.config.InputTransportAdaptorMessageConfiguration;
-import org.wso2.carbon.input.transport.adaptor.manager.core.InputTransportAdaptorManagerService;
-import org.wso2.carbon.input.transport.adaptor.manager.core.exception.InputTransportAdaptorManagerConfigurationException;
+import org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorDto;
+import org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorService;
+import org.wso2.carbon.event.input.adaptor.core.config.InputEventAdaptorConfiguration;
+import org.wso2.carbon.event.input.adaptor.core.message.config.InputEventAdaptorMessageConfiguration;
+import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorManagerService;
+import org.wso2.carbon.event.input.adaptor.manager.core.exception.InputEventAdaptorManagerConfigurationException;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -41,25 +46,25 @@ import java.util.Map;
 public class ConfigurationValidator {
     private static Log log = LogFactory.getLog(ConfigurationValidator.class);
 
-    public static boolean isValidTransportAdaptor(String transportAdaptorName,
-                                                  String transportAdaptorType, int tenantId) {
+    public static boolean isInputEventAdaptorActive(String inputEventAdaptorName,
+                                                    String inputEventAdaptorType, int tenantId) {
 
-        InputTransportAdaptorManagerService transportAdaptorManagerService = EventBuilderServiceValueHolder.getInputTransportAdaptorManagerService();
+        InputEventAdaptorManagerService inputEventAdaptorManagerService = EventBuilderServiceValueHolder.getInputEventAdaptorManagerService();
         try {
-            InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = transportAdaptorManagerService.getActiveInputTransportAdaptorConfiguration(transportAdaptorName, tenantId);
-            if (inputTransportAdaptorConfiguration != null && inputTransportAdaptorConfiguration.getType().equals(transportAdaptorType)) {
+            InputEventAdaptorConfiguration InputEventAdaptorConfiguration = inputEventAdaptorManagerService.getActiveInputEventAdaptorConfiguration(inputEventAdaptorName, tenantId);
+            if (InputEventAdaptorConfiguration != null && InputEventAdaptorConfiguration.getType().equals(inputEventAdaptorType)) {
                 return true;
             }
-        } catch (InputTransportAdaptorManagerConfigurationException e) {
-            log.error("Exception when retrieving configuration for InputTransportAdaptor '" + transportAdaptorName + "'.", e);
+        } catch (InputEventAdaptorManagerConfigurationException e) {
+            log.error("Exception when retrieving configuration for InputEventAdaptor '" + inputEventAdaptorName + "'.", e);
         }
 
         return false;
     }
 
-    public static boolean validateEventBuilderConfiguration(OMElement ebConfigOmElement) {
+    public static void validateEventBuilderConfiguration(OMElement ebConfigOmElement) throws EventBuilderConfigurationException {
         if (!ebConfigOmElement.getLocalName().equals(EventBuilderConstants.EB_ELEMENT_ROOT_ELEMENT)) {
-            return false;
+            throw new EventBuilderConfigurationException("Invalid event builder configuration.");
         }
 
         String eventBuilderName = ebConfigOmElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_NAME));
@@ -68,18 +73,18 @@ public class ConfigurationValidator {
         OMElement toElement = ebConfigOmElement.getFirstChildWithName(new QName(EventBuilderConstants.EB_CONF_NS, EventBuilderConstants.EB_ELEMENT_TO));
 
         if (eventBuilderName == null || eventBuilderName.isEmpty() || fromElement == null || mappingElement == null || toElement == null) {
-            return false;
+            throw new EventBuilderConfigurationException("Invalid event builder configuration for event builder: " + eventBuilderName);
         }
 
-        String fromTransportAdaptorName = fromElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_TA_NAME));
-        String fromTransportAdaptorType = fromElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_TA_TYPE));
+        String fromInputEventAdaptorName = fromElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_TA_NAME));
+        String fromInputEventAdaptorType = fromElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_TA_TYPE));
 
-        if (fromTransportAdaptorName == null || fromTransportAdaptorName.isEmpty() ||
-            fromTransportAdaptorType == null || fromTransportAdaptorType.isEmpty()) {
-            return false;
+        if (fromInputEventAdaptorName == null || fromInputEventAdaptorName.isEmpty() ||
+                fromInputEventAdaptorType == null || fromInputEventAdaptorType.isEmpty()) {
+            throw new EventBuilderConfigurationException("Invalid event builder configuration for event builder: " + eventBuilderName);
         }
 
-        InputTransportAdaptorMessageConfiguration inputTransportMessageConfiguration = EventBuilderConfigHelper.getInputTransportMessageConfiguration(fromTransportAdaptorType);
+        InputEventAdaptorMessageConfiguration inputEventMessageConfiguration = EventBuilderConfigHelper.getInputEventMessageConfiguration(fromInputEventAdaptorType);
 
         Iterator fromElementPropertyIterator = fromElement.getChildrenWithName(
                 new QName(EventBuilderConstants.EB_CONF_NS, EventBuilderConstants.EB_ELEMENT_PROPERTY));
@@ -90,66 +95,66 @@ public class ConfigurationValidator {
             String propertyValue = fromElementProperty.getText();
             fromPropertyMap.put(propertyName, propertyValue);
         }
-        for (String propertyKey : inputTransportMessageConfiguration.getInputMessageProperties().keySet()) {
+        for (String propertyKey : inputEventMessageConfiguration.getInputMessageProperties().keySet()) {
             if (fromPropertyMap.get(propertyKey) == null) {
-                return false;
+                throw new EventBuilderConfigurationException("Invalid event builder configuration for event builder: " + eventBuilderName);
             }
         }
 
         String mappingType = mappingElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_TYPE));
-        if (mappingType == null || mappingType.isEmpty() || !validateMappingProperties(mappingElement)) {
-            return false;
+        if (mappingType != null && !mappingType.isEmpty()) {
+            validateMappingProperties(mappingElement, mappingType);
+        } else {
+            throw new EventBuilderConfigurationException("Mapping type not specified for : " + eventBuilderName);
         }
 
         String toStreamName = toElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_STREAM_NAME));
         String toStreamVersion = toElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_VERSION));
 
         if (toStreamName == null || toStreamName.isEmpty() || toStreamVersion == null || toStreamVersion.isEmpty()) {
-            return false;
+            throw new EventBuilderConfigurationException("Invalid event builder configuration for event builder: " + eventBuilderName);
         }
-
-        return true;
     }
 
-    public static boolean isValidEventBuilderConfiguration(
+    public static boolean checkActivationPreconditions(
             EventBuilderConfiguration eventBuilderConfiguration, int tenantId) {
-        String fromTransportAdaptorName = eventBuilderConfiguration.getInputStreamConfiguration().getTransportAdaptorName();
-        String fromTransportAdaptorType = eventBuilderConfiguration.getInputStreamConfiguration().getTransportAdaptorType();
+        String fromInputEventAdaptorName = eventBuilderConfiguration.getInputStreamConfiguration().getInputEventAdaptorName();
+        String fromInputEventAdaptorType = eventBuilderConfiguration.getInputStreamConfiguration().getInputEventAdaptorType();
 
-        if (!ConfigurationValidator.isValidTransportAdaptor(fromTransportAdaptorName, fromTransportAdaptorType, tenantId)) {
+        if (!ConfigurationValidator.isInputEventAdaptorActive(fromInputEventAdaptorName, fromInputEventAdaptorType, tenantId)) {
             return false;
         }
         return true;
     }
 
-    public static boolean validateSupportedMapping(String transportAdaptorType,
+    public static boolean validateSupportedMapping(String inputEventAdaptorType,
                                                    String messageType) {
 
-        InputTransportAdaptorService transportAdaptorService = EventBuilderServiceValueHolder.getInputTransportAdaptorService();
-        InputTransportAdaptorDto transportAdaptorDto = transportAdaptorService.getTransportAdaptorDto(transportAdaptorType);
+        InputEventAdaptorService inputEventAdaptorService = EventBuilderServiceValueHolder.getInputEventAdaptorService();
+        InputEventAdaptorDto inputEventAdaptorDto = inputEventAdaptorService.getEventAdaptorDto(inputEventAdaptorType);
 
-        if (transportAdaptorDto == null) {
+        if (inputEventAdaptorDto == null) {
             return false;
         }
 
-        List<String> supportedInputMessageTypes = transportAdaptorDto.getSupportedMessageTypes();
+        List<String> supportedInputMessageTypes = inputEventAdaptorDto.getSupportedMessageTypes();
         return supportedInputMessageTypes.contains(messageType);
     }
 
     @SuppressWarnings("unchecked")
-    public static boolean validateMappingProperties(OMElement mappingElement) {
-        List<String> supportedChildTags = new ArrayList<String>();
-        supportedChildTags.add(EventBuilderConstants.EB_ELEMENT_PROPERTY);
-
-        Iterator<OMElement> mappingIterator = mappingElement.getChildElements();
-        while (mappingIterator.hasNext()) {
-            OMElement childElement = mappingIterator.next();
-            String childTag = childElement.getLocalName();
-            if (!supportedChildTags.contains(childTag)) {
-                return false;
-            }
+    public static void validateMappingProperties(OMElement mappingElement, String mappingType) throws EventBuilderConfigurationException {
+        if (mappingType.equalsIgnoreCase(EventBuilderConstants.EB_WSO2EVENT_MAPPING_TYPE)) {
+            Wso2EventBuilderConfigBuilder.validateWso2EventMapping(mappingElement);
+        } else if (mappingType.equalsIgnoreCase(EventBuilderConstants.EB_TEXT_MAPPING_TYPE)) {
+            TextInputMappingConfigBuilder.validateTextMapping(mappingElement);
+        } else if (mappingType.equalsIgnoreCase(EventBuilderConstants.EB_MAP_MAPPING_TYPE)) {
+            MapInputMappingConfigBuilder.validateMapEventMapping(mappingElement);
+        } else if (mappingType.equalsIgnoreCase(EventBuilderConstants.EB_XML_MAPPING_TYPE)) {
+            XMLInputMappingConfigBuilder.validateXMLEventMapping(mappingElement);
+        } else if (mappingType.equalsIgnoreCase(EventBuilderConstants.EB_JSON_MAPPING_TYPE)) {
+            JsonInputMappingConfigBuilder.validateJsonEventMapping(mappingElement);
+        } else {
+            log.info("No validations available for input mapping type :" + mappingType);
         }
-
-        return true;
     }
 }

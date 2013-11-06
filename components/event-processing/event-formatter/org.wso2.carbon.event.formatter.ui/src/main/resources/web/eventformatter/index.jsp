@@ -38,6 +38,7 @@
                         type:'POST',
                         url:'stat_tracing-ajaxprocessor.jsp',
                         data:'eventFormatterName=' + eventFormatterName + '&action=disableStat',
+                        async:false,
                         success:function (msg) {
                             handleCallback(eventFormatterName, DISABLE, STAT);
                         },
@@ -53,6 +54,7 @@
                         type:'POST',
                         url:'stat_tracing-ajaxprocessor.jsp',
                         data:'eventFormatterName=' + eventFormatterName + '&action=enableStat',
+                        async:false,
                         success:function (msg) {
                             handleCallback(eventFormatterName, ENABLE, STAT);
                         },
@@ -97,6 +99,7 @@
                         type:'POST',
                         url:'stat_tracing-ajaxprocessor.jsp',
                         data:'eventFormatterName=' + eventFormatterName + '&action=enableTracing',
+                        async:false,
                         success:function (msg) {
                             handleCallback(eventFormatterName, ENABLE, TRACE);
                         },
@@ -112,6 +115,7 @@
                         type:'POST',
                         url:'stat_tracing-ajaxprocessor.jsp',
                         data:'eventFormatterName=' + eventFormatterName + '&action=disableTracing',
+                        async:false,
                         success:function (msg) {
                             handleCallback(eventFormatterName, DISABLE, TRACE);
                         },
@@ -150,7 +154,7 @@
 
 <div id="middle">
     <h2><fmt:message key="available.event.formatters"/></h2>
-    <a href="create_eventFormatter.jsp"
+    <a href="create_eventFormatter.jsp?ordinal=1"
        style="background-image:url(images/add.gif);"
        class="icon-link">
         Add Event Formatter
@@ -160,7 +164,7 @@
 
         <%=totalEventFormatters%> <fmt:message
             key="active.event.formatters"/> <% if (totalNotDeployedEventFormatters > 0) { %><a
-            href="notdeployed_event_formatter_files_details.jsp"><%=totalNotDeployedEventFormatters%>
+            href="notdeployed_event_formatter_files_details.jsp?ordinal=1"><%=totalNotDeployedEventFormatters%>
         <fmt:message
                 key="inactive.event.formatters"/></a><% } else {%><%=totalNotDeployedEventFormatters%>
         <fmt:message key="inactive.event.formatters"/> <% } %>
@@ -174,9 +178,9 @@
             <tr>
                 <th><fmt:message key="event.formatter.name"/></th>
                 <th><fmt:message key="mapping.type"/></th>
-                <th><fmt:message key="transport.adaptor.name"/></th>
+                <th><fmt:message key="event.adaptor.name"/></th>
                 <th><fmt:message key="input.stream.id"/></th>
-                <th width="30%"><fmt:message key="actions"/></th>
+                <th width="420px"><fmt:message key="actions"/></th>
             </tr>
             </thead>
             <tbody>
@@ -185,13 +189,13 @@
             %>
             <tr>
                 <td>
-                    <a href="eventFormatter_details.jsp?eventFormatterName=<%=eventFormatterDetails.getEventFormatterName()%>"><%=eventFormatterDetails.getEventFormatterName()%>
+                    <a href="eventFormatter_details.jsp?ordinal=1&eventFormatterName=<%=eventFormatterDetails.getEventFormatterName()%>"><%=eventFormatterDetails.getEventFormatterName()%>
                     </a>
 
                 </td>
                 <td><%=eventFormatterDetails.getMappingType()%>
                 </td>
-                <td><%=eventFormatterDetails.getOutTransportAdaptorName()%>
+                <td><%=eventFormatterDetails.getOutEventAdaptorName()%>
                 </td>
                 <td><%=eventFormatterDetails.getInputStreamId()%>
                 </td>
@@ -279,7 +283,7 @@
                             color="#4682b4">Delete</font></a>
                     <a style="background-image: url(../admin/images/edit.gif);"
                        class="icon-link"
-                       href="edit_event_formatter_details.jsp?eventFormatterName=<%=eventFormatterDetails.getEventFormatterName()%>"><font
+                       href="edit_event_formatter_details.jsp?ordinal=1&eventFormatterName=<%=eventFormatterDetails.getEventFormatterName()%>"><font
                             color="#4682b4">Edit</font></a>
 
                 </td>

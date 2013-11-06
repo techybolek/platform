@@ -46,36 +46,46 @@ public class XMLMapperConfigurationBuilder {
 
         XMLOutputMapping xmlOutputMapping = new XMLOutputMapping();
 
-        if (!validateXMLEventMapping(mappingElement)) {
-            throw new EventFormatterConfigurationException("XML Mapping is not valid, check the output mapping");
-        }
-
-        OMElement innerMappingElement = mappingElement.getFirstChildWithName(
-                new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_INLINE));
-        if (innerMappingElement != null) {
-            xmlOutputMapping.setRegistryResource(false);
+        String customMappingEnabled = mappingElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING));
+        if (customMappingEnabled != null && (customMappingEnabled.equals(EventFormatterConstants.TM_VALUE_DISABLE))) {
+            xmlOutputMapping.setCustomMappingEnabled(false);
         } else {
-            innerMappingElement = mappingElement.getFirstChildWithName(
-                    new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_REGISTRY));
+            xmlOutputMapping.setCustomMappingEnabled(true);
+            if (!validateXMLEventMapping(mappingElement)) {
+                throw new EventFormatterConfigurationException("XML Mapping is not valid, check the output mapping");
+            }
+
+            OMElement innerMappingElement = mappingElement.getFirstChildWithName(
+                    new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_INLINE));
             if (innerMappingElement != null) {
-                xmlOutputMapping.setRegistryResource(true);
-                try {
-                    AXIOMUtil.stringToOM(innerMappingElement.toString());
-                } catch (XMLStreamException e) {
-                    throw new EventFormatterConfigurationException("XML Mapping that provided is not valid : "+e.getMessage(),e);
+                xmlOutputMapping.setRegistryResource(false);
+            } else {
+                innerMappingElement = mappingElement.getFirstChildWithName(
+                        new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_REGISTRY));
+                if (innerMappingElement != null) {
+                    xmlOutputMapping.setRegistryResource(true);
+                    try {
+                        AXIOMUtil.stringToOM(innerMappingElement.toString());
+                    } catch (XMLStreamException e) {
+                        throw new EventFormatterConfigurationException("XML Mapping that provided is not valid : " + e.getMessage(), e);
+                    }
+
+                } else {
+                    throw new EventFormatterConfigurationException("XML Mapping is not valid, Mapping should be inline or from registry");
                 }
+            }
+
+            String xmlMappingText = innerMappingElement.toString();
+            if (innerMappingElement.getChildElements().hasNext()) {
+                int index1 = xmlMappingText.indexOf(">");
+                int index2 = xmlMappingText.lastIndexOf("<");
+                xmlMappingText = xmlMappingText.substring(index1 + 1, index2);
+                xmlOutputMapping.setMappingXMLText(xmlMappingText);
+
 
             } else {
-                throw new EventFormatterConfigurationException("XML Mapping is not valid, Mapping should be inline or from registry");
+                throw new EventFormatterConfigurationException("There is no any valid xml content available");
             }
-        }
-
-        String xmlMappingText = innerMappingElement.toString();
-        if (innerMappingElement != null) {
-            int index1 = xmlMappingText.indexOf(">");
-            int index2 = xmlMappingText.lastIndexOf("<");
-            xmlMappingText = xmlMappingText.substring(index1 + 1, index2);
-            xmlOutputMapping.setMappingXMLText(xmlMappingText);
         }
 
         return xmlOutputMapping;
@@ -97,7 +107,8 @@ public class XMLMapperConfigurationBuilder {
 
 
     public static OMElement outputMappingToOM(
-            OutputMapping outputMapping, OMFactory factory) {
+            OutputMapping outputMapping, OMFactory factory)
+            throws EventFormatterConfigurationException {
 
         XMLOutputMapping xmlOutputMapping = (XMLOutputMapping) outputMapping;
         String xmlText = xmlOutputMapping.getMappingXMLText();
@@ -107,6 +118,11 @@ public class XMLMapperConfigurationBuilder {
         mappingOMElement.declareDefaultNamespace(EventFormatterConstants.EF_CONF_NS);
 
         mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_TYPE, EventFormatterConstants.EF_XML_MAPPING_TYPE, null);
+        if (xmlOutputMapping.isCustomMappingEnabled()) {
+            mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING, EventFormatterConstants.TM_VALUE_ENABLE, null);
+        } else {
+            mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING, EventFormatterConstants.TM_VALUE_DISABLE, null);
+        }
 
         OMElement innerMappingElement;
         if (xmlOutputMapping.isRegistryResource()) {
@@ -122,7 +138,7 @@ public class XMLMapperConfigurationBuilder {
             try {
                 AXIOMUtil.stringToOM(xmlText);
             } catch (XMLStreamException e) {
-                throw new EventFormatterConfigurationException("XML Mapping that provided is not valid : "+e.getMessage(),e);
+                throw new EventFormatterConfigurationException("XML Mapping that provided is not valid : " + e.getMessage(), e);
             }
 
             mappingOMElement.addChild(innerMappingElement);

@@ -28,11 +28,22 @@ public class StreamConfiguration {
     // for exported streams : valueOf
     private String siddhiStreamName;
 
+    private boolean passThroughFlowSupported;
 
     public StreamConfiguration(String name, String version) {
         this.name = name;
-        this.version = version;
-        this.siddhiStreamName = name;
+        if (version == null) {
+            this.version = "1.0.0";
+            this.siddhiStreamName = name;
+        } else {
+            this.version = version;
+            if ("1.0.0".equals(version)) {
+                this.siddhiStreamName = name;
+            } else {
+                this.siddhiStreamName = name + "_" + version.replaceAll("\\.", "_");
+            }
+        }
+
     }
 
     public StreamConfiguration(String name) {
@@ -41,10 +52,14 @@ public class StreamConfiguration {
         this.siddhiStreamName = name;
     }
 
-    public StreamConfiguration(String name, String siddhiStreamName, String version) {
+    public StreamConfiguration(String name, String version, String siddhiStreamName) {
         this.name = name;
         this.siddhiStreamName = siddhiStreamName;
-        this.version = version;
+        if (version == null) {
+            this.version = "1.0.0";
+        } else {
+            this.version = version;
+        }
     }
 
     public String getName() {
@@ -65,5 +80,13 @@ public class StreamConfiguration {
 
     public void setSiddhiStreamName(String siddhiStreamName) {
         this.siddhiStreamName = siddhiStreamName;
+    }
+
+    public boolean isPassThroughFlowSupported() {
+        return passThroughFlowSupported;
+    }
+
+    public void setPassThroughFlowSupported(boolean passThroughFlowSupported) {
+        this.passThroughFlowSupported = passThroughFlowSupported;
     }
 }

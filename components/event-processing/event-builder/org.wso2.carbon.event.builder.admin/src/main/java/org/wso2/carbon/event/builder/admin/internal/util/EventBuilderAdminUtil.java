@@ -18,32 +18,9 @@
 
 package org.wso2.carbon.event.builder.admin.internal.util;
 
-import org.wso2.carbon.event.builder.core.internal.config.DeploymentStatus;
-
 import java.io.File;
-import java.util.Map;
 
 public class EventBuilderAdminUtil {
-    public static DeploymentStatus getDeploymentStatusForString(String deploymentStatus) {
-        for (Map.Entry<DeploymentStatus, String> depStatusEntry : EventBuilderAdminConstants.DEP_STATUS_MAP.entrySet()) {
-            if (depStatusEntry.getValue().equals(deploymentStatus)) {
-                return depStatusEntry.getKey();
-            }
-        }
-
-        return null;
-    }
-
-    public static String splitCamelCase(String s) {
-        return s.replaceAll(
-                String.format("%s|%s|%s",
-                              "(?<=[A-Z])(?=[A-Z][a-z])",
-                              "(?<=[^A-Z])(?=[A-Z])",
-                              "(?<=[A-Za-z])(?=[^A-Za-z])"
-                ),
-                " "
-        );
-    }
 
     public static String deriveConfigurationFilenameFrom(String filePath) {
         int beginIndex = 0;

@@ -19,13 +19,22 @@
 package org.wso2.carbon.event.builder.core.internal.util;
 
 import org.apache.axis2.engine.AxisConfiguration;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
+import org.wso2.carbon.databridge.commons.utils.DataBridgeCommonsUtils;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
 import org.wso2.carbon.event.builder.core.internal.config.InputMappingAttribute;
+import org.wso2.carbon.event.builder.core.internal.config.InputStreamConfiguration;
+import org.wso2.carbon.event.builder.core.internal.type.AbstractInputMapping;
+import org.wso2.carbon.event.builder.core.internal.type.wso2event.Wso2EventInputMapping;
+import org.wso2.carbon.event.input.adaptor.core.message.config.InputEventAdaptorMessageConfiguration;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventBuilderUtil {
@@ -37,15 +46,6 @@ public class EventBuilderUtil {
             beginIndex = filename.lastIndexOf(File.separator) + 1;
         }
         return filename.substring(beginIndex, endIndex);
-    }
-
-    public static String deriveConfigurationFilenameFrom(String filePath) {
-        int beginIndex = 0;
-        int endIndex = filePath.length();
-        if (filePath.contains(File.separator)) {
-            beginIndex = filePath.lastIndexOf(File.separator) + 1;
-        }
-        return filePath.substring(beginIndex, endIndex);
     }
 
     public static Object getConvertedAttributeObject(String value, AttributeType type) {
@@ -66,55 +66,87 @@ public class EventBuilderUtil {
         }
     }
 
-    public static String getStreamIdFrom(EventBuilderConfiguration eventBuilderConfiguration) {
+    public static String getExportedStreamIdFrom(EventBuilderConfiguration eventBuilderConfiguration) {
         String streamId = null;
         if (eventBuilderConfiguration != null && eventBuilderConfiguration.getToStreamName() != null && !eventBuilderConfiguration.getToStreamName().isEmpty()) {
             streamId = eventBuilderConfiguration.getToStreamName() + EventBuilderConstants.STREAM_NAME_VER_DELIMITER +
-                       ((eventBuilderConfiguration.getToStreamVersion() != null && !eventBuilderConfiguration.getToStreamVersion().isEmpty()) ?
-                        eventBuilderConfiguration.getToStreamVersion() : EventBuilderConstants.DEFAULT_STREAM_VERSION);
+                    ((eventBuilderConfiguration.getToStreamVersion() != null && !eventBuilderConfiguration.getToStreamVersion().isEmpty()) ?
+                            eventBuilderConfiguration.getToStreamVersion() : EventBuilderConstants.DEFAULT_STREAM_VERSION);
         }
 
         return streamId;
     }
 
-    public static void addAttributesToStreamDefinition(StreamDefinition streamDefinition,
-                                                       List<InputMappingAttribute> inputMappingAttributeList,
-                                                       String propertyType) {
-        if (propertyType.equals("meta")) {
-            for (InputMappingAttribute inputMappingAttribute : inputMappingAttributeList) {
-                streamDefinition.addMetaData(inputMappingAttribute.getToElementKey(), inputMappingAttribute.getToElementType());
-            }
-        } else if (propertyType.equals("correlation")) {
-            for (InputMappingAttribute inputMappingAttribute : inputMappingAttributeList) {
-                streamDefinition.addCorrelationData(inputMappingAttribute.getToElementKey(), inputMappingAttribute.getToElementType());
-            }
-        } else if (propertyType.equals("payload")) {
-            for (InputMappingAttribute inputMappingAttribute : inputMappingAttributeList) {
-                streamDefinition.addPayloadData(inputMappingAttribute.getToElementKey(), inputMappingAttribute.getToElementType());
+    public static void addAttributesToStreamDefinition(StreamDefinition streamDefinition, Attribute[] orderedAttributeArray) {
+        if (orderedAttributeArray != null) {
+            for (Attribute attribute : orderedAttributeArray) {
+                if (attribute.getName().startsWith(EventBuilderConstants.META_DATA_PREFIX)) {
+                    String attributeName = attribute.getName().substring(EventBuilderConstants.META_DATA_PREFIX.length());
+                    streamDefinition.addMetaData(attributeName, attribute.getType());
+                } else if (attribute.getName().startsWith(EventBuilderConstants.CORRELATION_DATA_PREFIX)) {
+                    String attributeName = attribute.getName().substring(EventBuilderConstants.CORRELATION_DATA_PREFIX.length());
+                    streamDefinition.addCorrelationData(attributeName, attribute.getType());
+                } else {
+                    streamDefinition.addPayloadData(attribute.getName(), attribute.getType());
+                }
             }
         }
     }
 
-    public static String generateFilePath(String filename,
-                                          AxisConfiguration axisConfiguration) {
-        File repoDir = new File(axisConfiguration.getRepository().getPath());
+    public static Attribute[] getOrderedAttributeArray(AbstractInputMapping inputMapping) {
+        List<InputMappingAttribute> orderedInputMappingAttributes = EventBuilderUtil.sortInputMappingAttributes(inputMapping.getInputMappingAttributes());
+        int currentCount = 0;
+        int totalAttributeCount = orderedInputMappingAttributes.size();
+        Attribute[] attributeArray = new Attribute[totalAttributeCount];
+        for (InputMappingAttribute inputMappingAttribute : orderedInputMappingAttributes) {
+            attributeArray[currentCount++] = new Attribute(inputMappingAttribute.getToElementKey(), inputMappingAttribute.getToElementType());
+        }
+        return attributeArray;
+    }
+
+    public static List<InputMappingAttribute> sortInputMappingAttributes(List<InputMappingAttribute> inputMappingAttributes) {
+        List<InputMappingAttribute> metaAttributes = new ArrayList<InputMappingAttribute>();
+        List<InputMappingAttribute> correlationAttributes = new ArrayList<InputMappingAttribute>();
+        List<InputMappingAttribute> payloadAttributes = new ArrayList<InputMappingAttribute>();
+        for (InputMappingAttribute inputMappingAttribute : inputMappingAttributes) {
+            if (inputMappingAttribute.getToElementKey().startsWith(EventBuilderConstants.META_DATA_PREFIX)) {
+                metaAttributes.add(inputMappingAttribute);
+            } else if (inputMappingAttribute.getToElementKey().startsWith(EventBuilderConstants.CORRELATION_DATA_PREFIX)) {
+                correlationAttributes.add(inputMappingAttribute);
+            } else {
+                payloadAttributes.add(inputMappingAttribute);
+            }
+        }
+
+        List<InputMappingAttribute> orderedInputMappingAttributes = new ArrayList<InputMappingAttribute>();
+        orderedInputMappingAttributes.addAll(metaAttributes);
+        orderedInputMappingAttributes.addAll(correlationAttributes);
+        orderedInputMappingAttributes.addAll(payloadAttributes);
+
+        return orderedInputMappingAttributes;
+    }
+
+    public static String generateFilePath(EventBuilderConfiguration eventBuilderConfiguration) throws EventBuilderConfigurationException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String repositoryPath = MultitenantUtils.getAxis2RepositoryPath(tenantId);
+        String eventBuilderName = eventBuilderConfiguration.getEventBuilderName();
+        File repoDir = new File(repositoryPath);
         if (!repoDir.exists()) {
             if (repoDir.mkdir()) {
-                throw new EventBuilderConfigurationException("Cannot create directory to add tenant specific event builder configuration file :" + filename);
+                throw new EventBuilderConfigurationException("Cannot create directory to add tenant specific event builder :" + eventBuilderName);
             }
         }
         File subDir = new File(repoDir.getAbsolutePath() + File.separator + EventBuilderConstants.EB_CONFIG_DIRECTORY);
         if (!subDir.exists()) {
             if (!subDir.mkdir()) {
-                throw new EventBuilderConfigurationException("Cannot create directory " + EventBuilderConstants.EB_CONFIG_DIRECTORY
-                                                             + " to add tenant specific event builder configuration file:" + filename);
+                throw new EventBuilderConfigurationException("Cannot create directory " + EventBuilderConstants.EB_CONFIG_DIRECTORY + " to add tenant specific event builder :" + eventBuilderName);
             }
         }
-        return subDir.getAbsolutePath() + File.separator + filename;
+        return subDir.getAbsolutePath() + File.separator + eventBuilderName + EventBuilderConstants.EB_CONFIG_FILE_EXTENSION_WITH_DOT;
     }
 
     public static String generateFilePath(EventBuilderConfiguration eventBuilderConfiguration,
-                                          AxisConfiguration axisConfiguration) {
+                                          AxisConfiguration axisConfiguration) throws EventBuilderConfigurationException {
         String eventBuilderName = eventBuilderConfiguration.getEventBuilderName();
         File repoDir = new File(axisConfiguration.getRepository().getPath());
         if (!repoDir.exists()) {
@@ -131,4 +163,67 @@ public class EventBuilderUtil {
         return subDir.getAbsolutePath() + File.separator + eventBuilderName + EventBuilderConstants.EB_CONFIG_FILE_EXTENSION_WITH_DOT;
     }
 
+    public static Attribute[] streamDefinitionToAttributeArray(StreamDefinition streamDefinition) {
+
+        int size = 0;
+        if (streamDefinition.getMetaData() != null) {
+            size += streamDefinition.getMetaData().size();
+        }
+        if (streamDefinition.getCorrelationData() != null) {
+            size += streamDefinition.getCorrelationData().size();
+        }
+        if (streamDefinition.getPayloadData() != null) {
+            size += streamDefinition.getPayloadData().size();
+        }
+        Attribute[] attributes = new Attribute[size];
+
+        int index = 0;
+        if (streamDefinition.getMetaData() != null) {
+            for (Attribute attribute : streamDefinition.getMetaData()) {
+                attributes[index] = new Attribute(EventBuilderConstants.META_DATA_PREFIX + attribute.getName(), attribute.getType());
+                index++;
+            }
+        }
+        if (streamDefinition.getCorrelationData() != null) {
+            for (Attribute attribute : streamDefinition.getCorrelationData()) {
+                attributes[index] = new Attribute(EventBuilderConstants.CORRELATION_DATA_PREFIX + attribute.getName(), attribute.getType());
+                index++;
+            }
+        }
+        if (streamDefinition.getPayloadData() != null) {
+            for (Attribute attribute : streamDefinition.getPayloadData()) {
+                attributes[index] = new Attribute(attribute.getName(), attribute.getType());
+                index++;
+            }
+        }
+        return attributes;
+    }
+
+    public static EventBuilderConfiguration createDefaultEventBuilder(String streamId, String transportAdaptorName) {
+        String toStreamName = DataBridgeCommonsUtils.getStreamNameFromStreamId(streamId);
+        String toStreamVersion = DataBridgeCommonsUtils.getStreamVersionFromStreamId(streamId);
+
+        EventBuilderConfiguration eventBuilderConfiguration =
+                new EventBuilderConfiguration();
+
+        eventBuilderConfiguration.setEventBuilderName(streamId.replaceAll(":", "_") + EventBuilderConstants.DEFAULT_EVENT_BUILDER_POSTFIX);
+
+        Wso2EventInputMapping wso2EventInputMapping = new Wso2EventInputMapping();
+        wso2EventInputMapping.setCustomMappingEnabled(false);
+        eventBuilderConfiguration.setInputMapping(wso2EventInputMapping);
+
+        InputStreamConfiguration inputStreamConfiguration = new InputStreamConfiguration();
+        InputEventAdaptorMessageConfiguration inputEventAdaptorMessageConfiguration = new InputEventAdaptorMessageConfiguration();
+        inputEventAdaptorMessageConfiguration.addInputMessageProperty(EventBuilderConstants.ADAPTOR_MESSAGE_STREAM_NAME, toStreamName);
+        inputEventAdaptorMessageConfiguration.addInputMessageProperty(EventBuilderConstants.ADAPTOR_MESSAGE_STREAM_VERSION, toStreamVersion);
+        inputStreamConfiguration.setInputEventAdaptorMessageConfiguration(inputEventAdaptorMessageConfiguration);
+        inputStreamConfiguration.setInputEventAdaptorName(transportAdaptorName);
+        inputStreamConfiguration.setInputEventAdaptorType(EventBuilderConstants.ADAPTOR_TYPE_WSO2EVENT);
+        eventBuilderConfiguration.setInputStreamConfiguration(inputStreamConfiguration);
+
+        eventBuilderConfiguration.setToStreamName(toStreamName);
+        eventBuilderConfiguration.setToStreamVersion(toStreamVersion);
+
+        return eventBuilderConfiguration;
+    }
 }

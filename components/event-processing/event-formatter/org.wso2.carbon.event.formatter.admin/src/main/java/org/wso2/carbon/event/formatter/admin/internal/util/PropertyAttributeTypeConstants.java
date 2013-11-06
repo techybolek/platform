@@ -27,12 +27,12 @@ public final class PropertyAttributeTypeConstants {
     private PropertyAttributeTypeConstants() {
     }
 
-    public static final String ATTR_TYPE_FLOAT = "java.lang.Float";
-    public static final String ATTR_TYPE_DOUBLE = "java.lang.Double";
-    public static final String ATTR_TYPE_INTEGER = "java.lang.Integer";
-    public static final String ATTR_TYPE_LONG = "java.lang.Long";
-    public static final String ATTR_TYPE_STRING = "java.lang.String";
-    public static final String ATTR_TYPE_BOOL = "java.lang.Boolean";
+    public static final String ATTR_TYPE_FLOAT = "float";
+    public static final String ATTR_TYPE_DOUBLE = "double";
+    public static final String ATTR_TYPE_INTEGER = "int";
+    public static final String ATTR_TYPE_LONG = "long";
+    public static final String ATTR_TYPE_STRING = "string";
+    public static final String ATTR_TYPE_BOOL = "boolean";
 
 
     public static final Map<String, AttributeType> STRING_ATTRIBUTE_TYPE_MAP = Collections.unmodifiableMap(new HashMap<String, AttributeType>() {{
@@ -43,6 +43,9 @@ public final class PropertyAttributeTypeConstants {
         put(ATTR_TYPE_INTEGER, AttributeType.INT);
         put(ATTR_TYPE_LONG, AttributeType.LONG);
     }});
+
+    public static final String PROPERTY_META_PREFIX = "meta_";
+    public static final String PROPERTY_CORRELATION_PREFIX = "correlation_";
 
 
 }

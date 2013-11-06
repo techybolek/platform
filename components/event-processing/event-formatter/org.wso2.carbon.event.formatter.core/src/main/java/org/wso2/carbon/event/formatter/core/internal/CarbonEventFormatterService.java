@@ -8,37 +8,39 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.event.formatter.core.EventFormatterService;
-import org.wso2.carbon.event.formatter.core.EventSource;
 import org.wso2.carbon.event.formatter.core.config.EventFormatter;
 import org.wso2.carbon.event.formatter.core.config.EventFormatterConfiguration;
 import org.wso2.carbon.event.formatter.core.config.EventFormatterConstants;
 import org.wso2.carbon.event.formatter.core.exception.EventFormatterConfigurationException;
 import org.wso2.carbon.event.formatter.core.internal.ds.EventFormatterServiceValueHolder;
 import org.wso2.carbon.event.formatter.core.internal.util.EventFormatterConfigurationFile;
+import org.wso2.carbon.event.formatter.core.internal.util.EventFormatterUtil;
 import org.wso2.carbon.event.formatter.core.internal.util.FormatterConfigurationBuilder;
 import org.wso2.carbon.event.formatter.core.internal.util.helper.EventFormatterConfigurationFilesystemInvoker;
 import org.wso2.carbon.event.formatter.core.internal.util.helper.EventFormatterConfigurationHelper;
+import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorManagerService;
+import org.wso2.carbon.event.output.adaptor.manager.core.exception.OutputEventAdaptorManagerConfigurationException;
+import org.wso2.carbon.event.processor.api.passthrough.PassthroughSenderConfigurator;
+import org.wso2.carbon.event.processor.api.send.EventProducer;
+import org.wso2.carbon.event.processor.api.send.exception.EventProducerException;
+import org.wso2.carbon.event.stream.manager.core.EventStreamService;
+import org.wso2.carbon.event.stream.manager.core.exception.EventStreamConfigurationException;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 
 import javax.xml.stream.XMLStreamException;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CarbonEventFormatterService implements EventFormatterService {
+public class CarbonEventFormatterService implements EventFormatterService, PassthroughSenderConfigurator {
 
     private static final Log log = LogFactory.getLog(CarbonEventFormatterService.class);
-
     private Map<Integer, Map<String, EventFormatter>> tenantSpecificEventFormatterConfigurationMap;
     private Map<Integer, List<EventFormatterConfigurationFile>> eventFormatterConfigurationFileMap;
 
@@ -69,12 +71,14 @@ public class CarbonEventFormatterService implements EventFormatterService {
             directory = new File(directory.getAbsolutePath() + File.separator + EventFormatterConstants.TM_ELE_DIRECTORY);
             if (!directory.exists()) {
                 if (!directory.mkdir()) {
-                    throw new EventFormatterConfigurationException("Cannot create directory " + EventFormatterConstants.TM_ELE_DIRECTORY + " to add tenant specific transport adaptor :" + eventFormatterName);
+                    throw new EventFormatterConfigurationException("Cannot create directory " + EventFormatterConstants.TM_ELE_DIRECTORY + " to add tenant specific event adaptor :" + eventFormatterName);
                 }
             }
-            String pathInFileSystem = directory.getAbsolutePath() + File.separator + eventFormatterName + ".xml";
-            EventFormatterConfigurationFilesystemInvoker.save(omElement, pathInFileSystem, axisConfiguration);
+            validateToRemoveInactiveEventFormatterConfiguration(eventFormatterName, axisConfiguration);
+            EventFormatterConfigurationFilesystemInvoker.save(omElement, eventFormatterName + ".xml", axisConfiguration);
 
+        } else {
+            throw new EventFormatterConfigurationException("Mapping type of the Event Formatter " + eventFormatterName + " cannot be null");
         }
 
     }
@@ -84,10 +88,10 @@ public class CarbonEventFormatterService implements EventFormatterService {
                                                           AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException {
 
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        String filePath = getFilePath(tenantId, eventFormatterName);
-        if (filePath != null) {
-            EventFormatterConfigurationFilesystemInvoker.delete(filePath, axisConfiguration);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String fileName = getFileName(tenantId, eventFormatterName);
+        if (fileName != null) {
+            EventFormatterConfigurationFilesystemInvoker.delete(fileName, axisConfiguration);
         } else {
             throw new EventFormatterConfigurationException("Couldn't undeploy the Event Formatter configuration : " + eventFormatterName);
         }
@@ -95,21 +99,21 @@ public class CarbonEventFormatterService implements EventFormatterService {
     }
 
     @Override
-    public void undeployInactiveEventFormatterConfiguration(String filePath,
+    public void undeployInactiveEventFormatterConfiguration(String filename,
                                                             AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException {
 
-        EventFormatterConfigurationFilesystemInvoker.delete(filePath, axisConfiguration);
+        EventFormatterConfigurationFilesystemInvoker.delete(filename, axisConfiguration);
     }
 
     @Override
     public void editInactiveEventFormatterConfiguration(
             String eventFormatterConfiguration,
-            String filePath,
+            String filename,
             AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException {
 
-        editEvenTFormatterConfiguration(filePath, axisConfiguration, eventFormatterConfiguration, null);
+        editEventFormatterConfiguration(filename, axisConfiguration, eventFormatterConfiguration, null);
     }
 
     @Override
@@ -117,9 +121,12 @@ public class CarbonEventFormatterService implements EventFormatterService {
                                                       String eventFormatterName,
                                                       AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        String pathInFileSystem = getFilePath(tenantId, eventFormatterName);
-        editEvenTFormatterConfiguration(pathInFileSystem, axisConfiguration, eventFormatterConfiguration, eventFormatterName);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String fileName = getFileName(tenantId, eventFormatterName);
+        if (fileName == null) {
+            fileName = eventFormatterName + EventFormatterConstants.EF_CONFIG_FILE_EXTENSION_WITH_DOT;
+        }
+        editEventFormatterConfiguration(fileName, axisConfiguration, eventFormatterConfiguration, eventFormatterName);
 
     }
 
@@ -142,10 +149,9 @@ public class CarbonEventFormatterService implements EventFormatterService {
     public List<EventFormatterConfiguration> getAllActiveEventFormatterConfiguration(
             AxisConfiguration axisConfiguration) throws EventFormatterConfigurationException {
         List<EventFormatterConfiguration> eventFormatterConfigurations = new ArrayList<EventFormatterConfiguration>();
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         if (tenantSpecificEventFormatterConfigurationMap.get(tenantId) != null) {
-            for (EventFormatter eventFormatter : tenantSpecificEventFormatterConfigurationMap.get(
-                    tenantId).values()) {
+            for (EventFormatter eventFormatter : tenantSpecificEventFormatterConfigurationMap.get(tenantId).values()) {
                 eventFormatterConfigurations.add(eventFormatter.getEventFormatterConfiguration());
             }
         }
@@ -157,7 +163,7 @@ public class CarbonEventFormatterService implements EventFormatterService {
             AxisConfiguration axisConfiguration) {
 
         List<EventFormatterConfigurationFile> undeployedEventFormatterFileList = new ArrayList<EventFormatterConfigurationFile>();
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         if (eventFormatterConfigurationFileMap.get(tenantId) != null) {
             for (EventFormatterConfigurationFile eventFormatterConfigurationFile : eventFormatterConfigurationFileMap.get(tenantId)) {
                 if (!eventFormatterConfigurationFile.getStatus().equals(EventFormatterConfigurationFile.Status.DEPLOYED)) {
@@ -168,55 +174,55 @@ public class CarbonEventFormatterService implements EventFormatterService {
         return undeployedEventFormatterFileList;
     }
 
-
     @Override
-    public String getInactiveEventFormatterConfigurationContent(String filePath)
+    public String getInactiveEventFormatterConfigurationContent(String filename,
+                                                                AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException {
-        return readEventFormatterConfigurationFile(filePath);
+        return EventFormatterConfigurationFilesystemInvoker.readEventFormatterConfigurationFile(filename, axisConfiguration);
     }
 
     @Override
     public String getActiveEventFormatterConfigurationContent(String eventFormatterName,
                                                               AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException {
-
-
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        String filePath = getFilePath(tenantId, eventFormatterName);
-        return readEventFormatterConfigurationFile(filePath);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String fileName = getFileName(tenantId, eventFormatterName);
+        return EventFormatterConfigurationFilesystemInvoker.readEventFormatterConfigurationFile(fileName, axisConfiguration);
     }
-
 
     public List<String> getAllEventStreams(AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException {
 
         List<String> streamList = new ArrayList<String>();
-
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        List<EventSource> eventSourceList = EventFormatterServiceValueHolder.getEventSourceList();
-        if (eventSourceList != null) {
-            for (EventSource eventSource : eventSourceList) {
-                List<String> streamNameList = eventSource.getAllStreamId(tenantId);
-                if (streamNameList != null) {
-                    for (String streamName : streamNameList) {
-                        streamList.add(streamName);
-                    }
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        EventStreamService eventStreamService = EventFormatterServiceValueHolder.getEventStreamService();
+        Collection<StreamDefinition> eventStreamDefinitionList;
+        try {
+            eventStreamDefinitionList = eventStreamService.getAllStreamDefinitionsFromStore(tenantId);
+            if (eventStreamDefinitionList != null) {
+                for (StreamDefinition streamDefinition : eventStreamDefinitionList) {
+                    streamList.add(streamDefinition.getStreamId());
                 }
             }
+
+        } catch (EventStreamConfigurationException e) {
+            throw new EventFormatterConfigurationException("Error while retrieving stream definition from store", e);
         }
+
         return streamList;
     }
 
     public StreamDefinition getStreamDefinition(String streamNameWithVersion,
                                                 AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        EventSource eventSource = getEventSource(streamNameWithVersion, tenantId);
-        String streamDetail[] = streamNameWithVersion.trim().split(":");
-
-        return eventSource.getStreamDefinition(streamDetail[0], streamDetail[1], tenantId);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        EventStreamService eventStreamService = EventFormatterServiceValueHolder.getEventStreamService();
+        try {
+            return eventStreamService.getStreamDefinitionFromStore(streamNameWithVersion, tenantId);
+        } catch (EventStreamConfigurationException e) {
+            throw new EventFormatterConfigurationException("Error while getting stream definition from store : " + e.getMessage(), e);
+        }
     }
-
 
     public String getRegistryResourceContent(String resourcePath, int tenantId)
             throws EventFormatterConfigurationException {
@@ -235,13 +241,21 @@ public class CarbonEventFormatterService implements EventFormatterService {
             }
 
             if (registryResource != null) {
-                registryData = (RegistryUtils.decodeBytes((byte[]) registryResource.getContent()));
+                Object registryContent = registryResource.getContent();
+                if (registryContent != null) {
+                    registryData = (RegistryUtils.decodeBytes((byte[]) registryContent));
+                } else {
+                    throw new EventFormatterConfigurationException("There is no registry resource content available at " + resourcePath);
+                }
+
             } else {
                 throw new EventFormatterConfigurationException("Resource couldn't found from registry at " + resourcePath);
             }
 
         } catch (RegistryException e) {
             throw new EventFormatterConfigurationException("Error while retrieving the resource from registry at " + resourcePath, e);
+        } catch (ClassCastException e) {
+            throw new EventFormatterConfigurationException("Invalid mapping content found in " + resourcePath, e);
         }
         return registryData;
     }
@@ -251,7 +265,7 @@ public class CarbonEventFormatterService implements EventFormatterService {
                                      boolean flag)
             throws EventFormatterConfigurationException {
 
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         EventFormatterConfiguration eventFormatterConfiguration = getActiveEventFormatterConfiguration(eventFormatterName, tenantId);
         eventFormatterConfiguration.setEnableStatistics(flag);
         editTracingStatistics(eventFormatterConfiguration, eventFormatterName, tenantId, axisConfiguration);
@@ -261,10 +275,48 @@ public class CarbonEventFormatterService implements EventFormatterService {
     public void setTraceEnabled(String eventFormatterName, AxisConfiguration axisConfiguration,
                                 boolean flag)
             throws EventFormatterConfigurationException {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         EventFormatterConfiguration eventFormatterConfiguration = getActiveEventFormatterConfiguration(eventFormatterName, tenantId);
         eventFormatterConfiguration.setEnableTracing(flag);
         editTracingStatistics(eventFormatterConfiguration, eventFormatterName, tenantId, axisConfiguration);
+    }
+
+    @Override
+    public String getEventFormatterStatusAsString(String filename) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        List<EventFormatterConfigurationFile> eventFormatterConfigurationFileList = eventFormatterConfigurationFileMap.get(tenantId);
+        if(eventFormatterConfigurationFileList != null) {
+            for(EventFormatterConfigurationFile eventFormatterConfigurationFile: eventFormatterConfigurationFileList) {
+                if(filename != null && filename.equals(eventFormatterConfigurationFile.getFileName())) {
+                    String statusMsg = eventFormatterConfigurationFile.getDeploymentStatusMessage();
+                    if(eventFormatterConfigurationFile.getDependency() != null) {
+                        statusMsg = statusMsg + " [Dependency: " + eventFormatterConfigurationFile.getDependency() + "]";
+                    }
+                    return statusMsg;
+                }
+            }
+        }
+
+        return EventFormatterConstants.NO_DEPENDENCY_INFO_MSG;
+    }
+
+    @Override
+    public void deployDefaultEventSender(String streamId, AxisConfiguration axisConfiguration) throws EventProducerException {
+        OutputEventAdaptorManagerService outputEventAdaptorManagerService = EventFormatterServiceValueHolder.getOutputEventAdaptorManagerService();
+        try {
+            String defaultFormatterFilename = streamId.replaceAll(EventFormatterConstants.STREAM_ID_SEPERATOR, EventFormatterConstants.NORMALIZATION_STRING)
+                    + EventFormatterConstants.DEFAULT_EVENT_FORMATTER_POSTFIX + EventFormatterConstants.EF_CONFIG_FILE_EXTENSION_WITH_DOT;
+            if (!EventFormatterConfigurationFilesystemInvoker.isEventFormatterConfigurationFileExists(defaultFormatterFilename, axisConfiguration)) {
+                String eventAdaptorName = outputEventAdaptorManagerService.getDefaultWso2EventAdaptor(axisConfiguration);
+                EventFormatterConfiguration defaultEventFormatterConfiguration =
+                        EventFormatterUtil.createDefaultEventFormatter(streamId, eventAdaptorName);
+                deployEventFormatterConfiguration(defaultEventFormatterConfiguration, axisConfiguration);
+            }
+        } catch (OutputEventAdaptorManagerConfigurationException e) {
+            throw new EventProducerException("Error retrieving default wso2 event output adaptor : " + e.getMessage(), e);
+        } catch (EventFormatterConfigurationException e) {
+            throw new EventProducerException("Error creating a default event formatter : " + e.getMessage(), e);
+        }
     }
 
     //Non-Interface public methods
@@ -294,7 +346,7 @@ public class CarbonEventFormatterService implements EventFormatterService {
             eventFormatterConfigurationFileList = new ArrayList<EventFormatterConfigurationFile>();
         } else {
             for (EventFormatterConfigurationFile anEventFormatterConfigurationFileList : eventFormatterConfigurationFileList) {
-                if (anEventFormatterConfigurationFileList.getFilePath().equals(eventFormatterConfigurationFile.getFilePath())) {
+                if (anEventFormatterConfigurationFileList.getFileName().equals(eventFormatterConfigurationFile.getFileName())) {
                     return;
                 }
             }
@@ -303,9 +355,10 @@ public class CarbonEventFormatterService implements EventFormatterService {
         eventFormatterConfigurationFileMap.put(tenantId, eventFormatterConfigurationFileList);
     }
 
-    public void addEventFormatterConfiguration(
-            int tenantId, EventFormatterConfiguration eventFormatterConfiguration)
+    public void addEventFormatterConfiguration(EventFormatterConfiguration eventFormatterConfiguration)
             throws EventFormatterConfigurationException {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         Map<String, EventFormatter> eventFormatterConfigurationMap
                 = tenantSpecificEventFormatterConfigurationMap.get(tenantId);
@@ -314,26 +367,25 @@ public class CarbonEventFormatterService implements EventFormatterService {
             eventFormatterConfigurationMap = new ConcurrentHashMap<String, EventFormatter>();
         }
 
-        EventFormatter eventFormatter = new EventFormatter(eventFormatterConfiguration, tenantId);
+        EventFormatter eventFormatter = new EventFormatter(eventFormatterConfiguration);
         eventFormatterConfigurationMap.put(eventFormatterConfiguration.getEventFormatterName(), eventFormatter);
 
         tenantSpecificEventFormatterConfigurationMap.put(tenantId, eventFormatterConfigurationMap);
     }
 
-    public void removeEventFormatterConfigurationFromMap(String filePath, int tenantId) {
+    public void removeEventFormatterConfigurationFromMap(String fileName, int tenantId) {
         List<EventFormatterConfigurationFile> eventFormatterConfigurationFileList = eventFormatterConfigurationFileMap.get(tenantId);
         if (eventFormatterConfigurationFileList != null) {
             for (EventFormatterConfigurationFile eventFormatterConfigurationFile : eventFormatterConfigurationFileList) {
-                if ((eventFormatterConfigurationFile.getFilePath().equals(filePath))) {
+                if ((eventFormatterConfigurationFile.getFileName().equals(fileName))) {
                     if (eventFormatterConfigurationFile.getStatus().equals(EventFormatterConfigurationFile.Status.DEPLOYED)) {
                         String eventFormatterName = eventFormatterConfigurationFile.getEventFormatterName();
                         if (tenantSpecificEventFormatterConfigurationMap.get(tenantId) != null) {
                             EventFormatter eventFormatter = tenantSpecificEventFormatterConfigurationMap.get(tenantId).get(eventFormatterName);
-                            List<EventSource> eventSourceList = eventFormatter.getEventSourceList();
-                            for (EventSource eventSource : eventSourceList) {
-                                eventSource.unsubscribe(tenantId, eventFormatter.getStreamId(), eventFormatter.getEventFormatterListener());
+                            List<EventProducer> eventProducerList = eventFormatter.getEventProducerList();
+                            for (EventProducer eventProducer : eventProducerList) {
+                                eventProducer.unsubscribe(tenantId, eventFormatter.getStreamId(), eventFormatter.getEventFormatterSender());
                             }
-
                             tenantSpecificEventFormatterConfigurationMap.get(tenantId).remove(eventFormatterName);
                         }
                     }
@@ -353,9 +405,7 @@ public class CarbonEventFormatterService implements EventFormatterService {
             List<EventFormatterConfigurationFile> eventFormatterConfigurationFileList = eventFormatterConfigurationFileMap.get(tenantId);
 
             if (eventFormatterConfigurationFileList != null) {
-                Iterator<EventFormatterConfigurationFile> eventFormatterConfigurationFileIterator = eventFormatterConfigurationFileList.iterator();
-                while (eventFormatterConfigurationFileIterator.hasNext()) {
-                    EventFormatterConfigurationFile eventFormatterConfigurationFile = eventFormatterConfigurationFileIterator.next();
+                for (EventFormatterConfigurationFile eventFormatterConfigurationFile : eventFormatterConfigurationFileList) {
                     if ((eventFormatterConfigurationFile.getStatus().equals(EventFormatterConfigurationFile.Status.WAITING_FOR_DEPENDENCY)) && eventFormatterConfigurationFile.getDependency().equalsIgnoreCase(dependency)) {
                         fileList.add(eventFormatterConfigurationFile);
                     }
@@ -364,12 +414,11 @@ public class CarbonEventFormatterService implements EventFormatterService {
         }
         for (EventFormatterConfigurationFile eventFormatterConfigurationFile : fileList) {
             try {
-                EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFilePath(), eventFormatterConfigurationFile.getAxisConfiguration());
+                EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFileName(), eventFormatterConfigurationFile.getAxisConfiguration());
             } catch (Exception e) {
-                log.error("Exception occurred while trying to deploy the Event formatter configuration file : " + new File(eventFormatterConfigurationFile.getFilePath()).getName());
+                log.error("Exception occurred while trying to deploy the Event formatter configuration file : " + new File(eventFormatterConfigurationFile.getFileName()).getName(),e);
             }
         }
-
     }
 
     public void deactivateActiveEventFormatterConfiguration(int tenantId, String dependency)
@@ -381,8 +430,8 @@ public class CarbonEventFormatterService implements EventFormatterService {
             if (eventFormatterMap != null) {
                 for (EventFormatter eventFormatter : eventFormatterMap.values()) {
                     String streamNameWithVersion = eventFormatter.getEventFormatterConfiguration().getFromStreamName() + ":" + eventFormatter.getEventFormatterConfiguration().getFromStreamVersion();
-                    String transportAdaptorName = eventFormatter.getEventFormatterConfiguration().getToPropertyConfiguration().getTransportAdaptorName();
-                    if (streamNameWithVersion.equals(dependency) || transportAdaptorName.equals(dependency)) {
+                    String eventAdaptorName = eventFormatter.getEventFormatterConfiguration().getToPropertyConfiguration().getEventAdaptorName();
+                    if (streamNameWithVersion.equals(dependency) || eventAdaptorName.equals(dependency)) {
                         EventFormatterConfigurationFile eventFormatterConfigurationFile = getEventFormatterConfigurationFile(eventFormatter.getEventFormatterConfiguration().getEventFormatterName(), tenantId);
                         if (eventFormatterConfigurationFile != null) {
                             fileList.add(eventFormatterConfigurationFile);
@@ -393,8 +442,8 @@ public class CarbonEventFormatterService implements EventFormatterService {
         }
 
         for (EventFormatterConfigurationFile eventFormatterConfigurationFile : fileList) {
-            EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFilePath(), eventFormatterConfigurationFile.getAxisConfiguration());
-            log.info("EventFormatter  is undeployed because dependency : " + eventFormatterConfigurationFile.getEventFormatterName() + " , dependency couldn't found : " + dependency);
+            EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFileName(), eventFormatterConfigurationFile.getAxisConfiguration());
+            log.info("Event formatter : " + eventFormatterConfigurationFile.getEventFormatterName() + "  is in inactive state because dependency could not be found : " + dependency);
         }
     }
 
@@ -405,20 +454,21 @@ public class CarbonEventFormatterService implements EventFormatterService {
             String eventFormatterName, int tenantId, AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException {
 
-        String pathInFileSystem = getFilePath(tenantId, eventFormatterName);
+        String fileName = getFileName(tenantId, eventFormatterName);
         undeployActiveEventFormatterConfiguration(eventFormatterName, axisConfiguration);
         OMElement omElement = FormatterConfigurationBuilder.eventFormatterConfigurationToOM(eventFormatterConfiguration);
-        EventFormatterConfigurationFilesystemInvoker.save(omElement, pathInFileSystem, axisConfiguration);
+        EventFormatterConfigurationFilesystemInvoker.delete(fileName, axisConfiguration);
+        EventFormatterConfigurationFilesystemInvoker.save(omElement, fileName, axisConfiguration);
     }
 
-    private String getFilePath(int tenantId, String eventFormatterName) {
+    private String getFileName(int tenantId, String eventFormatterName) {
 
         if (eventFormatterConfigurationFileMap.size() > 0) {
             List<EventFormatterConfigurationFile> eventFormatterConfigurationFileList = eventFormatterConfigurationFileMap.get(tenantId);
             if (eventFormatterConfigurationFileList != null) {
                 for (EventFormatterConfigurationFile eventFormatterConfigurationFile : eventFormatterConfigurationFileList) {
-                    if ((eventFormatterConfigurationFile.getEventFormatterName().equals(eventFormatterName))) {
-                        return eventFormatterConfigurationFile.getFilePath();
+                    if ((eventFormatterConfigurationFile.getEventFormatterName().equals(eventFormatterName)) && (eventFormatterConfigurationFile.getStatus().equals(EventFormatterConfigurationFile.Status.DEPLOYED))) {
+                        return eventFormatterConfigurationFile.getFileName();
                     }
                 }
             }
@@ -426,38 +476,12 @@ public class CarbonEventFormatterService implements EventFormatterService {
         return null;
     }
 
-    private String readEventFormatterConfigurationFile(String filePath)
-            throws EventFormatterConfigurationException {
-        BufferedReader bufferedReader = null;
-        StringBuilder stringBuilder = new StringBuilder();
-        try {
-            bufferedReader = new BufferedReader(new FileReader(filePath));
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuilder.append(line).append("\n");
-            }
-        } catch (FileNotFoundException e) {
-            throw new EventFormatterConfigurationException("Event formatter file not found : " + e.getMessage(), e);
-        } catch (IOException e) {
-            throw new EventFormatterConfigurationException("Cannot read the Event Formatter file : " + e.getMessage(), e);
-        } finally {
-            try {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-            } catch (IOException e) {
-                log.error("Error occurred when reading the file : " + e.getMessage(), e);
-            }
-        }
-        return stringBuilder.toString().trim();
-    }
-
-    private void editEvenTFormatterConfiguration(String pathInFileSystem,
+    private void editEventFormatterConfiguration(String filename,
                                                  AxisConfiguration axisConfiguration,
                                                  String eventFormatterConfiguration,
-                                                 String eventFormatterName)
+                                                 String originalEventFormatterName)
             throws EventFormatterConfigurationException {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             OMElement omElement = AXIOMUtil.stringToOM(eventFormatterConfiguration);
             omElement.toString();
@@ -465,17 +489,20 @@ public class CarbonEventFormatterService implements EventFormatterService {
             String mappingType = EventFormatterConfigurationHelper.getOutputMappingType(omElement);
             if (mappingType != null) {
                 EventFormatterConfiguration eventFormatterConfigurationObject = FormatterConfigurationBuilder.getEventFormatterConfiguration(omElement, tenantId, mappingType);
-                if (!(eventFormatterConfigurationObject.getEventFormatterName().equals(eventFormatterName))) {
+                if (!(eventFormatterConfigurationObject.getEventFormatterName().equals(originalEventFormatterName))) {
                     if (checkEventFormatterValidity(tenantId, eventFormatterConfigurationObject.getEventFormatterName())) {
-                        EventFormatterConfigurationFilesystemInvoker.delete(pathInFileSystem, axisConfiguration);
-                        EventFormatterConfigurationFilesystemInvoker.save(omElement, pathInFileSystem, axisConfiguration);
+                        EventFormatterConfigurationFilesystemInvoker.delete(filename, axisConfiguration);
+                        EventFormatterConfigurationFilesystemInvoker.save(omElement, filename, axisConfiguration);
                     } else {
-                        throw new EventFormatterConfigurationException("There is a Event Formatter with the same name");
+                        throw new EventFormatterConfigurationException("There is a Event Formatter " + eventFormatterConfigurationObject.getEventFormatterName() + " with the same name");
                     }
                 } else {
-                    EventFormatterConfigurationFilesystemInvoker.delete(pathInFileSystem, axisConfiguration);
-                    EventFormatterConfigurationFilesystemInvoker.save(omElement, pathInFileSystem, axisConfiguration);
+                    EventFormatterConfigurationFilesystemInvoker.delete(filename, axisConfiguration);
+                    EventFormatterConfigurationFilesystemInvoker.save(omElement, filename, axisConfiguration);
                 }
+            } else {
+                throw new EventFormatterConfigurationException("Mapping type of the Event Formatter " + originalEventFormatterName + " cannot be null");
+
             }
 
         } catch (XMLStreamException e) {
@@ -484,32 +511,12 @@ public class CarbonEventFormatterService implements EventFormatterService {
 
     }
 
-    private EventSource getEventSource(String streamNameWithVersion, int tenantId) {
-        List<EventSource> eventSourceList = EventFormatterServiceValueHolder.getEventSourceList();
-
-        EventSource eventSource = null;
-        for (EventSource currentEventSource : eventSourceList) {
-            List<String> streamList = currentEventSource.getAllStreamId(tenantId);
-            if (streamList != null) {
-                for (String stream : streamList) {
-                    if (stream.equals(streamNameWithVersion)) {
-                        eventSource = currentEventSource;
-                        break;
-                    }
-                }
-            }
-        }
-        return eventSource;
-    }
-
     private EventFormatterConfigurationFile getEventFormatterConfigurationFile(
             String eventFormatterName, int tenantId) {
         List<EventFormatterConfigurationFile> eventFormatterConfigurationFileList = eventFormatterConfigurationFileMap.get(tenantId);
 
         if (eventFormatterConfigurationFileList != null) {
-            Iterator<EventFormatterConfigurationFile> eventFormatterConfigurationFileIterator = eventFormatterConfigurationFileList.iterator();
-            while (eventFormatterConfigurationFileIterator.hasNext()) {
-                EventFormatterConfigurationFile eventFormatterConfigurationFile = eventFormatterConfigurationFileIterator.next();
+            for (EventFormatterConfigurationFile eventFormatterConfigurationFile : eventFormatterConfigurationFileList) {
                 if (eventFormatterConfigurationFile.getEventFormatterName().equals(eventFormatterName)) {
                     return eventFormatterConfigurationFile;
                 }
@@ -519,5 +526,24 @@ public class CarbonEventFormatterService implements EventFormatterService {
 
     }
 
+    private void validateToRemoveInactiveEventFormatterConfiguration(String eventFormatterName,
+                                                                     AxisConfiguration axisConfiguration)
+            throws EventFormatterConfigurationException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        String fileName = eventFormatterName + EventFormatterConstants.EF_CONFIG_FILE_EXTENSION_WITH_DOT;
+        List<EventFormatterConfigurationFile> eventFormatterConfigurationFiles = eventFormatterConfigurationFileMap.get(tenantId);
+        if (eventFormatterConfigurationFiles != null) {
+            for (EventFormatterConfigurationFile eventFormatterConfigurationFile : eventFormatterConfigurationFiles) {
+                if ((eventFormatterConfigurationFile.getFileName().equals(fileName))) {
+                    if (!(eventFormatterConfigurationFile.getStatus().equals(EventFormatterConfigurationFile.Status.DEPLOYED))) {
+                        EventFormatterConfigurationFilesystemInvoker.delete(fileName, axisConfiguration);
+                        break;
+                    }
+                }
+            }
+        }
+
+    }
 
 }

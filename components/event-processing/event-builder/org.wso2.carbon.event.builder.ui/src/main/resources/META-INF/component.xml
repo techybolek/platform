@@ -20,10 +20,10 @@
 <component xmlns="http://products.wso2.org/carbon">
     <menus>
         <menu>
-            <id>event_processor_menu</id>
-            <i18n-key>event.processor</i18n-key>
+            <id>event_processor_config_menu</id>
+            <i18n-key>event.processor.configuration</i18n-key>
             <i18n-bundle>org.wso2.carbon.event.builder.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>manage_menu</parent-menu>
+            <parent-menu>configure_menu</parent-menu>
             <link>#</link>
             <region>region1</region>
             <order>10</order>
@@ -35,10 +35,10 @@
             <id>eventbuilder_menu</id>
             <i18n-key>event.builders</i18n-key>
             <i18n-bundle>org.wso2.carbon.event.builder.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>event_processor_menu</parent-menu>
+            <parent-menu>event_processor_config_menu</parent-menu>
             <link>../eventbuilder/index.jsp</link>
             <region>region1</region>
-            <order>10</order>
+            <order>20</order>
             <style-class>home</style-class>
             <icon>../eventbuilder/images/eventBuilder.gif</icon>
             <require-permission>/permission/admin/login</require-permission>

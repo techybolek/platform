@@ -81,21 +81,27 @@
     </script>
     <div id="middle">
         <%
+            String requestString="";
             if (category == null) {
         %>
         <h2><fmt:message key="event.statistics"/> (<fmt:message key="all.events"/>)</h2>
         <%
             } else {
+
                 if (deployment == null) {
+                    requestString="?category="+category;
         %>
         <h2><fmt:message key="event.statistics"/> (<fmt:message key="all.events"/> <%=category%>)</h2>
         <%
                 } else {
                     if (element == null) {
+                        requestString="?category="+category+"&deployment="+deployment;
+
         %>
         <h2><fmt:message key="event.statistics"/> (<%=deployment%> <%=category%>)</h2>
         <%
                     } else {
+                        requestString="?category="+category+"&deployment="+deployment+"&element="+element;
         %>
         <h2><fmt:message key="event.statistics"/> (<%=element%> <fmt:message key="event.statistics.events"/> <%=deployment%> <%=category%>)</h2>
         <%
@@ -115,7 +121,7 @@
                                 jQuery.noConflict();
                                 var refresh;
                                 function refreshStats() {
-                                    var url = "graph_ajaxprocessor.jsp";
+                                    var url = "graph_ajaxprocessor.jsp<%=requestString.replaceAll(" ","%20")%>";
                                     jQuery("#result").load(url, null, function (responseText, status, XMLHttpRequest) {
                                         if (status != "success") {
                                             stopRefreshStats();
@@ -151,19 +157,19 @@
                                     <%
                                         if (category == null) {
                                     %>
-                                    <a href="event_statistics_view.jsp?category=<%=childStat.replaceAll(" ","%20")%>"><%=childStat%>
+                                    <a href="event_statistics_view.jsp?ordinal=1&category=<%=childStat.replaceAll(" ","%20")%>"><%=childStat%>
                                     </a>
 
                                     <%
                                     } else {
                                         if (deployment == null) {
                                     %>
-                                    <a href="event_statistics_view.jsp?category=<%=category%>&deployment=<%=childStat.replaceAll(" ","%20")%>"><%=childStat%></a>
+                                    <a href="event_statistics_view.jsp?ordinal=1&category=<%=category%>&deployment=<%=childStat.replaceAll(" ","%20")%>"><%=childStat%></a>
                                     <%
                                             } else {
                                                 if (element == null) {
                                     %>
-                                    <a href="event_statistics_view.jsp?category=<%=category%>&deployment=<%=deployment%>&element=<%=childStat.replaceAll(" ","%20")%>"><%=childStat%></a>
+                                    <a href="event_statistics_view.jsp?ordinal=1&category=<%=category%>&deployment=<%=deployment%>&element=<%=childStat.replaceAll(" ","%20")%>"><%=childStat%></a>
                                     <%
                                                 }
                                             }

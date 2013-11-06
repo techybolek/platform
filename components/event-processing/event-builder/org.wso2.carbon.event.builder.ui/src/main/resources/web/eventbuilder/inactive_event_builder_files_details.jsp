@@ -68,7 +68,7 @@
                 <thead>
                 <tr>
                     <th><fmt:message key="filename.header"/></th>
-                    <th><fmt:message key="event.builder.name.header"/></th>
+                    <th><fmt:message key="inactive.reason.header"/></th>
                     <th><fmt:message key="actions.header"/></th>
                 </tr>
                 </thead>
@@ -81,13 +81,16 @@
                         <%=eventBuilderConfigurationFilename%>
                     </td>
                     <td>
+                        <%=stub.getEventBuilderStatusAsString(eventBuilderConfigurationFilename)%>
+                    </td>
+                    <td>
                         <a style="background-image: url(../admin/images/delete.gif);"
                            class="icon-link"
                            onclick="doDelete('<%=eventBuilderConfigurationFilename%>')"><font
                                 color="#4682b4">Delete</font></a>
                         <a style="background-image: url(../admin/images/edit.gif);"
                            class="icon-link"
-                           href="edit_inactive_event_builder_details.jsp?eventBuilderFilename=<%=eventBuilderConfigurationFilename%>"><font
+                           href="edit_inactive_event_builder_details.jsp?ordinal=1&eventBuilderFilename=<%=eventBuilderConfigurationFilename%>"><font
                                 color="#4682b4">Source View</font></a>
                     </td>
 

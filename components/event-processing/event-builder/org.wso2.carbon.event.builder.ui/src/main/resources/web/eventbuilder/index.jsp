@@ -52,6 +52,7 @@
                         type: 'POST',
                         url: 'update_property_ajaxprocessor.jsp',
                         data: 'eventBuilderName=' + eventBuilderName + '&attribute=stat' + '&value=false',
+                        async:false,
                         success: function (msg) {
                             handleCallback(eventBuilderName, DISABLE, STAT);
                         },
@@ -67,6 +68,7 @@
                         type: 'POST',
                         url: 'update_property_ajaxprocessor.jsp',
                         data: 'eventBuilderName=' + eventBuilderName + '&attribute=stat' + '&value=true',
+                        async:false,
                         success: function (msg) {
                             handleCallback(eventBuilderName, ENABLE, STAT);
                         },
@@ -111,6 +113,7 @@
                         type: 'POST',
                         url: 'update_property_ajaxprocessor.jsp',
                         data: 'eventBuilderName=' + eventBuilderName + '&attribute=trace' + '&value=true',
+                        async:false,
                         success: function (msg) {
                             handleCallback(eventBuilderName, ENABLE, TRACE);
                         },
@@ -126,6 +129,7 @@
                         type: 'POST',
                         url: 'update_property_ajaxprocessor.jsp',
                         data: 'eventBuilderName=' + eventBuilderName + '&attribute=trace' + '&value=false',
+                        async:false,
                         success: function (msg) {
                             handleCallback(eventBuilderName, DISABLE, TRACE);
                         },
@@ -165,7 +169,7 @@
 
 <div id="middle">
 <h2><fmt:message key="available.event.builders.header"/></h2>
-<a href="create_eventbuilder.jsp"
+<a href="create_eventbuilder.jsp?ordinal=1"
    style="background-image:url(images/add.gif);"
    class="icon-link">
     Add Event Builder
@@ -175,7 +179,7 @@
 <div id="workArea">
     <%=activeEventBuilders%> <fmt:message
         key="active.event.builders.header"/> , <% if (totalNotDeployedEventBuilders > 0) { %><a
-        href="inactive_event_builder_files_details.jsp"><%=totalNotDeployedEventBuilders%>
+        href="inactive_event_builder_files_details.jsp?ordinal=1"><%=totalNotDeployedEventBuilders%>
     <fmt:message
             key="inactive.event.builders.header"/></a><% } else {%><%=totalNotDeployedEventBuilders%>
     <fmt:message key="inactive.event.builders.header"/> <% } %>
@@ -195,7 +199,7 @@
             <th><fmt:message key="event.builder.type.header"/></th>
             <th><fmt:message key="transport.adaptor.name.header"/></th>
             <th><fmt:message key="event.builder.stream.header"/></th>
-            <th width="30%"><fmt:message key="actions.header"/></th>
+            <th width="420px"><fmt:message key="actions.header"/></th>
         </tr>
         </thead>
         <tbody>
@@ -205,13 +209,13 @@
         %>
         <tr>
             <td>
-                <a href="eventbuilder_details.jsp?eventBuilderName=<%=eventBuilderConfigurationDto.getEventBuilderConfigName()%>">
+                <a href="eventbuilder_details.jsp?ordinal=1&eventBuilderName=<%=eventBuilderConfigurationDto.getEventBuilderConfigName()%>">
                     <%=eventBuilderConfigurationDto.getEventBuilderConfigName()%>
                 </a>
             </td>
             <td><%=eventBuilderConfigurationDto.getInputMappingType()%>
             </td>
-            <td><%=eventBuilderConfigurationDto.getInputTransportAdaptorName()%>
+            <td><%=eventBuilderConfigurationDto.getInputEventAdaptorName()%>
             </td>
             <td><%=eventBuilderConfigurationDto.getToStreamName() + ":" + eventBuilderConfigurationDto.getToStreamVersion()%>
             </td>
@@ -297,7 +301,7 @@
                         color="#4682b4">Delete</font></a>
                 <a style="background-image: url(../admin/images/edit.gif);"
                    class="icon-link"
-                   href="edit_event_builder_details.jsp?eventBuilderName=<%=eventBuilderConfigurationDto.getEventBuilderConfigName()%>"><font
+                   href="edit_event_builder_details.jsp?ordinal=1&eventBuilderName=<%=eventBuilderConfigurationDto.getEventBuilderConfigName()%>"><font
                         color="#4682b4">Edit</font></a>
             </td>
 

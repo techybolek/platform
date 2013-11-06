@@ -4,7 +4,7 @@
 <fmt:bundle basename="org.wso2.carbon.event.formatter.ui.i18n.Resources">
 
     <carbon:breadcrumb
-            label="event.formatter.add"
+            label="add"
             resourceBundle="org.wso2.carbon.event.formatter.ui.i18n.Resources"
             topPage="false"
             request="<%=request%>"/>
@@ -18,6 +18,8 @@
     <script type="text/javascript" src="js/event_formatter.js"></script>
     <script type="text/javascript"
             src="js/create_eventFormatter_helper.js"></script>
+    <script type="text/javascript" src="../ajax/js/prototype.js"></script>
+
 
     <script type="text/javascript">
         jQuery(document).ready(function () {
@@ -31,12 +33,12 @@
 
         <div id="workArea">
 
-            <form name="inputForm" action="index.jsp" method="get" id="addEventFormatter">
+            <form name="inputForm" action="index.jsp?ordinal=1" method="get" id="addEventFormatter">
                 <table style="width:100%" id="eventFormatterAdd" class="styledLeft">
                     <% EventFormatterAdminServiceStub eventFormatterstub = EventFormatterUIUtils.getEventFormatterAdminService(config, session, request);
                         String[] outputStreamNames = eventFormatterstub.getAllEventStreamNames();
-                        String[] outputTransportAdaptorNames = eventFormatterstub.getOutputTransportAdaptorNames();
-                        if (outputStreamNames != null && outputTransportAdaptorNames != null) {
+                        OutputEventAdaptorInfoDto[] outputEventAdaptorInfoDtos = eventFormatterstub.getOutputEventAdaptorInfo();
+                        if (outputStreamNames != null && outputEventAdaptorInfoDtos != null) {
                     %>
                     <thead>
                     <tr>
@@ -67,9 +69,8 @@
                                 <tbody>
 
                                 <tr>
-                                    <td class="leftCol-med" colspan="2">Event Streams or output
-                                                                        Transport Adaptors are
-                                                                        not available
+                                    <td class="leftCol-med" colspan="2">Event Streams and/or Output
+                                        Event Adaptors are not available
                                     </td>
                                 </tr>
                                 </tbody>

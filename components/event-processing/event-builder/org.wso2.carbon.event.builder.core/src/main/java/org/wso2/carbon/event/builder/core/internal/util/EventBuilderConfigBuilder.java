@@ -27,20 +27,14 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.config.InputMapperFactory;
-import org.wso2.carbon.event.builder.core.config.InputMapping;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderValidationException;
-import org.wso2.carbon.event.builder.core.internal.config.InputMappingAttribute;
 import org.wso2.carbon.event.builder.core.internal.config.InputStreamConfiguration;
-import org.wso2.carbon.event.builder.core.internal.type.json.JsonInputMapperFactory;
-import org.wso2.carbon.event.builder.core.internal.type.map.MapInputMapperFactory;
-import org.wso2.carbon.event.builder.core.internal.type.text.TextInputMapperFactory;
-import org.wso2.carbon.event.builder.core.internal.type.wso2event.Wso2InputMapperFactory;
-import org.wso2.carbon.event.builder.core.internal.type.xml.XMLInputMapperFactory;
+import org.wso2.carbon.event.builder.core.internal.ds.EventBuilderServiceValueHolder;
 import org.wso2.carbon.event.builder.core.internal.util.helper.ConfigurationValidator;
 import org.wso2.carbon.event.builder.core.internal.util.helper.EventBuilderConfigHelper;
-import org.wso2.carbon.input.transport.adaptor.core.MessageType;
-import org.wso2.carbon.input.transport.adaptor.core.message.config.InputTransportAdaptorMessageConfiguration;
+import org.wso2.carbon.event.input.adaptor.core.MessageType;
+import org.wso2.carbon.event.input.adaptor.core.message.config.InputEventAdaptorMessageConfiguration;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -48,15 +42,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 
-public abstract class EventBuilderConfigBuilder {
+public class EventBuilderConfigBuilder {
 
     private static final Log log = LogFactory.getLog(EventBuilderConfigBuilder.class);
 
-    protected EventBuilderConfigBuilder() {
-
-    }
-
-    public OMElement eventBuilderConfigurationToOM(
+    public static OMElement eventBuilderConfigurationToOM(
             EventBuilderConfiguration eventBuilderConfiguration) {
 
         OMFactory factory = OMAbstractFactory.getOMFactory();
@@ -78,12 +68,12 @@ public abstract class EventBuilderConfigBuilder {
         //From properties - Stream Name and version
         InputStreamConfiguration inputStreamConfiguration = eventBuilderConfiguration.getInputStreamConfiguration();
         OMElement fromOMElement = factory.createOMElement(EventBuilderConstants.EB_ELEMENT_FROM, eventBuilderConfigElement.getDefaultNamespace());
-        fromOMElement.addAttribute(EventBuilderConstants.EB_ATTR_TA_NAME, inputStreamConfiguration.getTransportAdaptorName(), null);
-        fromOMElement.addAttribute(EventBuilderConstants.EB_ATTR_TA_TYPE, inputStreamConfiguration.getTransportAdaptorType(), null);
+        fromOMElement.addAttribute(EventBuilderConstants.EB_ATTR_TA_NAME, inputStreamConfiguration.getInputEventAdaptorName(), null);
+        fromOMElement.addAttribute(EventBuilderConstants.EB_ATTR_TA_TYPE, inputStreamConfiguration.getInputEventAdaptorType(), null);
 
-        InputTransportAdaptorMessageConfiguration inputTransportAdaptorMessageConfiguration = inputStreamConfiguration.getInputTransportAdaptorMessageConfiguration();
-        if (inputTransportAdaptorMessageConfiguration != null) {
-            Map<String, String> wso2EventInputPropertyMap = inputTransportAdaptorMessageConfiguration.getInputMessageProperties();
+        InputEventAdaptorMessageConfiguration InputEventAdaptorMessageConfiguration = inputStreamConfiguration.getInputEventAdaptorMessageConfiguration();
+        if (InputEventAdaptorMessageConfiguration != null) {
+            Map<String, String> wso2EventInputPropertyMap = InputEventAdaptorMessageConfiguration.getInputMessageProperties();
             for (Map.Entry<String, String> propertyEntry : wso2EventInputPropertyMap.entrySet()) {
                 OMElement propertyElement = factory.createOMElement(EventBuilderConstants.EB_ELEMENT_PROPERTY, fromOMElement.getDefaultNamespace());
                 propertyElement.addAttribute(EventBuilderConstants.EB_ATTR_NAME, propertyEntry.getKey(), null);
@@ -93,7 +83,9 @@ public abstract class EventBuilderConfigBuilder {
         }
         eventBuilderConfigElement.addChild(fromOMElement);
 
-        OMElement mappingOMElement = eventBuilderConfiguration.getInputMapperFactory().constructOMFromInputMapping(eventBuilderConfiguration.getInputMapping(), factory);
+        String mappingType = eventBuilderConfiguration.getInputMapping().getMappingType();
+        InputMapperFactory mapperFactory = EventBuilderServiceValueHolder.getMappingFactoryMap().get(mappingType);
+        OMElement mappingOMElement = mapperFactory.constructOMFromInputMapping(eventBuilderConfiguration.getInputMapping(), factory);
         mappingOMElement.setNamespace(eventBuilderConfigElement.getDefaultNamespace());
         eventBuilderConfigElement.addChild(mappingOMElement);
 
@@ -112,8 +104,8 @@ public abstract class EventBuilderConfigBuilder {
         return eventBuilderConfigElement;
     }
 
-    public EventBuilderConfiguration getEventBuilderConfiguration(
-            OMElement eventBuilderConfigOMElement, int tenantId, String mappingType)
+    public static EventBuilderConfiguration getEventBuilderConfiguration(
+            OMElement eventBuilderConfigOMElement, String mappingType, int tenantId)
             throws EventBuilderConfigurationException {
 
         if (!eventBuilderConfigOMElement.getLocalName().equals(EventBuilderConstants.EB_ELEMENT_ROOT_ELEMENT)) {
@@ -136,17 +128,17 @@ public abstract class EventBuilderConfigBuilder {
         OMElement mappingElement = eventBuilderConfigOMElement.getFirstChildWithName(new QName(EventBuilderConstants.EB_CONF_NS, EventBuilderConstants.EB_ELEMENT_MAPPING));
         OMElement toElement = eventBuilderConfigOMElement.getFirstChildWithName(new QName(EventBuilderConstants.EB_CONF_NS, EventBuilderConstants.EB_ELEMENT_TO));
 
-        String fromTransportAdaptorName = fromElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_TA_NAME));
-        String fromTransportAdaptorType = fromElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_TA_TYPE));
+        String fromEventAdaptorName = fromElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_TA_NAME));
+        String fromEventAdaptorType = fromElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_TA_TYPE));
 
-        if (!ConfigurationValidator.isValidTransportAdaptor(fromTransportAdaptorName, fromTransportAdaptorType, tenantId)) {
-            throw new EventBuilderValidationException("Could not validate the input transport adaptor configuration " + fromTransportAdaptorName + " which is a " + fromTransportAdaptorType, fromTransportAdaptorName);
+        if (!ConfigurationValidator.isInputEventAdaptorActive(fromEventAdaptorName, fromEventAdaptorType, tenantId)) {
+            throw new EventBuilderValidationException("Could not validate the input event adaptor configuration " + fromEventAdaptorName + " which is a " + fromEventAdaptorType, fromEventAdaptorName);
         }
 
-        InputTransportAdaptorMessageConfiguration inputTransportMessageConfiguration = EventBuilderConfigHelper.getInputTransportMessageConfiguration(fromTransportAdaptorType);
+        InputEventAdaptorMessageConfiguration inputEventMessageConfiguration = EventBuilderConfigHelper.getInputEventMessageConfiguration(fromEventAdaptorType);
         InputStreamConfiguration inputStreamConfiguration = new InputStreamConfiguration();
-        inputStreamConfiguration.setTransportAdaptorName(fromTransportAdaptorName);
-        inputStreamConfiguration.setTransportAdaptorType(fromTransportAdaptorType);
+        inputStreamConfiguration.setInputEventAdaptorName(fromEventAdaptorName);
+        inputStreamConfiguration.setInputEventAdaptorType(fromEventAdaptorType);
 
         Iterator fromElementPropertyIterator = fromElement.getChildrenWithName(
                 new QName(EventBuilderConstants.EB_CONF_NS, EventBuilderConstants.EB_ELEMENT_PROPERTY));
@@ -154,12 +146,12 @@ public abstract class EventBuilderConfigBuilder {
             OMElement fromElementProperty = (OMElement) fromElementPropertyIterator.next();
             String propertyName = fromElementProperty.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_NAME));
             String propertyValue = fromElementProperty.getText();
-            if (inputTransportMessageConfiguration.getInputMessageProperties().containsKey(propertyName)) {
-                inputTransportMessageConfiguration.addInputMessageProperty(propertyName, propertyValue);
+            if (inputEventMessageConfiguration.getInputMessageProperties().containsKey(propertyName)) {
+                inputEventMessageConfiguration.addInputMessageProperty(propertyName, propertyValue);
             }
         }
 
-        inputStreamConfiguration.setInputTransportAdaptorMessageConfiguration(inputTransportMessageConfiguration);
+        inputStreamConfiguration.setInputEventAdaptorMessageConfiguration(inputEventMessageConfiguration);
 
         String toStreamName = toElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_STREAM_NAME));
         String toStreamVersion = toElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_VERSION));
@@ -167,30 +159,30 @@ public abstract class EventBuilderConfigBuilder {
         EventBuilderConfiguration eventBuilderConfiguration;
 
         if (mappingType.equalsIgnoreCase(EventBuilderConstants.EB_WSO2EVENT_MAPPING_TYPE)) {
-            if (!ConfigurationValidator.validateSupportedMapping(fromTransportAdaptorType, MessageType.WSO2EVENT)) {
-                throw new EventBuilderConfigurationException("Wso2 Event Mapping is not supported by transport adaptor type " + fromTransportAdaptorType);
+            if (!ConfigurationValidator.validateSupportedMapping(fromEventAdaptorType, MessageType.WSO2EVENT)) {
+                throw new EventBuilderConfigurationException("Wso2 Event Mapping is not supported by event adaptor type " + fromEventAdaptorType);
             }
-            eventBuilderConfiguration = new EventBuilderConfiguration(new Wso2InputMapperFactory());
+            eventBuilderConfiguration = new EventBuilderConfiguration();
         } else if (mappingType.equalsIgnoreCase(EventBuilderConstants.EB_TEXT_MAPPING_TYPE)) {
-            if (!ConfigurationValidator.validateSupportedMapping(fromTransportAdaptorType, MessageType.TEXT)) {
-                throw new EventBuilderConfigurationException("Text Mapping is not supported by transport adaptor type " + fromTransportAdaptorType);
+            if (!ConfigurationValidator.validateSupportedMapping(fromEventAdaptorType, MessageType.TEXT)) {
+                throw new EventBuilderConfigurationException("Text Mapping is not supported by event adaptor type " + fromEventAdaptorType);
             }
-            eventBuilderConfiguration = new EventBuilderConfiguration(new TextInputMapperFactory());
+            eventBuilderConfiguration = new EventBuilderConfiguration();
         } else if (mappingType.equalsIgnoreCase(EventBuilderConstants.EB_MAP_MAPPING_TYPE)) {
-            if (!ConfigurationValidator.validateSupportedMapping(fromTransportAdaptorType, MessageType.MAP)) {
-                throw new EventBuilderConfigurationException("Mapping for Map input is not supported by transport adaptor type " + fromTransportAdaptorType);
+            if (!ConfigurationValidator.validateSupportedMapping(fromEventAdaptorType, MessageType.MAP)) {
+                throw new EventBuilderConfigurationException("Mapping for Map input is not supported by event adaptor type " + fromEventAdaptorType);
             }
-            eventBuilderConfiguration = new EventBuilderConfiguration(new MapInputMapperFactory());
+            eventBuilderConfiguration = new EventBuilderConfiguration();
         } else if (mappingType.equalsIgnoreCase(EventBuilderConstants.EB_XML_MAPPING_TYPE)) {
-            if (!ConfigurationValidator.validateSupportedMapping(fromTransportAdaptorType, MessageType.XML)) {
-                throw new EventBuilderConfigurationException("XML Mapping is not supported by transport adaptor type " + fromTransportAdaptorType);
+            if (!ConfigurationValidator.validateSupportedMapping(fromEventAdaptorType, MessageType.XML)) {
+                throw new EventBuilderConfigurationException("XML Mapping is not supported by event adaptor type " + fromEventAdaptorType);
             }
-            eventBuilderConfiguration = new EventBuilderConfiguration(new XMLInputMapperFactory());
+            eventBuilderConfiguration = new EventBuilderConfiguration();
         } else if (mappingType.equalsIgnoreCase(EventBuilderConstants.EB_JSON_MAPPING_TYPE)) {
-            if (!ConfigurationValidator.validateSupportedMapping(fromTransportAdaptorType, MessageType.JSON)) {
-                throw new EventBuilderConfigurationException("JSON Mapping is not supported by transport adaptor type " + fromTransportAdaptorType);
+            if (!ConfigurationValidator.validateSupportedMapping(fromEventAdaptorType, MessageType.JSON)) {
+                throw new EventBuilderConfigurationException("JSON Mapping is not supported by event adaptor type " + fromEventAdaptorType);
             }
-            eventBuilderConfiguration = new EventBuilderConfiguration(new JsonInputMapperFactory());
+            eventBuilderConfiguration = new EventBuilderConfiguration();
         } else {
             String factoryClassName = getMappingTypeFactoryClass(mappingElement);
             if (factoryClassName == null) {
@@ -201,7 +193,8 @@ public abstract class EventBuilderConfigBuilder {
             try {
                 factoryClass = Class.forName(factoryClassName);
                 InputMapperFactory inputMapperFactory = (InputMapperFactory) factoryClass.newInstance();
-                eventBuilderConfiguration = new EventBuilderConfiguration(inputMapperFactory);
+                EventBuilderServiceValueHolder.getMappingFactoryMap().putIfAbsent(mappingType, inputMapperFactory);
+                eventBuilderConfiguration = new EventBuilderConfiguration();
             } catch (ClassNotFoundException e) {
                 throw new EventBuilderConfigurationException("Class not found exception occurred ", e);
             } catch (InstantiationException e) {
@@ -216,27 +209,17 @@ public abstract class EventBuilderConfigBuilder {
         eventBuilderConfiguration.setStatisticsEnabled(statisticsEnabled);
         eventBuilderConfiguration.setToStreamName(toStreamName);
         eventBuilderConfiguration.setToStreamVersion(toStreamVersion);
-        eventBuilderConfiguration.setInputMapping(eventBuilderConfiguration.getInputMapperFactory().constructInputMappingFromOM(mappingElement));
+        InputMapperFactory mapperFactory = EventBuilderServiceValueHolder.getMappingFactoryMap().get(mappingType);
+        eventBuilderConfiguration.setInputMapping(mapperFactory.constructInputMappingFromOM(mappingElement));
         eventBuilderConfiguration.setInputStreamConfiguration(inputStreamConfiguration);
         return eventBuilderConfiguration;
     }
 
-    public String getMappingTypeFactoryClass(OMElement omElement) {
+    public static String getMappingTypeFactoryClass(OMElement omElement) {
         return omElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_FACTORY_CLASS));
     }
 
-    public abstract InputMapping fromOM(OMElement mappingElement)
-            throws EventBuilderConfigurationException;
-
-    public abstract OMElement inputMappingToOM(
-            InputMapping inputMapping, OMFactory factory);
-
-    protected abstract InputMappingAttribute getInputMappingAttributeFromOM(OMElement omElement);
-
-    protected abstract OMElement getPropertyOmElement(OMFactory factory,
-                                                      InputMappingAttribute inputMappingAttribute);
-
-    protected String getAttributeType(AttributeType attributeType) {
+    public static String getAttributeType(AttributeType attributeType) {
         Map<String, AttributeType> attributeMap = EventBuilderConstants.STRING_ATTRIBUTE_TYPE_MAP;
         for (Map.Entry<String, AttributeType> entry : attributeMap.entrySet()) {
             if (entry.getValue().equals(attributeType)) {

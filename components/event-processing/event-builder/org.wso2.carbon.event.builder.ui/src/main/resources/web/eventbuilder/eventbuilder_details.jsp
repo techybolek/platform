@@ -51,9 +51,9 @@
     if (eventBuilderName != null) {
         EventBuilderConfigurationDto eventBuilderConfigurationDto = stub.getActiveEventBuilderConfiguration(eventBuilderName);
         if (eventBuilderConfigurationDto != null) {
-            String transportAdaptorName = eventBuilderConfigurationDto.getInputTransportAdaptorName();
+            String eventAdaptorName = eventBuilderConfigurationDto.getInputEventAdaptorName();
 %>
-<form name="inputForm" action="index.jsp" method="get" id="addEventBuilder">
+<form name="inputForm" action="index.jsp?ordinal=1" method="get" id="addEventBuilder">
 <table style="width:100%" id="ebAdd" class="styledLeft">
 <thead>
 <tr>
@@ -63,7 +63,7 @@
 <tbody>
 <tr>
 <td class="formRaw">
-<table id="eventBuilderInputTable" class="normal-nopadding"
+<table id="eventBuilderInputTable" class="normal-nopadding smallTextInput"
        style="width:100%">
 <tbody>
 
@@ -74,7 +74,7 @@
     <td><input type="text" name="configName" id="eventBuilderNameId"
                class="initE"
                value="<%=eventBuilderConfigurationDto.getEventBuilderConfigName()%>"
-               style="width:75%" disabled/>
+               disabled/>
 
         <div class="sectionHelp">
             <fmt:message key="event.builder.name.tooltip"/>
@@ -86,10 +86,10 @@
     <td colspan="2"><b><fmt:message key="event.builder.from.tooltip"/></b></td>
 </tr>
 <tr>
-    <td>Input Transport Adaptor<span class="required">*</span></td>
-    <td><select name="transportAdaptorNameSelect"
-                id="transportAdaptorNameSelect" disabled>
-        <option><%=transportAdaptorName%>
+    <td>Input Event Adaptor<span class="required">*</span></td>
+    <td><select name="eventAdaptorNameSelect"
+                id="eventAdaptorNameSelect" disabled>
+        <option><%=eventAdaptorName%>
         </option>
     </select>
 
@@ -102,7 +102,7 @@
 <tr>
 
     <% //Input fields for message configuration properties
-        if (transportAdaptorName != null && !transportAdaptorName.isEmpty()) {
+        if (eventAdaptorName != null && !eventAdaptorName.isEmpty()) {
             EventBuilderPropertyDto[] messageConfigurationProperties = stub.getMessageConfigurationPropertiesWithValue(eventBuilderName);
 
             if (messageConfigurationProperties != null) {
@@ -133,7 +133,6 @@
     <td><input type="<%=type%>"
                name="<%=msgConfigProperty.getKey()%>"
                id="<%=propertyId%><%=index%>" class="initE"
-               style="width:75%"
                value="<%=msgConfigProperty.getValue() %>"
                disabled/>
         <%
@@ -192,50 +191,46 @@
         <fmt:message key="event.builder.mapping.wso2event"/>
     </td>
 </tr>
-<tr fromElementKey="inputWso2EventMapping">
-    <td colspan="2">
-        <h6><fmt:message key="property.data.type.meta"/></h6>
-        <table class="styledLeft noBorders spacer-bot" id="inputMetaDataTable">
-            <thead>
-            <th class="leftCol-med"><fmt:message
-                    key="event.builder.property.name"/></th>
-            <th class="leftCol-med"><fmt:message
-                    key="event.builder.property.valueof"/></th>
-            <th class="leftCol-med"><fmt:message
-                    key="event.builder.property.type"/></th>
-            </thead>
-            <tbody>
-            <%
-                for (EventBuilderPropertyDto eventBuilderPropertyDto : eventBuilderConfigurationDto.getEventBuilderProperties()) {
-                    if (eventBuilderPropertyDto.getKey().endsWith("_mapping") && eventBuilderPropertyDto.getKey().startsWith("meta_")) {
-            %>
-            <tr>
-                <td class="property-names"><%=eventBuilderPropertyDto.getKey()%>
-                </td>
-                <td class="property-names"><%=eventBuilderPropertyDto.getValue()%>
-                </td>
-                <td class="property-names"><%=eventBuilderPropertyDto.getPropertyType()%>
-                </td>
-            </tr>
-            <%
-                    }
-                }
-            %>
-            </tbody>
-        </table>
+<%
+    boolean customMappingEnabled = false;
+    for (EventBuilderPropertyDto eventBuilderPropertyDto : eventBuilderConfigurationDto.getEventBuilderProperties()) {
+        if (eventBuilderPropertyDto.getKey().startsWith("specific_customMappingValue")) {
+            customMappingEnabled = eventBuilderPropertyDto.getValue().equalsIgnoreCase("enable");
+%>
+<tr>
+    <td class="col-small">
+        <fmt:message key="event.builder.custommapping.enabled"/>
+    </td>
+    <td>
+        <% if(customMappingEnabled) { %>
+        <input name="customMapping" type="radio" value="enable"
+               onclick="enableMapping(true);" checked disabled>Enable</input>
+        <input name="customMapping" type="radio" value="disable" onclick="enableMapping(false);" disabled>Disable</input>
+        <% } else{     %>
+        <input name="customMapping" type="radio" value="enable"
+               onclick="enableMapping(true);" disabled>Enable</input>
+        <input name="customMapping" type="radio" value="disable" onclick="enableMapping(false);" checked disabled>Disable</input>
+
+        <% } %>
     </td>
 </tr>
-
+<%
+        }
+    }
+    if (customMappingEnabled) {
+%>
 
 <tr fromElementKey="inputWso2EventMapping">
     <td colspan="2">
 
-        <h6><fmt:message key="property.data.type.correlation"/></h6>
+        <h6><fmt:message key="wso2event.mapping.header"/></h6>
         <table class="styledLeft noBorders spacer-bot"
-               id="inputCorrelationDataTable">
+               id="inputWso2EventDataTable">
             <thead>
             <th class="leftCol-med"><fmt:message
                     key="event.builder.property.name"/></th>
+            <th class="leftCol-med"><fmt:message
+                    key="event.builder.property.inputtype"/></th>
             <th class="leftCol-med"><fmt:message
                     key="event.builder.property.valueof"/></th>
             <th class="leftCol-med"><fmt:message
@@ -244,48 +239,21 @@
             <tbody>
             <%
                 for (EventBuilderPropertyDto eventBuilderPropertyDto : eventBuilderConfigurationDto.getEventBuilderProperties()) {
-                    if (eventBuilderPropertyDto.getKey().endsWith("_mapping") && eventBuilderPropertyDto.getKey().startsWith("correlation_")) {
+                    if (eventBuilderPropertyDto.getKey().endsWith("_mapping") && !eventBuilderPropertyDto.getKey().startsWith("specific_")) {
             %>
-            <tr>
-                <td class="property-names"><%=eventBuilderPropertyDto.getKey()%>
+            <tr id="mappingRow">
+                <td class="property-names"><%=eventBuilderPropertyDto.getDisplayName()%>
                 </td>
-                <td class="property-names"><%=eventBuilderPropertyDto.getValue()%>
+                <td class="property-names">
+                    <% if (eventBuilderPropertyDto.getKey().startsWith("meta_")) { %>
+                    <%="meta"%>
+                    <% } else if (eventBuilderPropertyDto.getKey().startsWith("correlation_")) { %>
+                    <%="correlation"%>
+                    <% } else { %>
+                    <%="payload"%>
+                    <% } %>
                 </td>
-                <td class="property-names"><%=eventBuilderPropertyDto.getPropertyType()%>
-                </td>
-            </tr>
-            <%
-                    }
-                }
-            %>
-            </tbody>
-        </table>
-    </td>
-</tr>
-<tr fromElementKey="inputWso2EventMapping">
-    <td colspan="2">
-
-        <h6><fmt:message key="property.data.type.payload"/></h6>
-        <table class="styledLeft noBorders spacer-bot"
-               id="inputPayloadDataTable">
-            <thead>
-            <th class="leftCol-med"><fmt:message
-                    key="event.builder.property.name"/></th>
-            <th class="leftCol-med"><fmt:message
-                    key="event.builder.property.valueof"/></th>
-            <th class="leftCol-med"><fmt:message
-                    key="event.builder.property.type"/></th>
-            </thead>
-            <tbody>
-            <%
-                for (EventBuilderPropertyDto eventBuilderPropertyDto : eventBuilderConfigurationDto.getEventBuilderProperties()) {
-                    if (eventBuilderPropertyDto.getKey().endsWith("_mapping") && !eventBuilderPropertyDto.getKey().startsWith("meta_") && !eventBuilderPropertyDto.getKey().startsWith("correlation_")) {
-            %>
-            <tr>
-                <td class="property-names"><%=eventBuilderPropertyDto.getKey()%>
-                </td>
-                <td class="property-names"><%=eventBuilderPropertyDto.getValue()%>
-                </td>
+                <td class="property-names"><%=eventBuilderPropertyDto.getValue()%></td>
                 <td class="property-names"><%=eventBuilderPropertyDto.getPropertyType()%>
                 </td>
             </tr>
@@ -298,7 +266,7 @@
     </td>
 </tr>
 <%
-
+    }
 } else if (mappingType.equals("xml")) {
 %>
 <tr fromElementKey="inputXmlMapping">
@@ -309,7 +277,7 @@
 <tr fromElementKey="inputXmlMapping">
     <td colspan="2">
 
-        <h4><fmt:message key="xpath.prefix.header"/></h4>
+        <h6><fmt:message key="xpath.prefix.header"/></h6>
         <table class="styledLeft noBorders spacer-bot" id="inputXpathPrefixTable">
             <thead>
             <th class="leftCol-med"><fmt:message
@@ -340,31 +308,42 @@
 <tr fromElementKey="inputXmlMapping">
     <td colspan="2">
 
-        <h4><fmt:message key="xpath.expression.header"/></h4>
+        <h6><fmt:message key="xpath.expression.header"/></h6>
         <table class="styledLeft noBorders spacer-bot"
                id="inputXpathExprTable">
             <thead>
             <th class="leftCol-med"><fmt:message
-                    key="event.builder.property.name"/></th>
-            <th class="leftCol-med"><fmt:message
                     key="event.builder.property.xpath"/></th>
             <th class="leftCol-med"><fmt:message
+                    key="event.builder.property.valueof"/></th>
+            <th class="leftCol-med"><fmt:message
                     key="event.builder.property.type"/></th>
+            <th class="leftCol-med"><fmt:message
+                    key="event.builder.property.default"/></th>
             </thead>
             <tbody id="inputXpathExprTBody">
             <%
+                EventBuilderPropertyDto parentSelectorXpathPropertyDto = null;
                 for (EventBuilderPropertyDto eventBuilderPropertyDto : eventBuilderConfigurationDto.getEventBuilderProperties()) {
-                    if (eventBuilderPropertyDto.getKey().endsWith("_mapping") && !eventBuilderPropertyDto.getKey().startsWith("prefix_")) {
+                    if (eventBuilderPropertyDto.getKey().endsWith("_mapping")) {
+                        if (!(eventBuilderPropertyDto.getKey().startsWith("prefix_") || eventBuilderPropertyDto.getKey().startsWith("specific_"))) {
             %>
             <tr>
-                <td class="property-names"><%=eventBuilderPropertyDto.getDisplayName()%>
-                </td>
                 <td class="property-names"><%=eventBuilderPropertyDto.getValue()%>
+                </td>
+                <td class="property-names"><%=eventBuilderPropertyDto.getDisplayName()%>
                 </td>
                 <td class="property-names"><%=eventBuilderPropertyDto.getPropertyType()%>
                 </td>
+                <td class="property-names"><%=eventBuilderPropertyDto.getDefaultValue() != null ? eventBuilderPropertyDto.getDefaultValue() : ""%>
+                </td>
             </tr>
             <%
+                        } else if (eventBuilderPropertyDto.getKey().startsWith("specific_")) {
+                            if (eventBuilderPropertyDto.getKey().startsWith("specific_parentSelectorXpath")) {
+                                parentSelectorXpathPropertyDto = eventBuilderPropertyDto;
+                            }
+                        }
                     }
                 }
             %>
@@ -377,16 +356,11 @@
         <table class="normal">
             <tbody>
             <tr>
-                <td><fmt:message key="event.builder.batchprocessing.enabled"/></td>
-                <td><input type="checkbox" id="batchProcessingEnabled" disabled
-                        <%
-                                            if(eventBuilderConfigurationDto.getBatchProcessingEnabled()) {
-                                        %>
-                        <%="checked"%>
-                        <%
-                                        }
-                                        %>
-                        ></td>
+                <td><fmt:message key="event.builder.parentselector.xpath"/></td>
+                <td><input type="text" id="batchProcessingEnabled"
+                           value="<% if(parentSelectorXpathPropertyDto != null) { %><%=parentSelectorXpathPropertyDto.getValue()%><%}%>"
+                           disabled/>
+                </td>
             </tr>
             </tbody>
         </table>
@@ -395,9 +369,14 @@
 } else if (mappingType.equals("map")) {
 %>
 <tr fromElementKey="inputMapMapping">
+    <td colspan="2" class="middle-header">
+        <fmt:message key="event.builder.mapping.map"/>
+    </td>
+</tr>
+<tr fromElementKey="inputMapMapping">
     <td colspan="2">
 
-        <h6><fmt:message key="property.data.type.payload"/></h6>
+        <h6><fmt:message key="map.mapping.header"/></h6>
         <table class="styledLeft noBorders spacer-bot"
                id="inputMapDataTable">
             <thead>
@@ -407,6 +386,8 @@
                     key="event.builder.property.valueof"/></th>
             <th class="leftCol-med"><fmt:message
                     key="event.builder.property.type"/></th>
+            <th class="leftCol-med"><fmt:message
+                    key="event.builder.property.default"/></th>
             </thead>
             <tbody>
             <%
@@ -414,11 +395,13 @@
                     if (eventBuilderPropertyDto.getKey().endsWith("_mapping")) {
             %>
             <tr>
-                <td class="property-names"><%=eventBuilderPropertyDto.getDisplayName()%>
-                </td>
                 <td class="property-names"><%=eventBuilderPropertyDto.getValue()%>
                 </td>
+                <td class="property-names"><%=eventBuilderPropertyDto.getDisplayName()%>
+                </td>
                 <td class="property-names"><%=eventBuilderPropertyDto.getPropertyType()%>
+                </td>
+                <td class="property-names"><%=eventBuilderPropertyDto.getDefaultValue() != null ? eventBuilderPropertyDto.getDefaultValue() : ""%>
                 </td>
             </tr>
             <%
@@ -441,16 +424,18 @@
 <tr fromElementKey="inputTextMapping">
     <td colspan="2">
 
-        <h4><fmt:message key="text.mapping.header"/></h4>
+        <h6><fmt:message key="text.mapping.header"/></h6>
         <table class="styledLeft noBorders spacer-bot"
                id="inputTextMappingTable">
             <thead>
             <th class="leftCol-med"><fmt:message
-                    key="event.builder.property.name"/></th>
-            <th class="leftCol-med"><fmt:message
                     key="event.builder.property.regex"/></th>
             <th class="leftCol-med"><fmt:message
+                    key="event.builder.property.valueof"/></th>
+            <th class="leftCol-med"><fmt:message
                     key="event.builder.property.type"/></th>
+            <th class="leftCol-med"><fmt:message
+                    key="event.builder.property.default"/></th>
             </thead>
             <tbody id="inputTextMappingTBody">
             <%
@@ -458,11 +443,13 @@
                     if (eventBuilderPropertyDto.getKey().endsWith("_mapping")) {
             %>
             <tr>
-                <td class="property-names"><%=eventBuilderPropertyDto.getDisplayName()%>
-                </td>
                 <td class="property-names"><%=eventBuilderPropertyDto.getValue()%>
                 </td>
+                <td class="property-names"><%=eventBuilderPropertyDto.getDisplayName()%>
+                </td>
                 <td class="property-names"><%=eventBuilderPropertyDto.getPropertyType()%>
+                </td>
+                <td class="property-names"><%=eventBuilderPropertyDto.getDefaultValue() != null ? eventBuilderPropertyDto.getDefaultValue() : ""%>
                 </td>
             </tr>
             <%
@@ -485,16 +472,18 @@
 <tr fromElementKey="inputJsonMapping">
     <td colspan="2">
 
-        <h4><fmt:message key="jsonpath.expression.header"/></h4>
+        <h6><fmt:message key="jsonpath.expression.header"/></h6>
         <table class="styledLeft noBorders spacer-bot"
                id="inputJsonpathExprTable">
             <thead>
             <th class="leftCol-med"><fmt:message
-                    key="event.builder.property.name"/></th>
-            <th class="leftCol-med"><fmt:message
                     key="event.builder.property.jsonpath"/></th>
             <th class="leftCol-med"><fmt:message
+                    key="event.builder.property.valueof"/></th>
+            <th class="leftCol-med"><fmt:message
                     key="event.builder.property.type"/></th>
+            <th class="leftCol-med"><fmt:message
+                    key="event.builder.property.default"/></th>
             </thead>
             <tbody id="inputJsonpathExprTBody">
             <%
@@ -502,11 +491,13 @@
                     if (eventBuilderPropertyDto.getKey().endsWith("_mapping")) {
             %>
             <tr>
-                <td class="property-names"><%=eventBuilderPropertyDto.getDisplayName()%>
-                </td>
                 <td class="property-names"><%=eventBuilderPropertyDto.getValue()%>
                 </td>
+                <td class="property-names"><%=eventBuilderPropertyDto.getDisplayName()%>
+                </td>
                 <td class="property-names"><%=eventBuilderPropertyDto.getPropertyType()%>
+                </td>
+                <td class="property-names"><%=eventBuilderPropertyDto.getDefaultValue() != null ? eventBuilderPropertyDto.getDefaultValue() : ""%>
                 </td>
             </tr>
             <%
@@ -534,7 +525,7 @@
     <td><input type="text" name="toStreamName" id="toStreamName"
                class="initE"
                value="<%=eventBuilderConfigurationDto.getToStreamName()%>"
-               style="width:75%" disabled/>
+               disabled/>
 
         <div class="sectionHelp">
             <fmt:message key="to.stream.name.tooltip"/>
@@ -547,7 +538,7 @@
     <td><input type="text" name="toStreamVersion" id="toStreamVersion"
                class="initE"
                value="<%=eventBuilderConfigurationDto.getToStreamVersion()%>"
-               style="width:75%" disabled/>
+               disabled/>
 
         <div class="sectionHelp">
             <fmt:message key="to.stream.version.tooltip"/>
@@ -579,7 +570,7 @@
 
                 <tr>
                     <td class="leftCol-med" colspan="2">No Event Builder of name
-                                                        '<%=eventBuilderName%>' available.
+                        '<%=eventBuilderName%>' available.
                     </td>
                 </tr>
                 </tbody>

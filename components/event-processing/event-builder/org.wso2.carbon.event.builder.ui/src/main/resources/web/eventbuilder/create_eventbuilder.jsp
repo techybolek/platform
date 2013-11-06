@@ -1,3 +1,4 @@
+<%@ page import="org.wso2.carbon.event.stream.manager.stub.EventStreamAdminServiceStub" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
@@ -36,18 +37,23 @@
     <script type="text/javascript" src="../yui/build/yahoo-dom-event/yahoo-dom-event.js"></script>
     <script type="text/javascript" src="../yui/build/connection/connection-min.js"></script>
     <script type="text/javascript" src="js/event_builders.js"></script>
-    <script type="text/javascript" src="js/create_eventBuilder_helper.js"></script>
+    <script type="text/javascript" src="js/create_event_builder_helper.js"></script>
+    <script type="text/javascript" src="../ajax/js/prototype.js"></script>
 
-
+    <div id="custom_dcontainer" style="display:none"></div>
     <div id="middle">
         <h2><fmt:message key="create.event.builder"/></h2>
+
         <div id="workArea">
             <%
                 EventBuilderAdminServiceStub eventBuilderStub = EventBuilderUIUtils.getEventBuilderAdminService(config, session, request);
-                String[] inputTransportNames = eventBuilderStub.getInputTransportNames();
-                if (inputTransportNames != null) {
+                EventStreamAdminServiceStub eventStreamAdminServiceStub = EventBuilderUIUtils.getEventStreamAdminService(config,session,request);
+                InputEventAdaptorInfoDto[] InputEventAdaptorInfo = eventBuilderStub.getInputEventAdaptorInfo();
+                String[] streamNamesWitheVersion = eventStreamAdminServiceStub.getStreamNames();
+
+                if (InputEventAdaptorInfo != null && streamNamesWitheVersion != null) {
             %>
-            <form name="inputForm" action="index.jsp" method="get" id="addEventBuilder">
+            <form name="inputForm" action="index.jsp?ordinal=1" method="get" id="addEventBuilder">
                 <table style="width:100%" id="ebAdd" class="styledLeft">
                     <thead>
                     <tr>
@@ -84,8 +90,7 @@
                             <tbody>
 
                             <tr>
-                                <td class="leftCol-med" colspan="2">No Input Transport Adaptors
-                                                                    available
+                                <td class="leftCol-med" colspan="2">Event Streams and/or Input Event Adaptors are not available
                                 </td>
                             </tr>
                             </tbody>

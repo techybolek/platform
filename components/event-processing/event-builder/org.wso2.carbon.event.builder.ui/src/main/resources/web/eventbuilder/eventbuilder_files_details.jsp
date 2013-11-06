@@ -2,11 +2,11 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 
-<fmt:bundle basename="org.wso2.carbon.transport.adaptor.manager.ui.i18n.Resources">
+<fmt:bundle basename="org.wso2.carbon.event.adaptor.manager.ui.i18n.Resources">
 
     <carbon:breadcrumb
-            label="transportmanager.details"
-            resourceBundle="org.wso2.carbon.transport.adaptor.manager.ui.i18n.Resources"
+            label="details"
+            resourceBundle="org.wso2.carbon.event.builder.ui.i18n.Resources"
             topPage="false"
             request="<%=request%>"/>
 

@@ -19,8 +19,10 @@ package org.wso2.carbon.event.builder.test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.databridge.commons.StreamDefinition;
-import org.wso2.carbon.event.builder.core.BasicEventListener;
+import org.wso2.carbon.databridge.commons.Attribute;
+import org.wso2.carbon.event.processor.api.receive.BasicEventListener;
+
+import java.util.Arrays;
 
 /**
  * Topic subscription call back handler implementation
@@ -29,20 +31,20 @@ public class TestBasicEventListener implements BasicEventListener {
     private static final Log log = LogFactory.getLog(TestBasicEventListener.class);
 
     @Override
-    public void onAddDefinition(StreamDefinition definition) {
-        log.info("[TEST-Module] Added definition : " + definition.toString());
-    }
-
-    @Override
-    public void onRemoveDefinition(StreamDefinition definition) {
-        log.info("[TEST-Module] Removed definition : " + definition.toString());
-    }
-
-    @Override
     public void onEvent(Object[] event) {
         log.info("[TEST-Module] Received event as Object[]");
         for (Object object : event) {
             log.info(object.toString());
         }
+    }
+
+    @Override
+    public void onAddDefinition(Attribute[] definitionAttributes) {
+        log.info("[TEST-Module] Added definition : " + Arrays.deepToString(definitionAttributes));
+    }
+
+    @Override
+    public void onRemoveDefinition(Attribute[] definitionAttributes) {
+        log.info("[TEST-Module] Removed definition : " + Arrays.deepToString(definitionAttributes));
     }
 }

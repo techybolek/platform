@@ -20,8 +20,8 @@ package org.wso2.carbon.event.builder.admin.internal.ds;
 
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.builder.core.EventBuilderService;
-import org.wso2.carbon.input.transport.adaptor.core.InputTransportAdaptorService;
-import org.wso2.carbon.input.transport.adaptor.manager.core.InputTransportAdaptorManagerService;
+import org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorService;
+import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorManagerService;
 
 
 /**
@@ -31,12 +31,12 @@ import org.wso2.carbon.input.transport.adaptor.manager.core.InputTransportAdapto
  * @scr.reference name="eventBuilderService.service"
  * interface="org.wso2.carbon.event.builder.core.EventBuilderService" cardinality="1..1"
  * policy="dynamic" bind="setEventBuilderService" unbind="unsetEventBuilderService"
- * @scr.reference name="transportAdaptorManager.service"
- * interface="org.wso2.carbon.input.transport.adaptor.manager.core.InputTransportAdaptorManagerService" cardinality="1..1"
- * policy="dynamic" bind="setTransportAdaptorManagerService" unbind="unsetTransportAdaptorManagerService"
- * @scr.reference name="transportAdaptor.service"
- * interface="org.wso2.carbon.input.transport.adaptor.core.InputTransportAdaptorService" cardinality="1..1"
- * policy="dynamic" bind="setTransportAdaptorService" unbind="unsetTransportAdaptorService"
+ * @scr.reference name="inputEventAdaptorManager.service"
+ * interface="org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorManagerService" cardinality="1..1"
+ * policy="dynamic" bind="setInputEventAdaptorManagerService" unbind="unsetInputEventAdaptorManagerService"
+ * @scr.reference name="inputEventAdaptor.service"
+ * interface="org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorService" cardinality="1..1"
+ * policy="dynamic" bind="setInputEventAdaptorService" unbind="unsetInputEventAdaptorService"
  */
 public class EventBuilderAdminServiceDS {
     protected void activate(ComponentContext context) {
@@ -51,23 +51,23 @@ public class EventBuilderAdminServiceDS {
         EventBuilderAdminServiceValueHolder.registerEventBuilderService(null);
     }
 
-    protected void setTransportAdaptorManagerService(
-            InputTransportAdaptorManagerService transportManagerService) {
-        EventBuilderAdminServiceValueHolder.registerInputTransportAdaptorManagerService(transportManagerService);
+    protected void setInputEventAdaptorManagerService(
+            InputEventAdaptorManagerService transportManagerService) {
+        EventBuilderAdminServiceValueHolder.registerInputEventAdaptorManagerService(transportManagerService);
 
     }
 
-    protected void unsetTransportAdaptorManagerService(
-            InputTransportAdaptorManagerService transportManagerService) {
-        EventBuilderAdminServiceValueHolder.registerInputTransportAdaptorManagerService(null);
+    protected void unsetInputEventAdaptorManagerService(
+            InputEventAdaptorManagerService transportManagerService) {
+        EventBuilderAdminServiceValueHolder.registerInputEventAdaptorManagerService(null);
 
     }
 
-    protected void setTransportAdaptorService(InputTransportAdaptorService inputTransportAdaptorService) {
-        EventBuilderAdminServiceValueHolder.registerInputTransportAdaptorService(inputTransportAdaptorService);
+    protected void setInputEventAdaptorService(InputEventAdaptorService InputEventAdaptorService) {
+        EventBuilderAdminServiceValueHolder.registerInputEventAdaptorService(InputEventAdaptorService);
     }
 
-    protected void unsetTransportAdaptorService(InputTransportAdaptorService inputTransportAdaptorService) {
-        EventBuilderAdminServiceValueHolder.registerInputTransportAdaptorService(null);
+    protected void unsetInputEventAdaptorService(InputEventAdaptorService InputEventAdaptorService) {
+        EventBuilderAdminServiceValueHolder.registerInputEventAdaptorService(null);
     }
 }

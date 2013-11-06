@@ -21,20 +21,20 @@ package org.wso2.carbon.event.formatter.admin.internal;
  */
 public class EventFormatterConfigurationFileDto {
 
-    private String filePath;
+    private String fileName;
     private String eventFormatterName;
 
-    public EventFormatterConfigurationFileDto(String filePath, String eventFormatterName) {
-        this.filePath = filePath;
+    public EventFormatterConfigurationFileDto(String fileName, String eventFormatterName) {
+        this.fileName = fileName;
         this.eventFormatterName = eventFormatterName;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getEventFormatterName() {

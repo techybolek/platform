@@ -19,6 +19,7 @@ package org.wso2.carbon.event.processor.siddhi.extension;
 
 
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.processor.siddhi.extension.internal.SiddhiExtensionValueHolder;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -71,7 +72,7 @@ public class GetRegistryPropertyExecutorFunction extends FunctionExecutor {
                     String path = (String) pathExpressionExecutor.execute(event);
                     if (path.startsWith("gov:")) {
                         try {
-                            Registry registry = SiddhiExtensionValueHolder.getInstance().getGovernanceRegistry(CarbonContext.getCurrentContext().getTenantId());
+                            Registry registry = SiddhiExtensionValueHolder.getInstance().getGovernanceRegistry(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                             Resource resource = registry.get(path.replaceFirst("gov:", ""));
                             return resource.getProperties().getProperty((String) propertyExpressionExecutor.execute(event));
                         } catch (RegistryException e) {
@@ -79,7 +80,7 @@ public class GetRegistryPropertyExecutorFunction extends FunctionExecutor {
                         }
                     } else {
                         try {
-                            Registry registry = SiddhiExtensionValueHolder.getInstance().getConfigRegistry(CarbonContext.getCurrentContext().getTenantId());
+                            Registry registry = SiddhiExtensionValueHolder.getInstance().getConfigRegistry(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                             Resource resource = registry.get(path.replaceFirst("conf:", ""));
                             return resource.getProperties().getProperty((String) propertyExpressionExecutor.execute(event));
                         } catch (RegistryException e) {
@@ -93,7 +94,7 @@ public class GetRegistryPropertyExecutorFunction extends FunctionExecutor {
             if (path.startsWith("gov:")) {
                 path = path.replaceFirst("gov:", "");
                 try {
-                    registry = SiddhiExtensionValueHolder.getInstance().getGovernanceRegistry(CarbonContext.getCurrentContext().getTenantId());
+                    registry = SiddhiExtensionValueHolder.getInstance().getGovernanceRegistry(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                     propertyExecutor = new PropertyExecutor() {
                         @Override
                         public Object execute(AtomicEvent event) {
@@ -112,7 +113,7 @@ public class GetRegistryPropertyExecutorFunction extends FunctionExecutor {
             } else {
                 path = path.replaceFirst("conf:", "");
                 try {
-                    registry = SiddhiExtensionValueHolder.getInstance().getConfigRegistry(CarbonContext.getCurrentContext().getTenantId());
+                    registry = SiddhiExtensionValueHolder.getInstance().getConfigRegistry(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                     propertyExecutor = new PropertyExecutor() {
                         @Override
                         public Object execute(AtomicEvent event) {
@@ -138,7 +139,7 @@ public class GetRegistryPropertyExecutorFunction extends FunctionExecutor {
                     String path = (String) pathExpressionExecutor.execute(event);
                     if (path.startsWith("gov:")) {
                         try {
-                            Registry registry = SiddhiExtensionValueHolder.getInstance().getGovernanceRegistry(CarbonContext.getCurrentContext().getTenantId());
+                            Registry registry = SiddhiExtensionValueHolder.getInstance().getGovernanceRegistry(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                             Resource resource = registry.get(path.replaceFirst("gov:", ""));
                             return resource.getProperties().getProperty(property);
                         } catch (RegistryException e) {
@@ -146,7 +147,7 @@ public class GetRegistryPropertyExecutorFunction extends FunctionExecutor {
                         }
                     } else {
                         try {
-                            Registry registry = SiddhiExtensionValueHolder.getInstance().getConfigRegistry(CarbonContext.getCurrentContext().getTenantId());
+                            Registry registry = SiddhiExtensionValueHolder.getInstance().getConfigRegistry(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                             Resource resource = registry.get(path.replaceFirst("conf:", ""));
                             return resource.getProperties().getProperty(property);
                         } catch (RegistryException e) {
@@ -161,7 +162,7 @@ public class GetRegistryPropertyExecutorFunction extends FunctionExecutor {
             if (path.startsWith("gov:")) {
                 path = path.replaceFirst("gov:", "");
                 try {
-                    registry = SiddhiExtensionValueHolder.getInstance().getGovernanceRegistry(CarbonContext.getCurrentContext().getTenantId());
+                    registry = SiddhiExtensionValueHolder.getInstance().getGovernanceRegistry(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                     propertyExecutor = new PropertyExecutor() {
                         @Override
                         public Object execute(AtomicEvent event) {
@@ -180,7 +181,7 @@ public class GetRegistryPropertyExecutorFunction extends FunctionExecutor {
             } else {
                 path = path.replaceFirst("conf:", "");
                 try {
-                    registry = SiddhiExtensionValueHolder.getInstance().getConfigRegistry(CarbonContext.getCurrentContext().getTenantId());
+                    registry = SiddhiExtensionValueHolder.getInstance().getConfigRegistry(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                     propertyExecutor = new PropertyExecutor() {
                         @Override
                         public Object execute(AtomicEvent event) {
@@ -216,6 +217,11 @@ public class GetRegistryPropertyExecutorFunction extends FunctionExecutor {
     protected Object process(Object obj) {
         //this will not be called
         return null;
+    }
+
+    @Override
+    public void destroy() {
+
     }
 
 

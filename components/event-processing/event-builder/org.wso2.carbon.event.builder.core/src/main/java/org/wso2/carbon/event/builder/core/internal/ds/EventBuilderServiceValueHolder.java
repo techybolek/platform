@@ -26,18 +26,22 @@ import org.wso2.carbon.event.builder.core.internal.type.map.MapInputMapperFactor
 import org.wso2.carbon.event.builder.core.internal.type.text.TextInputMapperFactory;
 import org.wso2.carbon.event.builder.core.internal.type.wso2event.Wso2InputMapperFactory;
 import org.wso2.carbon.event.builder.core.internal.type.xml.XMLInputMapperFactory;
+import org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorService;
+import org.wso2.carbon.event.input.adaptor.core.MessageType;
+import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorManagerService;
 import org.wso2.carbon.event.statistics.EventStatisticsService;
-import org.wso2.carbon.input.transport.adaptor.core.InputTransportAdaptorService;
-import org.wso2.carbon.input.transport.adaptor.core.MessageType;
-import org.wso2.carbon.input.transport.adaptor.manager.core.InputTransportAdaptorManagerService;
+import org.wso2.carbon.event.stream.manager.core.EventStreamService;
+import org.wso2.carbon.registry.core.service.RegistryService;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EventBuilderServiceValueHolder {
     private static EventBuilderService eventBuilderService;
-    private static InputTransportAdaptorManagerService inputTransportAdaptorManagerService;
-    private static InputTransportAdaptorService inputTransportAdaptorService;
+    private static InputEventAdaptorManagerService inputEventAdaptorManagerService;
+    private static InputEventAdaptorService inputEventAdaptorService;
     private static CarbonEventBuilderService carbonEventBuilderService;
+    private static RegistryService registryService;
+    private static EventStreamService eventStreamService;
     private static ConcurrentHashMap<String, InputMapperFactory> mappingFactoryMap;
 
     static {
@@ -74,24 +78,23 @@ public class EventBuilderServiceValueHolder {
         return EventBuilderServiceValueHolder.eventBuilderService;
     }
 
-    public static void registerTransportAdaptorService(
-            InputTransportAdaptorService transportAdaptorService) {
-        EventBuilderServiceValueHolder.inputTransportAdaptorService = transportAdaptorService;
+    public static void registerInputEventAdaptorService(
+            InputEventAdaptorService inputEventAdaptorService) {
+        EventBuilderServiceValueHolder.inputEventAdaptorService = inputEventAdaptorService;
     }
 
-    public static InputTransportAdaptorService getInputTransportAdaptorService() {
-        return EventBuilderServiceValueHolder.inputTransportAdaptorService;
+    public static InputEventAdaptorService getInputEventAdaptorService() {
+        return EventBuilderServiceValueHolder.inputEventAdaptorService;
     }
 
-    public static void registerTransportAdaptorManagerService(
-            InputTransportAdaptorManagerService transportAdaptorManagerService) {
-        EventBuilderServiceValueHolder.inputTransportAdaptorManagerService = transportAdaptorManagerService;
+    public static void registerInputEventAdaptorManagerService(
+            InputEventAdaptorManagerService inputEventAdaptorManagerService) {
+        EventBuilderServiceValueHolder.inputEventAdaptorManagerService = inputEventAdaptorManagerService;
     }
 
-    public static InputTransportAdaptorManagerService getInputTransportAdaptorManagerService() {
-        return EventBuilderServiceValueHolder.inputTransportAdaptorManagerService;
+    public static InputEventAdaptorManagerService getInputEventAdaptorManagerService() {
+        return EventBuilderServiceValueHolder.inputEventAdaptorManagerService;
     }
-
 
     public static void registerEventStatisticsService(EventStatisticsService eventStatisticsService) {
         EventBuilderServiceValueHolder.eventStatisticsService = eventStatisticsService;
@@ -100,4 +103,21 @@ public class EventBuilderServiceValueHolder {
     public static EventStatisticsService getEventStatisticsService() {
         return eventStatisticsService;
     }
+
+    public static void registerRegistryService(RegistryService registryService) {
+        EventBuilderServiceValueHolder.registryService = registryService;
+    }
+
+    public static RegistryService getRegistryService() {
+        return registryService;
+    }
+
+    public static void registerEventStreamService(EventStreamService eventStreamService) {
+        EventBuilderServiceValueHolder.eventStreamService = eventStreamService;
+    }
+
+    public static EventStreamService getEventStreamService() {
+        return EventBuilderServiceValueHolder.eventStreamService;
+    }
+
 }

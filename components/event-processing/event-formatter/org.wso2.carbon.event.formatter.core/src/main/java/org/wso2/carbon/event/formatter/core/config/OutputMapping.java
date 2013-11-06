@@ -18,9 +18,17 @@
 
 package org.wso2.carbon.event.formatter.core.config;
 
-public interface OutputMapping {
+public abstract class OutputMapping {
 
-    public String getMappingType();
+    protected boolean customMappingEnabled = false;
 
+    public abstract String getMappingType();
 
+    public boolean isCustomMappingEnabled() {
+        return customMappingEnabled;
+    }
+
+    public void setCustomMappingEnabled(boolean customMappingEnabled) {
+        this.customMappingEnabled = customMappingEnabled;
+    }
 }

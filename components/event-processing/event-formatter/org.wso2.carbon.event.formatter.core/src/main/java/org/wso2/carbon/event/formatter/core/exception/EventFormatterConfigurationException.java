@@ -19,7 +19,7 @@ package org.wso2.carbon.event.formatter.core.exception;
 /**
  * If there is a problem when creating the event builder configuration.
  */
-public class EventFormatterConfigurationException extends RuntimeException {
+public class EventFormatterConfigurationException extends Exception {
 
     public EventFormatterConfigurationException() {
     }

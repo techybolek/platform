@@ -16,32 +16,32 @@ package org.wso2.carbon.event.formatter.admin.internal.util;/*
 
 
 import org.wso2.carbon.event.formatter.core.EventFormatterService;
-import org.wso2.carbon.output.transport.adaptor.core.OutputTransportAdaptorService;
-import org.wso2.carbon.output.transport.adaptor.manager.core.OutputTransportAdaptorManagerService;
+import org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorService;
+import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorManagerService;
 
 
 public class EventFormatterAdminServiceValueHolder {
 
-    private static OutputTransportAdaptorManagerService outputTransportAdaptorManagerService;
-    private static OutputTransportAdaptorService outputTransportAdaptorService;
+    private static OutputEventAdaptorManagerService outputEventAdaptorManagerService;
+    private static OutputEventAdaptorService outputEventAdaptorService;
     private static EventFormatterService eventFormatterService;
 
-    public static void registerTransportAdaptorManagerService(
-            OutputTransportAdaptorManagerService transportAdaptorManagerService) {
-        EventFormatterAdminServiceValueHolder.outputTransportAdaptorManagerService = transportAdaptorManagerService;
+    public static void registerEventAdaptorManagerService(
+            OutputEventAdaptorManagerService eventAdaptorManagerService) {
+        EventFormatterAdminServiceValueHolder.outputEventAdaptorManagerService = eventAdaptorManagerService;
     }
 
-    public static OutputTransportAdaptorManagerService getOutputTransportAdaptorManagerService() {
-        return EventFormatterAdminServiceValueHolder.outputTransportAdaptorManagerService;
+    public static OutputEventAdaptorManagerService getOutputEventAdaptorManagerService() {
+        return EventFormatterAdminServiceValueHolder.outputEventAdaptorManagerService;
     }
 
-    public static void registerTransportAdaptorService(
-            OutputTransportAdaptorService transportAdaptorService) {
-        EventFormatterAdminServiceValueHolder.outputTransportAdaptorService = transportAdaptorService;
+    public static void registerEventAdaptorService(
+            OutputEventAdaptorService eventAdaptorService) {
+        EventFormatterAdminServiceValueHolder.outputEventAdaptorService = eventAdaptorService;
     }
 
-    public static OutputTransportAdaptorService getOutputTransportAdaptorService() {
-        return EventFormatterAdminServiceValueHolder.outputTransportAdaptorService;
+    public static OutputEventAdaptorService getOutputEventAdaptorService() {
+        return EventFormatterAdminServiceValueHolder.outputEventAdaptorService;
     }
 
     public static void registerEventFormatterService(

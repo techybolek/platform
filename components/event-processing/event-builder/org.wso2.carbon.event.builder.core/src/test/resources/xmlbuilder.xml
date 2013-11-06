@@ -18,10 +18,10 @@
   -->
 
 <eventBuilder name="xmlbuilder" xmlns="http://wso2.org/carbon/eventbuilder">
-    <from transportAdaptorType="ws-event-local" transportAdaptorName="localTransportAdaptor">
+    <from eventAdaptorType="ws-event-local" eventAdaptorName="localEventAdaptor">
         <property name="topic">AllStockQuotes</property>
     </from>
-    <mapping type="xml" batchProcessingEnabled="true">
+    <mapping type="xml" parentXpath="//quotedata:AllStockQuotes">
         <xpathDefinition prefix="quotedata" namespace="http://ws.cdyne.com/"/>
         <property>
             <from xpath="//quotedata:StockQuoteEvent/quotedata:LastTradeAmount"/>

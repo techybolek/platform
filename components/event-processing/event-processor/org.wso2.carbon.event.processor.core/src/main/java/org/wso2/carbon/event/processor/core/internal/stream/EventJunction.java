@@ -30,7 +30,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class EventJunction {
 
-//    private Logger trace = Logger.getLogger(EventProcessorConstants.EVENT_TRACE_LOGGER);
     private static final Log log = LogFactory.getLog(EventJunction.class);
 
     /*
@@ -50,9 +49,6 @@ public class EventJunction {
      */
     private CopyOnWriteArrayList<EventConsumer> consumers;
 
-    // whether this has a subscription to builder
-    private boolean externalStream;
-
     // TODO 's - what happens when stream is changed by only one instance...,
     // todo 's  prioritize effects when some module changes its stream def.
 
@@ -63,17 +59,33 @@ public class EventJunction {
         this.consumers = new CopyOnWriteArrayList<EventConsumer>();
     }
 
-    public void dispatchEvents(Object[] events) {
-//        trace.info("Events arrived at junction. Event:" + Arrays.toString(events) + "  Stream:" + getStreamDefinition().getStreamId());
+    public void dispatchEvent(Object[] eventData) {
         for (EventConsumer consumer : consumers) {
-            consumer.consumeEvents(events);
+            try {
+                consumer.consumeEvent(eventData);
+            } catch (Exception e) {
+                log.error("Error while dispatching events", e);
+            }
+        }
+    }
+
+    public void dispatchEvents(Object[][] events) {
+        for (EventConsumer consumer : consumers) {
+            try {
+                consumer.consumeEvents(events);
+            } catch (Exception e) {
+                log.error("Error while dispatching events", e);
+            }
         }
     }
 
     public void dispatchEvents(Event[] events) {
-//        trace.info("Events arrived at junction. Event:" + Arrays.toString(events) + "  Stream:" + getStreamDefinition().getStreamId());
         for (EventConsumer consumer : consumers) {
-            consumer.consumeEvents(events);
+            try {
+                consumer.consumeEvents(events);
+            } catch (Exception e) {
+                log.error("Error while dispatching events", e);
+            }
         }
     }
 
@@ -83,7 +95,7 @@ public class EventJunction {
             log.info("Consumer added to the junction. Stream:" + getStreamDefinition().getStreamId());
             consumers.add(consumer);
         } else {
-            log.error("Consumer already exist in the junction: "+streamDefinition.getStreamId());
+            log.error("Consumer already exist in the junction: " + streamDefinition.getStreamId());
         }
     }
 
@@ -116,11 +128,4 @@ public class EventJunction {
         return streamDefinition;
     }
 
-    public boolean isExternalStream() {
-        return externalStream;
-    }
-
-    public void setExternalStream(boolean externalStream) {
-        this.externalStream = externalStream;
-    }
 }

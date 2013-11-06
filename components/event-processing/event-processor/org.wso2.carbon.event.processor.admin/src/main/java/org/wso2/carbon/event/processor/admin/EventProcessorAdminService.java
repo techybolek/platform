@@ -6,7 +6,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.event.processor.admin.internal.ds.EventProcessorAdminValueHolder;
 import org.wso2.carbon.event.processor.admin.internal.util.EventProcessorAdminUtil;
@@ -17,7 +16,6 @@ import org.wso2.carbon.event.processor.core.StreamConfiguration;
 import org.wso2.carbon.event.processor.core.exception.ExecutionPlanConfigurationException;
 import org.wso2.carbon.event.processor.core.exception.ExecutionPlanDependencyValidationException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,22 +24,24 @@ public class EventProcessorAdminService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(EventProcessorAdminService.class);
 
 
-    public void deployExecutionPlanConfiguration(ExecutionPlanConfigurationDto configurationDto) throws AxisFault {
+    public void deployExecutionPlanConfiguration(ExecutionPlanConfigurationDto configurationDto)
+            throws AxisFault {
         EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
-        if (eventProcessorService != null) {
-
+        if (eventProcessorService != null && checkExecutionPlanValidity(configurationDto.getName())) {
             ExecutionPlanConfiguration configuration = new ExecutionPlanConfiguration();
             copyConfigurationsFromDto(configuration, configurationDto);
 
             try {
                 eventProcessorService.deployExecutionPlanConfiguration(configuration, getAxisConfig());
             } catch (ExecutionPlanConfigurationException e) {
-                log.error("Unable to save the execution plan.", e);
+                log.error(e.getMessage(), e);
                 throw new AxisFault(e.getMessage(), e);
             } catch (ExecutionPlanDependencyValidationException e) {
-                log.error("Unable to save the execution plan, Invalid execution plan configuration.", e);
+                log.error(e.getMessage(), e);
                 throw new AxisFault(e.getMessage(), e);
             }
+        } else {
+            throw new AxisFault(configurationDto.getName() + " already registered as an execution in this tenant");
         }
     }
 
@@ -53,21 +53,21 @@ public class EventProcessorAdminService extends AbstractAdmin {
             try {
                 eventProcessorService.undeployActiveExecutionPlanConfiguration(name, axisConfig);
             } catch (ExecutionPlanConfigurationException e) {
-                log.error(e.getMessage(),e);
+                log.error(e.getMessage(), e);
                 throw new AxisFault(e.getMessage());
             }
         }
     }
 
-    public void undeployInactiveExecutionPlanConfiguration(String filePath) throws AxisFault {
+    public void undeployInactiveExecutionPlanConfiguration(String fileName) throws AxisFault {
         EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
         if (eventProcessorService != null) {
             AxisConfiguration axisConfig = getAxisConfig();
             try {
-                eventProcessorService.undeployInactiveExecutionPlanConfiguration(filePath, axisConfig);
+                eventProcessorService.undeployInactiveExecutionPlanConfiguration(fileName, axisConfig);
             } catch (ExecutionPlanConfigurationException e) {
-                log.error(e.getMessage(),e);
-                throw new AxisFault(e.getMessage());
+                log.error(e.getMessage(), e);
+                throw new AxisFault(e.getMessage(), e);
             }
         }
     }
@@ -79,29 +79,32 @@ public class EventProcessorAdminService extends AbstractAdmin {
         try {
             eventProcessorService.editActiveExecutionPlanConfiguration(configuration, name, axisConfig);
         } catch (ExecutionPlanConfigurationException e) {
-            throw new AxisFault("Unable to edit the configuration file.");
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage(), e);
         }
     }
 
-    public void editInactiveExecutionPlanConfiguration(String configuration, String path)
+    public void editInactiveExecutionPlanConfiguration(String configuration, String fileName)
             throws AxisFault {
         EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
         AxisConfiguration axisConfig = getAxisConfig();
         try {
-            eventProcessorService.editInactiveExecutionPlanConfiguration(configuration, path, axisConfig);
+            eventProcessorService.editInactiveExecutionPlanConfiguration(configuration, fileName, axisConfig);
         } catch (ExecutionPlanConfigurationException e) {
-            throw new AxisFault("Unable to edit the configuration file.");
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage(), e);
         }
     }
 
 
-    public String getInactiveExecutionPlanConfigurationContent(String path) throws AxisFault {
+    public String getInactiveExecutionPlanConfigurationContent(String filename) throws AxisFault {
         EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
         AxisConfiguration axisConfig = getAxisConfig();
         try {
-            return eventProcessorService.getInactiveExecutionPlanConfigurationContent(path, PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId());
+            return eventProcessorService.getInactiveExecutionPlanConfigurationContent(filename, axisConfig);
         } catch (ExecutionPlanConfigurationException e) {
-            throw new AxisFault("Unable to read the configuration file.");
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage(), e);
         }
     }
 
@@ -110,20 +113,21 @@ public class EventProcessorAdminService extends AbstractAdmin {
         EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
         AxisConfiguration axisConfig = getAxisConfig();
         try {
-            return eventProcessorService.getActiveExecutionPlanConfigurationContent(planName, PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId());
+            return eventProcessorService.getActiveExecutionPlanConfigurationContent(planName, axisConfig);
         } catch (ExecutionPlanConfigurationException e) {
-            throw new AxisFault("Unable to read the configuration file.");
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage(), e);
         }
     }
 
 
-    public ExecutionPlanConfigurationDto[] getAllActiveExecutionPlanConfigurations() throws AxisFault {
+    public ExecutionPlanConfigurationDto[] getAllActiveExecutionPlanConfigurations()
+            throws AxisFault {
 
         EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
         if (eventProcessorService != null) {
-            AxisConfiguration axisConfig = getAxisConfig();
 
-            Map<String, ExecutionPlanConfiguration> executionPlanConfigurations = eventProcessorService.getAllActiveExecutionConfigurations(PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId());
+            Map<String, ExecutionPlanConfiguration> executionPlanConfigurations = eventProcessorService.getAllActiveExecutionConfigurations(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             if (executionPlanConfigurations != null) {
                 ExecutionPlanConfigurationDto[] configurationDtos = new ExecutionPlanConfigurationDto[executionPlanConfigurations.size()];
 
@@ -140,11 +144,11 @@ public class EventProcessorAdminService extends AbstractAdmin {
         return new ExecutionPlanConfigurationDto[0];
     }
 
-    public ExecutionPlanConfigurationDto getActiveExecutionPlanConfiguration(String name) throws AxisFault {
+    public ExecutionPlanConfigurationDto getActiveExecutionPlanConfiguration(String name)
+            throws AxisFault {
         EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
         if (eventProcessorService != null) {
-            AxisConfiguration axisConfig = getAxisConfig();
-            ExecutionPlanConfiguration executionConfiguration = eventProcessorService.getActiveExecutionConfiguration(name, PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId());
+            ExecutionPlanConfiguration executionConfiguration = eventProcessorService.getActiveExecutionConfiguration(name, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             ExecutionPlanConfigurationDto dto = new ExecutionPlanConfigurationDto();
             copyConfigurationsToDto(executionConfiguration, dto);
             return dto;
@@ -152,10 +156,11 @@ public class EventProcessorAdminService extends AbstractAdmin {
         return null;
     }
 
-    public ExecutionPlanConfigurationFileDto[] getAllInactiveExecutionPlanConigurations() throws AxisFault {
+    public ExecutionPlanConfigurationFileDto[] getAllInactiveExecutionPlanConigurations()
+            throws AxisFault {
         EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
         if (eventProcessorService != null) {
-            int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             List<ExecutionPlanConfigurationFile> files = eventProcessorService.getAllInactiveExecutionPlanConfiguration(tenantId);
             if (files != null) {
                 ExecutionPlanConfigurationFileDto[] fileDtoArray = new ExecutionPlanConfigurationFileDto[files.size()];
@@ -163,7 +168,7 @@ public class EventProcessorAdminService extends AbstractAdmin {
                     ExecutionPlanConfigurationFile file = files.get(i);
                     fileDtoArray[i] = new ExecutionPlanConfigurationFileDto();
                     fileDtoArray[i].setName(file.getExecutionPlanName());
-                    fileDtoArray[i].setPath(file.getFilePath());
+                    fileDtoArray[i].setFileName(file.getFileName());
                     if (file.getStatus() != null) {
                         fileDtoArray[i].setStatus(file.getStatus().name());
                     }
@@ -174,38 +179,6 @@ public class EventProcessorAdminService extends AbstractAdmin {
         return new ExecutionPlanConfigurationFileDto[0];
     }
 
-
-    public List<String> getStreamNames() throws AxisFault {
-        EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
-        if (eventProcessorService != null) {
-            int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-            return eventProcessorService.getStreamIds(tenantId);
-        }
-        return new ArrayList<String>();
-    }
-
-    public StreamDefinitionDto getStreamDefinition(String streamId) throws AxisFault {
-        EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
-        if (eventProcessorService != null) {
-            AxisConfiguration axisConfig = getAxisConfig();
-            int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-            StreamDefinition streamDefinition = eventProcessorService.getStreamDefinition(streamId, tenantId);
-            StreamDefinitionDto dto = new StreamDefinitionDto();
-            dto.setName(streamId);
-            ArrayList<String> attributeList = new ArrayList<String>();
-            if (streamDefinition.getPayloadData() != null) {
-                for (Attribute attribute : streamDefinition.getPayloadData()) {
-                    String definition = attribute.getName() + " " + attribute.getType().name().toLowerCase();
-                    attributeList.add(definition);
-                }
-            }
-            dto.setAttributeList(attributeList);
-            return dto;
-        }
-        return null;
-    }
-
-
     public void setTracingEnabled(String executionPlanName, boolean isEnabled) throws AxisFault {
         EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
         if (eventProcessorService != null) {
@@ -213,7 +186,8 @@ public class EventProcessorAdminService extends AbstractAdmin {
             try {
                 eventProcessorService.setTracingEnabled(executionPlanName, isEnabled, axisConfig);
             } catch (ExecutionPlanConfigurationException e) {
-                throw new AxisFault(e.getMessage());
+                log.error(e.getMessage(), e);
+                throw new AxisFault(e.getMessage(), e);
             }
         } else {
             throw new AxisFault("Event processor is not loaded.");
@@ -227,108 +201,50 @@ public class EventProcessorAdminService extends AbstractAdmin {
             try {
                 eventProcessorService.setStatisticsEnabled(executionPlanName, isEnabled, axisConfig);
             } catch (ExecutionPlanConfigurationException e) {
-                throw new AxisFault(e.getMessage());
+                log.error(e.getMessage(), e);
+                throw new AxisFault(e.getMessage(), e);
             }
         } else {
             throw new AxisFault("Event processor is not loaded.");
         }
     }
 
-//    public String[] getAllExecutionPlanFileNames() throws AxisFault {
-//        EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
-//        if (eventProcessorService != null) {
-//            int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-//            List<String> files = eventProcessorService.getAllExecutionPlanConfigurationFileNames(tenantId);
-//            if (files != null) {
-//                String[] names = new String[files.size()];
-//                for (int i = 0; i < files.size(); i++) {
-//                    names[i] = files.get(i);
-//                }
-//                return names;
-//            }
-//        }
-//        return new String[0];
-//    }
+    public boolean validateSiddhiQueries(String[] inputStreamDefiniitons, String queryExpressions) throws AxisFault {
+        return EventProcessorAdminValueHolder.getEventProcessorService().validateSiddhiQueries(inputStreamDefiniitons, queryExpressions);
+    }
 
-//    public String[] getAllInactiveExecutionPlanFileNames() throws AxisFault {
-//        EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
-////        if (eventProcessorService != null) {
-////            int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-////            List<ExecutionPlanConfigurationFile> files = eventProcessorService.getFailedExecutionPlanConfigurationFiles(tenantId);
-////            if (files != null) {
-////                String[] fileNames = new String[files.size()];
-////                for (int i = 0; i < files.size(); i++) {
-////                    fileNames[i] = files.get(i).getExecutionPlanName();
-////                }
-////                return fileNames;
-////            }
-////        }
-//        return new String[0];
-//    }
-
-//
-//    public ExecutionPlanConfigurationFileDto getExecutionPlanfile(String name) throws AxisFault {
-//        EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
-////        if (eventProcessorService != null) {
-////            int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-////            ExecutionPlanConfigurationFile file = eventProcessorService.getExecutionPlanConfigurationFileByPlanName(name, tenantId);
-////            if (file != null) {
-////                ExecutionPlanConfigurationFileDto dto = new ExecutionPlanConfigurationFileDto();
-////                dto.setName(file.getExecutionPlanName());
-////                dto.setFilePath(file.getFilePath());
-////                if (file.getStatus() != null) {
-////                    dto.setStatus(file.getStatus().name());
-////                }
-////                return dto;
-////            }
-////        }
-//        return null;
-//    }
-
-    public String getStreamDefinitionAsString(String streamId) throws AxisFault {
-        EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
-        if (eventProcessorService != null) {
-            AxisConfiguration axisConfig = getAxisConfig();
-            int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-            StreamDefinition streamDefinition = eventProcessorService.getStreamDefinition(streamId, tenantId);
-
-            String definitionString = "(";
-            boolean appendComma = false;
-
-            if (streamDefinition.getMetaData() != null) {
-
-                for (Attribute attribute : streamDefinition.getMetaData()) {
-                    if (appendComma) {
-                        definitionString = definitionString + ", ";
-                    }
-                    definitionString = definitionString + attribute.getName() + " " + attribute.getType().name().toLowerCase();
-                    appendComma = true;
-                }
-            }
-            if (streamDefinition.getPayloadData() != null) {
-
-                for (Attribute attribute : streamDefinition.getPayloadData()) {
-                    if (appendComma) {
-                        definitionString = definitionString + ", ";
-                    }
-                    definitionString = definitionString + attribute.getName() + " " + attribute.getType().name().toLowerCase();
-                    appendComma = true;
-                }
-            }
-            if (streamDefinition.getCorrelationData() != null) {
-
-                for (Attribute attribute : streamDefinition.getCorrelationData()) {
-                    if (appendComma) {
-                        definitionString = definitionString + ", ";
-                    }
-                    definitionString = definitionString + attribute.getName() + " " + attribute.getType().name().toLowerCase();
-                    appendComma = true;
-                }
-            }
-            definitionString = definitionString + ")";
-            return definitionString;
+    public StreamDefinitionDto[] getSiddhiStreams(String[] inputStreamDefinitions, String queryExpressions) throws AxisFault {
+        List<StreamDefinition> streamdefinitions = EventProcessorAdminValueHolder.getEventProcessorService().getSiddhiStreams(inputStreamDefinitions, queryExpressions);
+        StreamDefinitionDto[] streamDefinitionDtos = new StreamDefinitionDto[streamdefinitions.size()];
+        int i = 0;
+        for (StreamDefinition databridgeStreamDef : streamdefinitions) {
+            StreamDefinitionDto dto = new StreamDefinitionDto();
+            dto.setName(databridgeStreamDef.getName());
+            dto.setMetaData(convertAttributeList(databridgeStreamDef.getMetaData()));
+            dto.setCorrelationData(convertAttributeList(databridgeStreamDef.getCorrelationData()));
+            dto.setPayloadData(convertAttributeList(databridgeStreamDef.getPayloadData()));
+            streamDefinitionDtos[i] = dto;
+            i++;
         }
-        return null;
+        return streamDefinitionDtos;
+    }
+
+    public String getExecutionPlanStatusAsString(String filename) {
+        EventProcessorService eventFormatterService = EventProcessorAdminValueHolder.getEventProcessorService();
+        return eventFormatterService.getExecutionPlanStatusAsString(filename);
+    }
+
+    private String[] convertAttributeList(List<org.wso2.carbon.databridge.commons.Attribute> attributeList) {
+        if (attributeList != null) {
+            String[] convertedAttributes = new String[attributeList.size()];
+            int i = 0;
+            for (org.wso2.carbon.databridge.commons.Attribute attribute : attributeList) {
+                convertedAttributes[i] = attribute.getName() + " " + attribute.getType();
+                i++;
+            }
+            return convertedAttributes;
+        }
+        return new String[0];
     }
 
     private void copyConfigurationsFromDto(ExecutionPlanConfiguration config,
@@ -346,15 +262,15 @@ public class EventProcessorAdminService extends AbstractAdmin {
 
         if (dto.getImportedStreams() != null) {
             for (StreamConfigurationDto streamConfigurationDto : dto.getImportedStreams()) {
-                StreamConfiguration streamConfig = new StreamConfiguration(EventProcessorAdminUtil.getStreamName(streamConfigurationDto.getStreamId()), streamConfigurationDto.getSiddhiStreamName(), EventProcessorAdminUtil.getVersion(streamConfigurationDto.getStreamId()));
-
+                StreamConfiguration streamConfig = new StreamConfiguration(EventProcessorAdminUtil.getStreamName(streamConfigurationDto.getStreamId()), EventProcessorAdminUtil.getVersion(streamConfigurationDto.getStreamId()), streamConfigurationDto.getSiddhiStreamName());
                 config.addImportedStream(streamConfig);
             }
         }
 
         if (dto.getExportedStreams() != null) {
             for (StreamConfigurationDto streamConfigurationDto : dto.getExportedStreams()) {
-                StreamConfiguration streamConfig = new StreamConfiguration(EventProcessorAdminUtil.getStreamName(streamConfigurationDto.getStreamId()), streamConfigurationDto.getSiddhiStreamName(), EventProcessorAdminUtil.getVersion(streamConfigurationDto.getStreamId()));
+                StreamConfiguration streamConfig = new StreamConfiguration(EventProcessorAdminUtil.getStreamName(streamConfigurationDto.getStreamId()), EventProcessorAdminUtil.getVersion(streamConfigurationDto.getStreamId()), streamConfigurationDto.getSiddhiStreamName());
+                streamConfig.setPassThroughFlowSupported(streamConfigurationDto.isPassThroughFlowSupported());
                 config.addExportedStream(streamConfig);
             }
         }
@@ -395,10 +311,29 @@ public class EventProcessorAdminService extends AbstractAdmin {
             for (int i = 0; i < config.getExportedStreams().size(); i++) {
                 StreamConfiguration streamConfiguration = config.getExportedStreams().get(i);
                 StreamConfigurationDto streamDto = new StreamConfigurationDto(streamConfiguration.getStreamId(), streamConfiguration.getSiddhiStreamName());
+                streamDto.setPassThroughFlowSupported(streamConfiguration.isPassThroughFlowSupported());
                 exportedStreamDtos[i] = streamDto;
             }
             dto.setExportedStreams(exportedStreamDtos);
         }
+    }
+
+    private boolean checkExecutionPlanValidity(String executionPlanName)
+            throws AxisFault {
+
+        EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        Map<String, ExecutionPlanConfiguration> executionPlanConfigurationMap;
+        executionPlanConfigurationMap = eventProcessorService.getAllActiveExecutionConfigurations(tenantId);
+        if (executionPlanConfigurationMap != null) {
+            for (String executionPlan : executionPlanConfigurationMap.keySet()) {
+                if (executionPlanName.equalsIgnoreCase(executionPlan)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
 }

@@ -16,100 +16,97 @@
   ~  under the License.
   -->
 
-<service name="EventBuilderAdminService">
-    <transports>
-        <transport>https</transport>
-    </transports>
-    <messageReceivers>
-        <messageReceiver mep="http://www.w3.org/ns/wsdl/robust-in-only"
-                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
-        <messageReceiver mep="http://www.w3.org/ns/wsdl/in-only"
-                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
-        <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
-                         class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
-    </messageReceivers>
-    <parameter name="ServiceClass">
-        org.wso2.carbon.event.builder.admin.internal.EventBuilderAdminService
-    </parameter>
+<serviceGroup>
+    <service name="EventBuilderAdminService" scope="transportsession">
+        <transports>
+            <transport>https</transport>
+        </transports>
+        <messageReceivers>
+            <messageReceiver mep="http://www.w3.org/ns/wsdl/robust-in-only"
+                             class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+            <messageReceiver mep="http://www.w3.org/ns/wsdl/in-only"
+                             class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+            <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
+                             class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+        </messageReceivers>
+        <parameter name="ServiceClass" locked="false">
+            org.wso2.carbon.event.builder.admin.internal.EventBuilderAdminService
+        </parameter>
 
-    <parameter name="AuthorizationAction" locked="false">
-        /permission/admin/manage/eventBuilder
-    </parameter>
-    <operation name="getInputTransportNames">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        <parameter name="AuthorizationAction" locked="false">
+            /permission/admin/manage/eventBuilder
         </parameter>
-    </operation>
-    <operation name="getAllActiveEventBuilderNames">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="getAllActiveEventBuilderConfigurations">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="getMessageConfigurationProperties">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="getMessageConfigurationPropertiesWithValue">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="getActiveEventBuilderConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="deployEventBuilderConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="undeployActiveConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="undeployInactiveEventBuilderConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="getSupportedInputMappingTypes">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="getEventBuilderConfigurationsFor">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="getActiveEventBuilderConfigurationContent">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="getInactiveEventBuilderConfigurationContent">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="editInactiveEventBuilderConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="editActiveEventBuilderConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="getAllInactiveEventBuilderConfigurations">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="setTraceEnabled">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
-    <operation name="setStatisticsEnabled">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
-        </parameter>
-    </operation>
 
+        <operation name="getInputEventAdaptorInfo">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="getAllActiveEventBuilderConfigurations">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="getMessageConfigurationProperties">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="getMessageConfigurationPropertiesWithValue">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="getActiveEventBuilderConfiguration">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="deployEventBuilderConfiguration">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="undeployActiveConfiguration">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="undeployInactiveEventBuilderConfiguration">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="getSupportedInputMappingTypes">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="getActiveEventBuilderConfigurationContent">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="getInactiveEventBuilderConfigurationContent">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="editInactiveEventBuilderConfiguration">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="editActiveEventBuilderConfiguration">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="getAllInactiveEventBuilderConfigurations">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="setTraceEnabled">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="setStatisticsEnabled">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+        <operation name="getEventBuilderStatusAsString">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+            </parameter>
+        </operation>
+
+    </service>
     <parameter name="adminService" locked="true">true</parameter>
     <parameter name="hiddenService" locked="true">true</parameter>
-</service>
-
-
+</serviceGroup>

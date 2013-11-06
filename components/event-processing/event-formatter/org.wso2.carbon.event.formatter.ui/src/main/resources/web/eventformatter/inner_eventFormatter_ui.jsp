@@ -1,8 +1,6 @@
-<%@ page
-        import="org.wso2.carbon.event.formatter.stub.EventFormatterAdminServiceStub" %>
-
-<%@ page
-        import="org.wso2.carbon.event.formatter.stub.types.EventFormatterPropertyDto" %>
+<%@ page import="org.wso2.carbon.event.formatter.stub.EventFormatterAdminServiceStub" %>
+<%@ page import="org.wso2.carbon.event.formatter.stub.types.EventFormatterPropertyDto" %>
+<%@ page import="org.wso2.carbon.event.formatter.stub.types.OutputEventAdaptorInfoDto" %>
 <%@ page import="org.wso2.carbon.event.formatter.ui.EventFormatterUIUtils" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -21,7 +19,7 @@
 <%
     EventFormatterAdminServiceStub stub = EventFormatterUIUtils.getEventFormatterAdminService(config, session, request);
     String[] streamNames = stub.getAllEventStreamNames();
-    String[] transportAdaptorNames = stub.getOutputTransportAdaptorNames();
+    OutputEventAdaptorInfoDto[] outputEventAdaptorInfoArray = stub.getOutputEventAdaptorInfo();
     String firstEventStreamName = null;
 %>
 
@@ -86,20 +84,20 @@
 </tr>
 
 <tr>
-    <td><fmt:message key="transport.adaptor.name"/><span class="required">*</span></td>
+    <td><fmt:message key="event.adaptor.name"/><span class="required">*</span></td>
     <td>
         <table>
-            <td class="custom-noPadding" width="60%"><select name="transportAdaptorNameFilter"
-                                                             onchange="loadTransportAdaptorRelatedProperties('<fmt:message key="to.heading"/>')"
-                                                             id="transportAdaptorNameFilter">
+            <td class="custom-noPadding" width="100%"><select name="eventAdaptorNameFilter"
+                                                             onchange="loadEventAdaptorRelatedProperties('<fmt:message key="to.heading"/>')"
+                                                             id="eventAdaptorNameFilter">
                 <%
-                    String firstTransportAdaptorName = null;
+                    String firstEventAdaptorName = null;
 
-                    if (transportAdaptorNames != null) {
-                        firstTransportAdaptorName = transportAdaptorNames[0];
-                        for (String transportAdaptorName : transportAdaptorNames) {
+                    if (outputEventAdaptorInfoArray != null) {
+                        firstEventAdaptorName = outputEventAdaptorInfoArray[0].getEventAdaptorName();
+                        for (OutputEventAdaptorInfoDto outputEventAdaptorInfoDto : outputEventAdaptorInfoArray) {
                 %>
-                <option><%=transportAdaptorName%>
+                <option value="<%=outputEventAdaptorInfoDto.getEventAdaptorName() + "$=" + outputEventAdaptorInfoDto.getEventAdaptorType()%>"><%=outputEventAdaptorInfoDto.getEventAdaptorName()%>
                 </option>
                 <%
                         }
@@ -109,10 +107,9 @@
             </select>
 
                 <div class="sectionHelp">
-                    <fmt:message key="transport.adaptor.name.help"/>
+                    <fmt:message key="event.adaptor.name.help"/>
                 </div>
             </td>
-            <td width="40%" id="addOutputTransportAdaptorTD" class="custom-noPadding"></td>
         </table>
     </td>
 
@@ -129,9 +126,7 @@
     <td><select name="mappingTypeFilter"
                 onchange="showMappingContext()" id="mappingTypeFilter">
         <%
-            String[] mappingTypes = stub.getSupportedMappingTypes(firstTransportAdaptorName);
-
-
+            String[] mappingTypes = stub.getSupportedMappingTypes(firstEventAdaptorName);
             if (mappingTypes != null) {
                 for (String mappingType : mappingTypes) {
         %>
@@ -143,7 +138,6 @@
         %>
 
     </select>
-
         <div class="sectionHelp">
             <fmt:message key="mapping.type.help"/>
         </div>
@@ -160,12 +154,26 @@
     <table class="styledLeft noBorders spacer-bot"
            style="width:100%">
         <tbody>
-        <tr name="outputWSO2EventMapping">
+        <tr name="outputWSO2EventMappingHeader">
             <td colspan="2" class="middle-header">
                 <fmt:message key="wso2event.mapping"/>
             </td>
         </tr>
-        <tr name="outputWSO2EventMapping">
+        <tr fromElementKey="outputWso2EventMapping">
+            <td colspan="2">
+                <table>
+                    <td class="col-small">
+                        <fmt:message key="event.formatter.custommapping.enabled"/>
+                    </td>
+                    <td>
+                        <input name="customMapping" type="radio" value="enable"
+                               onclick="enableMapping(true);" checked="true" >Enable</input>
+                        <input name="customMapping" type="radio" value="disable" onclick="enableMapping(false);" >Disable</input>
+                    </td>
+                </table>
+            </td>
+        </tr>
+        <tr id="outputWSO2EventMappingMeta">
             <td colspan="2">
 
                 <h6><fmt:message key="property.data.type.meta"/></h6>
@@ -174,7 +182,6 @@
                     <thead>
                     <th class="leftCol-med"><fmt:message key="property.name"/></th>
                     <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
-                    <th class="leftCol-med"><fmt:message key="property.type"/></th>
                     <th><fmt:message key="actions"/></th>
                     </thead>
                 </table>
@@ -193,16 +200,6 @@
                         <td>
                             <input type="text" id="outputMetaDataPropValueOf"/>
                         </td>
-                        <td><fmt:message key="property.type"/>:
-                            <select id="outputMetaDataPropType">
-                                <option value="java.lang.Integer">Integer</option>
-                                <option value="java.lang.Long">Long</option>
-                                <option value="java.lang.Double">Double</option>
-                                <option value="java.lang.Float">Float</option>
-                                <option value="java.lang.String">String</option>
-                                <option value="java.lang.Boolean">Boolean</option>
-                            </select>
-                        </td>
                         <td><input type="button" class="button"
                                    value="<fmt:message key="add"/>"
                                    onclick="addOutputWSO2EventProperty('Meta')"/>
@@ -214,7 +211,7 @@
         </tr>
 
 
-        <tr name="outputWSO2EventMapping">
+        <tr id="outputWSO2EventMappingCorrelation">
             <td colspan="2">
 
                 <h6><fmt:message key="property.data.type.correlation"/></h6>
@@ -223,7 +220,6 @@
                     <thead>
                     <th class="leftCol-med"><fmt:message key="property.name"/></th>
                     <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
-                    <th class="leftCol-med"><fmt:message key="property.type"/></th>
                     <th><fmt:message key="actions"/></th>
                     </thead>
                 </table>
@@ -242,16 +238,6 @@
                         <td>
                             <input type="text" id="outputCorrelationDataPropValueOf"/>
                         </td>
-                        <td><fmt:message key="property.type"/>:
-                            <select id="outputCorrelationDataPropType">
-                                <option value="java.lang.Integer">Integer</option>
-                                <option value="java.lang.Long">Long</option>
-                                <option value="java.lang.Double">Double</option>
-                                <option value="java.lang.Float">Float</option>
-                                <option value="java.lang.String">String</option>
-                                <option value="java.lang.Boolean">Boolean</option>
-                            </select>
-                        </td>
                         <td><input type="button" class="button"
                                    value="<fmt:message key="add"/>"
                                    onclick="addOutputWSO2EventProperty('Correlation')"/>
@@ -261,7 +247,7 @@
                 </table>
             </td>
         </tr>
-        <tr name="outputWSO2EventMapping">
+        <tr id="outputWSO2EventMappingPayload">
             <td colspan="2">
 
                 <h6><fmt:message key="property.data.type.payload"/></h6>
@@ -270,7 +256,6 @@
                     <thead>
                     <th class="leftCol-med"><fmt:message key="property.name"/></th>
                     <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
-                    <th class="leftCol-med"><fmt:message key="property.type"/></th>
                     <th><fmt:message key="actions"/></th>
                     </thead>
                 </table>
@@ -288,16 +273,6 @@
                         </td>
                         <td>
                             <input type="text" id="outputPayloadDataPropValueOf"/>
-                        </td>
-                        <td><fmt:message key="property.type"/>:
-                            <select id="outputPayloadDataPropType">
-                                <option value="java.lang.Integer">Integer</option>
-                                <option value="java.lang.Long">Long</option>
-                                <option value="java.lang.Double">Double</option>
-                                <option value="java.lang.Float">Float</option>
-                                <option value="java.lang.String">String</option>
-                                <option value="java.lang.Boolean">Boolean</option>
-                            </select>
                         </td>
                         <td><input type="button" class="button"
                                    value="<fmt:message key="add"/>"
@@ -532,7 +507,7 @@
 </tr>
 
 <%
-    EventFormatterPropertyDto[] eventFormatterProperties = stub.getEventFormatterProperties(firstTransportAdaptorName);
+    EventFormatterPropertyDto[] eventFormatterProperties = stub.getEventFormatterProperties(firstEventAdaptorName);
     if (eventFormatterProperties != null) {
 %>
 <tr>

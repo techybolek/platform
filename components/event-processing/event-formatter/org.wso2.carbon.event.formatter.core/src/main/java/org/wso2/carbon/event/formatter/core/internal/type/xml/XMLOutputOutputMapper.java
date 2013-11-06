@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.event.formatter.core.config.EventFormatterConfiguration;
 import org.wso2.carbon.event.formatter.core.exception.EventFormatterConfigurationException;
+import org.wso2.carbon.event.formatter.core.exception.EventFormatterProcessingException;
 import org.wso2.carbon.event.formatter.core.internal.OutputMapper;
 import org.wso2.carbon.event.formatter.core.internal.ds.EventFormatterServiceValueHolder;
 
@@ -37,14 +38,14 @@ import java.util.Map;
 public class XMLOutputOutputMapper implements OutputMapper {
 
     private static final Log log = LogFactory.getLog(XMLOutputOutputMapper.class);
-    private String outputXMLText = "";
     EventFormatterConfiguration eventFormatterConfiguration = null;
     Map<String, Integer> propertyPositionMap = null;
+    private String outputXMLText = "";
 
     public XMLOutputOutputMapper(EventFormatterConfiguration eventFormatterConfiguration,
                                  Map<String, Integer> propertyPositionMap,
                                  int tenantId) throws
-                                               EventFormatterConfigurationException {
+            EventFormatterConfigurationException {
         this.eventFormatterConfiguration = eventFormatterConfiguration;
         this.propertyPositionMap = propertyPositionMap;
 
@@ -138,15 +139,23 @@ public class XMLOutputOutputMapper implements OutputMapper {
     }
 
     @Override
-    public Object convert(Object obj) {
+    public Object convertToMappedInputEvent(Object obj)
+            throws EventFormatterConfigurationException {
         Object[] inputObjArray = (Object[]) obj;
-
-        try {
-            Object message = buildOuputOMElement(inputObjArray, AXIOMUtil.stringToOM(outputXMLText));
-            return message;
-        } catch (XMLStreamException e) {
-            throw new EventFormatterConfigurationException("XML mapping is not in XML format :" + outputXMLText, e);
+        if (inputObjArray.length > 0) {
+            try {
+                return buildOuputOMElement(inputObjArray, AXIOMUtil.stringToOM(outputXMLText));
+            } catch (XMLStreamException e) {
+                throw new EventFormatterConfigurationException("XML mapping is not in XML format :" + outputXMLText, e);
+            }
+        } else {
+            throw new EventFormatterProcessingException("Input Object array is empty!");
         }
+    }
+
+    @Override
+    public Object convertToTypedInputEvent(Object obj) throws EventFormatterConfigurationException {
+        throw new UnsupportedOperationException("This feature is not yet supported for XMLOutputMapping");
     }
 
 }

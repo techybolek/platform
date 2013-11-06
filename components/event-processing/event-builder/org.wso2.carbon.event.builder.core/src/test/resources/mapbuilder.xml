@@ -18,8 +18,8 @@
   -->
 
 <eventBuilder name="mapbuilder" xmlns="http://wso2.org/carbon/eventbuilder">
-    <from transportAdaptorType="jms" transportAdaptorName="jmsActiveMqAdaptor">
-        <property name="transport.jms.Destination">stockQuotes</property>
+    <from eventAdaptorType="jms" eventAdaptorName="jmsActiveMqAdaptor">
+        <property name="event.jms.Destination">stockQuotes</property>
     </from>
     <mapping type="map">
         <property>

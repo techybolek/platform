@@ -21,19 +21,19 @@ package org.wso2.carbon.event.formatter.admin.internal.ds;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.formatter.admin.internal.util.EventFormatterAdminServiceValueHolder;
 import org.wso2.carbon.event.formatter.core.EventFormatterService;
-import org.wso2.carbon.output.transport.adaptor.core.OutputTransportAdaptorService;
-import org.wso2.carbon.output.transport.adaptor.manager.core.OutputTransportAdaptorManagerService;
+import org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorService;
+import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorManagerService;
 
 /**
  * This class is used to get the EventFormatter service.
  *
  * @scr.component name="eventFormatterAdmin.component" immediate="true"
- * @scr.reference name="transportmanager.service"
- * interface="org.wso2.carbon.output.transport.adaptor.manager.core.OutputTransportAdaptorManagerService" cardinality="1..1"
- * policy="dynamic" bind="setTransportAdaptorManagerService" unbind="unSetTransportAdaptorManagerService"
- * @scr.reference name="transport.adaptor.service"
- * interface="org.wso2.carbon.output.transport.adaptor.core.OutputTransportAdaptorService" cardinality="1..1"
- * policy="dynamic" bind="setTransportAdaptorService" unbind="unSetTransportAdaptorService"
+ * @scr.reference name="eventmanager.service"
+ * interface="org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorManagerService" cardinality="1..1"
+ * policy="dynamic" bind="setEventAdaptorManagerService" unbind="unSetEventAdaptorManagerService"
+ * @scr.reference name="event.adaptor.service"
+ * interface="org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorService" cardinality="1..1"
+ * policy="dynamic" bind="setEventAdaptorService" unbind="unSetEventAdaptorService"
  * @scr.reference name="eventFormatterService.service"
  * interface="org.wso2.carbon.event.formatter.core.EventFormatterService" cardinality="1..1"
  * policy="dynamic" bind="setEventFormatterService" unbind="unSetEventFormatterService"
@@ -43,23 +43,23 @@ public class EventFormatterAdminServiceDS {
 
     }
 
-    protected void setTransportAdaptorManagerService(
-            OutputTransportAdaptorManagerService transportAdaptorManagerService) {
-        EventFormatterAdminServiceValueHolder.registerTransportAdaptorManagerService(transportAdaptorManagerService);
+    protected void setEventAdaptorManagerService(
+            OutputEventAdaptorManagerService eventAdaptorManagerService) {
+        EventFormatterAdminServiceValueHolder.registerEventAdaptorManagerService(eventAdaptorManagerService);
     }
 
-    protected void unSetTransportAdaptorManagerService(
-            OutputTransportAdaptorManagerService transportManagerService) {
+    protected void unSetEventAdaptorManagerService(
+            OutputEventAdaptorManagerService eventManagerService) {
 
     }
 
-    protected void setTransportAdaptorService(
-            OutputTransportAdaptorService transportAdaptorService) {
-        EventFormatterAdminServiceValueHolder.registerTransportAdaptorService(transportAdaptorService);
+    protected void setEventAdaptorService(
+            OutputEventAdaptorService eventAdaptorService) {
+        EventFormatterAdminServiceValueHolder.registerEventAdaptorService(eventAdaptorService);
     }
 
-    protected void unSetTransportAdaptorService(
-            OutputTransportAdaptorService transportAdaptorService) {
+    protected void unSetEventAdaptorService(
+            OutputEventAdaptorService eventAdaptorService) {
 
     }
 

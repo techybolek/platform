@@ -18,17 +18,19 @@
 
 //Method that used in jsp files
 
-function getWso2EventDataValues(dataTable) {
+function getWso2EventDataValues(dataTable, inputDataType) {
 
     var wso2EventData = "";
     for (var i = 1; i < dataTable.rows.length; i++) {
-
         var row = dataTable.rows[i];
-        var column0 = row.cells[0].innerHTML;
         var column1 = row.cells[1].innerHTML;
-        var column2 = row.cells[2].innerHTML;
+        if (column1 == inputDataType) {
+            var column0 = row.cells[0].innerHTML;
+            var column2 = row.cells[2].innerHTML;
+            var column3 = row.cells[3].innerHTML;
 
-        wso2EventData = wso2EventData + column0 + "^" + column1 + "^" + column2 + "$";
+            wso2EventData = wso2EventData + column0 + "^=" + column2 + "^=" + column3 + "$=";
+        }
     }
     return wso2EventData;
 }
@@ -45,7 +47,7 @@ function getJsonDataValues(dataTable) {
         var column3 = row.cells[3].innerHTML;
 
         // For JSON we use a different terminator (*) since $ is already used in JSONPath
-        jsonData = jsonData + column0 + "^" + column1 + "^" + column2 + "^" + column3 + "*";
+        jsonData = jsonData + column0 + "^=" + column1 + "^=" + column2 + "^=" + column3 + "*=";
     }
     return jsonData;
 }
@@ -61,7 +63,7 @@ function getXpathDataValues(dataTable) {
         var column2 = row.cells[2].innerHTML;
         var column3 = row.cells[3].innerHTML;
 
-        xpathData = xpathData + column0 + "^" + column1 + "^" + column2 + "^" + column3 + "$";
+        xpathData = xpathData + column0 + "^=" + column1 + "^=" + column2 + "^=" + column3 + "$=";
     }
     return xpathData;
 }
@@ -74,7 +76,7 @@ function getXpathPrefixValues(dataTable) {
         var column0 = row.cells[0].innerHTML;
         var column1 = row.cells[1].innerHTML;
 
-        xpathPrefixes = xpathPrefixes + column0 + "^" + column1 + "$";
+        xpathPrefixes = xpathPrefixes + column0 + "^=" + column1 + "$=";
     }
 
     return xpathPrefixes;
@@ -91,7 +93,7 @@ function getTextDataValues(dataTable) {
         var column2 = row.cells[2].innerHTML;
         var column3 = row.cells[3].innerHTML;
 
-        textData = textData + column0 + "^" + column1 + "^" + column2 + "^" + column3 + "$";
+        textData = textData + column1 + "^=" + column0 + "^=" + column2 + "^=" + column3 + "$=";
     }
     return textData;
 }
@@ -106,7 +108,7 @@ function getMapDataValues(dataTable) {
         var column1 = row.cells[1].innerHTML;
         var column2 = row.cells[2].innerHTML;
 
-        mapEventData = mapEventData + column0 + "^" + column1 + "^" + column2 + "^" + "$";
+        mapEventData = mapEventData + column0 + "^=" + column1 + "^=" + column2 + "^=" + "$=";
     }
     return mapEventData;
 }
@@ -116,15 +118,22 @@ function addEventBuilder(form) {
     var isFieldEmpty = false;
 
     var eventBuilderName = document.getElementById("eventBuilderNameId").value.trim();
-    var toStreamName = document.getElementById("toStreamName").value.trim();
-    var toStreamVersion = document.getElementById("toStreamVersion").value.trim();
-    var transportAdaptorName = document.getElementById("transportAdaptorNameSelect")[document.getElementById("transportAdaptorNameSelect").selectedIndex].text;
+    var toStreamId = document.getElementById("streamNameFilter").value.trim();
+    var toStreamNameAndVersion = toStreamId.split(":");
+    if(toStreamNameAndVersion.length != 2) {
+        CARBON.showErrorDialog("Could not find a valid To Stream Id, Please check.");
+        return;
+    }
+
+    var toStreamName = toStreamNameAndVersion[0];
+    var toStreamVersion = toStreamNameAndVersion[1];
+    var eventAdaptorInfo = document.getElementById("eventAdaptorNameSelect")[document.getElementById("eventAdaptorNameSelect").selectedIndex].value.trim();
 
 
     var reWhiteSpace = new RegExp("^[a-zA-Z0-9_]+$");
     // Check for white space
     if (!reWhiteSpace.test(eventBuilderName)) {
-        CARBON.showErrorDialog("White spaces are not allowed in event builder name.");
+        CARBON.showErrorDialog("Invalid character found in event builder name.");
         return;
     }
     if (isFieldEmpty || (eventBuilderName == "")) {
@@ -132,13 +141,16 @@ function addEventBuilder(form) {
         CARBON.showErrorDialog("Empty inputs fields are not allowed.");
         return;
     }
+    if(toStreamName != "" && toStreamVersion == "") {
+        toStreamVersion = "1.0.0";
+    }
 
     var propertyCount = 0;
     var msgConfigPropertyString = "";
 
     // all properties, not required and required are checked
     while (document.getElementById("msgConfigProperty_Required_" + propertyCount) != null ||
-           document.getElementById("msgConfigProperty_" + propertyCount) != null) {
+        document.getElementById("msgConfigProperty_" + propertyCount) != null) {
         // if required fields are empty
         if (document.getElementById("msgConfigProperty_Required_" + propertyCount) != null) {
             if (document.getElementById("msgConfigProperty_Required_" + propertyCount).value.trim() == "") {
@@ -151,7 +163,7 @@ function addEventBuilder(form) {
                 // values are stored in parameter string to send to backend
                 var propertyValue = document.getElementById("msgConfigProperty_Required_" + propertyCount).value.trim();
                 var propertyName = document.getElementById("msgConfigProperty_Required_" + propertyCount).name;
-                msgConfigPropertyString = msgConfigPropertyString + propertyName + "$" + propertyValue + "|";
+                msgConfigPropertyString = msgConfigPropertyString + propertyName + "$=" + propertyValue + "|=";
 
             }
         } else if (document.getElementById("msgConfigProperty_" + propertyCount) != null) {
@@ -160,7 +172,7 @@ function addEventBuilder(form) {
             if (notRequiredPropertyValue == "") {
                 notRequiredPropertyValue = "  ";
             }
-            msgConfigPropertyString = msgConfigPropertyString + notRequiredPropertyName + "$" + notRequiredPropertyValue + "|";
+            msgConfigPropertyString = msgConfigPropertyString + notRequiredPropertyName + "$=" + notRequiredPropertyValue + "|=";
         }
         propertyCount++;
     }
@@ -171,39 +183,49 @@ function addEventBuilder(form) {
         return;
     } else if (document.getElementById("inputMappingTypeSelect")[document.getElementById("inputMappingTypeSelect").selectedIndex].text == 'wso2event') {
 
-        var parameters = "?eventBuilderName=" + eventBuilderName + "&toStreamName=" + toStreamName + "&toStreamVersion=" + toStreamVersion + "&transportAdaptorName=" + transportAdaptorName + "&mappingType=wso2event" + "&msgConfigPropertySet=" + msgConfigPropertyString;
-
+        var mappingType = "wso2event";
         var metaData = "";
         var correlationData = "";
         var payloadData = "";
-
-        var metaDataTable = document.getElementById("inputMetaDataTable");
-        if (metaDataTable.rows.length > 1) {
-            metaData = getWso2EventDataValues(metaDataTable);
-            parameters = parameters + "&metaData=" + metaData;
-        }
-        var correlationDataTable = document.getElementById("inputCorrelationDataTable");
-        if (correlationDataTable.rows.length > 1) {
-            correlationData = getWso2EventDataValues(correlationDataTable);
-            parameters = parameters + "&correlationData=" + correlationData;
-        }
-        var payloadDataTable = document.getElementById("inputPayloadDataTable");
-        if (payloadDataTable.rows.length > 1) {
-            payloadData = getWso2EventDataValues(payloadDataTable);
-            parameters = parameters + "&payloadData=" + payloadData;
+        var customMappingValue = "disable";
+        var checkedRB = document.querySelectorAll('input[type="radio"][name="customMapping"]:checked');
+        if(checkedRB.length != 0) {
+            customMappingValue = checkedRB[0].value;
         }
 
-        if (metaData == "" && correlationData == "" && payloadData == "") {
+        if(customMappingValue == "enable") {
+        var wso2EventDataTable = document.getElementById("inputWso2EventDataTable");
+        if (wso2EventDataTable.rows.length > 1) {
+            metaData = getWso2EventDataValues(wso2EventDataTable, 'meta');
+            correlationData = getWso2EventDataValues(wso2EventDataTable, 'correlation');
+            payloadData = getWso2EventDataValues(wso2EventDataTable, 'payload');
+        }
+        }
+        if (metaData == "" && correlationData == "" && payloadData == "" && customMappingValue == "enable") {
             CARBON.showErrorDialog("Mapping parameters cannot be empty.");
             return;
+        } else {
+            new Ajax.Request('../eventbuilder/add_eventbuilder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderName: eventBuilderName, toStreamName: toStreamName,
+                    toStreamVersion: toStreamVersion, eventAdaptorInfo: eventAdaptorInfo, mappingType: mappingType,
+                    msgConfigPropertySet: msgConfigPropertyString, customMappingValue: customMappingValue,
+                    metaData: metaData, correlationData: correlationData, payloadData: payloadData},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        form.submit();
+                    } else {
+                        CARBON.showErrorDialog("Failed to add event builder, Exception: " + event.responseText.trim());
+                    }
+                }
+            })
         }
     }
 
     else if (document.getElementById("inputMappingTypeSelect")[document.getElementById("inputMappingTypeSelect").selectedIndex].text == 'text') {
 
-        var parameters = "?eventBuilderName=" + eventBuilderName + "&toStreamName=" + toStreamName + "&toStreamVersion=" + toStreamVersion
-                                 + "&transportAdaptorName=" + transportAdaptorName + "&mappingType=text" + "&msgConfigPropertySet=" + msgConfigPropertyString;
-
+        var mappingType = "text";
         var textData = "";
 
         var textDataTable = document.getElementById("inputTextMappingTable");
@@ -215,88 +237,362 @@ function addEventBuilder(form) {
             CARBON.showErrorDialog("Mapping parameters cannot be empty.");
             return;
         } else {
-            parameters = parameters + "&textData=" + textData;
+            new Ajax.Request('../eventbuilder/add_eventbuilder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderName: eventBuilderName, toStreamName: toStreamName,
+                    toStreamVersion: toStreamVersion, eventAdaptorInfo: eventAdaptorInfo, mappingType: mappingType, msgConfigPropertySet: msgConfigPropertyString,
+                    textData: textData},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        form.submit();
+                    } else {
+                        CARBON.showErrorDialog("Failed to add event builder, Exception: " + event.responseText.trim());
+                    }
+                }
+            })
         }
     }
 
     else if (document.getElementById("inputMappingTypeSelect")[document.getElementById("inputMappingTypeSelect").selectedIndex].text == 'xml') {
-        var batchProcessingEnabled = document.getElementById("batchProcessingEnabled").checked;
-        var parameters = "?eventBuilderName=" + eventBuilderName + "&toStreamName=" + toStreamName + "&toStreamVersion=" + toStreamVersion
-                                 + "&transportAdaptorName=" + transportAdaptorName + "&mappingType=xml" + "&msgConfigPropertySet=" + msgConfigPropertyString
-                                 + "&batchProcessingEnabled=" + batchProcessingEnabled;
+        var parentSelectorXpath = document.getElementById("parentSelectorXpath").value;
 
+        var mappingType = "xml";
         var prefixData = "";
         var xpathData = "";
 
         var xpathPrefixTable = document.getElementById("inputXpathPrefixTable");
         if (xpathPrefixTable.rows.length > 1) {
             prefixData = getXpathPrefixValues(xpathPrefixTable);
-            parameters = parameters + "&prefixData=" + prefixData;
         }
 
         var xpathExprTable = document.getElementById("inputXpathExprTable");
         if (xpathExprTable.rows.length > 1) {
             xpathData = getXpathDataValues(xpathExprTable);
-            parameters = parameters + "&xpathData=" + xpathData;
         }
 
         if (prefixData == "" && xpathData == "") {
             CARBON.showErrorDialog("Mapping parameters cannot be empty.");
             return;
+        } else {
+            new Ajax.Request('../eventbuilder/add_eventbuilder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderName: eventBuilderName, toStreamName: toStreamName,
+                    toStreamVersion: toStreamVersion, eventAdaptorInfo: eventAdaptorInfo, mappingType: mappingType, msgConfigPropertySet: msgConfigPropertyString,
+                    parentSelectorXpath: parentSelectorXpath, prefixData: prefixData, xpathData: xpathData},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        form.submit();
+                    } else {
+                        CARBON.showErrorDialog("Failed to add event builder, Exception: " + event.responseText.trim());
+                    }
+                }
+            });
         }
     }
     else if (document.getElementById("inputMappingTypeSelect")[document.getElementById("inputMappingTypeSelect").selectedIndex].text == 'map') {
 
-        var parameters = "?eventBuilderName=" + eventBuilderName + "&toStreamName=" + toStreamName + "&toStreamVersion=" + toStreamVersion + "&transportAdaptorName=" + transportAdaptorName + "&mappingType=map" + "&msgConfigPropertySet=" + msgConfigPropertyString;
-
+        var mappingType = "map";
         var mapData = "";
 
         var mapDataTable = document.getElementById("inputMapPropertiesTable");
         if (mapDataTable.rows.length > 1) {
             mapData = getMapDataValues(mapDataTable);
-            parameters = parameters + "&mapData=" + mapData;
-        }
-
-        else {
+            new Ajax.Request('../eventbuilder/add_eventbuilder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderName: eventBuilderName, toStreamName: toStreamName,
+                    toStreamVersion: toStreamVersion, eventAdaptorInfo: eventAdaptorInfo, mappingType: mappingType, msgConfigPropertySet: msgConfigPropertyString,
+                    mapData: mapData},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        form.submit();
+                    } else {
+                        CARBON.showErrorDialog("Failed to add event builder, Exception: " + event.responseText.trim());
+                    }
+                }
+            });
+        } else {
             CARBON.showErrorDialog("Mapping parameters cannot be empty.");
             return;
         }
     }
     else if (document.getElementById("inputMappingTypeSelect")[document.getElementById("inputMappingTypeSelect").selectedIndex].text == 'json') {
 
-        var parameters = "?eventBuilderName=" + eventBuilderName + "&toStreamName=" + toStreamName + "&toStreamVersion=" + toStreamVersion + "&transportAdaptorName=" + transportAdaptorName + "&mappingType=json" + "&msgConfigPropertySet=" + msgConfigPropertyString;
-
+        var mappingType = "json";
         var jsonData = "";
 
         var jsonDataTable = document.getElementById("inputJsonpathExprTable");
         if (jsonDataTable.rows.length > 1) {
             jsonData = getJsonDataValues(jsonDataTable);
-            parameters = parameters + "&jsonData=" + jsonData;
         }
 
         if (jsonData == "") {
             CARBON.showErrorDialog("Mapping parameters cannot be empty.");
             return;
+        } else {
+            new Ajax.Request('../eventbuilder/add_eventbuilder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderName: eventBuilderName, toStreamName: toStreamName,
+                    toStreamVersion: toStreamVersion, eventAdaptorInfo: eventAdaptorInfo, mappingType: mappingType, msgConfigPropertySet: msgConfigPropertyString,
+                    jsonData: jsonData},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        form.submit();
+                    } else {
+                        CARBON.showErrorDialog("Failed to add event builder, Exception: " + event.responseText.trim());
+                    }
+                }
+            });
         }
     }
 
 
-    jQuery.ajax({
-                    type: "POST",
-                    url: "../eventbuilder/add_eventbuilder_ajaxprocessor.jsp" + parameters,
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "text",
-                    data: {},
-                    async: false,
-                    success: function (msg) {
-                        if (msg.trim() == "true") {
-                            form.submit();
-                        } else {
-                            CARBON.showErrorDialog("Failed to add event builder, Exception: " + msg);
-                        }
-                    }
-                });
+}
 
+function addEventBuilderViaPopup(form) {
+
+    var isFieldEmpty = false;
+
+    var eventBuilderName = document.getElementById("eventBuilderNameId").value.trim();
+    var toStreamId = document.getElementById("streamNameFilter").value.trim();
+    var toStreamNameAndVersion = toStreamId.split(":");
+    if(toStreamNameAndVersion.length != 2) {
+        CARBON.showErrorDialog("Could not find a valid To Stream Id, Please check.");
+        return;
+    }
+
+    var toStreamName = toStreamNameAndVersion[0];
+    var toStreamVersion = toStreamNameAndVersion[1];
+    var eventAdaptorInfo = document.getElementById("eventAdaptorNameSelect")[document.getElementById("eventAdaptorNameSelect").selectedIndex].value.trim();
+
+
+    var reWhiteSpace = new RegExp("^[a-zA-Z0-9_]+$");
+    // Check for white space
+    if (!reWhiteSpace.test(eventBuilderName)) {
+        CARBON.showErrorDialog("Invalid character found in event builder name.");
+        return;
+    }
+    if (isFieldEmpty || (eventBuilderName == "")) {
+        // empty fields are encountered.
+        CARBON.showErrorDialog("Empty inputs fields are not allowed.");
+        return;
+    }
+    if(toStreamName != "" && toStreamVersion == "") {
+        toStreamVersion = "1.0.0";
+    }
+
+    var propertyCount = 0;
+    var msgConfigPropertyString = "";
+
+    // all properties, not required and required are checked
+    while (document.getElementById("msgConfigProperty_Required_" + propertyCount) != null ||
+        document.getElementById("msgConfigProperty_" + propertyCount) != null) {
+        // if required fields are empty
+        if (document.getElementById("msgConfigProperty_Required_" + propertyCount) != null) {
+            if (document.getElementById("msgConfigProperty_Required_" + propertyCount).value.trim() == "") {
+                // values are empty in fields
+                isFieldEmpty = true;
+                msgConfigPropertyString = "";
+                break;
+            }
+            else {
+                // values are stored in parameter string to send to backend
+                var propertyValue = document.getElementById("msgConfigProperty_Required_" + propertyCount).value.trim();
+                var propertyName = document.getElementById("msgConfigProperty_Required_" + propertyCount).name;
+                msgConfigPropertyString = msgConfigPropertyString + propertyName + "$=" + propertyValue + "|=";
+
+            }
+        } else if (document.getElementById("msgConfigProperty_" + propertyCount) != null) {
+            var notRequiredPropertyName = document.getElementById("msgConfigProperty_" + propertyCount).name;
+            var notRequiredPropertyValue = document.getElementById("msgConfigProperty_" + propertyCount).value.trim();
+            if (notRequiredPropertyValue == "") {
+                notRequiredPropertyValue = "  ";
+            }
+            msgConfigPropertyString = msgConfigPropertyString + notRequiredPropertyName + "$=" + notRequiredPropertyValue + "|=";
+        }
+        propertyCount++;
+    }
+
+    var mappingType = "";
+    if (isFieldEmpty) {
+        // empty fields are encountered.
+        CARBON.showErrorDialog("Empty inputs fields are not allowed.");
+        return;
+    } else if (document.getElementById("inputMappingTypeSelect")[document.getElementById("inputMappingTypeSelect").selectedIndex].text == 'wso2event') {
+
+        mappingType = "wso2event";
+        var metaData = "";
+        var correlationData = "";
+        var payloadData = "";
+        var customMappingValue = "disable";
+        var checkedRB = document.querySelectorAll('input[type="radio"][name="customMapping"]:checked');
+        if(checkedRB.length != 0) {
+            customMappingValue = checkedRB[0].value;
+        }
+
+        if(customMappingValue == "enable") {
+        var wso2EventDataTable = document.getElementById("inputWso2EventDataTable");
+        if (wso2EventDataTable.rows.length > 1) {
+            metaData = getWso2EventDataValues(wso2EventDataTable, 'meta');
+            correlationData = getWso2EventDataValues(wso2EventDataTable, 'correlation');
+            payloadData = getWso2EventDataValues(wso2EventDataTable, 'payload');
+        }
+        }
+        if (metaData == "" && correlationData == "" && payloadData == "" && customMappingValue == "enable") {
+            CARBON.showErrorDialog("Mapping parameters cannot be empty.");
+            return;
+        } else {
+            new Ajax.Request('../eventbuilder/add_eventbuilder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderName: eventBuilderName, toStreamName: toStreamName,
+                    toStreamVersion: toStreamVersion, eventAdaptorInfo: eventAdaptorInfo, mappingType: mappingType,
+                    msgConfigPropertySet: msgConfigPropertyString, customMappingValue: customMappingValue,
+                    metaData: metaData, correlationData: correlationData, payloadData: payloadData},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        CARBON.showInfoDialog("Event builder added successfully!!");
+                        customCarbonWindowClose();
+                    } else {
+                        CARBON.showErrorDialog("Failed to add event builder, Exception: " + event.responseText.trim());
+                    }
+                }
+            })
+        }
+    }
+
+    else if (document.getElementById("inputMappingTypeSelect")[document.getElementById("inputMappingTypeSelect").selectedIndex].text == 'text') {
+
+        mappingType = "text";
+        var textData = "";
+
+        var textDataTable = document.getElementById("inputTextMappingTable");
+        if (textDataTable.rows.length > 1) {
+            textData = getTextDataValues(textDataTable);
+        }
+
+        if (textData == "") {
+            CARBON.showErrorDialog("Mapping parameters cannot be empty.");
+            return;
+        } else {
+            new Ajax.Request('../eventbuilder/add_eventbuilder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderName: eventBuilderName, toStreamName: toStreamName,
+                    toStreamVersion: toStreamVersion, eventAdaptorInfo: eventAdaptorInfo, mappingType: mappingType, msgConfigPropertySet: msgConfigPropertyString,
+                    textData: textData},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        CARBON.showInfoDialog("Event builder added successfully!!");
+                        customCarbonWindowClose();
+                    } else {
+                        CARBON.showErrorDialog("Failed to add event builder, Exception: " + event.responseText.trim());
+                    }
+                }
+            })
+        }
+    }
+
+    else if (document.getElementById("inputMappingTypeSelect")[document.getElementById("inputMappingTypeSelect").selectedIndex].text == 'xml') {
+        var parentSelectorXpath = document.getElementById("parentSelectorXpath").value;
+
+        mappingType = "xml";
+        var prefixData = "";
+        var xpathData = "";
+
+        var xpathPrefixTable = document.getElementById("inputXpathPrefixTable");
+        if (xpathPrefixTable.rows.length > 1) {
+            prefixData = getXpathPrefixValues(xpathPrefixTable);
+        }
+
+        var xpathExprTable = document.getElementById("inputXpathExprTable");
+        if (xpathExprTable.rows.length > 1) {
+            xpathData = getXpathDataValues(xpathExprTable);
+        }
+
+        if (prefixData == "" && xpathData == "") {
+            CARBON.showErrorDialog("Mapping parameters cannot be empty.");
+            return;
+        } else {
+            new Ajax.Request('../eventbuilder/add_eventbuilder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderName: eventBuilderName, toStreamName: toStreamName,
+                    toStreamVersion: toStreamVersion, eventAdaptorInfo: eventAdaptorInfo, mappingType: mappingType, msgConfigPropertySet: msgConfigPropertyString,
+                    parentSelectorXpath: parentSelectorXpath, prefixData: prefixData, xpathData: xpathData},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        CARBON.showInfoDialog("Event builder added successfully!!");
+                        customCarbonWindowClose();
+                    } else {
+                        CARBON.showErrorDialog("Failed to add event builder, Exception: " + event.responseText.trim());
+                    }
+                }
+            });
+        }
+    }
+    else if (document.getElementById("inputMappingTypeSelect")[document.getElementById("inputMappingTypeSelect").selectedIndex].text == 'map') {
+
+        mappingType = "map";
+        var mapData = "";
+
+        var mapDataTable = document.getElementById("inputMapPropertiesTable");
+        if (mapDataTable.rows.length > 1) {
+            mapData = getMapDataValues(mapDataTable);
+            new Ajax.Request('../eventbuilder/add_eventbuilder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderName: eventBuilderName, toStreamName: toStreamName,
+                    toStreamVersion: toStreamVersion, eventAdaptorInfo: eventAdaptorInfo, mappingType: mappingType, msgConfigPropertySet: msgConfigPropertyString,
+                    mapData: mapData},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        CARBON.showInfoDialog("Event builder added successfully!!");
+                        customCarbonWindowClose();
+                    } else {
+                        CARBON.showErrorDialog("Failed to add event builder, Exception: " + event.responseText.trim());
+                    }
+                }
+            });
+        } else {
+            CARBON.showErrorDialog("Mapping parameters cannot be empty.");
+            return;
+        }
+    }
+    else if (document.getElementById("inputMappingTypeSelect")[document.getElementById("inputMappingTypeSelect").selectedIndex].text == 'json') {
+
+        mappingType = "json";
+        var jsonData = "";
+
+        var jsonDataTable = document.getElementById("inputJsonpathExprTable");
+        if (jsonDataTable.rows.length > 1) {
+            jsonData = getJsonDataValues(jsonDataTable);
+        }
+
+        if (jsonData == "") {
+            CARBON.showErrorDialog("Mapping parameters cannot be empty.");
+            return;
+        } else {
+            new Ajax.Request('../eventbuilder/add_eventbuilder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderName: eventBuilderName, toStreamName: toStreamName,
+                    toStreamVersion: toStreamVersion, eventAdaptorInfo: eventAdaptorInfo, mappingType: mappingType, msgConfigPropertySet: msgConfigPropertyString,
+                    jsonData: jsonData},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        CARBON.showInfoDialog("Event builder added successfully!!");
+                        customCarbonWindowClose();
+                    } else {
+                        CARBON.showErrorDialog("Failed to add event builder, Exception: " + event.responseText.trim());
+                    }
+                }
+            });
+        }
+    }
 }
 
 function addInputMapProperty() {
@@ -308,9 +604,13 @@ function addInputMapProperty() {
     var noPropertyDiv = document.getElementById("noInputMapProperties");
 
     var error = "";
-
     if (propName.value == "") {
         error = "Name field is empty.\n";
+    }
+    var reWhiteSpace = new RegExp("^[a-zA-Z0-9_]+$");
+    // Check for white space
+    if (!reWhiteSpace.test(propName.value)) {
+        error = "Invalid character found in Input Attribute name field.";
     }
 
     if (propValueOf.value == "") {
@@ -368,10 +668,19 @@ function addInputXpathDef() {
     if (prefixName.value == "") {
         error = "Prefix field is empty.\n";
     }
+    var reWhiteSpace = new RegExp("^[a-zA-Z0-9_]+$");
+    // Check for white space
+    if (!reWhiteSpace.test(prefixName.value)) {
+        error = "Invalid character found in prefix field.";
+    }
 
     if (xpathNs.value == "") {
         error = "Namespace field is empty.\n";
     }
+//    // Check for white space
+//    if (!reWhiteSpace.test(xpathNs.value)) {
+//        error = "Invalid character found in XPath namespace.";
+//    }
 
     if (error != "") {
         CARBON.showErrorDialog(error);
@@ -409,6 +718,11 @@ function addInputXmlProperty() {
 
     if (propName.value == "") {
         error = "Name field is empty.\n";
+    }
+    var reWhiteSpace = new RegExp("^[a-zA-Z0-9_]+$");
+    // Check for white space
+    if (!reWhiteSpace.test(propName.value)) {
+        error = "Invalid character found in Mapped To field.";
     }
 
     if (xpathExpr.value == "") {
@@ -483,7 +797,7 @@ function addInputRegexDef() {
     YAHOO.util.Dom.addClass(newCell0, "property-names");
 
     var newCell1 = newTableRow.insertCell(1);
-    newCell1.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeInputProperty(this,\'' + 'xml' + '\')">Delete</a>';
+    newCell1.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeRegexInputProperty(this,\'' + 'xml' + '\')">Delete</a>';
 
 
     if (regexSelect.value == "") {
@@ -512,6 +826,12 @@ function addInputTextProperty() {
     if (propName.value == "") {
         error = "Name field is empty.\n";
     }
+    var reWhiteSpace = new RegExp("^[a-zA-Z0-9_]+$");
+    // Check for white space
+    if (!reWhiteSpace.test(propName.value)) {
+        error = "Invalid character found in Mapped To field.";
+    }
+
 
     if (regexExpr.value == "") {
         error = "Regular expression field is empty.\n";
@@ -572,6 +892,11 @@ function addInputJsonProperty() {
     if (propName.value == "") {
         error = "Name field is empty.\n";
     }
+    var reWhiteSpace = new RegExp("^[a-zA-Z0-9_]+$");
+    // Check for white space
+    if (!reWhiteSpace.test(propName.value)) {
+        error = "Invalid character found in Mapped To field.";
+    }
 
     if (jsonpathExpr.value == "") {
         error = "JSONPath field is empty.\n";
@@ -618,17 +943,24 @@ function addInputJsonProperty() {
     noPropertyDiv.style.display = "none";
 }
 
-function addInputWso2EventProperty(dataType) {
-    var propertyName = document.getElementById("input" + dataType + "DataPropName");
-    var propertyValueOf = document.getElementById("input" + dataType + "DataPropValueOf");
-    var propertyType = document.getElementById("input" + dataType + "DataPropType");
-    var propertyTable = document.getElementById("input" + dataType + "DataTable");
-    var noPropertyDiv = document.getElementById("noInput" + dataType + "Data");
+function addInputWso2EventProperty() {
+    var propertyName = document.getElementById("inputWso2EventPropertyName");
+    var inputPropertyType = document.getElementById("inputWso2EventPropertyInputType");
+    var propertyValueOf = document.getElementById("inputWso2EventPropertyValue");
+    var propertyType = document.getElementById("inputWso2EventPropertyType");
+    var propertyTable = document.getElementById("inputWso2EventDataTable");
+    var propertyTableTBody = document.getElementById("inputWso2EventTBody");
+    var noPropertyDiv = document.getElementById("noInputWso2EventData");
 
     var error = "";
 
     if (propertyName.value == "") {
         error = "Name field is empty.\n";
+    }
+    var reWhiteSpace = new RegExp("^[a-zA-Z0-9_]+$");
+    // Check for white space
+    if (!reWhiteSpace.test(propertyName.value)) {
+        error = "Invalid character found in Input Attribute Name field.";
     }
 
     if (propertyValueOf.value == "") {
@@ -642,19 +974,22 @@ function addInputWso2EventProperty(dataType) {
     propertyTable.style.display = "";
 
     //add new row
-    var newTableRow = propertyTable.insertRow(propertyTable.rows.length);
+    var newTableRow = propertyTableTBody.insertRow(propertyTableTBody.rows.length);
     var newCell0 = newTableRow.insertCell(0);
     newCell0.innerHTML = propertyName.value;
     YAHOO.util.Dom.addClass(newCell0, "property-names");
 
     var newCell1 = newTableRow.insertCell(1);
-    newCell1.innerHTML = propertyValueOf.value;
+    newCell1.innerHTML = inputPropertyType.value;
 
     var newCell2 = newTableRow.insertCell(2);
-    newCell2.innerHTML = propertyType.value;
+    newCell2.innerHTML = propertyValueOf.value;
 
     var newCell3 = newTableRow.insertCell(3);
-    newCell3.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeInputProperty(this,\'' + 'map' + '\')">Delete</a>';
+    newCell3.innerHTML = propertyType.value;
+
+    var newCell4 = newTableRow.insertCell(4);
+    newCell4.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeInputProperty(this,\'' + 'map' + '\')">Delete</a>';
 
     propertyName.value = "";
     propertyValueOf.value = "";
@@ -681,43 +1016,24 @@ function clearInputFields() {
 function removeInputProperty(link, format) {
     var rowToRemove = link.parentNode.parentNode;
     var propertyToRemove = rowToRemove.cells[0].innerHTML.trim();
-    removePropertyFromSession(propertyToRemove, format, 'input');
     rowToRemove.parentNode.removeChild(rowToRemove);
     CARBON.showInfoDialog("Input Property removed successfully!!");
 }
 
-function removePropertyFromSession(property, format, type) {
-    var callback =
-    {
-        success: function (o) {
-            if (o.responseText !== undefined) {
-            }
-        },
-        failure: function (o) {
-            if (o.responseText !== undefined) {
-                alert("Error " + o.status + "\n Following is the message from the server.\n" + o.responseText);
-            }
-        }
-    };
-    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_delete_property.jsp", callback, "property=" + property + "&type=" + type + "&format=" + format);
+function removeRegexInputProperty(link, format) {
+    var rowToRemove = link.parentNode.parentNode;
+    var propertyToRemove = rowToRemove.cells[0].innerHTML.trim();
+    rowToRemove.parentNode.removeChild(rowToRemove);
+    CARBON.showInfoDialog("Input Property removed successfully!!");
 
-}
-
-function goBack() {
-    var callback =
-    {
-        success: function (o) {
-            location.href = 'cep_buckets.jsp';
-            if (o.responseText !== undefined) {
-            }
-        },
-        failure: function (o) {
-            if (o.responseText !== undefined) {
-                alert("Error " + o.status + "\n Following is the message from the server.\n" + o.responseText);
-            }
-        }
-    };
-    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_clear_property_sessions_ajaxprocessor.jsp", callback, "");
+    var regexSelect = document.getElementById("inputPropertyValue");
+    jQuery("#inputPropertyValue option[value='"+propertyToRemove+"']").remove();
+    if(regexSelect.length == 0){
+        var newRegexOption = document.createElement("option");
+        newRegexOption.value = 'No regular expression defined';
+        newRegexOption.text = 'No regular expression defined';
+        regexSelect.add(newRegexOption, null);
+    }
 
 }
 
@@ -748,39 +1064,15 @@ function deleteTableRows(tl, keepHeader) {
 
 }
 
-function setEventClass() {
-    var inputEventClass = document.getElementById("eventClassName");
-    var selectedType = inputEventClass[inputEventClass.selectedIndex].value;
-    populateElementDisplay(document.getElementsByName("inputEventClass"), "none");
-    if (selectedType == "Class") {
-        populateElementDisplay(document.getElementsByName("inputEventClass"), "");
+function enableMapping(isEnabled) {
+    var mappingRow = document.getElementById("mappingRow");
+    if(isEnabled) {
+        mappingRow.style.display = "";
+    } else {
+        mappingRow.style.display = "none";
     }
 }
 
-function setInputMapping() {
-    var inputMappingElement = document.getElementById("inputMapping");
-    var selectedType = inputMappingElement[inputMappingElement.selectedIndex].value;
-    populateElementDisplay(document.getElementsByName("inputXMLMapping"), "none");
-    populateElementDisplay(document.getElementsByName("inputTextMapping"), "none");
-    populateElementDisplay(document.getElementsByName("inputElementMapping"), "none");
-    populateElementDisplay(document.getElementsByName("inputTupleMapping"), "none");
-    populateElementDisplay(document.getElementsByName("inputMapMapping"), "none");
-    if (selectedType == "xml") {
-        populateElementDisplay(document.getElementsByName("inputXMLMapping"), "");
-    } else if (selectedType == "text") {
-        populateElementDisplay(document.getElementsByName("inputTextMapping"), "");
-    } else if (selectedType == "element") {
-        populateElementDisplay(document.getElementsByName("inputElementMapping"), "");
-    } else if (selectedType == "tuple") {
-        populateElementDisplay(document.getElementsByName("inputTupleMapping"), "");
-    } else if (selectedType == "map") {
-        populateElementDisplay(document.getElementsByName("inputMapMapping"), "");
-    }
+function customCarbonWindowClose(){
+    jQuery("#custom_dialog").dialog("destroy").remove();
 }
-
-function populateElementDisplay(elements, display) {
-    for (var i = 0; i < elements.length; i++) {
-        elements[i].style.display = display;
-    }
-}
-

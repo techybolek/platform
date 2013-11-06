@@ -14,7 +14,7 @@
 <fmt:bundle basename="org.wso2.carbon.event.formatter.ui.i18n.Resources">
 
 <carbon:breadcrumb
-        label="event.formatter.details"
+        label="event.formatter.details.breabcrumb"
         resourceBundle="org.wso2.carbon.event.formatter.ui.i18n.Resources"
         topPage="false"
         request="<%=request%>"/>
@@ -64,7 +64,7 @@
 
 <div id="workArea">
 
-<form name="inputForm" action="index.jsp" method="get">
+<form name="inputForm" action="index.jsp?ordinal=1" method="get">
 <table style="width:100%" id="eventFormatterAdd" class="styledLeft">
 <thead>
 <tr>
@@ -124,10 +124,10 @@
 </tr>
 
 <tr>
-    <td><fmt:message key="transport.adaptor.name"/><span class="required">*</span></td>
-    <td><select name="transportAdaptorNameFilter"
-                id="transportAdaptorNameFilter" disabled="disabled">
-        <option><%=eventFormatterConfigurationDto.getToPropertyConfigurationDto().getTransportAdaptorName()%>
+    <td><fmt:message key="event.adaptor.name"/><span class="required">*</span></td>
+    <td><select name="eventAdaptorNameFilter"
+                id="eventAdaptorNameFilter" disabled="disabled">
+        <option><%=eventFormatterConfigurationDto.getToPropertyConfigurationDto().getEventAdaptorName()%>
         </option>
     </select>
     </td>
@@ -137,7 +137,7 @@
     <td><fmt:message key="mapping.type"/><span class="required">*</span></td>
     <td><select name="mappingTypeFilter"
                 id="mappingTypeFilter" disabled="disabled">
-        <option><%=eventFormatterConfigurationDto.getToPropertyConfigurationDto().getTransportAdaptorType()%>
+        <option><%=eventFormatterConfigurationDto.getMappingType()%>
         </option>
     </select>
     </td>
@@ -536,10 +536,10 @@
 
 <%
     ToPropertyConfigurationDto toPropertyConfigurationDto = eventFormatterConfigurationDto.getToPropertyConfigurationDto();
-    if (toPropertyConfigurationDto != null && toPropertyConfigurationDto.getOutputTransportAdaptorMessageConfiguration()[0] != null) {
+    if (toPropertyConfigurationDto != null && toPropertyConfigurationDto.getOutputEventAdaptorMessageConfiguration()[0] != null) {
 
-        for (int index = 0; index < toPropertyConfigurationDto.getOutputTransportAdaptorMessageConfiguration().length; index++) {
-            EventFormatterPropertyDto[] eventFormatterPropertyDto = toPropertyConfigurationDto.getOutputTransportAdaptorMessageConfiguration();
+        for (int index = 0; index < toPropertyConfigurationDto.getOutputEventAdaptorMessageConfiguration().length; index++) {
+            EventFormatterPropertyDto[] eventFormatterPropertyDto = toPropertyConfigurationDto.getOutputEventAdaptorMessageConfiguration();
 %>
 <tr>
 

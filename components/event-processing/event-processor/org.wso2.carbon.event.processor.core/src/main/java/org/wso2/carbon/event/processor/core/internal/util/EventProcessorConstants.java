@@ -35,6 +35,7 @@ public interface EventProcessorConstants {
     String EP_ATTR_TRACING = "trace";
     String EP_ENABLE = "enable";
     String EP_DISABLE = "disable";
+    String EP_ATTR_PASSTHROUGH_FLOW = "passthroughFlow";
 
 
     // for inputs  - siddhi stream
@@ -43,11 +44,11 @@ public interface EventProcessorConstants {
     String EP_ATTR_VALUEOF = "valueOf";
 
     String EP_ATTR_NAME = "name";
-
     String EP_ATTR_VERSION = "version";
 
 
     String STREAM_SEPARATOR = ":";
+    String ATTRIBUTE_SEPARATOR = "_";
 
     String EVENT_TRACE_LOGGER = "EVENT_TRACE_LOGGER";
 
@@ -55,5 +56,14 @@ public interface EventProcessorConstants {
     String XML_EXTENSION = ".xml";
 
     String EVENT_PROCESSOR = "Event Processor";
+    String SIDDHI_DISTRIBUTED_PROCESSING = "siddhi.enable.distributed.processing";
+    String SIDDHI_SNAPSHOT_INTERVAL = "siddhi.persistence.snapshot.time.interval.minutes";
+    String EP_CONFIG_FILE_EXTENSION_WITH_DOT = ".xml";
 
+    String META = "meta";
+    String CORRELATION = "correlation";
+
+    String HAZELCAST_INSTANCE = "hazelcast.instance";
+
+    String NO_DEPENDENCY_INFO_MSG = "No dependency information available for this event formatter";
 }

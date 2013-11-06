@@ -25,21 +25,20 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.event.builder.admin.exception.EventBuilderAdminServiceException;
 import org.wso2.carbon.event.builder.admin.internal.ds.EventBuilderAdminServiceValueHolder;
+import org.wso2.carbon.event.builder.admin.internal.util.DtoConverter;
 import org.wso2.carbon.event.builder.admin.internal.util.DtoConverterFactory;
-import org.wso2.carbon.event.builder.admin.internal.util.DtoConvertible;
 import org.wso2.carbon.event.builder.admin.internal.util.EventBuilderAdminUtil;
 import org.wso2.carbon.event.builder.core.EventBuilderService;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
+import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
 import org.wso2.carbon.event.builder.core.internal.config.EventBuilderConfigurationFile;
-import org.wso2.carbon.event.builder.core.internal.config.DeploymentStatus;
-import org.wso2.carbon.input.transport.adaptor.core.InputTransportAdaptorService;
-import org.wso2.carbon.input.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
-import org.wso2.carbon.input.transport.adaptor.core.message.MessageDto;
-import org.wso2.carbon.input.transport.adaptor.manager.core.InputTransportAdaptorInfo;
-import org.wso2.carbon.input.transport.adaptor.manager.core.InputTransportAdaptorManagerService;
-import org.wso2.carbon.input.transport.adaptor.manager.core.exception.InputTransportAdaptorManagerConfigurationException;
+import org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorService;
+import org.wso2.carbon.event.input.adaptor.core.config.InputEventAdaptorConfiguration;
+import org.wso2.carbon.event.input.adaptor.core.message.MessageDto;
+import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorInfo;
+import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorManagerService;
+import org.wso2.carbon.event.input.adaptor.manager.core.exception.InputEventAdaptorManagerConfigurationException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class EventBuilderAdminService extends AbstractAdmin {
@@ -50,130 +49,142 @@ public class EventBuilderAdminService extends AbstractAdmin {
         dtoConverterFactory = new DtoConverterFactory();
     }
 
-    public String[] getInputTransportNames() throws AxisFault {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-        InputTransportAdaptorManagerService transportAdaptorManagerService = EventBuilderAdminServiceValueHolder.getInputTransportAdaptorManagerService();
-        List<InputTransportAdaptorInfo> transportAdaptorInfoList = transportAdaptorManagerService.getInputTransportAdaptorInfo(tenantId);
-        if (transportAdaptorInfoList != null && !transportAdaptorInfoList.isEmpty()) {
-            String[] inputTransportNames = new String[transportAdaptorInfoList.size()];
-            for (int i = 0; i < transportAdaptorInfoList.size(); i++) {
-                inputTransportNames[i] = transportAdaptorInfoList.get(i).getTransportAdaptorName();
+    public InputEventAdaptorInfoDto[] getInputEventAdaptorInfo() throws AxisFault {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        InputEventAdaptorManagerService inputEventAdaptorManagerService = EventBuilderAdminServiceValueHolder.getInputEventAdaptorManagerService();
+        List<InputEventAdaptorInfo> inputEventAdaptorInfoList = inputEventAdaptorManagerService.getInputEventAdaptorInfo(tenantId);
+        if (inputEventAdaptorInfoList != null && !inputEventAdaptorInfoList.isEmpty()) {
+            InputEventAdaptorInfoDto[] InputEventAdaptorInfoDtos = new InputEventAdaptorInfoDto[inputEventAdaptorInfoList.size()];
+            for (int i = 0; i < inputEventAdaptorInfoList.size(); i++) {
+                InputEventAdaptorInfo InputEventAdaptorInfo = inputEventAdaptorInfoList.get(i);
+                InputEventAdaptorInfoDtos[i] = new InputEventAdaptorInfoDto(InputEventAdaptorInfo.getEventAdaptorName(), InputEventAdaptorInfo.getEventAdaptorType());
             }
-            return inputTransportNames;
+            return InputEventAdaptorInfoDtos;
         }
 
-        return new String[0];
+        return new InputEventAdaptorInfoDto[0];
     }
 
-    public String[] getSupportedInputMappingTypes(String transportAdaptorName) throws AxisFault {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
+    public String[] getSupportedInputMappingTypes(String inputEventAdaptorName) throws AxisFault {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        List<String> supportedInputMappingTypes = eventBuilderService.getSupportedInputMappingTypes(transportAdaptorName, tenantId);
+        List<String> supportedInputMappingTypes = eventBuilderService.getSupportedInputMappingTypes(inputEventAdaptorName, tenantId);
         return supportedInputMappingTypes.toArray(new String[supportedInputMappingTypes.size()]);
     }
 
     public void deployEventBuilderConfiguration(
             EventBuilderConfigurationDto eventBuilderConfigurationDto)
             throws AxisFault {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        DtoConvertible dtoConverter = dtoConverterFactory.getDtoConverter(eventBuilderConfigurationDto.getInputMappingType());
+        DtoConverter dtoConverter = dtoConverterFactory.getDtoConverter(eventBuilderConfigurationDto.getInputMappingType());
         EventBuilderConfiguration eventBuilderConfiguration;
         try {
             eventBuilderConfiguration = dtoConverter.toEventBuilderConfiguration(eventBuilderConfigurationDto, tenantId);
         } catch (EventBuilderAdminServiceException e) {
-            String errMsg = "Error converting DTO to corresponding object instance";
-            log.error(errMsg, e);
-            throw new AxisFault(errMsg, e);
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
         }
         if (eventBuilderConfiguration != null) {
-            eventBuilderService.deployEventBuilderConfiguration(eventBuilderConfiguration, getAxisConfig());
+            try {
+                eventBuilderService.deployEventBuilderConfiguration(eventBuilderConfiguration, getAxisConfig());
+            } catch (EventBuilderConfigurationException e) {
+                log.error(e.getMessage(), e);
+                throw new AxisFault(e.getMessage());
+            }
         }
     }
 
     public void undeployActiveConfiguration(String eventBuilderName) throws AxisFault {
         EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        eventBuilderService.undeployActiveEventBuilderConfiguration(eventBuilderName, getAxisConfig());
-    }
-
-    public void undeployInactiveEventBuilderConfiguration(String filename) {
-        EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        eventBuilderService.undeployInactiveEventBuilderConfiguration(filename, getAxisConfig());
-    }
-
-    public EventBuilderConfigurationDto getActiveEventBuilderConfiguration(String eventBuilderName)
-            throws AxisFault {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-        EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        EventBuilderConfiguration eventBuilderConfiguration = eventBuilderService.getActiveEventBuilderConfiguration(eventBuilderName, tenantId);
-        DtoConvertible dtoConverter = dtoConverterFactory.getDtoConverter(eventBuilderConfiguration.getInputMapping().getMappingType());
-
         try {
-            return dtoConverter.fromEventBuilderConfiguration(eventBuilderConfiguration);
-        } catch (EventBuilderAdminServiceException e) {
+            eventBuilderService.undeployActiveEventBuilderConfiguration(eventBuilderName, getAxisConfig());
+        } catch (EventBuilderConfigurationException e) {
+            log.error(e.getMessage(), e);
             throw new AxisFault(e.getMessage());
         }
     }
 
-    public String getActiveEventBuilderConfigurationContent(String eventBuilderName) {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
+    public void undeployInactiveEventBuilderConfiguration(String filename) throws AxisFault {
         EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        return eventBuilderService.getActiveEventBuilderConfigurationContent(eventBuilderName, tenantId);
+        try {
+            eventBuilderService.undeployInactiveEventBuilderConfiguration(filename, getAxisConfig());
+        } catch (EventBuilderConfigurationException e) {
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
+        }
     }
 
-    public String getInactiveEventBuilderConfigurationContent(String filePath) {
+    public EventBuilderConfigurationDto getActiveEventBuilderConfiguration(String eventBuilderName)
+            throws AxisFault {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        return eventBuilderService.getInactiveEventBuilderConfigurationContent(filePath, getAxisConfig());
+        EventBuilderConfiguration eventBuilderConfiguration = eventBuilderService.getActiveEventBuilderConfiguration(eventBuilderName, tenantId);
+        DtoConverter dtoConverter = dtoConverterFactory.getDtoConverter(eventBuilderConfiguration.getInputMapping().getMappingType());
+
+        try {
+            return dtoConverter.fromEventBuilderConfiguration(eventBuilderConfiguration);
+        } catch (EventBuilderAdminServiceException e) {
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
+        }
+    }
+
+    public String getActiveEventBuilderConfigurationContent(String eventBuilderName) throws AxisFault {
+        try {
+            EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
+            return eventBuilderService.getActiveEventBuilderConfigurationContent(eventBuilderName, getAxisConfig());
+        } catch (EventBuilderConfigurationException e) {
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
+        }
+    }
+
+    public String getInactiveEventBuilderConfigurationContent(String filename) throws AxisFault {
+        EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
+        String eventBuilderConfigurationContent;
+        try {
+            eventBuilderConfigurationContent = eventBuilderService.getInactiveEventBuilderConfigurationContent(filename, getAxisConfig());
+        } catch (EventBuilderConfigurationException e) {
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
+        }
+        return eventBuilderConfigurationContent;
     }
 
     public void editActiveEventBuilderConfiguration(String originalEventBuilderName,
                                                     String eventBuilderConfigXml) throws AxisFault {
         if (eventBuilderConfigXml != null && !eventBuilderConfigXml.isEmpty() && originalEventBuilderName != null && !originalEventBuilderName.isEmpty()) {
             EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-            eventBuilderService.editActiveEventBuilderConfiguration(eventBuilderConfigXml, originalEventBuilderName, getAxisConfig());
-        } else {
-            String errMsg = "Some required parameters were null or empty. Cannot proceed with updating.";
-            log.error(errMsg);
-            throw new AxisFault(errMsg);
-        }
-    }
-
-    public void editInactiveEventBuilderConfiguration(String filePath, String eventBuilderConfigXml)
-            throws AxisFault {
-        if (eventBuilderConfigXml != null && !eventBuilderConfigXml.isEmpty() && filePath != null && !filePath.isEmpty()) {
-            EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-            eventBuilderService.editInactiveEventBuilderConfiguration(eventBuilderConfigXml, filePath, getAxisConfig());
-        } else {
-            String errMsg = "Some required parameters were null or empty. Cannot proceed with updating.";
-            log.error(errMsg);
-            throw new AxisFault(errMsg);
-        }
-    }
-
-    //TODO Check usage of this method
-    public EventBuilderConfigurationDto[] getEventBuilderConfigurationsFor(
-            String deploymentStatusString)
-            throws AxisFault {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-        List<EventBuilderConfigurationDto> eventBuilderConfigurationDtos = new ArrayList<EventBuilderConfigurationDto>();
-        EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        List<EventBuilderConfiguration> eventBuilderConfigurations = eventBuilderService.getAllActiveEventBuilderConfigurations(tenantId);
-        DeploymentStatus deploymentStatus = EventBuilderAdminUtil.getDeploymentStatusForString(deploymentStatusString);
-        if (eventBuilderConfigurations != null && eventBuilderConfigurations.size() > 0) {
-            for (EventBuilderConfiguration eventBuilderConfiguration : eventBuilderConfigurations) {
-                if (deploymentStatus.equals(eventBuilderConfiguration.getDeploymentStatus())) {
-                    DtoConvertible dtoConverter = dtoConverterFactory.getDtoConverter(eventBuilderConfiguration.getInputMapping().getMappingType());
-                    try {
-                        eventBuilderConfigurationDtos.add(dtoConverter.fromEventBuilderConfiguration(eventBuilderConfiguration));
-                    } catch (EventBuilderAdminServiceException e) {
-                        throw new AxisFault(e.getMessage());
-                    }
-                }
+            try {
+                eventBuilderService.editActiveEventBuilderConfiguration(eventBuilderConfigXml, originalEventBuilderName, getAxisConfig());
+            } catch (EventBuilderConfigurationException e) {
+                log.error(e.getMessage(), e);
+                throw new AxisFault(e.getMessage());
             }
-            return eventBuilderConfigurationDtos.toArray(new EventBuilderConfigurationDto[eventBuilderConfigurationDtos.size()]);
+        } else {
+            String errMsg = "Some required parameters were null or empty. Cannot proceed with updating.";
+            log.error(errMsg);
+            throw new AxisFault(errMsg);
         }
+    }
 
-        return new EventBuilderConfigurationDto[0];
+    public void editInactiveEventBuilderConfiguration(String filename, String eventBuilderConfigXml)
+            throws AxisFault {
+        if (eventBuilderConfigXml != null && !eventBuilderConfigXml.isEmpty() && filename != null && !filename.isEmpty()) {
+            EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
+            try {
+                eventBuilderService.editInactiveEventBuilderConfiguration(eventBuilderConfigXml, filename, getAxisConfig());
+            } catch (EventBuilderConfigurationException e) {
+                log.error(e.getMessage(), e);
+                throw new AxisFault(e.getMessage());
+            }
+        } else {
+            String errMsg = "Some required parameters were null or empty. Cannot proceed with updating.";
+            log.error(errMsg);
+            throw new AxisFault(errMsg);
+        }
     }
 
     public String[] getAllInactiveEventBuilderConfigurations() {
@@ -183,7 +194,7 @@ public class EventBuilderAdminService extends AbstractAdmin {
             String[] fileNameList = new String[eventBuilderConfigurationFileList.size()];
             int i = 0;
             for (EventBuilderConfigurationFile eventBuilderConfigurationFile : eventBuilderConfigurationFileList) {
-                fileNameList[i++] = EventBuilderAdminUtil.deriveConfigurationFilenameFrom(eventBuilderConfigurationFile.getFilePath());
+                fileNameList[i++] = EventBuilderAdminUtil.deriveConfigurationFilenameFrom(eventBuilderConfigurationFile.getFileName());
             }
             return fileNameList;
         }
@@ -192,14 +203,14 @@ public class EventBuilderAdminService extends AbstractAdmin {
 
     public EventBuilderConfigurationDto[] getAllActiveEventBuilderConfigurations()
             throws AxisFault {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
         List<EventBuilderConfiguration> eventBuilderConfigurationList = eventBuilderService.getAllActiveEventBuilderConfigurations(tenantId);
         if (eventBuilderConfigurationList != null && !eventBuilderConfigurationList.isEmpty()) {
             EventBuilderConfigurationDto[] eventBuilderConfigurationDtos = new EventBuilderConfigurationDto[eventBuilderConfigurationList.size()];
             for (int i = 0; i < eventBuilderConfigurationList.size(); i++) {
                 EventBuilderConfiguration eventBuilderConfiguration = eventBuilderConfigurationList.get(i);
-                DtoConvertible dtoConverter = dtoConverterFactory.getDtoConverter(eventBuilderConfiguration.getInputMapping().getMappingType());
+                DtoConverter dtoConverter = dtoConverterFactory.getDtoConverter(eventBuilderConfiguration.getInputMapping().getMappingType());
                 EventBuilderConfigurationDto eventBuilderConfigurationDto;
                 try {
                     eventBuilderConfigurationDto = dtoConverter.fromEventBuilderConfiguration(eventBuilderConfiguration);
@@ -215,46 +226,41 @@ public class EventBuilderAdminService extends AbstractAdmin {
         return new EventBuilderConfigurationDto[0];
     }
 
-    public void setTraceEnabled(String eventBuilderName, boolean traceEnabled) {
+    public void setTraceEnabled(String eventBuilderName, boolean traceEnabled) throws AxisFault {
         EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        eventBuilderService.setTraceEnabled(eventBuilderName, traceEnabled, getAxisConfig());
-    }
-
-    public void setStatisticsEnabled(String eventBuilderName, boolean statisticsEnabled) {
-        EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        eventBuilderService.setStatisticsEnabled(eventBuilderName, statisticsEnabled, getAxisConfig());
-    }
-
-    //TODO Check usage of this method
-    public String[] getAllActiveEventBuilderNames() throws AxisFault {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-        EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
-        List<EventBuilderConfiguration> eventBuilderConfigurationList = eventBuilderService.getAllActiveEventBuilderConfigurations(tenantId);
-        String[] eventBuilderNames = new String[0];
-        if (eventBuilderConfigurationList != null) {
-            eventBuilderNames = new String[eventBuilderConfigurationList.size()];
-            for (int i = 0; i < eventBuilderConfigurationList.size(); i++) {
-                eventBuilderNames[i] = eventBuilderConfigurationList.get(i).getEventBuilderName();
-            }
+        try {
+            eventBuilderService.setTraceEnabled(eventBuilderName, traceEnabled, getAxisConfig());
+        } catch (EventBuilderConfigurationException e) {
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
         }
+    }
 
-        return eventBuilderNames;
+    public void setStatisticsEnabled(String eventBuilderName, boolean statisticsEnabled) throws AxisFault {
+        EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
+        try {
+            eventBuilderService.setStatisticsEnabled(eventBuilderName, statisticsEnabled, getAxisConfig());
+        } catch (EventBuilderConfigurationException e) {
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
+        }
     }
 
     public EventBuilderPropertyDto[] getMessageConfigurationProperties(
-            String transportAdaptorName) {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
-        InputTransportAdaptorService inputTransportAdaptorService = EventBuilderAdminServiceValueHolder.getInputTransportAdaptorService();
-        InputTransportAdaptorManagerService inputTransportAdaptorManagerService = EventBuilderAdminServiceValueHolder.getInputTransportAdaptorManagerService();
-        InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = null;
+            String inputEventAdaptorName) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        InputEventAdaptorService InputEventAdaptorService = EventBuilderAdminServiceValueHolder.getInputEventAdaptorService();
+        InputEventAdaptorManagerService InputEventAdaptorManagerService = EventBuilderAdminServiceValueHolder.getInputEventAdaptorManagerService();
+        InputEventAdaptorConfiguration InputEventAdaptorConfiguration = null;
         try {
-            inputTransportAdaptorConfiguration = inputTransportAdaptorManagerService.getActiveInputTransportAdaptorConfiguration(transportAdaptorName, tenantId);
-        } catch (InputTransportAdaptorManagerConfigurationException e) {
-            log.error("Error retrieving input transport adaptor configuration with name '" + transportAdaptorName + "'", e);
+            InputEventAdaptorConfiguration = InputEventAdaptorManagerService.getActiveInputEventAdaptorConfiguration(inputEventAdaptorName, tenantId);
+        } catch (InputEventAdaptorManagerConfigurationException e) {
+            String errorMsg = "Error retrieving input event adaptor configuration with name '" + inputEventAdaptorName + "' " + e.getMessage();
+            log.error(errorMsg, e);
         }
-        if (inputTransportAdaptorConfiguration != null) {
-            MessageDto messageDto = inputTransportAdaptorService.getTransportMessageDto(inputTransportAdaptorConfiguration.getType());
-            DtoConvertible dtoConverter = dtoConverterFactory.getDtoConverter(null);
+        if (InputEventAdaptorConfiguration != null) {
+            MessageDto messageDto = InputEventAdaptorService.getEventMessageDto(InputEventAdaptorConfiguration.getType());
+            DtoConverter dtoConverter = dtoConverterFactory.getDtoConverter(null);
             return dtoConverter.getEventBuilderPropertiesFrom(messageDto, null);
         }
 
@@ -264,24 +270,29 @@ public class EventBuilderAdminService extends AbstractAdmin {
     public EventBuilderPropertyDto[] getMessageConfigurationPropertiesWithValue(
             String eventBuilderName)
             throws AxisFault {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
         EventBuilderConfiguration eventBuilderConfiguration = eventBuilderService.getActiveEventBuilderConfiguration(eventBuilderName, tenantId);
-        String transportAdaptorName = eventBuilderConfiguration.getInputStreamConfiguration().getTransportAdaptorName();
-        InputTransportAdaptorService inputTransportAdaptorService = EventBuilderAdminServiceValueHolder.getInputTransportAdaptorService();
-        InputTransportAdaptorManagerService inputTransportAdaptorManagerService = EventBuilderAdminServiceValueHolder.getInputTransportAdaptorManagerService();
-        InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = null;
+        String inputEventAdaptorName = eventBuilderConfiguration.getInputStreamConfiguration().getInputEventAdaptorName();
+        InputEventAdaptorService InputEventAdaptorService = EventBuilderAdminServiceValueHolder.getInputEventAdaptorService();
+        InputEventAdaptorManagerService InputEventAdaptorManagerService = EventBuilderAdminServiceValueHolder.getInputEventAdaptorManagerService();
+        InputEventAdaptorConfiguration InputEventAdaptorConfiguration = null;
         try {
-            inputTransportAdaptorConfiguration = inputTransportAdaptorManagerService.getActiveInputTransportAdaptorConfiguration(transportAdaptorName, tenantId);
-        } catch (InputTransportAdaptorManagerConfigurationException e) {
-            log.error("Error retrieving input transport adaptor configuration with name '" + transportAdaptorName + "'", e);
+            InputEventAdaptorConfiguration = InputEventAdaptorManagerService.getActiveInputEventAdaptorConfiguration(inputEventAdaptorName, tenantId);
+        } catch (InputEventAdaptorManagerConfigurationException e) {
+            log.error("Error retrieving input event adaptor configuration with name '" + inputEventAdaptorName + "' " + e.getMessage(), e);
         }
-        if (inputTransportAdaptorConfiguration != null) {
-            MessageDto messageDto = inputTransportAdaptorService.getTransportMessageDto(inputTransportAdaptorConfiguration.getType());
-            DtoConvertible dtoConverter = dtoConverterFactory.getDtoConverter(null);
+        if (InputEventAdaptorConfiguration != null) {
+            MessageDto messageDto = InputEventAdaptorService.getEventMessageDto(InputEventAdaptorConfiguration.getType());
+            DtoConverter dtoConverter = dtoConverterFactory.getDtoConverter(null);
             return dtoConverter.getEventBuilderPropertiesFrom(messageDto, eventBuilderConfiguration);
         }
 
         return new EventBuilderPropertyDto[0];
+    }
+
+    public String getEventBuilderStatusAsString(String filename) {
+        EventBuilderService eventBuilderService = EventBuilderAdminServiceValueHolder.getEventBuilderService();
+        return eventBuilderService.getEventBuilderStatusAsString(filename);
     }
 }

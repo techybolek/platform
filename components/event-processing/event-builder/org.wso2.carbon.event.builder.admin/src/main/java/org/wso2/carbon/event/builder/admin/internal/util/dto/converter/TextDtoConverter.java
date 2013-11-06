@@ -22,21 +22,20 @@ import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.event.builder.admin.exception.EventBuilderAdminServiceException;
 import org.wso2.carbon.event.builder.admin.internal.EventBuilderConfigurationDto;
 import org.wso2.carbon.event.builder.admin.internal.EventBuilderPropertyDto;
+import org.wso2.carbon.event.builder.admin.internal.util.DtoConverter;
 import org.wso2.carbon.event.builder.admin.internal.util.EventBuilderAdminConstants;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
-import org.wso2.carbon.event.builder.core.config.InputMapperFactory;
 import org.wso2.carbon.event.builder.core.internal.config.InputMappingAttribute;
 import org.wso2.carbon.event.builder.core.internal.config.InputStreamConfiguration;
-import org.wso2.carbon.event.builder.core.internal.type.text.TextInputMapperFactory;
 import org.wso2.carbon.event.builder.core.internal.type.text.TextInputMapping;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
-import org.wso2.carbon.input.transport.adaptor.core.message.config.InputTransportAdaptorMessageConfiguration;
+import org.wso2.carbon.event.input.adaptor.core.message.config.InputEventAdaptorMessageConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class TextDtoConverter extends BasicDtoConverter {
+public class TextDtoConverter extends DtoConverter {
 
     @Override
     public EventBuilderConfiguration toEventBuilderConfiguration(
@@ -46,21 +45,22 @@ public class TextDtoConverter extends BasicDtoConverter {
         if (!eventBuilderType.equals(EventBuilderConstants.EB_TEXT_MAPPING_TYPE)) {
             throw new EventBuilderAdminServiceException("Incorrect mapping type. Expected: " + EventBuilderConstants.EB_TEXT_MAPPING_TYPE + ", Found: " + eventBuilderType);
         }
-        InputMapperFactory inputMapperFactory = getEventBuilderFactory();
-        EventBuilderConfiguration eventBuilderConfiguration = new EventBuilderConfiguration(inputMapperFactory);
+        EventBuilderConfiguration eventBuilderConfiguration = new EventBuilderConfiguration();
         eventBuilderConfiguration.setEventBuilderName(eventBuilderConfigurationDto.getEventBuilderConfigName());
 
         TextInputMapping textInputMapping = new TextInputMapping();
-        InputTransportAdaptorMessageConfiguration inputTransportAdaptorMessageConfiguration = new InputTransportAdaptorMessageConfiguration();
+        InputEventAdaptorMessageConfiguration inputEventAdaptorMessageConfiguration = new InputEventAdaptorMessageConfiguration();
         for (EventBuilderPropertyDto eventBuilderPropertyDto : eventBuilderConfigurationDto.getEventBuilderProperties()) {
             if (eventBuilderPropertyDto.getKey().endsWith(EventBuilderAdminConstants.FROM_SUFFIX)) {
                 String propertyName = eventBuilderPropertyDto.getKey().substring(0, eventBuilderPropertyDto.getKey().lastIndexOf(EventBuilderAdminConstants.FROM_SUFFIX));
-                inputTransportAdaptorMessageConfiguration.addInputMessageProperty(propertyName, eventBuilderPropertyDto.getValue());
+                inputEventAdaptorMessageConfiguration.addInputMessageProperty(propertyName, eventBuilderPropertyDto.getValue());
             } else if (eventBuilderPropertyDto.getKey().endsWith(EventBuilderAdminConstants.MAPPING_SUFFIX)) {
                 String keyWithoutSuffix = eventBuilderPropertyDto.getKey().substring(0, eventBuilderPropertyDto.getKey().lastIndexOf(EventBuilderAdminConstants.MAPPING_SUFFIX));
-                int typeTrimLength = EventBuilderAdminConstants.JAVA_LANG_PACKAGE_PREFIX.length();
-                String attribTypeName = eventBuilderPropertyDto.getPropertyType().substring(typeTrimLength).toLowerCase();
-                AttributeType attributeType = EventBuilderConstants.STRING_ATTRIBUTE_TYPE_MAP.get(attribTypeName);
+                String attribTypeName = eventBuilderPropertyDto.getPropertyType();
+                AttributeType attributeType = EventBuilderConstants.STRING_ATTRIBUTE_TYPE_MAP.get(attribTypeName.toLowerCase());
+                if (attributeType == null) {
+                    throw new EventBuilderAdminServiceException(attribTypeName.toLowerCase() + " is not a supported attribute type, only the following are supported: " + EventBuilderConstants.STRING_ATTRIBUTE_TYPE_MAP.keySet());
+                }
                 InputMappingAttribute textMappingAttribute = new InputMappingAttribute(eventBuilderPropertyDto.getValue(), keyWithoutSuffix, attributeType);
                 textMappingAttribute.setDefaultValue(eventBuilderPropertyDto.getDefaultValue());
                 textInputMapping.addInputMappingAttribute(textMappingAttribute);
@@ -73,10 +73,9 @@ public class TextDtoConverter extends BasicDtoConverter {
         eventBuilderConfiguration.setTraceEnabled(eventBuilderConfigurationDto.isTraceEnabled());
 
         InputStreamConfiguration inputStreamConfiguration = new InputStreamConfiguration();
-        inputStreamConfiguration.setInputTransportAdaptorMessageConfiguration(inputTransportAdaptorMessageConfiguration);
-        inputStreamConfiguration.setTransportAdaptorName(eventBuilderConfigurationDto.getInputTransportAdaptorName());
-        String transportAdaptorType = getInputTransportAdaptorType(eventBuilderConfigurationDto.getInputTransportAdaptorName(), tenantId);
-        inputStreamConfiguration.setTransportAdaptorType(transportAdaptorType);
+        inputStreamConfiguration.setInputEventAdaptorMessageConfiguration(inputEventAdaptorMessageConfiguration);
+        inputStreamConfiguration.setInputEventAdaptorName(eventBuilderConfigurationDto.getInputEventAdaptorName());
+        inputStreamConfiguration.setInputEventAdaptorType(eventBuilderConfigurationDto.getInputEventAdaptorType());
         eventBuilderConfiguration.setInputStreamConfiguration(inputStreamConfiguration);
 
         return eventBuilderConfiguration;
@@ -89,11 +88,8 @@ public class TextDtoConverter extends BasicDtoConverter {
 
         eventBuilderConfigurationDto.setEventBuilderConfigName(eventBuilderConfiguration.getEventBuilderName());
         eventBuilderConfigurationDto.setInputMappingType(eventBuilderConfiguration.getInputMapping().getMappingType());
-
-        String deploymentStatus = EventBuilderAdminConstants.DEP_STATUS_MAP.get(eventBuilderConfiguration.getDeploymentStatus());
-        eventBuilderConfigurationDto.setDeploymentStatus(deploymentStatus);
-        eventBuilderConfigurationDto.setInputTransportAdaptorName(eventBuilderConfiguration.getInputStreamConfiguration().getTransportAdaptorName());
-        eventBuilderConfigurationDto.setInputTransportAdaptorType(eventBuilderConfiguration.getInputStreamConfiguration().getTransportAdaptorType());
+        eventBuilderConfigurationDto.setInputEventAdaptorName(eventBuilderConfiguration.getInputStreamConfiguration().getInputEventAdaptorName());
+        eventBuilderConfigurationDto.setInputEventAdaptorType(eventBuilderConfiguration.getInputStreamConfiguration().getInputEventAdaptorType());
         eventBuilderConfigurationDto.setToStreamName(eventBuilderConfiguration.getToStreamName());
         eventBuilderConfigurationDto.setToStreamVersion(eventBuilderConfiguration.getToStreamVersion());
 
@@ -106,18 +102,13 @@ public class TextDtoConverter extends BasicDtoConverter {
         return eventBuilderConfigurationDto;
     }
 
-    @Override
-    protected InputMapperFactory getEventBuilderFactory() {
-        return new TextInputMapperFactory();
-    }
-
     private EventBuilderPropertyDto[] getEventBuilderProperties(
             EventBuilderConfiguration eventBuilderConfiguration) {
         List<EventBuilderPropertyDto> eventBuilderPropertyDtoList = new ArrayList<EventBuilderPropertyDto>();
         TextInputMapping wso2EventInputMapping = (TextInputMapping) eventBuilderConfiguration.getInputMapping();
         InputStreamConfiguration inputStreamConfiguration = eventBuilderConfiguration.getInputStreamConfiguration();
 
-        for (Map.Entry<String, String> entry : inputStreamConfiguration.getInputTransportAdaptorMessageConfiguration().getInputMessageProperties().entrySet()) {
+        for (Map.Entry<String, String> entry : inputStreamConfiguration.getInputEventAdaptorMessageConfiguration().getInputMessageProperties().entrySet()) {
             eventBuilderPropertyDtoList.add(getFromSectionProperty(entry.getKey(), entry.getValue()));
         }
 

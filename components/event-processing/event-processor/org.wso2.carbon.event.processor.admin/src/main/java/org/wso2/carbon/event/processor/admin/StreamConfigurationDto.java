@@ -11,6 +11,8 @@ public class StreamConfigurationDto {
     // for exported streams : valueOf
     private String siddhiStreamName;
 
+    private boolean passThroughFlowSupported;
+
     public StreamConfigurationDto() {
     }
 
@@ -35,5 +37,13 @@ public class StreamConfigurationDto {
 
     public void setSiddhiStreamName(String siddhiStreamName) {
         this.siddhiStreamName = siddhiStreamName;
+    }
+
+    public boolean isPassThroughFlowSupported() {
+        return passThroughFlowSupported;
+    }
+
+    public void setPassThroughFlowSupported(boolean passThroughFlowSupported) {
+        this.passThroughFlowSupported = passThroughFlowSupported;
     }
 }

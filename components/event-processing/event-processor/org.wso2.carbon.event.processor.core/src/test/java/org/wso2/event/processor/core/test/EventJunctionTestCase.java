@@ -1,13 +1,14 @@
 package org.wso2.event.processor.core.test;
 
+import junit.framework.Assert;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
+import org.wso2.carbon.event.processor.core.StreamConfiguration;
 import org.wso2.carbon.event.processor.core.internal.stream.EventConsumer;
 import org.wso2.carbon.event.processor.core.internal.stream.EventJunction;
 import org.wso2.carbon.event.processor.core.internal.util.EventProcessorUtil;
@@ -32,17 +33,27 @@ public class EventJunctionTestCase {
         junction.addConsumer(new EventConsumer() {
 
             @Override
-            public void consumeEvents(Object[] events) {
-                for (Object o : events) {
-                    log.info("Event received from junction: " + Arrays.toString((Object[]) o));
+            public void consumeEvents(Object[][] events) {
+                for (Object[] eventData : events) {
+                    log.info("Event data received from junction: " + Arrays.deepToString(eventData));
                 }
             }
 
             @Override
             public void consumeEvents(Event[] events) {
                 for (Object o : events) {
-                    log.info("Event received from junction: " + Arrays.toString((Object[]) o));
+                    log.info("Event received from junction: " + Arrays.deepToString((Object[]) o));
                 }
+            }
+
+            @Override
+            public void consumeEvent(Object[] eventData) {
+                log.info("Event data received from junction: " + Arrays.deepToString(eventData));
+            }
+
+            @Override
+            public void consumeEvent(Event event) {
+                log.info("Event received from junction: " + event);
             }
 
             @Override
@@ -79,7 +90,7 @@ public class EventJunctionTestCase {
         streamDef.setMetaData(meta);
         streamDef.setPayloadData(payload);
 
-        org.wso2.siddhi.query.api.definition.StreamDefinition siddhiDefinition = EventProcessorUtil.convertToSiddhiStreamDefinition(streamDef);
+        org.wso2.siddhi.query.api.definition.StreamDefinition siddhiDefinition = EventProcessorUtil.convertToSiddhiStreamDefinition(streamDef, new StreamConfiguration("stockStream", "1.1.0"));
         Assert.assertEquals(siddhiDefinition.getAttributeList().size(), 2);
         log.info(siddhiDefinition);
 

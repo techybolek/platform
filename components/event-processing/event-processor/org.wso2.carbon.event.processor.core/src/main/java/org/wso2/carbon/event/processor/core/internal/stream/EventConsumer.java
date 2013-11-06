@@ -24,11 +24,15 @@ import org.wso2.siddhi.core.event.Event;
  * Represents event sinks that fetch events from the junction.
  */
 public interface EventConsumer {
-    public void consumeEvents(Object[] events);
+
+    public void consumeEvents(Object[][] events);
 
     public void consumeEvents(Event[] events);
 
-    public Object getOwner();
+    void consumeEvent(Object[] eventData);
 
+    public void consumeEvent(Event event);
+
+    public Object getOwner();
 
 }

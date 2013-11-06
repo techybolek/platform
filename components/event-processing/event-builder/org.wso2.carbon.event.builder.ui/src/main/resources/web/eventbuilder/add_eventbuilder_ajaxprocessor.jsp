@@ -33,7 +33,7 @@
         } catch (Exception e) {
 %>
 <script type="text/javascript">
-    location.href = 'index.jsp';</script>
+    location.href = 'index.jsp?ordinal=1';</script>
 <%
             return;
         }
@@ -53,21 +53,21 @@
             String inputMappingType = request.getParameter("mappingType");
             String toStreamName = request.getParameter("toStreamName");
             String toStreamVersion = request.getParameter("toStreamVersion");
-            String transportAdaptorName = request.getParameter("transportAdaptorName");
+            String eventAdaptorInfo = request.getParameter("eventAdaptorInfo");
+            String[] eventAdaptorNameAndType = eventAdaptorInfo.split("\\$=");
             // property set contains a set of properties, eg; userName$myName|url$http://wso2.org|
             String msgConfigPropertySet = request.getParameter("msgConfigPropertySet");
-            boolean batchProcessingEnabled = false;
             EventBuilderPropertyDto[] msgConfigProperties = null;
             EventBuilderPropertyDto[] allConfigProperties;
 
             if (msgConfigPropertySet != null) {
-                String[] properties = msgConfigPropertySet.split("\\|");
+                String[] properties = msgConfigPropertySet.split("\\|=");
                 if (properties != null) {
-                    // construct transport builder property array for each transport builder property
+                    // construct event builder property array for each event builder property
                     msgConfigProperties = new EventBuilderPropertyDto[properties.length];
                     int index = 0;
                     for (String property : properties) {
-                        String[] propertyNameAndValue = property.split("\\$");
+                        String[] propertyNameAndValue = property.split("\\$=");
                         if (propertyNameAndValue != null) {
                             msgConfigProperties[index] = new EventBuilderPropertyDto();
                             msgConfigProperties[index].setKey(propertyNameAndValue[0].trim());
@@ -88,74 +88,90 @@
             EventBuilderPropertyDto[] mappingProperties = null;
             if (inputMappingType.equals("wso2event")) {
                 int mappingPropertyCount = 0;
-                String metaPropertySet = request.getParameter("metaData");
                 EventBuilderPropertyDto[] metaEbProperties = null;
-                if (metaPropertySet != null) {
-                    String[] properties = metaPropertySet.split("\\$");
-                    if (properties != null) {
-                        // construct event builder property array for each event builder property
-                        metaEbProperties = new EventBuilderPropertyDto[properties.length];
-                        mappingPropertyCount += properties.length;
-                        int index = 0;
-                        for (String property : properties) {
-                            String[] propertyNameValueAndType = property.split("\\^");
-                            if (propertyNameValueAndType != null) {
-                                metaEbProperties[index] = new EventBuilderPropertyDto();
-                                metaEbProperties[index].setKey("meta_" + propertyNameValueAndType[0].trim());
-                                metaEbProperties[index].setValue(propertyNameValueAndType[1].trim());
-                                metaEbProperties[index].setPropertyType(propertyNameValueAndType[2].trim());
-                                index++;
-                            }
-                        }
-                    }
-
-                }
-                String correlationPropertySet = request.getParameter("correlationData");
                 EventBuilderPropertyDto[] correlationEbProperties = null;
-                if (correlationPropertySet != null) {
-                    String[] properties = correlationPropertySet.split("\\$");
-                    if (properties != null) {
-                        // construct event builder property array for each event builder property
-                        correlationEbProperties = new EventBuilderPropertyDto[properties.length];
-                        mappingPropertyCount += properties.length;
-                        int index = 0;
-                        for (String property : properties) {
-                            String[] propertyNameValueAndType = property.split("\\^");
-                            if (propertyNameValueAndType != null) {
-                                correlationEbProperties[index] = new EventBuilderPropertyDto();
-                                correlationEbProperties[index].setKey("correlation_" + propertyNameValueAndType[0].trim());
-                                correlationEbProperties[index].setValue(propertyNameValueAndType[1].trim());
-                                correlationEbProperties[index].setPropertyType(propertyNameValueAndType[2].trim());
-                                index++;
-                            }
-                        }
-                    }
-
-                }
-                String payloadPropertySet = request.getParameter("payloadData");
                 EventBuilderPropertyDto[] payloadEbProperties = null;
-                if (payloadPropertySet != null) {
-                    String[] properties = payloadPropertySet.split("\\$");
-                    if (properties != null) {
-                        // construct event builder property array for each event builder property
-                        payloadEbProperties = new EventBuilderPropertyDto[properties.length];
-                        mappingPropertyCount += properties.length;
-                        int index = 0;
-                        for (String property : properties) {
-                            String[] propertyNameValueAndType = property.split("\\^");
-                            if (propertyNameValueAndType != null) {
-                                payloadEbProperties[index] = new EventBuilderPropertyDto();
-                                payloadEbProperties[index].setKey(propertyNameValueAndType[0].trim());
-                                payloadEbProperties[index].setValue(propertyNameValueAndType[1].trim());
-                                payloadEbProperties[index].setPropertyType(propertyNameValueAndType[2].trim());
-                                index++;
+                String customMapping = request.getParameter("customMappingValue");
+                EventBuilderPropertyDto customMappingValuePropertyDto = null;
+                if(customMapping != null) {
+                    customMappingValuePropertyDto = new EventBuilderPropertyDto();
+                    customMappingValuePropertyDto.setKey("specific_customMappingValue");
+                    customMappingValuePropertyDto.setValue(customMapping);
+                    mappingPropertyCount++;
+                }
+                if (customMapping.equalsIgnoreCase("enable")) {
+                    String metaPropertySet = request.getParameter("metaData");
+
+                    if (metaPropertySet != null && !metaPropertySet.isEmpty()) {
+                        String[] properties = metaPropertySet.split("\\$=");
+                        if (properties != null) {
+                            // construct event builder property array for each event builder property
+                            metaEbProperties = new EventBuilderPropertyDto[properties.length];
+                            mappingPropertyCount += properties.length;
+                            int index = 0;
+                            for (String property : properties) {
+                                String[] propertyNameValueAndType = property.split("\\^=");
+                                if (propertyNameValueAndType != null) {
+                                    metaEbProperties[index] = new EventBuilderPropertyDto();
+                                    metaEbProperties[index].setKey("meta_" + propertyNameValueAndType[0].trim());
+                                    metaEbProperties[index].setValue(propertyNameValueAndType[1].trim());
+                                    metaEbProperties[index].setPropertyType(propertyNameValueAndType[2].trim());
+                                    index++;
+                                }
                             }
                         }
-                    }
 
+                    }
+                    String correlationPropertySet = request.getParameter("correlationData");
+
+                    if (correlationPropertySet != null && !correlationPropertySet.isEmpty()) {
+                        String[] properties = correlationPropertySet.split("\\$=");
+                        if (properties != null) {
+                            // construct event builder property array for each event builder property
+                            correlationEbProperties = new EventBuilderPropertyDto[properties.length];
+                            mappingPropertyCount += properties.length;
+                            int index = 0;
+                            for (String property : properties) {
+                                String[] propertyNameValueAndType = property.split("\\^=");
+                                if (propertyNameValueAndType != null) {
+                                    correlationEbProperties[index] = new EventBuilderPropertyDto();
+                                    correlationEbProperties[index].setKey("correlation_" + propertyNameValueAndType[0].trim());
+                                    correlationEbProperties[index].setValue(propertyNameValueAndType[1].trim());
+                                    correlationEbProperties[index].setPropertyType(propertyNameValueAndType[2].trim());
+                                    index++;
+                                }
+                            }
+                        }
+
+                    }
+                    String payloadPropertySet = request.getParameter("payloadData");
+
+                    if (payloadPropertySet != null && !payloadPropertySet.isEmpty()) {
+                        String[] properties = payloadPropertySet.split("\\$=");
+                        if (properties != null) {
+                            // construct event builder property array for each event builder property
+                            payloadEbProperties = new EventBuilderPropertyDto[properties.length];
+                            mappingPropertyCount += properties.length;
+                            int index = 0;
+                            for (String property : properties) {
+                                String[] propertyNameValueAndType = property.split("\\^=");
+                                if (propertyNameValueAndType != null) {
+                                    payloadEbProperties[index] = new EventBuilderPropertyDto();
+                                    payloadEbProperties[index].setKey(propertyNameValueAndType[0].trim());
+                                    payloadEbProperties[index].setValue(propertyNameValueAndType[1].trim());
+                                    payloadEbProperties[index].setPropertyType(propertyNameValueAndType[2].trim());
+                                    index++;
+                                }
+                            }
+                        }
+
+                    }
                 }
                 mappingProperties = new EventBuilderPropertyDto[mappingPropertyCount];
                 int i = 0;
+                if(customMappingValuePropertyDto != null) {
+                    mappingProperties[i++] = customMappingValuePropertyDto;
+                }
                 if (metaEbProperties != null) {
                     for (EventBuilderPropertyDto eventBuilderPropertyDto : metaEbProperties) {
                         mappingProperties[i++] = eventBuilderPropertyDto;
@@ -174,20 +190,24 @@
             } else if (inputMappingType.equals("xml")) {
                 int mappingPropertyCount = 0;
                 String prefixPropertySet = request.getParameter("prefixData");
-                String batchProcessingEnabledParam = request.getParameter("batchProcessingEnabled");
-                if (batchProcessingEnabledParam != null && batchProcessingEnabledParam.equalsIgnoreCase("true")) {
-                    batchProcessingEnabled = true;
+                String parentSelectorXpath = request.getParameter("parentSelectorXpath");
+                EventBuilderPropertyDto parentSelectorXpathProperty = null;
+                if (parentSelectorXpath != null && !parentSelectorXpath.isEmpty()) {
+                    parentSelectorXpathProperty = new EventBuilderPropertyDto();
+                    parentSelectorXpathProperty.setKey("specific_parentSelectorXpath");
+                    parentSelectorXpathProperty.setValue(parentSelectorXpath);
+                    mappingPropertyCount += 1;
                 }
                 EventBuilderPropertyDto[] prefixEbProperties = null;
-                if (prefixPropertySet != null) {
-                    String[] properties = prefixPropertySet.split("\\$");
+                if (prefixPropertySet != null && !prefixPropertySet.isEmpty()) {
+                    String[] properties = prefixPropertySet.split("\\$=");
                     if (properties != null) {
-                        // construct transport builder property array for each transport builder property
+                        // construct event builder property array for each event builder property
                         prefixEbProperties = new EventBuilderPropertyDto[properties.length];
                         mappingPropertyCount += properties.length;
                         int index = 0;
                         for (String property : properties) {
-                            String[] xpathPrefixAndNs = property.split("\\^");
+                            String[] xpathPrefixAndNs = property.split("\\^=");
                             if (xpathPrefixAndNs != null) {
                                 prefixEbProperties[index] = new EventBuilderPropertyDto();
                                 prefixEbProperties[index].setKey("prefix_" + xpathPrefixAndNs[0].trim());
@@ -199,21 +219,23 @@
                 }
                 String xpathPropertySet = request.getParameter("xpathData");
                 EventBuilderPropertyDto[] xpathEbProperties = null;
-                if (xpathPropertySet != null) {
-                    String[] properties = xpathPropertySet.split("\\$");
+                if (xpathPropertySet != null && !xpathPropertySet.isEmpty()) {
+                    String[] properties = xpathPropertySet.split("\\$=");
                     if (properties != null) {
                         // construct event builder property array for each event builder property
                         xpathEbProperties = new EventBuilderPropertyDto[properties.length];
                         mappingPropertyCount += properties.length;
                         int index = 0;
                         for (String property : properties) {
-                            String[] propertyStringArr = property.split("\\^");
+                            String[] propertyStringArr = property.split("\\^=");
                             if (propertyStringArr != null) {
                                 xpathEbProperties[index] = new EventBuilderPropertyDto();
                                 xpathEbProperties[index].setKey(propertyStringArr[1].trim());
                                 xpathEbProperties[index].setValue(propertyStringArr[0].trim());
                                 xpathEbProperties[index].setPropertyType(propertyStringArr[2].trim());
-                                xpathEbProperties[index].setDefaultValue(propertyStringArr[3].trim());
+                                if (propertyStringArr.length >= 4) {
+                                    xpathEbProperties[index].setDefaultValue(propertyStringArr[3].trim());
+                                }
                                 index++;
                             }
                         }
@@ -222,6 +244,9 @@
                 }
                 mappingProperties = new EventBuilderPropertyDto[mappingPropertyCount];
                 int i = 0;
+                if (parentSelectorXpathProperty != null) {
+                    mappingProperties[i++] = parentSelectorXpathProperty;
+                }
                 if (prefixEbProperties != null) {
                     for (EventBuilderPropertyDto eventBuilderPropertyDto : prefixEbProperties) {
                         mappingProperties[i++] = eventBuilderPropertyDto;
@@ -236,15 +261,15 @@
                 int mappingPropertyCount = 0;
                 String payloadPropertySet = request.getParameter("mapData");
                 EventBuilderPropertyDto[] mapEbProperties = null;
-                if (payloadPropertySet != null) {
-                    String[] properties = payloadPropertySet.split("\\$");
+                if (payloadPropertySet != null && !payloadPropertySet.isEmpty()) {
+                    String[] properties = payloadPropertySet.split("\\$=");
                     if (properties != null) {
                         // construct event builder property array for each event builder property
                         mapEbProperties = new EventBuilderPropertyDto[properties.length];
                         mappingPropertyCount += properties.length;
                         int index = 0;
                         for (String property : properties) {
-                            String[] propertyNameValueAndType = property.split("\\^");
+                            String[] propertyNameValueAndType = property.split("\\^=");
                             if (propertyNameValueAndType != null) {
                                 mapEbProperties[index] = new EventBuilderPropertyDto();
                                 mapEbProperties[index].setKey(propertyNameValueAndType[0].trim());
@@ -267,21 +292,23 @@
                 int mappingPropertyCount = 0;
                 String textPropertySet = request.getParameter("textData");
                 EventBuilderPropertyDto[] textEbProperties = null;
-                if (textPropertySet != null) {
-                    String[] properties = textPropertySet.split("\\$");
+                if (textPropertySet != null && !textPropertySet.isEmpty()) {
+                    String[] properties = textPropertySet.split("\\$=");
                     if (properties != null) {
                         // construct event builder property array for each event builder property
                         textEbProperties = new EventBuilderPropertyDto[properties.length];
                         mappingPropertyCount += properties.length;
                         int index = 0;
                         for (String property : properties) {
-                            String[] propertyStringArr = property.split("\\^");
+                            String[] propertyStringArr = property.split("\\^=");
                             if (propertyStringArr != null) {
                                 textEbProperties[index] = new EventBuilderPropertyDto();
                                 textEbProperties[index].setKey(propertyStringArr[0].trim());
                                 textEbProperties[index].setValue(propertyStringArr[1].trim());
                                 textEbProperties[index].setPropertyType(propertyStringArr[2].trim());
-                                textEbProperties[index].setDefaultValue(propertyStringArr[3].trim());
+                                if (propertyStringArr.length >= 4) {
+                                    textEbProperties[index].setDefaultValue(propertyStringArr[3].trim());
+                                }
                                 index++;
                             }
                         }
@@ -297,27 +324,33 @@
                 }
             } else if (inputMappingType.equals("json")) {
                 int mappingPropertyCount = 0;
-                String batchProcessingEnabledParam = request.getParameter("batchProcessingEnabled");
-                if (batchProcessingEnabledParam != null && batchProcessingEnabledParam.equalsIgnoreCase("true")) {
-                    batchProcessingEnabled = true;
+                String parentSelectorJsonPath = request.getParameter("parentSelectorJsonPath");
+                EventBuilderPropertyDto parentSelectorJsonPathPropertyDto = null;
+                if (parentSelectorJsonPath != null && !parentSelectorJsonPath.isEmpty()) {
+                    parentSelectorJsonPathPropertyDto = new EventBuilderPropertyDto();
+                    parentSelectorJsonPathPropertyDto.setKey("specific_parentSelectorJsonPath");
+                    parentSelectorJsonPathPropertyDto.setValue(parentSelectorJsonPath);
+                    mappingPropertyCount += 1;
                 }
                 String jsonPropertySet = request.getParameter("jsonData");
                 EventBuilderPropertyDto[] jsonEbProperties = null;
-                if (jsonPropertySet != null) {
-                    String[] properties = jsonPropertySet.split("\\*");
+                if (jsonPropertySet != null && !jsonPropertySet.isEmpty()) {
+                    String[] properties = jsonPropertySet.split("\\*=");
                     if (properties != null) {
                         // construct event builder property array for each event builder property
                         jsonEbProperties = new EventBuilderPropertyDto[properties.length];
                         mappingPropertyCount += properties.length;
                         int index = 0;
                         for (String property : properties) {
-                            String[] propertyStringArr = property.split("\\^");
+                            String[] propertyStringArr = property.split("\\^=");
                             if (propertyStringArr != null) {
                                 jsonEbProperties[index] = new EventBuilderPropertyDto();
                                 jsonEbProperties[index].setKey(propertyStringArr[1].trim());
                                 jsonEbProperties[index].setValue(propertyStringArr[0].trim());
                                 jsonEbProperties[index].setPropertyType(propertyStringArr[2].trim());
-                                jsonEbProperties[index].setDefaultValue(propertyStringArr[3].trim());
+                                if (propertyStringArr.length >= 4) {
+                                    jsonEbProperties[index].setDefaultValue(propertyStringArr[3].trim());
+                                }
                                 index++;
                             }
                         }
@@ -326,6 +359,9 @@
                 }
                 mappingProperties = new EventBuilderPropertyDto[mappingPropertyCount];
                 int i = 0;
+                if (parentSelectorJsonPathPropertyDto != null) {
+                    mappingProperties[i++] = parentSelectorJsonPathPropertyDto;
+                }
                 if (jsonEbProperties != null) {
                     for (EventBuilderPropertyDto eventBuilderPropertyDto : jsonEbProperties) {
                         mappingProperties[i++] = eventBuilderPropertyDto;
@@ -351,11 +387,15 @@
                 EventBuilderConfigurationDto eventBuilderConfigurationDto = new EventBuilderConfigurationDto();
                 eventBuilderConfigurationDto.setInputMappingType(inputMappingType);
                 eventBuilderConfigurationDto.setEventBuilderConfigName(eventBuilderName);
-                eventBuilderConfigurationDto.setInputTransportAdaptorName(transportAdaptorName);
+                if (eventAdaptorNameAndType != null) {
+                    eventBuilderConfigurationDto.setInputEventAdaptorName(eventAdaptorNameAndType[0]);
+                    eventBuilderConfigurationDto.setInputEventAdaptorType(eventAdaptorNameAndType[1]);
+                } else {
+                    throw new Exception("Event adaptor name and type not set properly.");
+                }
                 eventBuilderConfigurationDto.setToStreamName(toStreamName);
                 eventBuilderConfigurationDto.setToStreamVersion(toStreamVersion);
                 eventBuilderConfigurationDto.setEventBuilderProperties(allConfigProperties);
-                eventBuilderConfigurationDto.setBatchProcessingEnabled(batchProcessingEnabled);
                 stub.deployEventBuilderConfiguration(eventBuilderConfigurationDto);
                 // add event builder via admin service
                 msg = "true";
@@ -365,6 +405,4 @@
             }
         }
     }
-%>  <%=msg%>   <%
-
-%>
+%><%=msg%>

@@ -17,11 +17,11 @@ package org.wso2.carbon.event.formatter.core.internal.util;/*
 import org.apache.axis2.engine.AxisConfiguration;
 
 /**
- * To create objects of transport adaptor file details
+ * To create objects of event adaptor file details
  */
 public class EventFormatterConfigurationFile {
 
-    private String filePath;
+    private String fileName;
 
     private String eventFormatterName;
 
@@ -34,7 +34,7 @@ public class EventFormatterConfigurationFile {
 
     //private boolean success;
 
-    private String deploymentStatusMessage;
+    private String deploymentStatusMessage="";
 
     private AxisConfiguration axisConfiguration;
 
@@ -78,12 +78,12 @@ public class EventFormatterConfigurationFile {
         this.eventFormatterName = eventFormatterName;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
 }

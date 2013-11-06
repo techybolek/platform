@@ -29,13 +29,14 @@ import org.wso2.carbon.event.builder.core.EventBuilderService;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
 import org.wso2.carbon.event.builder.core.internal.config.InputStreamConfiguration;
-import org.wso2.carbon.event.builder.core.internal.type.wso2event.Wso2InputMapperFactory;
 import org.wso2.carbon.event.builder.test.TestBasicEventListener;
-import org.wso2.carbon.input.transport.adaptor.core.InputTransportAdaptorService;
-import org.wso2.carbon.input.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
-import org.wso2.carbon.input.transport.adaptor.core.config.InternalInputTransportAdaptorConfiguration;
-import org.wso2.carbon.input.transport.adaptor.core.exception.InputTransportAdaptorEventProcessingException;
-import org.wso2.carbon.input.transport.adaptor.core.message.config.InputTransportAdaptorMessageConfiguration;
+import org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorService;
+import org.wso2.carbon.event.input.adaptor.core.config.InputEventAdaptorConfiguration;
+import org.wso2.carbon.event.input.adaptor.core.config.InternalInputEventAdaptorConfiguration;
+import org.wso2.carbon.event.input.adaptor.core.exception.InputEventAdaptorEventProcessingException;
+import org.wso2.carbon.event.input.adaptor.core.message.config.InputEventAdaptorMessageConfiguration;
+import org.wso2.carbon.event.processor.api.receive.EventReceiver;
+import org.wso2.carbon.event.processor.api.receive.exception.EventReceiverException;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
@@ -43,8 +44,11 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  *
  * @scr.component name="eventBuilder.test.component" immediate="true"
  * @scr.reference name="transportservice.service"
- * interface="org.wso2.carbon.input.transport.adaptor.core.InputTransportAdaptorService" cardinality="1..1"
- * policy="dynamic" bind="setTransportAdaptorService" unbind="unsetTransportAdaptorService"
+ * interface="org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorService" cardinality="1..1"
+ * policy="dynamic" bind="setInputEventAdaptorService" unbind="unsetInputEventAdaptorService"
+ * @scr.reference name="eventReceiver.service"
+ * interface="org.wso2.carbon.event.processor.api.receive.EventReceiver" cardinality="1..1"
+ * policy="dynamic" bind="notifyEventReceiver" unbind="notifyRemovalEventReceiver"
  * @scr.reference name="eventBuilder.service"
  * interface="org.wso2.carbon.event.builder.core.EventBuilderService" cardinality="1..1"
  * policy="dynamic" bind="setEventBuilderService" unbind="unsetEventBuilderService"
@@ -56,14 +60,14 @@ public class EventBuilderTesterDS {
     private static final Log log = LogFactory.getLog(EventBuilderTesterDS.class);
 
     protected void activate(ComponentContext context) {
-        EventBuilderService eventBuilderService = TestEventBuilderServiceHolder.getInstance().getEventBuilderService();
-        InputTransportAdaptorService transportAdaptorService = TestEventBuilderServiceHolder.getInstance().getInputTransportAdaptorService();
+        EventReceiver eventReceiver = TestEventBuilderServiceHolder.getInstance().getEventReceiverList().get(0);
+        InputEventAdaptorService inputEventAdaptorService = TestEventBuilderServiceHolder.getInstance().getInputEventAdaptorService();
         ConfigurationContextService configurationContextService = TestEventBuilderServiceHolder.getInstance().getConfigurationContextService();
         AxisConfiguration axisConfiguration = configurationContextService.getClientConfigContext().getAxisConfiguration();
-        InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = new InputTransportAdaptorConfiguration();
-        InputTransportAdaptorMessageConfiguration inputTransportMessageConfiguration = new InputTransportAdaptorMessageConfiguration();
+        InputEventAdaptorConfiguration InputEventAdaptorConfiguration = new InputEventAdaptorConfiguration();
+        InputEventAdaptorMessageConfiguration inputTransportMessageConfiguration = new InputEventAdaptorMessageConfiguration();
 
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         String fromStreamName = "analytics_Statistics";
         String fromStreamVersion = "1.2.0";
         String toStreamName = "kpiStream";
@@ -71,9 +75,9 @@ public class EventBuilderTesterDS {
 
         inputTransportMessageConfiguration.addInputMessageProperty("streamName", fromStreamName);
         inputTransportMessageConfiguration.addInputMessageProperty("version", fromStreamVersion);
-        configureInputTransportAdaptor(transportAdaptorService, axisConfiguration, fromStreamName, fromStreamVersion,
-                                       inputTransportAdaptorConfiguration, inputTransportMessageConfiguration);
-        configureEventBuilder(eventBuilderService, axisConfiguration, inputTransportMessageConfiguration, inputTransportAdaptorConfiguration, toStreamName, toStreamVersion);
+        configureInputEventAdaptor(inputEventAdaptorService, axisConfiguration, fromStreamName, fromStreamVersion,
+                InputEventAdaptorConfiguration, inputTransportMessageConfiguration);
+        configureEventBuilder(TestEventBuilderServiceHolder.getInstance().getEventBuilderService(), axisConfiguration, inputTransportMessageConfiguration, InputEventAdaptorConfiguration, toStreamName, toStreamVersion);
 
         StreamDefinition streamDefinition;
         try {
@@ -81,28 +85,28 @@ public class EventBuilderTesterDS {
             log.info("[TEST-Module] Successfully deployed event builder service tester");
 
             TestBasicEventListener testBasicEventListener = new TestBasicEventListener();
-            eventBuilderService.subscribe(streamDefinition.getStreamId(), testBasicEventListener, tenantId);
+            eventReceiver.subscribe(streamDefinition.getStreamId(), testBasicEventListener, tenantId);
             log.info("[TEST-Module] Successfully subscribed to event builder.");
 
         } catch (MalformedStreamDefinitionException e) {
             log.error("[TEST-Module] Error creating stream definition with id " + fromStreamName + ":" + fromStreamVersion);
-        } catch (EventBuilderConfigurationException e) {
-            log.error("[TEST-Module] Error when subscribing to event builder:\n" + e);
+        } catch (EventReceiverException e) {
+            log.error("[TEST-Module] Error when subscribing to event receiver:\n" + e);
         }
     }
 
     private void configureEventBuilder(EventBuilderService eventBuilderService,
                                        AxisConfiguration axisConfiguration,
-                                       InputTransportAdaptorMessageConfiguration inputTransportMessageConfiguration,
-                                       InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
+                                       InputEventAdaptorMessageConfiguration inputTransportMessageConfiguration,
+                                       InputEventAdaptorConfiguration InputEventAdaptorConfiguration,
                                        String toStreamName, String toStreamVersion) {
 
         EventBuilderConfiguration eventBuilderConfiguration =
-                new EventBuilderConfiguration(new Wso2InputMapperFactory());
+                new EventBuilderConfiguration();
         InputStreamConfiguration inputStreamConfiguration = new InputStreamConfiguration();
-        inputStreamConfiguration.setInputTransportAdaptorMessageConfiguration(inputTransportMessageConfiguration);
-        inputStreamConfiguration.setTransportAdaptorName(inputTransportAdaptorConfiguration.getName());
-        inputStreamConfiguration.setTransportAdaptorType(inputTransportAdaptorConfiguration.getType());
+        inputStreamConfiguration.setInputEventAdaptorMessageConfiguration(inputTransportMessageConfiguration);
+        inputStreamConfiguration.setInputEventAdaptorName(InputEventAdaptorConfiguration.getName());
+        inputStreamConfiguration.setInputEventAdaptorType(InputEventAdaptorConfiguration.getType());
         eventBuilderConfiguration.setInputStreamConfiguration(inputStreamConfiguration);
         eventBuilderConfiguration.setToStreamName(toStreamName);
         eventBuilderConfiguration.setToStreamVersion(toStreamVersion);
@@ -114,29 +118,29 @@ public class EventBuilderTesterDS {
         }
     }
 
-    private void configureInputTransportAdaptor(
-            InputTransportAdaptorService transportAdaptorService,
+    private void configureInputEventAdaptor(
+            InputEventAdaptorService inputEventAdaptorService,
             AxisConfiguration axisConfiguration,
             String streamName, String streamVersion,
-            InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-            InputTransportAdaptorMessageConfiguration inputTransportMessageConfiguration) {
-        if (inputTransportAdaptorConfiguration != null && inputTransportMessageConfiguration != null) {
-            inputTransportAdaptorConfiguration.setName("localEventReceiver");
-            inputTransportAdaptorConfiguration.setType("wso2event-receiver");
+            InputEventAdaptorConfiguration InputEventAdaptorConfiguration,
+            InputEventAdaptorMessageConfiguration inputTransportMessageConfiguration) {
+        if (InputEventAdaptorConfiguration != null && inputTransportMessageConfiguration != null) {
+            InputEventAdaptorConfiguration.setName("localEventReceiver");
+            InputEventAdaptorConfiguration.setType("wso2event-receiver");
 
-            InternalInputTransportAdaptorConfiguration internalTransportAdaptorConfiguration = new InternalInputTransportAdaptorConfiguration();
-            internalTransportAdaptorConfiguration.addTransportAdaptorProperty("receiverURL", "tcp://localhost:76111");
-            internalTransportAdaptorConfiguration.addTransportAdaptorProperty("authenticatorURL", "ssl://localhost:77111");
-            internalTransportAdaptorConfiguration.addTransportAdaptorProperty("username", "admin");
-            internalTransportAdaptorConfiguration.addTransportAdaptorProperty("password", "admin");
-            inputTransportAdaptorConfiguration.setInputConfiguration(internalTransportAdaptorConfiguration);
+            InternalInputEventAdaptorConfiguration internalInputEventAdaptorConfiguration = new InternalInputEventAdaptorConfiguration();
+            internalInputEventAdaptorConfiguration.addEventAdaptorProperty("receiverURL", "tcp://localhost:76111");
+            internalInputEventAdaptorConfiguration.addEventAdaptorProperty("authenticatorURL", "ssl://localhost:77111");
+            internalInputEventAdaptorConfiguration.addEventAdaptorProperty("username", "admin");
+            internalInputEventAdaptorConfiguration.addEventAdaptorProperty("password", "admin");
+            InputEventAdaptorConfiguration.setInputConfiguration(internalInputEventAdaptorConfiguration);
 
             inputTransportMessageConfiguration.addInputMessageProperty("streamName", streamName);
             inputTransportMessageConfiguration.addInputMessageProperty("version", streamVersion);
 
             try {
-                transportAdaptorService.subscribe(inputTransportAdaptorConfiguration, inputTransportMessageConfiguration, null, axisConfiguration);
-            } catch (InputTransportAdaptorEventProcessingException e) {
+                inputEventAdaptorService.subscribe(InputEventAdaptorConfiguration, inputTransportMessageConfiguration, null, axisConfiguration);
+            } catch (InputEventAdaptorEventProcessingException e) {
                 log.error("Error subscribing to transport adaptor:\n" + e);
             }
         } else {
@@ -144,22 +148,31 @@ public class EventBuilderTesterDS {
         }
     }
 
+    public void notifyEventReceiver(EventReceiver eventReceiver) {
+        TestEventBuilderServiceHolder.addEventReceiver(eventReceiver);
+//        eventReceiver.subscribeNotificationListener(new EventReceiverStreamNotificationListenerImpl(eventReceiver));
+    }
+
     protected void setEventBuilderService(EventBuilderService eventBuilderService) {
         TestEventBuilderServiceHolder.getInstance().registerEventBuilderService(eventBuilderService);
+    }
+
+    public void notifyRemovalEventReceiver(EventReceiver eventReceiver) {
+        TestEventBuilderServiceHolder.removeEventReceiver(eventReceiver);
     }
 
     protected void unsetEventBuilderService(EventBuilderService eventBuilderService) {
         TestEventBuilderServiceHolder.getInstance().unregisterEventBuilderService(eventBuilderService);
     }
 
-    protected void setTransportAdaptorService(
-            InputTransportAdaptorService transportAdaptorService) {
-        TestEventBuilderServiceHolder.getInstance().registerTransportAdaptorService(transportAdaptorService);
+    protected void setInputEventAdaptorService(
+            InputEventAdaptorService inputEventAdaptorService) {
+        TestEventBuilderServiceHolder.getInstance().registerInputEventAdaptorService(inputEventAdaptorService);
     }
 
-    protected void unsetTransportAdaptorService(
-            InputTransportAdaptorService transportAdaptorService) {
-        TestEventBuilderServiceHolder.getInstance().unregisterTransportAdaptorService(transportAdaptorService);
+    protected void unsetInputEventAdaptorService(
+            InputEventAdaptorService inputEventAdaptorService) {
+        TestEventBuilderServiceHolder.getInstance().unregisterInputEventAdaptorService(inputEventAdaptorService);
     }
 
     protected void setConfigurationContextService(

@@ -18,46 +18,36 @@
 
 package org.wso2.carbon.event.builder.core.internal.type.xml;
 
-import org.wso2.carbon.event.builder.core.config.InputMapping;
-import org.wso2.carbon.event.builder.core.internal.config.InputMappingAttribute;
+import org.wso2.carbon.event.builder.core.internal.type.AbstractInputMapping;
 import org.wso2.carbon.event.builder.core.internal.type.xml.config.XPathDefinition;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class XMLInputMapping implements InputMapping {
+public class XMLInputMapping extends AbstractInputMapping {
 
-    private XPathDefinition xpathDefinition;
-    private List<InputMappingAttribute> inputMappingAttributes;
-    private boolean batchProcessingEnabled = false;
+    private List<XPathDefinition> xpathDefinitions;
+    private String parentSelectorXpath;
 
     public XMLInputMapping() {
-        this.inputMappingAttributes = new ArrayList<InputMappingAttribute>();
+        this.xpathDefinitions = new ArrayList<XPathDefinition>();
     }
 
-    public boolean isBatchProcessingEnabled() {
-        return batchProcessingEnabled;
+    public String getParentSelectorXpath() {
+        return parentSelectorXpath;
     }
 
-    public void setBatchProcessingEnabled(boolean batchProcessingEnabled) {
-        this.batchProcessingEnabled = batchProcessingEnabled;
+    public void setParentSelectorXpath(String parentSelectorXpath) {
+        this.parentSelectorXpath = parentSelectorXpath;
     }
 
-    public XPathDefinition getXpathDefinition() {
-        return xpathDefinition;
+    public List<XPathDefinition> getXPathDefinitions() {
+        return xpathDefinitions;
     }
 
-    public void setXpathDefinition(XPathDefinition xpathDefinition) {
-        this.xpathDefinition = xpathDefinition;
-    }
-
-    public List<InputMappingAttribute> getInputMappingAttributes() {
-        return inputMappingAttributes;
-    }
-
-    public void addInputMappingAttribute(InputMappingAttribute inputMappingAttribute) {
-        inputMappingAttributes.add(inputMappingAttribute);
+    public void setXPathDefinitions(List<XPathDefinition> XPathDefinitions) {
+        this.xpathDefinitions = XPathDefinitions;
     }
 
     @Override
@@ -67,33 +57,22 @@ public class XMLInputMapping implements InputMapping {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         XMLInputMapping that = (XMLInputMapping) o;
 
-        if (batchProcessingEnabled != that.batchProcessingEnabled) {
+        if (parentSelectorXpath != null ? !parentSelectorXpath.equals(that.parentSelectorXpath) : that.parentSelectorXpath != null)
             return false;
-        }
-        if (!inputMappingAttributes.equals(that.inputMappingAttributes)) {
-            return false;
-        }
-        if (xpathDefinition != null ? !xpathDefinition.equals(that.xpathDefinition) : that.xpathDefinition != null) {
-            return false;
-        }
+        if (!xpathDefinitions.equals(that.xpathDefinitions)) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = xpathDefinition != null ? xpathDefinition.hashCode() : 0;
-        result = 31 * result + inputMappingAttributes.hashCode();
-        result = 31 * result + (batchProcessingEnabled ? 1 : 0);
+        int result = xpathDefinitions.hashCode();
+        result = 31 * result + (parentSelectorXpath != null ? parentSelectorXpath.hashCode() : 0);
         return result;
     }
 }

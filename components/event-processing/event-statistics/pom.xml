@@ -14,15 +14,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>event-processing</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>event-statistics</artifactId>
-    <groupId>org.wso2.carbon</groupId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Event Statistics Aggregator Module</name>
-    <version>1.0.0</version>
+    <version>1.1.0-SNAPSHOT</version>
     <url>http://wso2.org</url>
 
     <modules>
@@ -60,6 +59,11 @@
                 <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.event.statistics.stub</artifactId>
+                <version>${cep.stub.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
@@ -72,5 +76,7 @@
         </dependencies>
     </dependencyManagement>
 
-
+    <properties>
+        <cep.stub.version>1.0.0</cep.stub.version>
+    </properties>
 </project>	

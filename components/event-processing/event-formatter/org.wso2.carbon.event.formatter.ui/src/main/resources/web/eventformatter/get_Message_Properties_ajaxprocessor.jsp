@@ -6,12 +6,12 @@
 <%@ page import="org.wso2.carbon.event.formatter.ui.EventFormatterUIUtils" %>
 
 <%
-    // get Transport Adaptor properties
+    // get Event Adaptor properties
     EventFormatterAdminServiceStub stub = EventFormatterUIUtils.getEventFormatterAdminService(config, session, request);
-    String transportAdaptorName = request.getParameter("transportAdaptorName");
+    String eventAdaptorName = request.getParameter("eventAdaptorName");
 
-    if (transportAdaptorName != null) {
-        EventFormatterPropertyDto[] eventFormatterPropertiesDto = stub.getEventFormatterProperties(transportAdaptorName);
+    if (eventAdaptorName != null) {
+        EventFormatterPropertyDto[] eventFormatterPropertiesDto = stub.getEventFormatterProperties(eventAdaptorName);
         String propertiesString = "";
         propertiesString = new Gson().toJson(eventFormatterPropertiesDto);
 

@@ -32,7 +32,7 @@
         <tr fromElementKey="inputMapMapping">
             <td colspan="2">
 
-                <h6><fmt:message key="property.data.type.payload"/></h6>
+                <h6><fmt:message key="map.mapping.header"/></h6>
                 <table class="styledLeft noBorders spacer-bot"
                        id="inputMapPropertiesTable" style="display:none">
                     <thead>
@@ -65,12 +65,12 @@
                         </td>
                         <td><fmt:message key="event.builder.property.type"/>:
                             <select id="inputMapPropType">
-                                <option value="java.lang.Integer">Integer</option>
-                                <option value="java.lang.Long">Long</option>
-                                <option value="java.lang.Double">Double</option>
-                                <option value="java.lang.Float">Float</option>
-                                <option value="java.lang.String">String</option>
-                                <option value="java.lang.Boolean">Boolean</option>
+                                <option value="int">int</option>
+                                <option value="long">long</option>
+                                <option value="double">double</option>
+                                <option value="float">float</option>
+                                <option value="string">string</option>
+                                <option value="boolean">boolean</option>
                             </select>
                         </td>
                         <td><input type="button" class="button"

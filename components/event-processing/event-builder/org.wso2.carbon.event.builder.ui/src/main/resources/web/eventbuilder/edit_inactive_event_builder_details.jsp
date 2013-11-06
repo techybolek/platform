@@ -47,6 +47,8 @@
 
     <!--Yahoo includes for dom event handling-->
     <script src="../yui/build/yahoo-dom-event/yahoo-dom-event.js" type="text/javascript"></script>
+    <script type="text/javascript" src="../ajax/js/prototype.js"></script>
+
 
     <%--end of newly added--%>
 
@@ -86,10 +88,10 @@
     <% if (loadEditArea) { %>
     <script type="text/javascript">
         editAreaLoader.init({
-                                id: "rawConfig"        // text area id
-                                , syntax: "xml"            // syntax to be uses for highlighting
-                                , start_highlight: true  // to display with highlight mode on start-up
-                            });
+            id: "rawConfig"        // text area id
+            , syntax: "xml"            // syntax to be uses for highlighting
+            , start_highlight: true  // to display with highlight mode on start-up
+        });
     </script>
     <% } %>
 
@@ -101,24 +103,24 @@
                 newEventBuilderConfiguration = editAreaLoader.getValue("rawConfig");
             }
 
-            var parameters = "?eventBuilderFilename=" + eventBuilderFilename + "&eventBuilderConfiguration=" + newEventBuilderConfiguration;
-
-            jQuery.ajax({
-                            type: "POST",
-                            url: "edit_event_builder_ajaxprocessor.jsp" + parameters,
-                            contentType: "application/json; charset=utf-8",
-                            dataType: "text",
-                            data: {},
-                            async: false,
-                            success: function (msg) {
-                                if (msg.trim() == "true") {
-                                    form.submit();
-                                } else {
-                                    CARBON.showErrorDialog("Failed to update event builder, Exception: " + msg);
-                                }
-                            }
-                        });
-
+            new Ajax.Request('edit_event_builder_ajaxprocessor.jsp', {
+                method: 'post',
+                asynchronous: false,
+                parameters: {eventBuilderFilename: eventBuilderFilename, eventBuilderConfiguration: newEventBuilderConfiguration},
+                onSuccess: function (event) {
+                    if ("true" == event.responseText.trim()) {
+                        form.submit();
+                    } else {
+                        if(event.responseText.trim().indexOf("The input stream for an incoming message is null") != -1){
+                            CARBON.showErrorDialog("Possible session time out, redirecting to index page",function(){
+                                window.location.href = "../admin/index.jsp?ordinal=1";
+                            });
+                        }else{
+                            CARBON.showErrorDialog("Failed to update event builder, Exception: " + event.responseText.trim());
+                        }
+                    }
+                }
+            })
         }
 
         function resetConfiguration(form) {
@@ -133,7 +135,7 @@
         <h2><fmt:message key="event.builder.edit.header"/></h2>
 
         <div id="workArea">
-            <form name="configform" id="configform" action="index.jsp" method="get">
+            <form name="configform" id="configform" action="index.jsp?ordinal=1" method="get">
                 <div id="saveConfiguration">
                             <span style="margin-top:10px;margin-bottom:10px; display:block;_margin-top:0px;">
                                 <fmt:message key="save.advice"/>

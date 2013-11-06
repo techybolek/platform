@@ -18,23 +18,16 @@
 
 package org.wso2.carbon.event.builder.core.config;
 
-import org.wso2.carbon.event.builder.core.internal.config.DeploymentStatus;
 import org.wso2.carbon.event.builder.core.internal.config.InputStreamConfiguration;
 
 public class EventBuilderConfiguration {
     private String eventBuilderName;
     private String toStreamName;
-    private String toStreamVersion;
+    private String toStreamVersion="1.0.0";
     private InputStreamConfiguration inputStreamConfiguration;
-    private InputMapperFactory inputMapperFactory;
     private InputMapping inputMapping;
-    private DeploymentStatus deploymentStatus;
     private boolean traceEnabled;
     private boolean statisticsEnabled;
-
-    public EventBuilderConfiguration(InputMapperFactory inputMapperFactory) {
-        this.inputMapperFactory = inputMapperFactory;
-    }
 
     public boolean isTraceEnabled() {
         return traceEnabled;
@@ -52,24 +45,12 @@ public class EventBuilderConfiguration {
         this.statisticsEnabled = statisticsEnabled;
     }
 
-    public DeploymentStatus getDeploymentStatus() {
-        return deploymentStatus;
-    }
-
-    public void setDeploymentStatus(DeploymentStatus deploymentStatus) {
-        this.deploymentStatus = deploymentStatus;
-    }
-
     public InputStreamConfiguration getInputStreamConfiguration() {
         return inputStreamConfiguration;
     }
 
     public void setInputStreamConfiguration(InputStreamConfiguration inputStreamConfiguration) {
         this.inputStreamConfiguration = inputStreamConfiguration;
-    }
-
-    public InputMapperFactory getInputMapperFactory() {
-        return inputMapperFactory;
     }
 
     public InputMapping getInputMapping() {

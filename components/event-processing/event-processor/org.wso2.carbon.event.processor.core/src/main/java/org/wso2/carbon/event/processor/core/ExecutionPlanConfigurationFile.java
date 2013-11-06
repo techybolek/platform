@@ -19,18 +19,18 @@ package org.wso2.carbon.event.processor.core;
 import org.apache.axis2.engine.AxisConfiguration;
 
 public class ExecutionPlanConfigurationFile {
-    private String filePath;
+    private String fileName;
 
     private String executionPlanName;
 
-    public enum Status {DEPLOYED, WAITING_FOR_DEPENDENCY, ERROR}
+    public enum Status {DEPLOYED, WAITING_FOR_DEPENDENCY, ERROR, WAITING_FOR_OSGI_SERVICE}
 
     //Deployed, Waiting for Dependency, Error
     private Status status;
 
     private String dependency;
 
-    private String deploymentStatusMessage;
+    private String deploymentStatusMessage="";
 
     private AxisConfiguration axisConfiguration;
 
@@ -38,12 +38,12 @@ public class ExecutionPlanConfigurationFile {
     public ExecutionPlanConfigurationFile() {
     }
 
-    public String getFilePath() {
-        return filePath;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getExecutionPlanName() {

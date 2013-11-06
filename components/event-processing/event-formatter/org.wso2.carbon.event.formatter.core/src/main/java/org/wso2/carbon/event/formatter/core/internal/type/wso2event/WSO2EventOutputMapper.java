@@ -26,45 +26,71 @@ import org.wso2.carbon.event.formatter.core.config.EventFormatterConstants;
 import org.wso2.carbon.event.formatter.core.exception.EventFormatterConfigurationException;
 import org.wso2.carbon.event.formatter.core.internal.OutputMapper;
 import org.wso2.carbon.event.formatter.core.internal.config.EventOutputProperty;
+import org.wso2.carbon.event.formatter.core.internal.ds.EventFormatterServiceValueHolder;
+import org.wso2.carbon.event.stream.manager.core.exception.EventStreamConfigurationException;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WSO2EventOutputMapper implements OutputMapper {
 
     WSO2EventOutputMapping wso2EventOutputMapping;
-    private StreamDefinition outputStreamDefinition = null;
     EventFormatterConfiguration eventFormatterConfiguration = null;
     Map<String, Integer> propertyPositionMap = null;
+    private StreamDefinition outputStreamDefinition = null;
+    private int noOfMetaData = 0;
+    private int noOfCorrelationData = 0;
+    private int noOfPayloadData = 0;
 
     public WSO2EventOutputMapper(EventFormatterConfiguration eventFormatterConfiguration,
                                  Map<String, Integer> propertyPositionMap,
                                  int tenantId) throws
-                                               EventFormatterConfigurationException {
+            EventFormatterConfigurationException {
         this.eventFormatterConfiguration = eventFormatterConfiguration;
         this.propertyPositionMap = propertyPositionMap;
         validateStreamDefinitionWithOutputProperties();
-        String outputStreamName = eventFormatterConfiguration.getToPropertyConfiguration().getOutputTransportAdaptorMessageConfiguration().getOutputMessageProperties().get(EventFormatterConstants.EF_ELE_PROPERTY_STREAM_NAME);
-        String outputStreamVersion = eventFormatterConfiguration.getToPropertyConfiguration().getOutputTransportAdaptorMessageConfiguration().getOutputMessageProperties().get(EventFormatterConstants.EF_ATTR_VERSION);
+        String outputStreamName = eventFormatterConfiguration.getToPropertyConfiguration().getOutputEventAdaptorMessageConfiguration().getOutputMessageProperties().get(EventFormatterConstants.EF_ELE_PROPERTY_STREAM_NAME);
+        String outputStreamVersion = eventFormatterConfiguration.getToPropertyConfiguration().getOutputEventAdaptorMessageConfiguration().getOutputMessageProperties().get(EventFormatterConstants.EF_ATTR_VERSION);
 
         try {
-            outputStreamDefinition = new StreamDefinition(outputStreamName, outputStreamVersion);
+            String inputStreamName = eventFormatterConfiguration.getFromStreamName();
+            String inputStreamVersion = eventFormatterConfiguration.getFromStreamVersion();
+
             wso2EventOutputMapping = (WSO2EventOutputMapping) eventFormatterConfiguration.getOutputMapping();
 
-            if (wso2EventOutputMapping != null) {
-                addAttributeToStreamDefinition(outputStreamDefinition, wso2EventOutputMapping.getMetaWSO2EventOutputPropertyConfiguration(), "meta");
-                addAttributeToStreamDefinition(outputStreamDefinition, wso2EventOutputMapping.getCorrelationWSO2EventOutputPropertyConfiguration(), "correlation");
-                addAttributeToStreamDefinition(outputStreamDefinition, wso2EventOutputMapping.getPayloadWSO2EventOutputPropertyConfiguration(), "payload");
+            if (!wso2EventOutputMapping.isCustomMappingEnabled()) {
+                StreamDefinition inputStreamDefinition = EventFormatterServiceValueHolder.getEventStreamService().getStreamDefinitionFromStore(inputStreamName, inputStreamVersion, tenantId);
+                outputStreamDefinition = EventFormatterServiceValueHolder.getEventStreamService().getStreamDefinitionFromStore(outputStreamName, outputStreamVersion, tenantId);
+
+                if (outputStreamDefinition != null && (!inputStreamDefinition.equals(outputStreamDefinition))) {
+                    throw new EventFormatterConfigurationException("input and output stream definitions are different in pass-through event formatter");
+                } else {
+                    outputStreamDefinition = new StreamDefinition(outputStreamName, outputStreamVersion);
+                    outputStreamDefinition.setMetaData(inputStreamDefinition.getMetaData());
+                    outputStreamDefinition.setCorrelationData(inputStreamDefinition.getCorrelationData());
+                    outputStreamDefinition.setPayloadData(inputStreamDefinition.getPayloadData());
+
+                    noOfMetaData = outputStreamDefinition.getMetaData() != null ? outputStreamDefinition.getMetaData().size() : 0;
+                    noOfCorrelationData = outputStreamDefinition.getCorrelationData() != null ? outputStreamDefinition.getCorrelationData().size() : 0;
+                    noOfPayloadData = outputStreamDefinition.getPayloadData() != null ? outputStreamDefinition.getPayloadData().size() : 0;
+
+                }
+            } else {
+
+                if (wso2EventOutputMapping != null) {
+                    outputStreamDefinition = new StreamDefinition(outputStreamName, outputStreamVersion);
+                    addAttributeToStreamDefinition(outputStreamDefinition, wso2EventOutputMapping.getMetaWSO2EventOutputPropertyConfiguration(), "meta");
+                    addAttributeToStreamDefinition(outputStreamDefinition, wso2EventOutputMapping.getCorrelationWSO2EventOutputPropertyConfiguration(), "correlation");
+                    addAttributeToStreamDefinition(outputStreamDefinition, wso2EventOutputMapping.getPayloadWSO2EventOutputPropertyConfiguration(), "payload");
+                }
             }
 
+        } catch (EventStreamConfigurationException e) {
+            throw new EventFormatterConfigurationException("Error while retrieving stream definition from registry", e);
         } catch (MalformedStreamDefinitionException e) {
-            throw new EventFormatterConfigurationException("Cannot create output stream definition from the given mapping", e);
+            throw new EventFormatterConfigurationException("Error while creating output stream definition : " + outputStreamName + ":" + outputStreamVersion, e);
         }
 
     }
-
 
     private void validateStreamDefinitionWithOutputProperties()
             throws EventFormatterConfigurationException {
@@ -123,38 +149,68 @@ public class WSO2EventOutputMapper implements OutputMapper {
     }
 
     @Override
-    public Object convert(Object obj) {
+    public Object convertToMappedInputEvent(Object obj)
+            throws EventFormatterConfigurationException {
+        Object[] inputObjArray = (Object[]) obj;
+        Event eventObject = new Event();
+        if (inputObjArray.length > 0) {
+
+            List<EventOutputProperty> metaWSO2EventOutputPropertyConfiguration = wso2EventOutputMapping.getMetaWSO2EventOutputPropertyConfiguration();
+            List<EventOutputProperty> correlationWSO2EventOutputPropertyConfiguration = wso2EventOutputMapping.getCorrelationWSO2EventOutputPropertyConfiguration();
+            List<EventOutputProperty> payloadWSO2EventOutputPropertyConfiguration = wso2EventOutputMapping.getPayloadWSO2EventOutputPropertyConfiguration();
+
+            if (metaWSO2EventOutputPropertyConfiguration.size() != 0) {
+                List<Object> metaData = new ArrayList<Object>();
+                for (EventOutputProperty eventOutputProperty : metaWSO2EventOutputPropertyConfiguration) {
+                    int position = propertyPositionMap.get(eventOutputProperty.getValueOf());
+                    metaData.add(inputObjArray[position]);
+                }
+                eventObject.setMetaData(metaData.toArray());
+            }
+
+            if (correlationWSO2EventOutputPropertyConfiguration.size() != 0) {
+                List<Object> correlationData = new ArrayList<Object>();
+                for (EventOutputProperty eventOutputProperty : correlationWSO2EventOutputPropertyConfiguration) {
+                    int position = propertyPositionMap.get(eventOutputProperty.getValueOf());
+                    correlationData.add(inputObjArray[position]);
+                }
+                eventObject.setCorrelationData(correlationData.toArray());
+            }
+
+            if (payloadWSO2EventOutputPropertyConfiguration.size() != 0) {
+                List<Object> payloadData = new ArrayList<Object>();
+                for (EventOutputProperty eventOutputProperty : payloadWSO2EventOutputPropertyConfiguration) {
+                    int position = propertyPositionMap.get(eventOutputProperty.getValueOf());
+                    payloadData.add(inputObjArray[position]);
+                }
+                eventObject.setPayloadData(payloadData.toArray());
+            }
+        }
+
+        return new Object[]{eventObject, outputStreamDefinition};
+    }
+
+    @Override
+    public Object convertToTypedInputEvent(Object obj) throws EventFormatterConfigurationException {
+
         Object[] inputObjArray = (Object[]) obj;
         Event eventObject = new Event();
 
-        List<EventOutputProperty> metaWSO2EventOutputPropertyConfiguration = wso2EventOutputMapping.getMetaWSO2EventOutputPropertyConfiguration();
-        List<EventOutputProperty> correlationWSO2EventOutputPropertyConfiguration = wso2EventOutputMapping.getCorrelationWSO2EventOutputPropertyConfiguration();
-        List<EventOutputProperty> payloadWSO2EventOutputPropertyConfiguration = wso2EventOutputMapping.getPayloadWSO2EventOutputPropertyConfiguration();
-
-        if (metaWSO2EventOutputPropertyConfiguration.size() != 0) {
+        if (noOfMetaData > 0) {
             List<Object> metaData = new ArrayList<Object>();
-            for (EventOutputProperty eventOutputProperty : metaWSO2EventOutputPropertyConfiguration) {
-                int position = propertyPositionMap.get(eventOutputProperty.getValueOf());
-                metaData.add(inputObjArray[position]);
-            }
+            metaData.addAll(Arrays.asList(inputObjArray).subList(0, noOfMetaData));
             eventObject.setMetaData(metaData.toArray());
         }
 
-        if (correlationWSO2EventOutputPropertyConfiguration.size() != 0) {
+        if (noOfCorrelationData > 0) {
             List<Object> correlationData = new ArrayList<Object>();
-            for (EventOutputProperty eventOutputProperty : correlationWSO2EventOutputPropertyConfiguration) {
-                int position = propertyPositionMap.get(eventOutputProperty.getValueOf());
-                correlationData.add(inputObjArray[position]);
-            }
+            correlationData.addAll(Arrays.asList(inputObjArray).subList(noOfMetaData, noOfMetaData + noOfCorrelationData));
             eventObject.setCorrelationData(correlationData.toArray());
         }
 
-        if (payloadWSO2EventOutputPropertyConfiguration.size() != 0) {
+        if (noOfPayloadData > 0) {
             List<Object> payloadData = new ArrayList<Object>();
-            for (EventOutputProperty eventOutputProperty : payloadWSO2EventOutputPropertyConfiguration) {
-                int position = propertyPositionMap.get(eventOutputProperty.getValueOf());
-                payloadData.add(inputObjArray[position]);
-            }
+            payloadData.addAll(Arrays.asList(inputObjArray).subList(noOfCorrelationData + noOfMetaData, noOfPayloadData + noOfCorrelationData + noOfMetaData));
             eventObject.setPayloadData(payloadData.toArray());
         }
 

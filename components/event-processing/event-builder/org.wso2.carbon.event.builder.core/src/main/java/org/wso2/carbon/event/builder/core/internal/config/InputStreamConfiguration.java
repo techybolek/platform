@@ -16,39 +16,38 @@
 
 package org.wso2.carbon.event.builder.core.internal.config;
 
-import org.wso2.carbon.input.transport.adaptor.core.message.config.InputTransportAdaptorMessageConfiguration;
+
+import org.wso2.carbon.event.input.adaptor.core.message.config.InputEventAdaptorMessageConfiguration;
 
 public class InputStreamConfiguration {
 
-    private String transportAdaptorName;
+    private String inputEventAdaptorName;
+    private String inputEventAdaptorType;
+    private InputEventAdaptorMessageConfiguration inputEventAdaptorMessageConfiguration;
 
-    private String transportAdaptorType;
-
-    private InputTransportAdaptorMessageConfiguration inputTransportAdaptorMessageConfiguration;
-
-    public InputTransportAdaptorMessageConfiguration getInputTransportAdaptorMessageConfiguration() {
-        return inputTransportAdaptorMessageConfiguration;
+    public InputEventAdaptorMessageConfiguration getInputEventAdaptorMessageConfiguration() {
+        return inputEventAdaptorMessageConfiguration;
     }
 
-    public void setInputTransportAdaptorMessageConfiguration(
-            InputTransportAdaptorMessageConfiguration inputTransportAdaptorMessageConfiguration) {
-        this.inputTransportAdaptorMessageConfiguration = inputTransportAdaptorMessageConfiguration;
+    public void setInputEventAdaptorMessageConfiguration(
+            InputEventAdaptorMessageConfiguration EventInputAdaptorMessageConfiguration) {
+        this.inputEventAdaptorMessageConfiguration = EventInputAdaptorMessageConfiguration;
     }
 
-    public String getTransportAdaptorType() {
-        return transportAdaptorType;
+    public String getInputEventAdaptorType() {
+        return inputEventAdaptorType;
     }
 
-    public void setTransportAdaptorType(String transportAdaptorType) {
-        this.transportAdaptorType = transportAdaptorType;
+    public void setInputEventAdaptorType(String inputEventAdaptorType) {
+        this.inputEventAdaptorType = inputEventAdaptorType;
     }
 
-    public String getTransportAdaptorName() {
-        return transportAdaptorName;
+    public String getInputEventAdaptorName() {
+        return inputEventAdaptorName;
     }
 
-    public void setTransportAdaptorName(String transportAdaptorName) {
-        this.transportAdaptorName = transportAdaptorName;
+    public void setInputEventAdaptorName(String inputEventAdaptorName) {
+        this.inputEventAdaptorName = inputEventAdaptorName;
     }
 
 

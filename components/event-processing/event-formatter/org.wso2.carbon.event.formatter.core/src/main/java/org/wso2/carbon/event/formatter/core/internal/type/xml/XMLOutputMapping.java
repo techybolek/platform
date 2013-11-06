@@ -21,7 +21,7 @@ package org.wso2.carbon.event.formatter.core.internal.type.xml;
 import org.wso2.carbon.event.formatter.core.config.EventFormatterConstants;
 import org.wso2.carbon.event.formatter.core.config.OutputMapping;
 
-public class XMLOutputMapping implements OutputMapping {
+public class XMLOutputMapping extends OutputMapping {
 
     private String mappingXMLText;
 

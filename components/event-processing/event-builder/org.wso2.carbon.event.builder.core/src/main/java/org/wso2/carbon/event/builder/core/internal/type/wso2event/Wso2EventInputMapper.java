@@ -18,65 +18,154 @@
 
 package org.wso2.carbon.event.builder.core.internal.type.wso2event;
 
+import com.google.common.collect.ObjectArrays;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
-import org.wso2.carbon.event.builder.core.config.EventDispatcher;
 import org.wso2.carbon.event.builder.core.config.InputMapper;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
-import org.wso2.carbon.event.builder.core.exception.EventBuilderValidationException;
+import org.wso2.carbon.event.builder.core.exception.EventBuilderStreamValidationException;
 import org.wso2.carbon.event.builder.core.internal.config.InputMappingAttribute;
+import org.wso2.carbon.event.builder.core.internal.ds.EventBuilderServiceValueHolder;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderUtil;
+import org.wso2.carbon.event.builder.core.internal.util.helper.EventBuilderConfigHelper;
+import org.wso2.carbon.event.stream.manager.core.EventStreamService;
+import org.wso2.carbon.event.stream.manager.core.exception.EventStreamConfigurationException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class Wso2EventInputMapper implements InputMapper {
     private EventBuilderConfiguration eventBuilderConfiguration = null;
     private StreamDefinition exportedStreamDefinition = null;
-    private EventDispatcher eventDispatcher = null;
+    private StreamDefinition inputStreamDefinition = null;
     private Map<InputDataType, int[]> inputDataTypeSpecificPositionMap = null;
 
-    public Wso2EventInputMapper(EventBuilderConfiguration eventBuilderConfiguration,
-                                EventDispatcher eventDispatcher) {
+    public Wso2EventInputMapper(EventBuilderConfiguration eventBuilderConfiguration, StreamDefinition inputStreamDefinition)
+            throws EventBuilderConfigurationException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        validateInputStreamAttributes();
         this.eventBuilderConfiguration = eventBuilderConfiguration;
-        this.eventDispatcher = eventDispatcher;
+        //TODO It is better if logic to check from stream definition store can be moved outside of input mapper.
+        Map<String, String> inputMessageProperties = eventBuilderConfiguration.getInputStreamConfiguration()
+                .getInputEventAdaptorMessageConfiguration().getInputMessageProperties();
+        String fromStreamName = inputMessageProperties.get(EventBuilderConstants.ADAPTOR_MESSAGE_STREAM_NAME);
+        String fromStreamVersion = inputMessageProperties.get(EventBuilderConstants.ADAPTOR_MESSAGE_STREAM_VERSION);
+        if (fromStreamName != null && fromStreamVersion != null && (!fromStreamName.isEmpty()) && (!fromStreamVersion.isEmpty())) {
+            EventStreamService eventStreamService = EventBuilderServiceValueHolder.getEventStreamService();
+            try {
+                StreamDefinition streamDefinition = eventStreamService.getStreamDefinitionFromStore(fromStreamName, fromStreamVersion, tenantId);
+                if (streamDefinition == null) {
+                    throw new EventBuilderStreamValidationException("Input stream definition is not available ",
+                            fromStreamName + EventBuilderConstants.STREAM_NAME_VER_DELIMITER + fromStreamVersion);
+                }
+            } catch (EventStreamConfigurationException e) {
+                throw new EventBuilderConfigurationException("Error while validating input stream definition : " + e.getMessage());
+            }
+        } else {
+            throw new EventBuilderConfigurationException("Required message properties stream name and stream version not found");
+        }
+
+        this.inputStreamDefinition = inputStreamDefinition;
+        if (inputStreamDefinition != null) {
+            Wso2EventInputMapping wso2EventInputMapping = (Wso2EventInputMapping) this.eventBuilderConfiguration.getInputMapping();
+            this.exportedStreamDefinition = EventBuilderConfigHelper.deriveStreamDefinition(eventBuilderConfiguration.getToStreamName(),
+                    eventBuilderConfiguration.getToStreamVersion(), wso2EventInputMapping.getInputMappingAttributes());
+            this.inputDataTypeSpecificPositionMap = new HashMap<InputDataType, int[]>();
+            Map<Integer, Integer> payloadDataMap = new TreeMap<Integer, Integer>();
+            Map<Integer, Integer> metaDataMap = new TreeMap<Integer, Integer>();
+            Map<Integer, Integer> correlationDataMap = new TreeMap<Integer, Integer>();
+
+            List<Attribute> allAttributes = new ArrayList<Attribute>();
+            if (inputStreamDefinition.getMetaData() != null && !inputStreamDefinition.getMetaData().isEmpty()) {
+                allAttributes.addAll(inputStreamDefinition.getMetaData());
+            }
+            if (inputStreamDefinition.getCorrelationData() != null && !inputStreamDefinition.getCorrelationData().isEmpty()) {
+                allAttributes.addAll(inputStreamDefinition.getCorrelationData());
+            }
+            if (inputStreamDefinition.getPayloadData() != null && !inputStreamDefinition.getPayloadData().isEmpty()) {
+                allAttributes.addAll(inputStreamDefinition.getPayloadData());
+            }
+            int metaCount = 0, correlationCount = 0, payloadCount = 0;
+            for (InputMappingAttribute inputMappingAttribute : wso2EventInputMapping.getInputMappingAttributes()) {
+                if (inputMappingAttribute.getToElementKey().startsWith(EventBuilderConstants.META_DATA_PREFIX)) {
+                    for (int i = 0; i < allAttributes.size(); i++) {
+                        if (allAttributes.get(i).getName().equals(inputMappingAttribute.getFromElementKey())) {
+                            metaDataMap.put(metaCount, i);
+                            break;
+                        }
+                    }
+                    if (metaDataMap.get(metaCount++) == null) {
+                        this.inputDataTypeSpecificPositionMap = null;
+                        throw new EventBuilderConfigurationException("Cannot find a corresponding meta data input attribute '"
+                                + inputMappingAttribute.getFromElementKey() + "' in stream with id " + inputStreamDefinition.getStreamId());
+                    }
+                } else if (inputMappingAttribute.getToElementKey().startsWith(EventBuilderConstants.CORRELATION_DATA_PREFIX)) {
+                    for (int i = 0; i < allAttributes.size(); i++) {
+                        if (allAttributes.get(i).getName().equals(inputMappingAttribute.getFromElementKey())) {
+                            correlationDataMap.put(correlationCount, i);
+                            break;
+                        }
+                    }
+                    if (correlationDataMap.get(correlationCount++) == null) {
+                        this.inputDataTypeSpecificPositionMap = null;
+                        throw new EventBuilderConfigurationException("Cannot find a corresponding correlation data input attribute '"
+                                + inputMappingAttribute.getFromElementKey() + "' in stream with id " + inputStreamDefinition.getStreamId());
+                    }
+                } else {
+                    for (int i = 0; i < allAttributes.size(); i++) {
+                        if (allAttributes.get(i).getName().equals(inputMappingAttribute.getFromElementKey())) {
+                            payloadDataMap.put(payloadCount, i);
+                            break;
+                        }
+                    }
+                    if (payloadDataMap.get(payloadCount++) == null) {
+                        this.inputDataTypeSpecificPositionMap = null;
+                        throw new EventBuilderConfigurationException("Cannot find a corresponding payload data input attribute '"
+                                + inputMappingAttribute.getFromElementKey() + "' in stream with id : " + inputStreamDefinition.getStreamId());
+                    }
+                }
+            }
+
+            int[] metaPositions = new int[metaDataMap.size()];
+            for (int i = 0; i < metaPositions.length; i++) {
+                metaPositions[i] = metaDataMap.get(i);
+            }
+            inputDataTypeSpecificPositionMap.put(InputDataType.META_DATA, metaPositions);
+            int[] correlationPositions = new int[correlationDataMap.size()];
+            for (int i = 0; i < correlationPositions.length; i++) {
+                correlationPositions[i] = correlationDataMap.get(i);
+            }
+            inputDataTypeSpecificPositionMap.put(InputDataType.CORRELATION_DATA, correlationPositions);
+            int[] payloadPositions = new int[payloadDataMap.size()];
+            for (int i = 0; i < payloadPositions.length; i++) {
+                payloadPositions[i] = payloadDataMap.get(i);
+            }
+            inputDataTypeSpecificPositionMap.put(InputDataType.PAYLOAD_DATA, payloadPositions);
+        }
     }
 
-    @Override
-    public void validateInputStreamAttributes(StreamDefinition inputStreamDefinition)
+    private void validateInputStreamAttributes()
             throws EventBuilderConfigurationException {
+        if (this.inputStreamDefinition != null) {
+            Wso2EventInputMapping wso2EventInputMapping = (Wso2EventInputMapping) eventBuilderConfiguration.getInputMapping();
+            List<InputMappingAttribute> inputMappingAttributes = wso2EventInputMapping.getInputMappingAttributes();
+            List<String> inputStreamMetaAttributeNames = getAttributeNamesList(inputStreamDefinition.getMetaData());
+            List<String> inputStreamCorrelationAttributeNames = getAttributeNamesList(inputStreamDefinition.getCorrelationData());
+            List<String> inputStreamPayloadAttributeNames = getAttributeNamesList(inputStreamDefinition.getPayloadData());
 
-        Wso2EventInputMapping wso2EventInputMapping = (Wso2EventInputMapping) eventBuilderConfiguration.getInputMapping();
-        List<InputMappingAttribute> metaInputMappingAttributes = wso2EventInputMapping.getMetaInputMappingAttributes();
-        List<InputMappingAttribute> correlationInputMappingAttributes = wso2EventInputMapping.getCorrelationInputMappingAttributes();
-        List<InputMappingAttribute> payloadInputMappingAttributes = wso2EventInputMapping.getPayloadInputMappingAttributes();
-
-        List<String> inputStreamMetaAttributeNames = getAttributeNamesList(inputStreamDefinition.getMetaData());
-        List<String> inputStreamCorrelationAttributeNames = getAttributeNamesList(inputStreamDefinition.getCorrelationData());
-        List<String> inputStreamPayloadAttributeNames = getAttributeNamesList(inputStreamDefinition.getPayloadData());
-
-        for (InputMappingAttribute inputMappingAttribute : metaInputMappingAttributes) {
-            if (!inputStreamMetaAttributeNames.contains(inputMappingAttribute.getFromElementKey())) {
-                throw new EventBuilderConfigurationException("Property " + inputMappingAttribute.getFromElementKey() + " is not in the input stream definition. ");
-            }
-        }
-
-        for (InputMappingAttribute inputMappingAttribute : correlationInputMappingAttributes) {
-            if (!inputStreamCorrelationAttributeNames.contains(inputMappingAttribute.getFromElementKey())) {
-                throw new EventBuilderConfigurationException("Property " + inputMappingAttribute.getFromElementKey() + " is not in the input stream definition. ");
-            }
-        }
-
-        for (InputMappingAttribute inputMappingAttribute : payloadInputMappingAttributes) {
-            if (!inputStreamPayloadAttributeNames.contains(inputMappingAttribute.getFromElementKey())) {
-                throw new EventBuilderConfigurationException("Property " + inputMappingAttribute.getFromElementKey() + " is not in the input stream definition. ");
+            for (InputMappingAttribute inputMappingAttribute : inputMappingAttributes) {
+                if (inputMappingAttribute.getToElementKey().startsWith(EventBuilderConstants.META_DATA_PREFIX)
+                        && !inputStreamMetaAttributeNames.contains(inputMappingAttribute.getFromElementKey())) {
+                    throw new EventBuilderConfigurationException("Property " + inputMappingAttribute.getFromElementKey() + " is not in the input stream definition. ");
+                } else if (inputMappingAttribute.getToElementKey().startsWith(EventBuilderConstants.CORRELATION_DATA_PREFIX)
+                        && !inputStreamCorrelationAttributeNames.contains(inputMappingAttribute.getFromElementKey())) {
+                    throw new EventBuilderConfigurationException("Property " + inputMappingAttribute.getFromElementKey() + " is not in the input stream definition. ");
+                } else if (!inputStreamPayloadAttributeNames.contains(inputMappingAttribute.getFromElementKey())) {
+                    throw new EventBuilderConfigurationException("Property " + inputMappingAttribute.getFromElementKey() + " is not in the input stream definition. ");
+                }
             }
         }
     }
@@ -92,165 +181,63 @@ public class Wso2EventInputMapper implements InputMapper {
         return attributeNamesList;
     }
 
+    //TODO Profile performance of this method
     @Override
-    public boolean isStreamDefinitionValidForConfiguration(
-            EventBuilderConfiguration eventBuilderConfiguration,
-            StreamDefinition exportedStreamDefinition) {
-        if (!(eventBuilderConfiguration.getToStreamName().equals(exportedStreamDefinition.getName())
-              && eventBuilderConfiguration.getToStreamVersion().equals(exportedStreamDefinition.getVersion()))) {
-            return false;
-        }
-        if (eventBuilderConfiguration.getInputMapping() instanceof Wso2EventInputMapping) {
-            Wso2EventInputMapping wso2EventInputMapping = (Wso2EventInputMapping) eventBuilderConfiguration.getInputMapping();
-            for (InputMappingAttribute inputMappingAttribute : wso2EventInputMapping.getMetaInputMappingAttributes()) {
-                Attribute attribute = new Attribute(inputMappingAttribute.getToElementKey(), inputMappingAttribute.getToElementType());
-                if (!exportedStreamDefinition.getMetaData().contains(attribute)) {
-                    return false;
-                }
-            }
-            for (InputMappingAttribute inputMappingAttribute : wso2EventInputMapping.getCorrelationInputMappingAttributes()) {
-                Attribute attribute = new Attribute(inputMappingAttribute.getToElementKey(), inputMappingAttribute.getToElementType());
-                if (!exportedStreamDefinition.getCorrelationData().contains(attribute)) {
-                    return false;
-                }
-            }
-            for (InputMappingAttribute inputMappingAttribute : wso2EventInputMapping.getPayloadInputMappingAttributes()) {
-                Attribute attribute = new Attribute(inputMappingAttribute.getToElementKey(), inputMappingAttribute.getToElementType());
-                if (!exportedStreamDefinition.getPayloadData().contains(attribute)) {
-                    return false;
-                }
-            }
-        } else {
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public StreamDefinition createExportedStreamDefinition() {
-        String inputStreamName = this.eventBuilderConfiguration.getToStreamName();
-        String inputStreamVersion = this.eventBuilderConfiguration.getToStreamVersion();
-        StreamDefinition toStreamDefinition;
-        Wso2EventInputMapping wso2EventInputMapping = (Wso2EventInputMapping) this.eventBuilderConfiguration.getInputMapping();
-        try {
-            toStreamDefinition = new StreamDefinition(this.eventBuilderConfiguration.getToStreamName(), this.eventBuilderConfiguration.getToStreamVersion());
-        } catch (MalformedStreamDefinitionException e) {
-            throw new EventBuilderConfigurationException("Could not create stream definition with " + inputStreamName + EventBuilderConstants.STREAM_NAME_VER_DELIMITER + inputStreamVersion);
-        }
-
-        if (wso2EventInputMapping != null) {
-            EventBuilderUtil.addAttributesToStreamDefinition(toStreamDefinition, wso2EventInputMapping.getMetaInputMappingAttributes(), EventBuilderConstants.META_DATA_VAL);
-            EventBuilderUtil.addAttributesToStreamDefinition(toStreamDefinition, wso2EventInputMapping.getCorrelationInputMappingAttributes(), EventBuilderConstants.CORRELATION_DATA_VAL);
-            EventBuilderUtil.addAttributesToStreamDefinition(toStreamDefinition, wso2EventInputMapping.getPayloadInputMappingAttributes(), EventBuilderConstants.PAYLOAD_DATA_VAL);
-        }
-        this.exportedStreamDefinition = toStreamDefinition;
-        return toStreamDefinition;
-    }
-
-    @Override
-    public void createMapping(Object eventDefinition) throws EventBuilderConfigurationException {
-        if (eventDefinition instanceof StreamDefinition) {
-            StreamDefinition inputStreamDefinition = (StreamDefinition) eventDefinition;
-            Wso2EventInputMapping wso2EventInputMapping = (Wso2EventInputMapping) this.eventBuilderConfiguration.getInputMapping();
-            this.inputDataTypeSpecificPositionMap = new HashMap<InputDataType, int[]>();
-            Map<Integer, Integer> payloadDataMap = new TreeMap<Integer, Integer>();
-            Map<Integer, Integer> metaDataMap = new TreeMap<Integer, Integer>();
-            Map<Integer, Integer> correlationDataMap = new TreeMap<Integer, Integer>();
-
-            for (InputMappingAttribute inputMappingAttribute : wso2EventInputMapping.getMetaInputMappingAttributes()) {
-                List<Attribute> metaAttributes = inputStreamDefinition.getMetaData();
-                for (int i = 0; i < metaAttributes.size(); i++) {
-                    if (metaAttributes.get(i).getName().equals(inputMappingAttribute.getFromElementKey())) {
-                        metaDataMap.put(inputMappingAttribute.getToStreamPosition(), i);
-                        break;
-                    }
-                }
-                if (metaDataMap.get(inputMappingAttribute.getToStreamPosition()) == null) {
-                    this.inputDataTypeSpecificPositionMap = null;
-                    throw new EventBuilderConfigurationException("Cannot find a corresponding meta data input attribute '"
-                                                                 + inputMappingAttribute.getFromElementKey() + "' in stream with id " + inputStreamDefinition.getStreamId());
-                }
-            }
-            for (InputMappingAttribute inputMappingAttribute : wso2EventInputMapping.getCorrelationInputMappingAttributes()) {
-                List<Attribute> correlationAttributes = inputStreamDefinition.getCorrelationData();
-                for (int i = 0; i < correlationAttributes.size(); i++) {
-                    if (correlationAttributes.get(i).getName().equals(inputMappingAttribute.getFromElementKey())) {
-                        correlationDataMap.put(inputMappingAttribute.getToStreamPosition(), i);
-                        break;
-                    }
-                }
-                if (correlationDataMap.get(inputMappingAttribute.getToStreamPosition()) == null) {
-                    this.inputDataTypeSpecificPositionMap = null;
-                    throw new EventBuilderConfigurationException("Cannot find a corresponding correlation data input attribute '"
-                                                                 + inputMappingAttribute.getFromElementKey() + "' in stream with id " + inputStreamDefinition.getStreamId());
-                }
-            }
-            for (InputMappingAttribute inputMappingAttribute : wso2EventInputMapping.getPayloadInputMappingAttributes()) {
-                List<Attribute> payloadAttributes = inputStreamDefinition.getPayloadData();
-                for (int i = 0; i < payloadAttributes.size(); i++) {
-                    if (payloadAttributes.get(i).getName().equals(inputMappingAttribute.getFromElementKey())) {
-                        payloadDataMap.put(inputMappingAttribute.getToStreamPosition(), i);
-                        break;
-                    }
-                }
-                if (payloadDataMap.get(inputMappingAttribute.getToStreamPosition()) == null) {
-                    this.inputDataTypeSpecificPositionMap = null;
-                    throw new EventBuilderConfigurationException("Cannot find a corresponding payload data input attribute '"
-                                                                 + inputMappingAttribute.getFromElementKey() + "' in stream with id : " + inputStreamDefinition.getStreamId());
-                }
-            }
-
-            int[] payloadPositions = new int[payloadDataMap.size()];
-            for (int i = 0; i < payloadPositions.length; i++) {
-                payloadPositions[i] = payloadDataMap.get(i);
-            }
-            inputDataTypeSpecificPositionMap.put(InputDataType.PAYLOAD_DATA, payloadPositions);
-            int[] metaPositions = new int[metaDataMap.size()];
-            for (int i = 0; i < metaPositions.length; i++) {
-                metaPositions[i] = metaDataMap.get(i);
-            }
-            inputDataTypeSpecificPositionMap.put(InputDataType.META_DATA, metaPositions);
-            int[] correlationPositions = new int[correlationDataMap.size()];
-            for (int i = 0; i < correlationPositions.length; i++) {
-                correlationPositions[i] = correlationDataMap.get(i);
-            }
-            inputDataTypeSpecificPositionMap.put(InputDataType.CORRELATION_DATA, correlationPositions);
-            if (!isStreamDefinitionValidForConfiguration(eventBuilderConfiguration, exportedStreamDefinition)) {
-                throw new EventBuilderValidationException("Exported stream definition does not match the specified configuration.");
-            }
-        }
-    }
-
-    @Override
-    public void processInputEvent(Object obj) {
+    public Object convertToMappedInputEvent(Object obj) throws EventBuilderConfigurationException {
         Object[] outObjArray = null;
         if (obj instanceof Event) {
             Event event = (Event) obj;
             Map<String, String> arbitraryMap = event.getArbitraryDataMap();
             if (arbitraryMap != null && !arbitraryMap.isEmpty()) {
                 outObjArray = processArbitraryMap(event);
-            } else {
-                if (inputDataTypeSpecificPositionMap == null) {
-                    throw new EventBuilderConfigurationException("Input mapping is not available for the current input stream definition:");
-                }
+            } else if (inputDataTypeSpecificPositionMap != null) {
                 List<Object> outObjList = new ArrayList<Object>();
+                Object[] inEventArray = new Object[0];
+                if (event.getMetaData() != null) {
+                    inEventArray = ObjectArrays.concat(inEventArray, event.getMetaData(), Object.class);
+                }
+                if (event.getCorrelationData() != null) {
+                    inEventArray = ObjectArrays.concat(inEventArray, event.getCorrelationData(), Object.class);
+                }
+                if (event.getPayloadData() != null) {
+                    inEventArray = ObjectArrays.concat(inEventArray, event.getPayloadData(), Object.class);
+                }
                 int[] metaPositions = inputDataTypeSpecificPositionMap.get(InputDataType.META_DATA);
-                for (int i = 0; i < metaPositions.length; i++) {
-                    outObjList.add(event.getMetaData()[metaPositions[i]]);
+                for (int metaPosition : metaPositions) {
+                    outObjList.add(inEventArray[metaPosition]);
                 }
                 int[] correlationPositions = inputDataTypeSpecificPositionMap.get(InputDataType.CORRELATION_DATA);
-                for (int i = 0; i < correlationPositions.length; i++) {
-                    outObjList.add(event.getCorrelationData()[correlationPositions[i]]);
+                for (int correlationPosition : correlationPositions) {
+                    outObjList.add(inEventArray[correlationPosition]);
                 }
                 int[] payloadPositions = inputDataTypeSpecificPositionMap.get(InputDataType.PAYLOAD_DATA);
-                for (int i = 0; i < payloadPositions.length; i++) {
-                    outObjList.add(event.getPayloadData()[payloadPositions[i]]);
+                for (int payloadPosition : payloadPositions) {
+                    outObjList.add(inEventArray[payloadPosition]);
                 }
                 outObjArray = outObjList.toArray();
             }
         }
-        eventDispatcher.dispatchEvent(outObjArray);
+        return outObjArray;
+    }
+
+    @Override
+    public Object convertToTypedInputEvent(Object obj) throws EventBuilderConfigurationException {
+        Object[] outObjArray = null;
+        if (obj instanceof Event) {
+            Event inputEvent = (Event) obj;
+            Object[] metaCorrArray = ObjectArrays.concat(inputEvent.getMetaData() != null ? inputEvent.getMetaData() : new Object[0]
+                    , inputEvent.getCorrelationData() != null ? inputEvent.getCorrelationData() : new Object[0], Object.class);
+            outObjArray = ObjectArrays.concat
+                    (metaCorrArray, inputEvent.getPayloadData() != null ? inputEvent.getPayloadData() : new Object[0], Object.class);
+        }
+        return outObjArray;
+    }
+
+    @Override
+    public Attribute[] getOutputAttributes() {
+        Wso2EventInputMapping wso2EventInputMapping = (Wso2EventInputMapping) eventBuilderConfiguration.getInputMapping();
+        List<InputMappingAttribute> inputMappingAttributes = wso2EventInputMapping.getInputMappingAttributes();
+        return EventBuilderConfigHelper.getAttributes(inputMappingAttributes);
     }
 
     private Object[] processArbitraryMap(Event inEvent) {
@@ -304,6 +291,6 @@ public class Wso2EventInputMapper implements InputMapper {
     }
 
     private enum InputDataType {
-        PAYLOAD_DATA, META_DATA, CORRELATION_DATA
+        META_DATA, CORRELATION_DATA, PAYLOAD_DATA
     }
 }

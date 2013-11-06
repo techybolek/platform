@@ -19,34 +19,34 @@ package org.wso2.carbon.event.formatter.admin.internal;
 
 public class ToPropertyConfigurationDto {
 
-    private String transportAdaptorName;
+    private String eventAdaptorName;
 
-    private String transportAdaptorType;
+    private String eventAdaptorType;
 
-    private EventFormatterPropertyDto[] outputTransportAdaptorMessageConfiguration;
+    private EventFormatterPropertyDto[] outputEventAdaptorMessageConfiguration;
 
-    public String getTransportAdaptorType() {
-        return transportAdaptorType;
+    public String getEventAdaptorType() {
+        return eventAdaptorType;
     }
 
-    public void setTransportAdaptorType(String transportAdaptorType) {
-        this.transportAdaptorType = transportAdaptorType;
+    public void setEventAdaptorType(String eventAdaptorType) {
+        this.eventAdaptorType = eventAdaptorType;
     }
 
-    public String getTransportAdaptorName() {
-        return transportAdaptorName;
+    public String getEventAdaptorName() {
+        return eventAdaptorName;
     }
 
-    public void setTransportAdaptorName(String transportAdaptorName) {
-        this.transportAdaptorName = transportAdaptorName;
+    public void setEventAdaptorName(String eventAdaptorName) {
+        this.eventAdaptorName = eventAdaptorName;
     }
 
-    public EventFormatterPropertyDto[] getOutputTransportAdaptorMessageConfiguration() {
-        return outputTransportAdaptorMessageConfiguration;
+    public EventFormatterPropertyDto[] getOutputEventAdaptorMessageConfiguration() {
+        return outputEventAdaptorMessageConfiguration;
     }
 
-    public void setOutputTransportAdaptorMessageConfiguration(
-            EventFormatterPropertyDto[] outputTransportAdaptorMessageConfiguration) {
-        this.outputTransportAdaptorMessageConfiguration = outputTransportAdaptorMessageConfiguration;
+    public void setOutputEventAdaptorMessageConfiguration(
+            EventFormatterPropertyDto[] outputEventAdaptorMessageConfiguration) {
+        this.outputEventAdaptorMessageConfiguration = outputEventAdaptorMessageConfiguration;
     }
 }

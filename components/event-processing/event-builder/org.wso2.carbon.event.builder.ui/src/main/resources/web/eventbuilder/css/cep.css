@@ -54,7 +54,6 @@ div#workArea table.normal-nopadding tbody tr td table td.custom-noPadding {
     vertical-align: middle !important;
 }
 
-
 div#workArea table.styledLeft tbody tr td.middle-header {
     background-image: none !important;
     background-color: #f5f4f4;
@@ -122,8 +121,13 @@ h6 {
     font-weight: bold !important;
     color: #666666 !important;
     font-size: 11px !important;
+    padding: 5px;
 }
 
 .leftCol-extSmall {
     width: 110px;
+}
+
+.smallTextInput>tbody>tr>td>input[type="text"] {
+    width: 600px;
 }

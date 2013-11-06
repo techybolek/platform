@@ -9,7 +9,7 @@
 <fmt:bundle basename="org.wso2.carbon.event.formatter.ui.i18n.Resources">
 
     <carbon:breadcrumb
-            label="eventformatter.details"
+            label="inactive.event.formatters.breadcrumb"
             resourceBundle="org.wso2.carbon.event.formatter.ui.i18n.Resources"
             topPage="false"
             request="<%=request%>"/>
@@ -52,7 +52,7 @@
                 <thead>
                 <tr>
                     <th><fmt:message key="file.name"/></th>
-                    <th><fmt:message key="event.formatter.name"/></th>
+                    <th><fmt:message key="inactive.reason.header"/></th>
                     <th><fmt:message key="actions"/></th>
                 </tr>
                 </thead>
@@ -64,18 +64,18 @@
                 <tbody>
                 <tr>
                     <td>
-                        <%=eventFormatterFile.getFilePath().substring(eventFormatterFile.getFilePath().lastIndexOf('/') + 1, eventFormatterFile.getFilePath().length())%>
+                        <%=eventFormatterFile.getFileName()%>
                     </td>
-                    <td><%=eventFormatterFile.getEventFormatterName()%>
+                    <td><%=stub.getEventFormatterStatusAsString(eventFormatterFile.getFileName())%>
                     </td>
                     <td>
                         <a style="background-image: url(../admin/images/delete.gif);"
                            class="icon-link"
-                           onclick="doDelete('<%=eventFormatterFile.getFilePath()%>')"><font
+                           onclick="doDelete('<%=eventFormatterFile.getFileName()%>')"><font
                                 color="#4682b4">Delete</font></a>
                         <a style="background-image: url(../admin/images/edit.gif);"
                            class="icon-link"
-                           href="edit_event_formatter_details.jsp?eventFormatterPath=<%=eventFormatterFile.getFilePath()%>"><font
+                           href="edit_event_formatter_details.jsp?ordinal=1&eventFormatterPath=<%=eventFormatterFile.getFileName()%>"><font
                                 color="#4682b4">Source View</font></a>
                     </td>
 

@@ -17,7 +17,7 @@ package org.wso2.carbon.event.formatter.admin.internal;
  */
 
 /**
- * Transport property related attributes are stored with values
+ * Event property related attributes are stored with values
  */
 public class EventFormatterPropertyDto {
 

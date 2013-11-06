@@ -18,6 +18,7 @@ package org.wso2.carbon.event.formatter.core.config;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.wso2.carbon.event.formatter.core.exception.EventFormatterConfigurationException;
 import org.wso2.carbon.event.formatter.core.internal.OutputMapper;
 
 import java.util.Map;
@@ -25,12 +26,12 @@ import java.util.Map;
 
 public interface OutputMapperFactory {
 
-    OutputMapping constructOutputMapping(OMElement omElement);
+    OutputMapping constructOutputMapping(OMElement omElement) throws EventFormatterConfigurationException;
 
-    OMElement constructOutputMappingOM(OutputMapping outputMapping, OMFactory factory);
+    OMElement constructOutputMappingOM(OutputMapping outputMapping, OMFactory factory) throws EventFormatterConfigurationException;
 
     OutputMapper constructOutputMapper(EventFormatterConfiguration eventFormatterConfiguration,
-                                       Map<String, Integer> propositionMap, int tenantId);
+                                       Map<String, Integer> propositionMap, int tenantId) throws EventFormatterConfigurationException;
 
 
 }

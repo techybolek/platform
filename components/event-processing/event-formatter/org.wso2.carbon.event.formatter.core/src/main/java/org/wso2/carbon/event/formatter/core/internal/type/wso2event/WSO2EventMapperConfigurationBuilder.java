@@ -47,55 +47,61 @@ public class WSO2EventMapperConfigurationBuilder {
             OMElement mappingElement)
             throws EventFormatterValidationException, EventFormatterConfigurationException {
 
-        if (!validateWSO2EventMapping(mappingElement)) {
-            throw new EventFormatterConfigurationException("WS02Event Mapping is not valid, check the output mapping");
-        }
+        WSO2EventOutputMapping wso2EventOutputMapping = new WSO2EventOutputMapping();
 
-        WSO2EventOutputMapping WSO2EventOutputMapping = new WSO2EventOutputMapping();
+        String customMappingEnabled = mappingElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING));
+        if (customMappingEnabled != null && (customMappingEnabled.equals(EventFormatterConstants.TM_VALUE_DISABLE))) {
+            wso2EventOutputMapping.setCustomMappingEnabled(false);
+        } else {
+            wso2EventOutputMapping.setCustomMappingEnabled(true);
+            if (!validateWSO2EventMapping(mappingElement)) {
+                throw new EventFormatterConfigurationException("WS02Event Mapping is not valid, check the output mapping");
+            }
+            wso2EventOutputMapping.setCustomMappingEnabled(true);
 
-        OMElement metaMappingElement = mappingElement.getFirstChildWithName(
-                new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_TO_METADATA_PROPERTY));
+            OMElement metaMappingElement = mappingElement.getFirstChildWithName(
+                    new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_TO_METADATA_PROPERTY));
 
-        if (metaMappingElement != null) {
-            Iterator metaPropertyIterator = metaMappingElement.getChildrenWithName(new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_PROPERTY));
-            while (metaPropertyIterator.hasNext()) {
-                OMElement propertyOMElement = (OMElement) metaPropertyIterator.next();
+            if (metaMappingElement != null) {
+                Iterator metaPropertyIterator = metaMappingElement.getChildrenWithName(new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_PROPERTY));
+                while (metaPropertyIterator.hasNext()) {
+                    OMElement propertyOMElement = (OMElement) metaPropertyIterator.next();
 
-                EventOutputProperty eventOutputProperty = getWSO2EventOutputPropertyFromOM(propertyOMElement);
-                WSO2EventOutputMapping.addMetaWSO2EventOutputPropertyConfiguration(eventOutputProperty);
+                    EventOutputProperty eventOutputProperty = getWSO2EventOutputPropertyFromOM(propertyOMElement);
+                    wso2EventOutputMapping.addMetaWSO2EventOutputPropertyConfiguration(eventOutputProperty);
 
+                }
+            }
+
+
+            OMElement correlationMappingElement = mappingElement.getFirstChildWithName(
+                    new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_TO_CORRELATION_PROPERTY));
+
+            if (correlationMappingElement != null) {
+                Iterator correlationPropertyIterator = correlationMappingElement.getChildrenWithName(new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_PROPERTY));
+                while (correlationPropertyIterator.hasNext()) {
+                    OMElement propertyOMElement = (OMElement) correlationPropertyIterator.next();
+
+                    EventOutputProperty eventOutputProperty = getWSO2EventOutputPropertyFromOM(propertyOMElement);
+                    wso2EventOutputMapping.addCorrelationWSO2EventOutputPropertyConfiguration(eventOutputProperty);
+
+                }
+            }
+
+            OMElement payloadMappingElement = mappingElement.getFirstChildWithName(
+                    new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_TO_PAYLOAD_PROPERTY));
+            if (payloadMappingElement != null) {
+                Iterator payloadPropertyIterator = payloadMappingElement.getChildrenWithName(new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_PROPERTY));
+                while (payloadPropertyIterator.hasNext()) {
+                    OMElement propertyOMElement = (OMElement) payloadPropertyIterator.next();
+
+                    EventOutputProperty eventOutputProperty = getWSO2EventOutputPropertyFromOM(propertyOMElement);
+                    wso2EventOutputMapping.addPayloadWSO2EventOutputPropertyConfiguration(eventOutputProperty);
+                }
             }
         }
 
-
-        OMElement correlationMappingElement = mappingElement.getFirstChildWithName(
-                new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_TO_CORRELATION_PROPERTY));
-
-        if (correlationMappingElement != null) {
-            Iterator correlationPropertyIterator = correlationMappingElement.getChildrenWithName(new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_PROPERTY));
-            while (correlationPropertyIterator.hasNext()) {
-                OMElement propertyOMElement = (OMElement) correlationPropertyIterator.next();
-
-                EventOutputProperty eventOutputProperty = getWSO2EventOutputPropertyFromOM(propertyOMElement);
-                WSO2EventOutputMapping.addCorrelationWSO2EventOutputPropertyConfiguration(eventOutputProperty);
-
-            }
-        }
-
-
-        OMElement payloadMappingElement = mappingElement.getFirstChildWithName(
-                new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_TO_PAYLOAD_PROPERTY));
-        if (payloadMappingElement != null) {
-            Iterator payloadPropertyIterator = payloadMappingElement.getChildrenWithName(new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_PROPERTY));
-            while (payloadPropertyIterator.hasNext()) {
-                OMElement propertyOMElement = (OMElement) payloadPropertyIterator.next();
-
-                EventOutputProperty eventOutputProperty = getWSO2EventOutputPropertyFromOM(propertyOMElement);
-                WSO2EventOutputMapping.addPayloadWSO2EventOutputPropertyConfiguration(eventOutputProperty);
-            }
-        }
-
-        return WSO2EventOutputMapping;
+        return wso2EventOutputMapping;
     }
 
     private static EventOutputProperty getWSO2EventOutputPropertyFromOM(OMElement omElement) {
@@ -138,17 +144,23 @@ public class WSO2EventMapperConfigurationBuilder {
     public static OMElement outputMappingToOM(
             OutputMapping outputMapping, OMFactory factory) {
 
-        WSO2EventOutputMapping WSO2EventOutputMapping = (WSO2EventOutputMapping) outputMapping;
+        WSO2EventOutputMapping wso2EventOutputMapping = (WSO2EventOutputMapping) outputMapping;
 
-        List<EventOutputProperty> metaWSO2EventPropertyConfiguration = WSO2EventOutputMapping.getMetaWSO2EventOutputPropertyConfiguration();
-        List<EventOutputProperty> correlationWSO2EventPropertyConfiguration = WSO2EventOutputMapping.getCorrelationWSO2EventOutputPropertyConfiguration();
-        List<EventOutputProperty> payloadWSO2EventPropertyConfiguration = WSO2EventOutputMapping.getPayloadWSO2EventOutputPropertyConfiguration();
+        List<EventOutputProperty> metaWSO2EventPropertyConfiguration = wso2EventOutputMapping.getMetaWSO2EventOutputPropertyConfiguration();
+        List<EventOutputProperty> correlationWSO2EventPropertyConfiguration = wso2EventOutputMapping.getCorrelationWSO2EventOutputPropertyConfiguration();
+        List<EventOutputProperty> payloadWSO2EventPropertyConfiguration = wso2EventOutputMapping.getPayloadWSO2EventOutputPropertyConfiguration();
 
         OMElement mappingOMElement = factory.createOMElement(new QName(
                 EventFormatterConstants.EF_ELE_MAPPING_PROPERTY));
         mappingOMElement.declareDefaultNamespace(EventFormatterConstants.EF_CONF_NS);
 
         mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_TYPE, EventFormatterConstants.EF_WSO2EVENT_MAPPING_TYPE, null);
+
+        if (wso2EventOutputMapping.isCustomMappingEnabled()) {
+            mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING, EventFormatterConstants.TM_VALUE_ENABLE, null);
+        } else {
+            mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING, EventFormatterConstants.TM_VALUE_DISABLE, null);
+        }
 
         if (metaWSO2EventPropertyConfiguration.size() > 0) {
             OMElement metaOMElement = factory.createOMElement(new QName(EventFormatterConstants.EF_ELE_TO_METADATA_PROPERTY));

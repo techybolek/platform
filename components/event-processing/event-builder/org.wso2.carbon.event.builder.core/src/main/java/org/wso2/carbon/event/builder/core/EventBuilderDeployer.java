@@ -30,13 +30,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
+import org.wso2.carbon.event.builder.core.exception.EventBuilderStreamValidationException;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderValidationException;
 import org.wso2.carbon.event.builder.core.internal.CarbonEventBuilderService;
-import org.wso2.carbon.event.builder.core.internal.config.DeploymentStatus;
+import org.wso2.carbon.event.builder.core.internal.config.EventBuilderConfigurationFile;
 import org.wso2.carbon.event.builder.core.internal.ds.EventBuilderServiceValueHolder;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConfigBuilder;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
-import org.wso2.carbon.event.builder.core.internal.util.EventBuilderUtil;
 import org.wso2.carbon.event.builder.core.internal.util.helper.ConfigurationValidator;
 import org.wso2.carbon.event.builder.core.internal.util.helper.EventBuilderConfigHelper;
 
@@ -44,13 +44,10 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Deploy event builders as axis2 service
@@ -59,8 +56,8 @@ public class EventBuilderDeployer extends AbstractDeployer {
 
     private static Log log = LogFactory.getLog(EventBuilderDeployer.class);
     private ConfigurationContext configurationContext;
-    private List<String> deployedEventBuilderFilePaths = new ArrayList<String>();
-    private List<String> undeployedEventBuilderFilePaths = new ArrayList<String>();
+    private Set<String> deployedEventBuilderFilePaths = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+    private Set<String> undeployedEventBuilderFilePaths = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     @Override
     public void init(ConfigurationContext configurationContext) {
@@ -94,7 +91,6 @@ public class EventBuilderDeployer extends AbstractDeployer {
     private OMElement getEbConfigOMElement(File ebConfigFile) throws DeploymentException {
         OMElement ebConfigElement = null;
         BufferedInputStream inputStream = null;
-        String path = ebConfigFile.getPath();
         try {
             inputStream = new BufferedInputStream(new FileInputStream(ebConfigFile));
             XMLStreamReader parser = XMLInputFactory.newInstance().
@@ -103,11 +99,11 @@ public class EventBuilderDeployer extends AbstractDeployer {
             ebConfigElement = builder.getDocumentElement();
             ebConfigElement.build();
         } catch (FileNotFoundException e) {
-            String errorMessage = ebConfigFile.getName() + " cannot be found in the path : " + path;
+            String errorMessage = ebConfigFile.getName() + " cannot be found";
             log.error(errorMessage, e);
             throw new DeploymentException(errorMessage, e);
         } catch (XMLStreamException e) {
-            String errorMessage = "Invalid XML for " + ebConfigFile.getName() + " located in the path : " + path;
+            String errorMessage = "Invalid XML for " + ebConfigFile.getName();
             log.error(errorMessage, e);
             throw new DeploymentException(errorMessage, e);
         } catch (Exception e) {
@@ -163,10 +159,10 @@ public class EventBuilderDeployer extends AbstractDeployer {
             throws DeploymentException, EventBuilderConfigurationException {
 
         File ebConfigXmlFile = deploymentFileData.getFile();
-        String path = deploymentFileData.getAbsolutePath();
+        String fileName = deploymentFileData.getName();
         CarbonEventBuilderService carbonEventBuilderService = EventBuilderServiceValueHolder.getCarbonEventBuilderService();
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
-        String eventBuilderName = EventBuilderUtil.deriveEventBuilderNameFrom(ebConfigXmlFile.getName());
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String eventBuilderName = "";
         String streamNameWithVersion = null;
         AxisConfiguration currentAxisConfiguration = configurationContext.getAxisConfiguration();
         OMElement ebConfigOMElement = null;
@@ -174,67 +170,74 @@ public class EventBuilderDeployer extends AbstractDeployer {
             ebConfigOMElement = getEbConfigOMElement(ebConfigXmlFile);
             eventBuilderName = ebConfigOMElement.getAttributeValue(new QName(EventBuilderConstants.EB_ATTR_NAME));
             String inputMappingType = EventBuilderConfigHelper.getInputMappingType(ebConfigOMElement);
-            EventBuilderConfigBuilder eventBuilderConfigBuilder = EventBuilderConfigHelper.getEventBuilderConfigBuilder(inputMappingType);
-            EventBuilderConfiguration eventBuilderConfiguration = eventBuilderConfigBuilder.getEventBuilderConfiguration(ebConfigOMElement, tenantId, inputMappingType);
 
-            if (eventBuilderConfiguration != null) {
+            if (eventBuilderName == null || eventBuilderName.trim().isEmpty()) {
+                throw new EventBuilderConfigurationException(ebConfigXmlFile.getName() + " is not a valid event builder configuration file, does not contain a valid event-builder name");
+            }
+
+            EventBuilderConfiguration eventBuilderConfiguration = EventBuilderConfigBuilder.getEventBuilderConfiguration(ebConfigOMElement, inputMappingType, tenantId);
+            if (eventBuilderConfiguration != null && (!carbonEventBuilderService.isEventBuilderAlreadyExists(tenantId, eventBuilderName))) {
                 streamNameWithVersion = eventBuilderConfiguration.getToStreamName() + EventBuilderConstants.STREAM_NAME_VER_DELIMITER + eventBuilderConfiguration.getToStreamVersion();
-                if (ConfigurationValidator.isValidEventBuilderConfiguration(eventBuilderConfiguration, tenantId)) {
+                if (ConfigurationValidator.checkActivationPreconditions(eventBuilderConfiguration, tenantId)) {
                     carbonEventBuilderService.addEventBuilder(eventBuilderConfiguration, configurationContext.getAxisConfiguration());
-                    carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, path, DeploymentStatus.DEPLOYED, eventBuilderName + " successfully deployed.", null, streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
-                    List<EventBuilderNotificationListener> eventBuilderNotificationListeners = carbonEventBuilderService.getEventBuilderNotificationListeners();
-                    if (eventBuilderNotificationListeners != null) {
-                        for (EventBuilderNotificationListener eventBuilderNotificationListener : eventBuilderNotificationListeners) {
-                            eventBuilderNotificationListener.configurationAdded(tenantId, streamNameWithVersion);
-                        }
-                    }
+                    carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, fileName, EventBuilderConfigurationFile.DeploymentStatus.DEPLOYED,
+                            eventBuilderName + " successfully deployed.", null, streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
                     log.info("Event Builder deployed successfully and in active state : " + eventBuilderName);
                 } else {
-                    carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, path, DeploymentStatus.WAITING_FOR_DEPENDENCY,
-                                                                               "Transport Adaptor Configuration is not found", eventBuilderConfiguration.getInputStreamConfiguration().getTransportAdaptorName(), streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
+                    carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, fileName, EventBuilderConfigurationFile.DeploymentStatus.WAITING_FOR_DEPENDENCY,
+                            "Event Adaptor Configuration is not found", eventBuilderConfiguration.getInputStreamConfiguration().getInputEventAdaptorName(), streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
                 }
+            } else {
+                throw new EventBuilderConfigurationException("Event Builder not deployed and in inactive state, since there is a event builder registered with the same name in this tenant :" + eventBuilderName);
             }
         } catch (EventBuilderValidationException e) {
-            carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, path, DeploymentStatus.WAITING_FOR_DEPENDENCY,
-                                                                       "Dependency not loaded", e.getDependency(), streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
-            log.info("Event builder deployment held back and in inactive state :" + eventBuilderName + ", Waiting for Input Transport Adaptor dependency :" + e.getDependency());
+            carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, fileName, EventBuilderConfigurationFile.DeploymentStatus.WAITING_FOR_DEPENDENCY,
+                    "Dependency not loaded", e.getDependency(), streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
+            log.info("Event builder deployment held back and in inactive state :" + eventBuilderName + ", Waiting for Input Event Adaptor dependency :" + e.getDependency());
+        } catch (EventBuilderStreamValidationException e) {
+            carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, fileName, EventBuilderConfigurationFile.DeploymentStatus.WAITING_FOR_STREAM_DEPENDENCY,
+                    "Stream validation exception : " + e.getMessage(), e.getDependency(), streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
+            log.info("Event builder deployment held back and in inactive state :" + eventBuilderName + ", Stream validation exception : " + e.getMessage());
         } catch (EventBuilderConfigurationException e) {
-            carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, path, DeploymentStatus.ERROR,
-                                                                       "Exception when deploying event builder configuration file:\n" + e.getMessage(), null, streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
+            carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, fileName, EventBuilderConfigurationFile.DeploymentStatus.ERROR,
+                    "Exception when deploying event builder configuration file:\n" + e.getMessage(), null, streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
             throw e;
         } catch (Throwable e) {
             log.error("Invalid configuration in event builder configuration file :" + ebConfigXmlFile.getName(), e);
-            carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, path, DeploymentStatus.ERROR,
-                                                                       "Deployment exception: " + e.getMessage(), null, streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
+            carbonEventBuilderService.addEventBuilderConfigurationFile(eventBuilderName, fileName, EventBuilderConfigurationFile.DeploymentStatus.ERROR,
+                    "Deployment exception: " + e.getMessage(), null, streamNameWithVersion, ebConfigOMElement, currentAxisConfiguration);
             throw new DeploymentException(e);
         }
     }
 
-    public void processUndeployment(String filePath) {
-        File file = new File(filePath);
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
+    public void processUndeployment(String filePath) throws EventBuilderConfigurationException {
+        String fileName = new File(filePath).getName();
+        log.info("Event Builder undeployed successfully : " + fileName);
+        int tenantID = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         CarbonEventBuilderService carbonEventBuilderService = EventBuilderServiceValueHolder.getCarbonEventBuilderService();
-        if (carbonEventBuilderService.isEventBuilderConfigurationFileRegistered(filePath, tenantId)) {
-            carbonEventBuilderService.removeEventBuilderConfigurationFile(filePath, tenantId);
-            log.info("Event builder undeployed successfully :" + file.getName());
-        }
+        carbonEventBuilderService.removeEventBuilderConfigurationFile(fileName, tenantID);
     }
 
     public void executeManualDeployment(DeploymentFileData deploymentFileData)
             throws EventBuilderConfigurationException {
         try {
-            deployedEventBuilderFilePaths.add(deploymentFileData.getAbsolutePath());
             processDeployment(deploymentFileData);
         } catch (DeploymentException e) {
             throw new EventBuilderConfigurationException("Error while attempting manual deployment :" + e.getMessage(), e);
         }
     }
 
-    public void executeManualUndeployment(String filePath) {
-        undeployedEventBuilderFilePaths.add(filePath);
+    public void executeManualUndeployment(String filePath) throws EventBuilderConfigurationException {
         processUndeployment(filePath);
     }
 
+    public Set<String> getDeployedEventBuilderFilePaths() {
+        return deployedEventBuilderFilePaths;
+    }
+
+    public Set<String> getUndeployedEventBuilderFilePaths() {
+        return undeployedEventBuilderFilePaths;
+    }
 }
 
 

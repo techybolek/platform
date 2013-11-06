@@ -1,7 +1,7 @@
 <%@ page import="org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub" %>
-<%@ page import="org.wso2.carbon.event.processor.ui.UIUtils" %>
+<%@ page import="org.wso2.carbon.event.processor.ui.EventProcessorUIUtils" %>
 <%
-    EventProcessorAdminServiceStub stub = UIUtils.getEventProcessorAdminService(config, session, request);
+    EventProcessorAdminServiceStub stub = EventProcessorUIUtils.getEventProcessorAdminService(config, session, request);
     String executionPlanName = request.getParameter("execPlanName");
     String executionPlanPath = request.getParameter("execPlanPath");
     String executionPlanConfiguration = request.getParameter("execPlanConfig");
@@ -25,6 +25,5 @@
         }
     }
 
-%>  <%=msg%>   <%
-
+%><%=msg%><%
 %>

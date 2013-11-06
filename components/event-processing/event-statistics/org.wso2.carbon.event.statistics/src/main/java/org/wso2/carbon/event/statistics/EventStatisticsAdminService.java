@@ -20,6 +20,7 @@ package org.wso2.carbon.event.statistics;
 
 
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.statistics.internal.data.StatsDTO;
 import org.wso2.carbon.event.statistics.internal.ds.EventStatisticsServiceHolder;
 
@@ -30,22 +31,22 @@ public class EventStatisticsAdminService {
     }
 
     public StatsDTO getGlobalCount() {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         return EventStatisticsServiceHolder.getInstance().getEventStatisticsService().getGlobalCount(tenantId);
     }
 
     public StatsDTO getCategoryCount(String categoryName) {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         return EventStatisticsServiceHolder.getInstance().getEventStatisticsService().getCategoryCount(tenantId, categoryName);
     }
 
     public StatsDTO getDeploymentCount(String categoryName, String deploymentName) {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         return EventStatisticsServiceHolder.getInstance().getEventStatisticsService().getDeploymentCount(tenantId, categoryName, deploymentName);
     }
 
     public StatsDTO getElementCount(String categoryName, String deploymentName, String elementName) {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         return EventStatisticsServiceHolder.getInstance().getEventStatisticsService().getElementCount(tenantId, categoryName, deploymentName, elementName);
     }
 

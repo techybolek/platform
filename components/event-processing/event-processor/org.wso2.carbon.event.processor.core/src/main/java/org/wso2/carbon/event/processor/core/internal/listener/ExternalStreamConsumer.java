@@ -16,32 +16,42 @@
 
 package org.wso2.carbon.event.processor.core.internal.listener;
 
-import org.wso2.carbon.event.formatter.core.EventFormatterListener;
+import org.wso2.carbon.event.processor.api.send.EventSender;
 import org.wso2.carbon.event.processor.core.internal.stream.EventConsumer;
 import org.wso2.siddhi.core.event.Event;
 
 public class ExternalStreamConsumer implements EventConsumer {
 
-    private EventFormatterListener formatterListener;
+    private EventSender eventSender;
     private Object owner;
 
-    public ExternalStreamConsumer(EventFormatterListener formatterListener, Object owner) {
-        this.formatterListener = formatterListener;
+    public ExternalStreamConsumer(EventSender eventSender, Object owner) {
+        this.eventSender = eventSender;
         this.owner = owner;
     }
 
     @Override
-    public void consumeEvents(Object[] events) {
-        for (Object event : events) {
-            formatterListener.onEvent(event);
+    public void consumeEvents(Object[][] events) {
+        for (Object[] eventData : events) {
+            eventSender.sendEventData(eventData);
         }
     }
 
     @Override
     public void consumeEvents(Event[] events) {
         for (Event event : events) {
-            formatterListener.onEvent(event.getData());
+            eventSender.sendEventData(event.getData());
         }
+    }
+
+    @Override
+    public void consumeEvent(Object[] eventData) {
+        eventSender.sendEventData(eventData);
+    }
+
+    @Override
+    public void consumeEvent(Event event) {
+        eventSender.sendEventData(event.getData());
     }
 
     @Override

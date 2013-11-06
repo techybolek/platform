@@ -18,54 +18,43 @@
 
 package org.wso2.carbon.event.builder.core.config;
 
-import org.wso2.carbon.databridge.commons.StreamDefinition;
+import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
 
 public interface InputMapper {
     /**
-     * Converts the passed in object and returns an object array with attributes as array elements.
+     * Converts the passed in object and returns an object array(s) with attributes as array elements.
+     * The conversion will happen according to a predefined mapping
      *
      * @param obj the object to be converted
-     */
-    public void processInputEvent(Object obj);
-
-    /**
-     * Returns true if the stream definition passed in is compatible with the event builder configuration
-     *
-     * @param eventBuilderConfiguration the event builder configuration to be checked against
-     * @param exportedStreamDefinition  the stream definition to be tested
-     * @return {@value true} if it is compatible, {@value false} otherwise
-     */
-    public boolean isStreamDefinitionValidForConfiguration(
-            EventBuilderConfiguration eventBuilderConfiguration,
-            StreamDefinition exportedStreamDefinition);
-
-    /**
-     * Creates the exported stream definition based on the event builder configuration of this mapper
-     *
-     * @return the stream definition that will be exposed from this mapper
-     */
-    public StreamDefinition createExportedStreamDefinition();
-
-    /**
-     * Creates a mapping based on the input stream definition.
-     *
-     * @param eventDefinition
+     * @return the converted object. This can be an object array or an array of object arrays
+     *         in the case of the mapper supporting processing of batched events
      * @throws EventBuilderConfigurationException
      *
      */
-    public void createMapping(Object eventDefinition)
-            throws EventBuilderConfigurationException;
+    public Object convertToMappedInputEvent(Object obj) throws EventBuilderConfigurationException;
 
     /**
-     * Validates the incoming stream definition with the attributes expected by the event builder
+     * Converts the passed in object and returns an object array(s) with attributes as array elements.
+     * The conversion will happen based on the mapping type where all incoming attributes of an event
+     * will be passed directly to consumers of event builder without any mapping happening.
      *
-     * @param inputStreamDefinition
+     * @param obj the object to be converted
+     * @return the converted object. This can be an object array or an array of object arrays
+     *         in the case of the mapper supporting processing of batched events
      * @throws EventBuilderConfigurationException
      *
      */
-    public void validateInputStreamAttributes(StreamDefinition inputStreamDefinition)
-            throws EventBuilderConfigurationException;
+    public Object convertToTypedInputEvent(Object obj) throws EventBuilderConfigurationException;
+
+    /**
+     * Returns an array of attributes that will be output from the stream definition.
+     * All implementing classes need to output these output attributes in the specific
+     * order of meta attributes, correlation attributes, payload attributes.
+     *
+     * @return an array of {@link Attribute} elements that will be used to create the exported stream definition
+     */
+    public Attribute[] getOutputAttributes();
 
 }
 

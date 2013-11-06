@@ -7,7 +7,7 @@
             <xs:element name="undeployInactiveExecutionPlanConfiguration">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="fileName" nillable="true" type="xs:string"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -57,20 +57,6 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"></xs:element>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getStreamDefinition">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="streamId" nillable="true" type="xs:string"></xs:element>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getStreamDefinitionResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2107:StreamDefinitionDto"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -165,12 +151,6 @@
             </xs:element>
         </xs:schema>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://admin.processor.event.carbon.wso2.org/xsd">
-            <xs:complexType name="StreamDefinitionDto">
-                <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="attributeList" nillable="true" type="xs:string"></xs:element>
-                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"></xs:element>
-                </xs:sequence>
-            </xs:complexType>
             <xs:complexType name="ExecutionPlanConfigurationFileDto">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="deploymentStatusMessage" nillable="true" type="xs:string"></xs:element>
@@ -269,12 +249,6 @@
         <wsdl:part name="parameters" element="ns:setTracingEnabled"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="setTracingEnabledResponse"></wsdl:message>
-    <wsdl:message name="getStreamDefinitionRequest">
-        <wsdl:part name="parameters" element="ns:getStreamDefinition"></wsdl:part>
-    </wsdl:message>
-    <wsdl:message name="getStreamDefinitionResponse">
-        <wsdl:part name="parameters" element="ns:getStreamDefinitionResponse"></wsdl:part>
-    </wsdl:message>
     <wsdl:message name="getInactiveExecutionPlanConfigurationContentRequest">
         <wsdl:part name="parameters" element="ns:getInactiveExecutionPlanConfigurationContent"></wsdl:part>
     </wsdl:message>
@@ -333,10 +307,6 @@
         <wsdl:operation name="setTracingEnabled">
             <wsdl:input message="ns:setTracingEnabledRequest" wsaw:Action="urn:setTracingEnabled"></wsdl:input>
             <wsdl:output message="ns:setTracingEnabledResponse" wsaw:Action="urn:setTracingEnabledResponse"></wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getStreamDefinition">
-            <wsdl:input message="ns:getStreamDefinitionRequest" wsaw:Action="urn:getStreamDefinition"></wsdl:input>
-            <wsdl:output message="ns:getStreamDefinitionResponse" wsaw:Action="urn:getStreamDefinitionResponse"></wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getInactiveExecutionPlanConfigurationContent">
             <wsdl:input message="ns:getInactiveExecutionPlanConfigurationContentRequest" wsaw:Action="urn:getInactiveExecutionPlanConfigurationContent"></wsdl:input>
@@ -455,15 +425,6 @@
         </wsdl:operation>
         <wsdl:operation name="setTracingEnabled">
             <soap:operation soapAction="urn:setTracingEnabled" style="document"></soap:operation>
-            <wsdl:input>
-                <soap:body use="literal"></soap:body>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"></soap:body>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getStreamDefinition">
-            <soap:operation soapAction="urn:getStreamDefinition" style="document"></soap:operation>
             <wsdl:input>
                 <soap:body use="literal"></soap:body>
             </wsdl:input>
@@ -600,15 +561,6 @@
                 <soap12:body use="literal"></soap12:body>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getStreamDefinition">
-            <soap12:operation soapAction="urn:getStreamDefinition" style="document"></soap12:operation>
-            <wsdl:input>
-                <soap12:body use="literal"></soap12:body>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"></soap12:body>
-            </wsdl:output>
-        </wsdl:operation>
         <wsdl:operation name="getInactiveExecutionPlanConfigurationContent">
             <soap12:operation soapAction="urn:getInactiveExecutionPlanConfigurationContent" style="document"></soap12:operation>
             <wsdl:input>
@@ -738,15 +690,6 @@
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getStreamDefinition">
-            <http:operation location="getStreamDefinition"></http:operation>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"></mime:content>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters"></mime:content>
-            </wsdl:output>
-        </wsdl:operation>
         <wsdl:operation name="getInactiveExecutionPlanConfigurationContent">
             <http:operation location="getInactiveExecutionPlanConfigurationContent"></http:operation>
             <wsdl:input>
@@ -759,13 +702,13 @@
     </wsdl:binding>
     <wsdl:service name="EventProcessorAdminService">
         <wsdl:port name="EventProcessorAdminServiceHttpsSoap11Endpoint" binding="ns:EventProcessorAdminServiceSoap11Binding">
-            <soap:address location="https://10.200.1.90:9443/services/EventProcessorAdminService.EventProcessorAdminServiceHttpsSoap11Endpoint/"></soap:address>
+            <soap:address location="https://10.100.1.144:9443/services/EventProcessorAdminService.EventProcessorAdminServiceHttpsSoap11Endpoint/"></soap:address>
         </wsdl:port>
         <wsdl:port name="EventProcessorAdminServiceHttpsSoap12Endpoint" binding="ns:EventProcessorAdminServiceSoap12Binding">
-            <soap12:address location="https://10.200.1.90:9443/services/EventProcessorAdminService.EventProcessorAdminServiceHttpsSoap12Endpoint/"></soap12:address>
+            <soap12:address location="https://10.100.1.144:9443/services/EventProcessorAdminService.EventProcessorAdminServiceHttpsSoap12Endpoint/"></soap12:address>
         </wsdl:port>
         <wsdl:port name="EventProcessorAdminServiceHttpsEndpoint" binding="ns:EventProcessorAdminServiceHttpBinding">
-            <http:address location="https://10.200.1.90:9443/services/EventProcessorAdminService.EventProcessorAdminServiceHttpsEndpoint/"></http:address>
+            <http:address location="https://10.100.1.144:9443/services/EventProcessorAdminService.EventProcessorAdminServiceHttpsEndpoint/"></http:address>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

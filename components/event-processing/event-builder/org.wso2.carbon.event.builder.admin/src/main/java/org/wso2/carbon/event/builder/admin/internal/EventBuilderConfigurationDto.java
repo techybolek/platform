@@ -24,23 +24,13 @@ package org.wso2.carbon.event.builder.admin.internal;
 public class EventBuilderConfigurationDto {
     private String eventBuilderConfigName;
     private String inputMappingType;
-    private String deploymentStatus;
-    private String inputTransportAdaptorName;
-    private String inputTransportAdaptorType;
+    private String inputEventAdaptorName;
+    private String inputEventAdaptorType;
     private String toStreamName;
     private String toStreamVersion;
     private boolean traceEnabled;
     private boolean statisticsEnabled;
-    private boolean batchProcessingEnabled = false;
     private EventBuilderPropertyDto[] eventBuilderPropertyDtos;
-
-    public boolean isBatchProcessingEnabled() {
-        return batchProcessingEnabled;
-    }
-
-    public void setBatchProcessingEnabled(boolean batchProcessingEnabled) {
-        this.batchProcessingEnabled = batchProcessingEnabled;
-    }
 
     public boolean isTraceEnabled() {
         return traceEnabled;
@@ -74,28 +64,20 @@ public class EventBuilderConfigurationDto {
         this.toStreamVersion = toStreamVersion;
     }
 
-    public String getInputTransportAdaptorType() {
-        return inputTransportAdaptorType;
+    public String getInputEventAdaptorType() {
+        return inputEventAdaptorType;
     }
 
-    public void setInputTransportAdaptorType(String inputTransportAdaptorType) {
-        this.inputTransportAdaptorType = inputTransportAdaptorType;
+    public void setInputEventAdaptorType(String InputEventAdaptorType) {
+        this.inputEventAdaptorType = InputEventAdaptorType;
     }
 
-    public String getInputTransportAdaptorName() {
-        return inputTransportAdaptorName;
+    public String getInputEventAdaptorName() {
+        return inputEventAdaptorName;
     }
 
-    public void setInputTransportAdaptorName(String inputTransportAdaptorName) {
-        this.inputTransportAdaptorName = inputTransportAdaptorName;
-    }
-
-    public String getDeploymentStatus() {
-        return deploymentStatus;
-    }
-
-    public void setDeploymentStatus(String deploymentStatus) {
-        this.deploymentStatus = deploymentStatus;
+    public void setInputEventAdaptorName(String InputEventAdaptorName) {
+        this.inputEventAdaptorName = InputEventAdaptorName;
     }
 
     public String getInputMappingType() {

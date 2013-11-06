@@ -2,13 +2,12 @@
 <%@ page import="org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto" %>
 <%@ page import="org.wso2.carbon.event.processor.stub.types.SiddhiConfigurationDto" %>
 <%@ page import="org.wso2.carbon.event.processor.stub.types.StreamConfigurationDto" %>
+<%@ page import="org.wso2.carbon.event.processor.ui.EventProcessorUIUtils" %>
 <%@ page import="org.wso2.carbon.event.processor.ui.UIConstants" %>
-<%@ page import="org.wso2.carbon.event.processor.ui.UIUtils" %>
 <%@ page import="java.util.Arrays" %>
-
 <%
-
-    EventProcessorAdminServiceStub stub = UIUtils.getEventProcessorAdminService(config, session, request);
+    String msg;
+    EventProcessorAdminServiceStub stub = EventProcessorUIUtils.getEventProcessorAdminService(config, session, request);
 
     String executionPlanName = request.getParameter("execPlanName");
     String description = request.getParameter("description");
@@ -34,11 +33,11 @@
     configDto.setSiddhiConfigurations(siddhiConfigurationDtos);
     configDto.setQueryExpressions(queryExpressions);
 
-    String[] importedStreamsArray = importedStreams.split("\\$");
+    String[] importedStreamsArray = importedStreams.split("\\$=");
     StreamConfigurationDto[] importedStreamConfigurationDtoArray = new StreamConfigurationDto[importedStreamsArray.length];
     int i = 0;
     for (String streamMapping : importedStreamsArray) {
-        String[] mappings = streamMapping.trim().split("\\^");
+        String[] mappings = streamMapping.trim().split("\\^=");
         if (mappings.length >= 2) {
             StreamConfigurationDto streamDto = new StreamConfigurationDto();
             streamDto.setStreamId(mappings[0].trim());
@@ -51,15 +50,18 @@
         importedStreamConfigurationDtoArray = Arrays.copyOf(importedStreamConfigurationDtoArray, i + 1);
     }
 
-    String[] exportedStreamsArray = exportedStreams.split("\\$");
-    StreamConfigurationDto[] exportedStreamConfigurationDtoArray = new StreamConfigurationDto[importedStreamsArray.length];
+    String[] exportedStreamsArray = exportedStreams.split("\\$=");
+    StreamConfigurationDto[] exportedStreamConfigurationDtoArray = new StreamConfigurationDto[exportedStreamsArray.length];
     i = 0;
     for (String streamMapping : exportedStreamsArray) {
-        String[] mappings = streamMapping.trim().split("\\^");
+        String[] mappings = streamMapping.trim().split("\\^=");
         if (mappings.length >= 2) {
             StreamConfigurationDto streamDto = new StreamConfigurationDto();
-            streamDto.setStreamId(mappings[0].trim());
-            streamDto.setSiddhiStreamName(mappings[1].trim());
+            streamDto.setSiddhiStreamName(mappings[0].trim());
+            streamDto.setStreamId(mappings[1].trim());
+            if(mappings.length >= 3 && UIConstants.TRUE_LITERAL.equalsIgnoreCase(mappings[2])) {
+                streamDto.setPassThroughFlowSupported(true);
+            }
             exportedStreamConfigurationDtoArray[i] = streamDto;
             i++;
         }
@@ -73,17 +75,8 @@
 
     try {
         stub.deployExecutionPlanConfiguration(configDto);
-
-%>
-<%="true"%>
-<%
-} catch (Exception ex) {
-
-
-%>
-<%="false"%>
-
-<%
+        msg = "true";
+    } catch (Exception ex) {
+        msg = ex.getMessage();
     }
-%>
-
+%><%=msg%>

@@ -44,20 +44,24 @@ public class MapMapperConfigurationBuilder {
             OMElement mappingElement)
             throws EventFormatterValidationException, EventFormatterConfigurationException {
 
-
-        if (!validateMapEventMapping(mappingElement)) {
-            throw new EventFormatterConfigurationException("Map Mapping is not valid, check the output mapping");
-        }
-
         MapOutputMapping mapOutputMapping = new MapOutputMapping();
 
+        String customMappingEnabled = mappingElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING));
+        if (customMappingEnabled != null && (customMappingEnabled.equals(EventFormatterConstants.TM_VALUE_DISABLE))) {
+            mapOutputMapping.setCustomMappingEnabled(false);
+        } else {
+            mapOutputMapping.setCustomMappingEnabled(true);
+            if (!validateMapEventMapping(mappingElement)) {
+                throw new EventFormatterConfigurationException("Map Mapping is not valid, check the output mapping");
+            }
 
-        if (mappingElement != null) {
-            Iterator propertyIterator = mappingElement.getChildrenWithName(new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_PROPERTY));
-            while (propertyIterator.hasNext()) {
-                OMElement propertyOMElement = (OMElement) propertyIterator.next();
-                EventOutputProperty eventOutputProperty = getOutputPropertyFromOM(propertyOMElement);
-                mapOutputMapping.addOutputPropertyConfiguration(eventOutputProperty);
+            if (mappingElement != null) {
+                Iterator propertyIterator = mappingElement.getChildrenWithName(new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_PROPERTY));
+                while (propertyIterator.hasNext()) {
+                    OMElement propertyOMElement = (OMElement) propertyIterator.next();
+                    EventOutputProperty eventOutputProperty = getOutputPropertyFromOM(propertyOMElement);
+                    mapOutputMapping.addOutputPropertyConfiguration(eventOutputProperty);
+                }
             }
         }
 
@@ -108,6 +112,12 @@ public class MapMapperConfigurationBuilder {
         mappingOMElement.declareDefaultNamespace(EventFormatterConstants.EF_CONF_NS);
 
         mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_TYPE, EventFormatterConstants.EF_MAP_MAPPING_TYPE, null);
+
+        if (mapOutputMapping.isCustomMappingEnabled()) {
+            mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING, EventFormatterConstants.TM_VALUE_ENABLE, null);
+        } else {
+            mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING, EventFormatterConstants.TM_VALUE_DISABLE, null);
+        }
 
         if (outputPropertyConfiguration.size() > 0) {
             for (EventOutputProperty eventOutputProperty : outputPropertyConfiguration) {

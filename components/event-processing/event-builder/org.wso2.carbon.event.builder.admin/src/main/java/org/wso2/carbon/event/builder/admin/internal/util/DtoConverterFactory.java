@@ -18,12 +18,7 @@
 
 package org.wso2.carbon.event.builder.admin.internal.util;
 
-import org.wso2.carbon.event.builder.admin.internal.util.dto.converter.BasicDtoConverter;
-import org.wso2.carbon.event.builder.admin.internal.util.dto.converter.JsonDtoConverter;
-import org.wso2.carbon.event.builder.admin.internal.util.dto.converter.MapDtoConverter;
-import org.wso2.carbon.event.builder.admin.internal.util.dto.converter.TextDtoConverter;
-import org.wso2.carbon.event.builder.admin.internal.util.dto.converter.Wso2EventDtoConverter;
-import org.wso2.carbon.event.builder.admin.internal.util.dto.converter.XmlDtoConverter;
+import org.wso2.carbon.event.builder.admin.internal.util.dto.converter.*;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
 
 public class DtoConverterFactory {
@@ -32,9 +27,9 @@ public class DtoConverterFactory {
     private MapDtoConverter mapDtoConverter;
     private JsonDtoConverter jsonDtoConverter;
     private TextDtoConverter textDtoConverter;
-    private BasicDtoConverter basicDtoConverter;
+    private GenericDtoConverter genericDtoConverter;
 
-    public DtoConvertible getDtoConverter(String inputMappingType) {
+    public DtoConverter getDtoConverter(String inputMappingType) {
         if (EventBuilderConstants.EB_WSO2EVENT_MAPPING_TYPE.equals(inputMappingType)) {
             if (this.wso2EventDtoConverter == null) {
                 this.wso2EventDtoConverter = new Wso2EventDtoConverter();
@@ -56,15 +51,15 @@ public class DtoConverterFactory {
             }
             return jsonDtoConverter;
         } else if (EventBuilderConstants.EB_TEXT_MAPPING_TYPE.equals(inputMappingType)) {
-            if(this.textDtoConverter == null) {
+            if (this.textDtoConverter == null) {
                 this.textDtoConverter = new TextDtoConverter();
             }
             return textDtoConverter;
         } else {
-            if (this.basicDtoConverter == null) {
-                this.basicDtoConverter = new BasicDtoConverter();
+            if (this.genericDtoConverter == null) {
+                this.genericDtoConverter = new GenericDtoConverter();
             }
-            return basicDtoConverter;
+            return genericDtoConverter;
         }
     }
 }

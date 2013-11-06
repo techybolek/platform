@@ -20,7 +20,9 @@ package org.wso2.carbon.event.formatter.admin.internal;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.wso2.carbon.context.CarbonContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
@@ -38,13 +40,13 @@ import org.wso2.carbon.event.formatter.core.internal.type.text.TextOutputMapping
 import org.wso2.carbon.event.formatter.core.internal.type.wso2event.WSO2EventOutputMapping;
 import org.wso2.carbon.event.formatter.core.internal.type.xml.XMLOutputMapping;
 import org.wso2.carbon.event.formatter.core.internal.util.EventFormatterConfigurationFile;
-import org.wso2.carbon.output.transport.adaptor.core.OutputTransportAdaptorDto;
-import org.wso2.carbon.output.transport.adaptor.core.OutputTransportAdaptorService;
-import org.wso2.carbon.output.transport.adaptor.core.Property;
-import org.wso2.carbon.output.transport.adaptor.core.message.MessageDto;
-import org.wso2.carbon.output.transport.adaptor.core.message.config.OutputTransportAdaptorMessageConfiguration;
-import org.wso2.carbon.output.transport.adaptor.manager.core.OutputTransportAdaptorInfo;
-import org.wso2.carbon.output.transport.adaptor.manager.core.OutputTransportAdaptorManagerService;
+import org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorDto;
+import org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorService;
+import org.wso2.carbon.event.output.adaptor.core.Property;
+import org.wso2.carbon.event.output.adaptor.core.message.MessageDto;
+import org.wso2.carbon.event.output.adaptor.core.message.config.OutputEventAdaptorMessageConfiguration;
+import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorInfo;
+import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorManagerService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,6 +54,8 @@ import java.util.List;
 import java.util.Map;
 
 public class EventFormatterAdminService extends AbstractAdmin {
+
+    private static Log log = LogFactory.getLog(EventFormatterAdminService.class);
 
 
     public EventFormatterConfigurationInfoDto[] getAllActiveEventFormatterConfiguration()
@@ -74,14 +78,14 @@ public class EventFormatterAdminService extends AbstractAdmin {
                     EventFormatterConfiguration eventFormatterConfiguration = eventFormatterConfigurationList.get(index);
                     String eventFormatterName = eventFormatterConfiguration.getEventFormatterName();
                     String mappingType = eventFormatterConfiguration.getOutputMapping().getMappingType();
-                    String outputTransportAdaptorName = eventFormatterConfiguration.getToPropertyConfiguration().getTransportAdaptorName();
+                    String outputEventAdaptorName = eventFormatterConfiguration.getToPropertyConfiguration().getEventAdaptorName();
                     String streamNameWithVersion = eventFormatterConfiguration.getFromStreamName() + ":" + eventFormatterConfiguration.getFromStreamVersion();
 
 
                     eventFormatterConfigurationInfoDtoArray[index] = new EventFormatterConfigurationInfoDto();
                     eventFormatterConfigurationInfoDtoArray[index].setEventFormatterName(eventFormatterName);
                     eventFormatterConfigurationInfoDtoArray[index].setMappingType(mappingType);
-                    eventFormatterConfigurationInfoDtoArray[index].setOutTransportAdaptorName(outputTransportAdaptorName);
+                    eventFormatterConfigurationInfoDtoArray[index].setOutEventAdaptorName(outputEventAdaptorName);
                     eventFormatterConfigurationInfoDtoArray[index].setInputStreamId(streamNameWithVersion);
                     eventFormatterConfigurationInfoDtoArray[index].setEnableStats(eventFormatterConfiguration.isEnableStatistics());
                     eventFormatterConfigurationInfoDtoArray[index].setEnableTracing(eventFormatterConfiguration.isEnableTracing());
@@ -91,7 +95,8 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 return new EventFormatterConfigurationInfoDto[0];
             }
         } catch (EventFormatterConfigurationException e) {
-            throw new AxisFault("No Event Formatter configurations received : " + e.getMessage());
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
         }
     }
 
@@ -102,7 +107,8 @@ public class EventFormatterAdminService extends AbstractAdmin {
         try {
             eventFormatterService.undeployActiveEventFormatterConfiguration(eventFormatterName, axisConfiguration);
         } catch (EventFormatterConfigurationException e) {
-            throw new AxisFault("Error in removing Event Formatter configurations : " + e.getMessage());
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
         }
     }
 
@@ -120,10 +126,10 @@ public class EventFormatterAdminService extends AbstractAdmin {
 
             for (int index = 0; index < eventFormatterFileDtoArray.length; index++) {
                 EventFormatterConfigurationFile eventFormatterConfigurationFile = eventFormatterConfigurationFileList.get(index);
-                String filePath = eventFormatterConfigurationFile.getFilePath();
+                String fileName = eventFormatterConfigurationFile.getFileName();
                 String eventFormatterName = eventFormatterConfigurationFile.getEventFormatterName();
 
-                eventFormatterFileDtoArray[index] = new EventFormatterConfigurationFileDto(filePath, eventFormatterName);
+                eventFormatterFileDtoArray[index] = new EventFormatterConfigurationFileDto(fileName, eventFormatterName);
             }
             return eventFormatterFileDtoArray;
         } else {
@@ -131,39 +137,42 @@ public class EventFormatterAdminService extends AbstractAdmin {
         }
     }
 
-    public void undeployInactiveEventFormatterConfiguration(String filePath)
+    public void undeployInactiveEventFormatterConfiguration(String fileName)
             throws AxisFault {
         EventFormatterService eventFormatterService = EventFormatterAdminServiceValueHolder.getEventFormatterService();
         try {
             AxisConfiguration axisConfiguration = getAxisConfig();
-            eventFormatterService.undeployInactiveEventFormatterConfiguration(filePath, axisConfiguration);
+            eventFormatterService.undeployInactiveEventFormatterConfiguration(fileName, axisConfiguration);
         } catch (EventFormatterConfigurationException e) {
-            throw new AxisFault("Error when removing Event Formatter configurations : " + e.getMessage());
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
         }
     }
 
-    public String getInactiveEventFormatterConfigurationContent(String filePath)
+    public String getInactiveEventFormatterConfigurationContent(String fileName)
             throws AxisFault {
         EventFormatterService eventFormatterService = EventFormatterAdminServiceValueHolder.getEventFormatterService();
         try {
-            String eventFormatterConfigurationFile = eventFormatterService.getInactiveEventFormatterConfigurationContent(filePath);
+            String eventFormatterConfigurationFile = eventFormatterService.getInactiveEventFormatterConfigurationContent(fileName, getAxisConfig());
             return eventFormatterConfigurationFile.trim();
         } catch (EventFormatterConfigurationException e) {
-            throw new AxisFault("Error when retrieving Event Formatter configurations : " + e.getMessage());
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
         }
     }
 
     public void editInactiveEventFormatterConfiguration(
             String eventFormatterConfiguration,
-            String filePath)
+            String fileName)
             throws AxisFault {
 
         EventFormatterService eventFormatterService = EventFormatterAdminServiceValueHolder.getEventFormatterService();
         AxisConfiguration axisConfiguration = getAxisConfig();
         try {
-            eventFormatterService.editInactiveEventFormatterConfiguration(eventFormatterConfiguration, filePath, axisConfiguration);
+            eventFormatterService.editInactiveEventFormatterConfiguration(eventFormatterConfiguration, fileName, axisConfiguration);
         } catch (EventFormatterConfigurationException e) {
-            throw new AxisFault("Error when editing Event Formatter configurations : " + e.getMessage());
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
         }
     }
 
@@ -174,7 +183,8 @@ public class EventFormatterAdminService extends AbstractAdmin {
         try {
             return eventFormatterService.getActiveEventFormatterConfigurationContent(eventFormatterName, axisConfiguration);
         } catch (EventFormatterConfigurationException e) {
-            throw new AxisFault("Error when retrieving Event Formatter configurations : " + e.getMessage());
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
         }
     }
 
@@ -186,20 +196,22 @@ public class EventFormatterAdminService extends AbstractAdmin {
         try {
             eventFormatterService.editActiveEventFormatterConfiguration(eventFormatterConfiguration, eventFormatterName, axisConfiguration);
         } catch (EventFormatterConfigurationException e) {
-            throw new AxisFault("Error when editing Event Formatter configurations : " + e.getMessage());
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
         }
     }
 
-
+    //TODO have to get the streams directly from stream store
     public String[] getAllEventStreamNames() throws AxisFault {
 
         EventFormatterService eventFormatterService = EventFormatterAdminServiceValueHolder.getEventFormatterService();
         AxisConfiguration axisConfiguration = getAxisConfig();
         try {
             List<String> streamNames = eventFormatterService.getAllEventStreams(axisConfiguration);
-            return streamNames.toArray(new String[0]);
+            return streamNames.toArray(new String[streamNames.size()]);
         } catch (EventFormatterConfigurationException ex) {
-            throw new AxisFault("Error while retrieving the stream names : " + ex.getMessage());
+            log.error(ex.getMessage(), ex);
+            throw new AxisFault(ex.getMessage());
         }
     }
 
@@ -211,46 +223,50 @@ public class EventFormatterAdminService extends AbstractAdmin {
             StreamDefinition streamDefinition = eventFormatterService.getStreamDefinition(streamNameWithVersion, axisConfiguration);
             return getStreamAttributes(streamDefinition);
         } catch (EventFormatterConfigurationException ex) {
-            throw new AxisFault("Error while retrieving the stream definition : " + ex.getMessage());
+            log.error(ex.getMessage(), ex);
+            throw new AxisFault(ex.getMessage());
         }
 
     }
 
-    public String[] getOutputTransportAdaptorNames() throws AxisFault {
+    public OutputEventAdaptorInfoDto[] getOutputEventAdaptorInfo() throws AxisFault {
 
-        OutputTransportAdaptorManagerService transportAdaptorManagerService = EventFormatterAdminServiceValueHolder.getOutputTransportAdaptorManagerService();
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        OutputEventAdaptorManagerService eventAdaptorManagerService = EventFormatterAdminServiceValueHolder.getOutputEventAdaptorManagerService();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         try {
-            List<OutputTransportAdaptorInfo> transportAdaptorInfoList = transportAdaptorManagerService.getOutputTransportAdaptorInfo(tenantId);
-            if (transportAdaptorInfoList != null) {
-                String[] transportAdaptorNames = new String[transportAdaptorInfoList.size()];
-                for (int index = 0; index < transportAdaptorNames.length; index++) {
+            List<OutputEventAdaptorInfo> eventAdaptorInfoList = eventAdaptorManagerService.getOutputEventAdaptorInfo(tenantId);
+            if (eventAdaptorInfoList != null) {
+                OutputEventAdaptorInfoDto[] eventAdaptorNames = new OutputEventAdaptorInfoDto[eventAdaptorInfoList.size()];
+                for (int index = 0; index < eventAdaptorNames.length; index++) {
 
-                    OutputTransportAdaptorInfo transportAdaptorInfo = transportAdaptorInfoList.get(index);
-                    transportAdaptorNames[index] = transportAdaptorInfo.getTransportAdaptorName();
+                    OutputEventAdaptorInfo eventAdaptorInfo = eventAdaptorInfoList.get(index);
+                    eventAdaptorNames[index] = new OutputEventAdaptorInfoDto(eventAdaptorInfo.getEventAdaptorName(),
+                                                                                     eventAdaptorInfo.getEventAdaptorType());
                 }
-                return transportAdaptorNames;
+                return eventAdaptorNames;
             }
-            return new String[0];
+            return new OutputEventAdaptorInfoDto[0];
         } catch (Exception ex) {
-            throw new AxisFault("Error while retrieving the transport adaptor names : " +ex.getMessage());
+            log.error(ex.getMessage(), ex);
+            throw new AxisFault(ex.getMessage());
         }
 
     }
 
-    public String[] getSupportedMappingTypes(String transportAdaptorName) throws AxisFault {
+    public String[] getSupportedMappingTypes(String eventAdaptorName) throws AxisFault {
 
-        OutputTransportAdaptorManagerService transportAdaptorManagerService = EventFormatterAdminServiceValueHolder.getOutputTransportAdaptorManagerService();
-        OutputTransportAdaptorService transportAdaptorService = EventFormatterAdminServiceValueHolder.getOutputTransportAdaptorService();
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        OutputEventAdaptorManagerService eventAdaptorManagerService = EventFormatterAdminServiceValueHolder.getOutputEventAdaptorManagerService();
+        OutputEventAdaptorService eventAdaptorService = EventFormatterAdminServiceValueHolder.getOutputEventAdaptorService();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
         try {
-            List<OutputTransportAdaptorInfo> transportAdaptorInfoList = transportAdaptorManagerService.getOutputTransportAdaptorInfo(tenantId);
-            for (OutputTransportAdaptorInfo transportAdaptorInfo : transportAdaptorInfoList) {
-                if (transportAdaptorInfo.getTransportAdaptorName().equals(transportAdaptorName)) {
-                    String transportAdaptorType = transportAdaptorInfo.getTransportAdaptorType();
-                    OutputTransportAdaptorDto transportAdaptorDto = transportAdaptorService.getTransportAdaptorDto(transportAdaptorType);
-                    List<String> supportedOutputMessageTypes = transportAdaptorDto.getSupportedMessageTypes();
+            List<OutputEventAdaptorInfo> eventAdaptorInfoList = eventAdaptorManagerService.getOutputEventAdaptorInfo(tenantId);
+            for (OutputEventAdaptorInfo eventAdaptorInfo : eventAdaptorInfoList) {
+                if (eventAdaptorInfo.getEventAdaptorName().equals(eventAdaptorName)) {
+                    String eventAdaptorType = eventAdaptorInfo.getEventAdaptorType();
+                    OutputEventAdaptorDto eventAdaptorDto = eventAdaptorService.getEventAdaptorDto(eventAdaptorType);
+                    List<String> supportedOutputMessageTypes = eventAdaptorDto.getSupportedMessageTypes();
                     String[] supportedMappingTypes = new String[supportedOutputMessageTypes.size()];
                     for (int index = 0; index < supportedMappingTypes.length; index++) {
                         String mappingInfo = supportedOutputMessageTypes.get(index);
@@ -260,24 +276,25 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 }
             }
         } catch (Exception ex) {
-            throw new AxisFault("Error while retrieving the mapping types : "+ex.getMessage());
+            log.error(ex.getMessage(), ex);
+            throw new AxisFault(ex.getMessage());
         }
 
         return new String[0];
 
     }
 
-    public EventFormatterPropertyDto[] getEventFormatterProperties(String transportAdaptorName)
+    public EventFormatterPropertyDto[] getEventFormatterProperties(String eventAdaptorName)
             throws AxisFault {
 
-        OutputTransportAdaptorService transportAdaptorService = EventFormatterAdminServiceValueHolder.getOutputTransportAdaptorService();
+        OutputEventAdaptorService eventAdaptorService = EventFormatterAdminServiceValueHolder.getOutputEventAdaptorService();
 
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        String transportAdaptorType = "";
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String eventAdaptorType = "";
 
         try {
-            transportAdaptorType = getTransportAdaptorType(transportAdaptorName, tenantId);
-            MessageDto messageDto = transportAdaptorService.getTransportMessageDto(transportAdaptorType);
+            eventAdaptorType = getEventAdaptorType(eventAdaptorName, tenantId);
+            MessageDto messageDto = eventAdaptorService.getEventAdaptorMessageDto(eventAdaptorType);
 
             List<Property> propertyList = messageDto.getMessageOutPropertyList();
             if (propertyList != null) {
@@ -296,34 +313,36 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 return eventFormatterPropertyDtoArray;
             }
         } catch (Exception ex) {
-            throw new AxisFault("Error while retrieving the transport adaptor names : "+ex.getMessage());
+            log.error(ex.getMessage(), ex);
+            throw new AxisFault(ex.getMessage());
         }
         return new EventFormatterPropertyDto[0];
     }
 
-    private String getTransportAdaptorType(String transportAdaptorName, int tenantId) {
+    private String getEventAdaptorType(String eventAdaptorName, int tenantId) {
 
-        OutputTransportAdaptorManagerService transportAdaptorManagerService = EventFormatterAdminServiceValueHolder.getOutputTransportAdaptorManagerService();
+        OutputEventAdaptorManagerService eventAdaptorManagerService = EventFormatterAdminServiceValueHolder.getOutputEventAdaptorManagerService();
 
-        String transportAdaptorType = "";
+        String eventAdaptorType = "";
 
-        List<OutputTransportAdaptorInfo> transportAdaptorInfoList = transportAdaptorManagerService.getOutputTransportAdaptorInfo(tenantId);
-        for (OutputTransportAdaptorInfo transportAdaptorInfo : transportAdaptorInfoList) {
-            if (transportAdaptorInfo.getTransportAdaptorName().equals(transportAdaptorName)) {
-                transportAdaptorType = transportAdaptorInfo.getTransportAdaptorType();
+        List<OutputEventAdaptorInfo> eventAdaptorInfoList = eventAdaptorManagerService.getOutputEventAdaptorInfo(tenantId);
+        for (OutputEventAdaptorInfo eventAdaptorInfo : eventAdaptorInfoList) {
+            if (eventAdaptorInfo.getEventAdaptorName().equals(eventAdaptorName)) {
+                eventAdaptorType = eventAdaptorInfo.getEventAdaptorType();
                 break;
             }
         }
-        return transportAdaptorType;
+        return eventAdaptorType;
     }
 
     public void deployWSO2EventFormatterConfiguration(String eventFormatterName,
                                                       String streamNameWithVersion,
-                                                      String transportAdaptorName,
+                                                      String eventAdaptorName,
+                                                      String eventAdaptorType,
                                                       EventOutputPropertyConfigurationDto[] metaData,
                                                       EventOutputPropertyConfigurationDto[] correlationData,
                                                       EventOutputPropertyConfigurationDto[] payloadData,
-                                                      EventFormatterPropertyDto[] outputPropertyConfiguration)
+                                                      EventFormatterPropertyDto[] outputPropertyConfiguration, boolean mappingEnabled)
             throws AxisFault {
 
         if (checkEventFormatterValidity(eventFormatterName)) {
@@ -338,32 +357,33 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 eventFormatterConfiguration.setFromStreamVersion(fromStreamProperties[1]);
 
                 AxisConfiguration axisConfiguration = getAxisConfig();
-                int tenantId = CarbonContext.getCurrentContext().getTenantId();
+                StreamDefinition streamDefinition = eventFormatterService.getStreamDefinition(streamNameWithVersion, axisConfiguration);
 
                 ToPropertyConfiguration toPropertyConfiguration = new ToPropertyConfiguration();
-                toPropertyConfiguration.setTransportAdaptorName(transportAdaptorName);
-                toPropertyConfiguration.setTransportAdaptorType(getTransportAdaptorType(transportAdaptorName, tenantId));
+                toPropertyConfiguration.setEventAdaptorName(eventAdaptorName);
+                toPropertyConfiguration.setEventAdaptorType(eventAdaptorType);
 
                 // add output message property configuration to the map
                 if (outputPropertyConfiguration != null && outputPropertyConfiguration.length != 0) {
-                    OutputTransportAdaptorMessageConfiguration outputTransportMessageConfiguration = new OutputTransportAdaptorMessageConfiguration();
+                    OutputEventAdaptorMessageConfiguration outputEventMessageConfiguration = new OutputEventAdaptorMessageConfiguration();
 
                     for (EventFormatterPropertyDto eventFormatterProperty : outputPropertyConfiguration) {
                         if (!eventFormatterProperty.getValue().trim().equals("")) {
-                            outputTransportMessageConfiguration.addOutputMessageProperty(eventFormatterProperty.getKey().trim(), eventFormatterProperty.getValue().trim());
+                            outputEventMessageConfiguration.addOutputMessageProperty(eventFormatterProperty.getKey().trim(), eventFormatterProperty.getValue().trim());
                         }
                     }
-                    toPropertyConfiguration.setOutputTransportAdaptorMessageConfiguration(outputTransportMessageConfiguration);
+                    toPropertyConfiguration.setOutputEventAdaptorMessageConfiguration(outputEventMessageConfiguration);
                 }
 
                 eventFormatterConfiguration.setToPropertyConfiguration(toPropertyConfiguration);
 
                 WSO2EventOutputMapping wso2EventOutputMapping = new WSO2EventOutputMapping();
+                wso2EventOutputMapping.setCustomMappingEnabled(mappingEnabled);
                 List<String> outputEventAttributes = new ArrayList<String>();
 
                 if (metaData != null && metaData.length != 0) {
                     for (EventOutputPropertyConfigurationDto wso2EventOutputPropertyConfiguration : metaData) {
-                        EventOutputProperty eventOutputProperty = new EventOutputProperty(wso2EventOutputPropertyConfiguration.getName(), wso2EventOutputPropertyConfiguration.getValueOf(), PropertyAttributeTypeConstants.STRING_ATTRIBUTE_TYPE_MAP.get(wso2EventOutputPropertyConfiguration.getType()));
+                        EventOutputProperty eventOutputProperty = new EventOutputProperty(wso2EventOutputPropertyConfiguration.getName(), wso2EventOutputPropertyConfiguration.getValueOf(), PropertyAttributeTypeConstants.STRING_ATTRIBUTE_TYPE_MAP.get(getPropertyAttributeDataType(wso2EventOutputPropertyConfiguration.getValueOf(),streamDefinition)));
                         wso2EventOutputMapping.addMetaWSO2EventOutputPropertyConfiguration(eventOutputProperty);
                         outputEventAttributes.add(wso2EventOutputPropertyConfiguration.getValueOf());
                     }
@@ -372,32 +392,31 @@ public class EventFormatterAdminService extends AbstractAdmin {
 
                 if (correlationData != null && correlationData.length != 0) {
                     for (EventOutputPropertyConfigurationDto wso2EventOutputPropertyConfiguration : correlationData) {
-                        EventOutputProperty eventOutputProperty = new EventOutputProperty(wso2EventOutputPropertyConfiguration.getName(), wso2EventOutputPropertyConfiguration.getValueOf(), PropertyAttributeTypeConstants.STRING_ATTRIBUTE_TYPE_MAP.get(wso2EventOutputPropertyConfiguration.getType()));
+                        EventOutputProperty eventOutputProperty = new EventOutputProperty(wso2EventOutputPropertyConfiguration.getName(), wso2EventOutputPropertyConfiguration.getValueOf(), PropertyAttributeTypeConstants.STRING_ATTRIBUTE_TYPE_MAP.get(getPropertyAttributeDataType(wso2EventOutputPropertyConfiguration.getValueOf(),streamDefinition)));
                         wso2EventOutputMapping.addCorrelationWSO2EventOutputPropertyConfiguration(eventOutputProperty);
                         outputEventAttributes.add(wso2EventOutputPropertyConfiguration.getValueOf());
                     }
-
                 }
 
                 if (payloadData != null && payloadData.length != 0) {
                     for (EventOutputPropertyConfigurationDto wso2EventOutputPropertyConfiguration : payloadData) {
-                        EventOutputProperty eventOutputProperty = new EventOutputProperty(wso2EventOutputPropertyConfiguration.getName(), wso2EventOutputPropertyConfiguration.getValueOf(), PropertyAttributeTypeConstants.STRING_ATTRIBUTE_TYPE_MAP.get(wso2EventOutputPropertyConfiguration.getType()));
+                        EventOutputProperty eventOutputProperty = new EventOutputProperty(wso2EventOutputPropertyConfiguration.getName(), wso2EventOutputPropertyConfiguration.getValueOf(), PropertyAttributeTypeConstants.STRING_ATTRIBUTE_TYPE_MAP.get(getPropertyAttributeDataType(wso2EventOutputPropertyConfiguration.getValueOf(),streamDefinition)));
                         wso2EventOutputMapping.addPayloadWSO2EventOutputPropertyConfiguration(eventOutputProperty);
                         outputEventAttributes.add(wso2EventOutputPropertyConfiguration.getValueOf());
                     }
-
                 }
 
                 eventFormatterConfiguration.setOutputMapping(wso2EventOutputMapping);
 
-                if (checkStreamAttributeValidity(outputEventAttributes, eventFormatterService.getStreamDefinition(streamNameWithVersion, axisConfiguration))) {
+                if (checkStreamAttributeValidity(outputEventAttributes,streamDefinition)) {
                     eventFormatterService.deployEventFormatterConfiguration(eventFormatterConfiguration, axisConfiguration);
                 } else {
                     throw new AxisFault("Output Stream attributes are not matching with input stream definition ");
                 }
 
             } catch (EventFormatterConfigurationException e) {
-                throw new AxisFault("Error in adding Event Formatter configuration : "+ e.getMessage());
+                log.error(e.getMessage(), e);
+                throw new AxisFault(e.getMessage());
             }
         } else {
             throw new AxisFault(eventFormatterName + " is already registered for this tenant");
@@ -405,10 +424,10 @@ public class EventFormatterAdminService extends AbstractAdmin {
 
     }
 
-
     public void deployTextEventFormatterConfiguration(String eventFormatterName,
                                                       String streamNameWithVersion,
-                                                      String transportAdaptorName,
+                                                      String eventAdaptorName,
+                                                      String eventAdaptorType,
                                                       String textData,
                                                       EventFormatterPropertyDto[] outputPropertyConfiguration,
                                                       String dataFrom)
@@ -426,22 +445,22 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 eventFormatterConfiguration.setFromStreamVersion(fromStreamProperties[1]);
 
                 AxisConfiguration axisConfiguration = getAxisConfig();
-                int tenantId = CarbonContext.getCurrentContext().getTenantId();
+                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
                 ToPropertyConfiguration toPropertyConfiguration = new ToPropertyConfiguration();
-                toPropertyConfiguration.setTransportAdaptorName(transportAdaptorName);
-                toPropertyConfiguration.setTransportAdaptorType(getTransportAdaptorType(transportAdaptorName, tenantId));
+                toPropertyConfiguration.setEventAdaptorName(eventAdaptorName);
+                toPropertyConfiguration.setEventAdaptorType(eventAdaptorType);
 
                 // add output message property configuration to the map
                 if (outputPropertyConfiguration != null && outputPropertyConfiguration.length != 0) {
-                    OutputTransportAdaptorMessageConfiguration outputTransportMessageConfiguration = new OutputTransportAdaptorMessageConfiguration();
+                    OutputEventAdaptorMessageConfiguration outputEventMessageConfiguration = new OutputEventAdaptorMessageConfiguration();
 
                     for (EventFormatterPropertyDto eventFormatterProperty : outputPropertyConfiguration) {
                         if (!eventFormatterProperty.getValue().trim().equals("")) {
-                            outputTransportMessageConfiguration.addOutputMessageProperty(eventFormatterProperty.getKey().trim(), eventFormatterProperty.getValue().trim());
+                            outputEventMessageConfiguration.addOutputMessageProperty(eventFormatterProperty.getKey().trim(), eventFormatterProperty.getValue().trim());
                         }
                     }
-                    toPropertyConfiguration.setOutputTransportAdaptorMessageConfiguration(outputTransportMessageConfiguration);
+                    toPropertyConfiguration.setOutputEventAdaptorMessageConfiguration(outputEventMessageConfiguration);
                 }
 
                 eventFormatterConfiguration.setToPropertyConfiguration(toPropertyConfiguration);
@@ -449,6 +468,8 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 TextOutputMapping textOutputMapping = new TextOutputMapping();
                 textOutputMapping.setRegistryResource(validateRegistrySource(dataFrom));
                 textOutputMapping.setMappingText(textData);
+                textOutputMapping.setCustomMappingEnabled(true);
+
                 if (dataFrom.equalsIgnoreCase("registry")) {
                     textData = eventFormatterService.getRegistryResourceContent(textData, tenantId);
                 }
@@ -463,7 +484,8 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 }
 
             } catch (EventFormatterConfigurationException e) {
-                throw new AxisFault("Error in adding Event Formatter configuration : "+ e.getMessage());
+                log.error(e.getMessage(), e);
+                throw new AxisFault(e.getMessage());
             }
         } else {
             throw new AxisFault(eventFormatterName + " is already registered for this tenant");
@@ -473,7 +495,8 @@ public class EventFormatterAdminService extends AbstractAdmin {
 
     public void deployXmlEventFormatterConfiguration(String eventFormatterName,
                                                      String streamNameWithVersion,
-                                                     String transportAdaptorName,
+                                                     String eventAdaptorName,
+                                                     String eventAdaptorType,
                                                      String textData,
                                                      EventFormatterPropertyDto[] outputPropertyConfiguration,
                                                      String dataFrom)
@@ -491,22 +514,21 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 eventFormatterConfiguration.setFromStreamVersion(fromStreamProperties[1]);
 
                 AxisConfiguration axisConfiguration = getAxisConfig();
-                int tenantId = CarbonContext.getCurrentContext().getTenantId();
 
                 ToPropertyConfiguration toPropertyConfiguration = new ToPropertyConfiguration();
-                toPropertyConfiguration.setTransportAdaptorName(transportAdaptorName);
-                toPropertyConfiguration.setTransportAdaptorType(getTransportAdaptorType(transportAdaptorName, tenantId));
+                toPropertyConfiguration.setEventAdaptorName(eventAdaptorName);
+                toPropertyConfiguration.setEventAdaptorType(eventAdaptorType);
 
                 // add output message property configuration to the map
                 if (outputPropertyConfiguration != null && outputPropertyConfiguration.length != 0) {
-                    OutputTransportAdaptorMessageConfiguration outputTransportMessageConfiguration = new OutputTransportAdaptorMessageConfiguration();
+                    OutputEventAdaptorMessageConfiguration outputEventMessageConfiguration = new OutputEventAdaptorMessageConfiguration();
 
                     for (EventFormatterPropertyDto eventFormatterProperty : outputPropertyConfiguration) {
                         if (!eventFormatterProperty.getValue().trim().equals("")) {
-                            outputTransportMessageConfiguration.addOutputMessageProperty(eventFormatterProperty.getKey().trim(), eventFormatterProperty.getValue().trim());
+                            outputEventMessageConfiguration.addOutputMessageProperty(eventFormatterProperty.getKey().trim(), eventFormatterProperty.getValue().trim());
                         }
                     }
-                    toPropertyConfiguration.setOutputTransportAdaptorMessageConfiguration(outputTransportMessageConfiguration);
+                    toPropertyConfiguration.setOutputEventAdaptorMessageConfiguration(outputEventMessageConfiguration);
                 }
 
                 eventFormatterConfiguration.setToPropertyConfiguration(toPropertyConfiguration);
@@ -514,6 +536,7 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 XMLOutputMapping xmlOutputMapping = new XMLOutputMapping();
                 xmlOutputMapping.setMappingXMLText(textData);
                 xmlOutputMapping.setRegistryResource(validateRegistrySource(dataFrom));
+                xmlOutputMapping.setCustomMappingEnabled(true);
                 List<String> outputEventAttributes = getOutputMappingPropertyList(textData);
 
                 eventFormatterConfiguration.setOutputMapping(xmlOutputMapping);
@@ -525,7 +548,8 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 }
 
             } catch (EventFormatterConfigurationException e) {
-                throw new AxisFault("Error in adding Event Formatter configuration : "+ e.getMessage());
+                log.error(e.getMessage(), e);
+                throw new AxisFault(e.getMessage());
             }
         } else {
             throw new AxisFault(eventFormatterName + " is already registered for this tenant");
@@ -533,10 +557,10 @@ public class EventFormatterAdminService extends AbstractAdmin {
 
     }
 
-
     public void deployMapEventFormatterConfiguration(String eventFormatterName,
                                                      String streamNameWithVersion,
-                                                     String transportAdaptorName,
+                                                     String eventAdaptorName,
+                                                     String eventAdaptorType,
                                                      EventOutputPropertyConfigurationDto[] mapData,
                                                      EventFormatterPropertyDto[] outputPropertyConfiguration)
             throws AxisFault {
@@ -553,27 +577,27 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 eventFormatterConfiguration.setFromStreamVersion(fromStreamProperties[1]);
 
                 AxisConfiguration axisConfiguration = getAxisConfig();
-                int tenantId = CarbonContext.getCurrentContext().getTenantId();
 
                 ToPropertyConfiguration toPropertyConfiguration = new ToPropertyConfiguration();
-                toPropertyConfiguration.setTransportAdaptorName(transportAdaptorName);
-                toPropertyConfiguration.setTransportAdaptorType(getTransportAdaptorType(transportAdaptorName, tenantId));
+                toPropertyConfiguration.setEventAdaptorName(eventAdaptorName);
+                toPropertyConfiguration.setEventAdaptorType(eventAdaptorType);
 
                 // add output message property configuration to the map
                 if (outputPropertyConfiguration != null && outputPropertyConfiguration.length != 0) {
-                    OutputTransportAdaptorMessageConfiguration outputTransportMessageConfiguration = new OutputTransportAdaptorMessageConfiguration();
+                    OutputEventAdaptorMessageConfiguration outputEventMessageConfiguration = new OutputEventAdaptorMessageConfiguration();
 
                     for (EventFormatterPropertyDto eventFormatterProperty : outputPropertyConfiguration) {
                         if (!eventFormatterProperty.getValue().trim().equals("")) {
-                            outputTransportMessageConfiguration.addOutputMessageProperty(eventFormatterProperty.getKey().trim(), eventFormatterProperty.getValue().trim());
+                            outputEventMessageConfiguration.addOutputMessageProperty(eventFormatterProperty.getKey().trim(), eventFormatterProperty.getValue().trim());
                         }
                     }
-                    toPropertyConfiguration.setOutputTransportAdaptorMessageConfiguration(outputTransportMessageConfiguration);
+                    toPropertyConfiguration.setOutputEventAdaptorMessageConfiguration(outputEventMessageConfiguration);
                 }
 
                 eventFormatterConfiguration.setToPropertyConfiguration(toPropertyConfiguration);
 
                 MapOutputMapping mapOutputMapping = new MapOutputMapping();
+                mapOutputMapping.setCustomMappingEnabled(true);
                 List<String> outputEventAttributes = new ArrayList<String>();
 
                 if (mapData != null && mapData.length != 0) {
@@ -593,8 +617,9 @@ public class EventFormatterAdminService extends AbstractAdmin {
                     throw new AxisFault("Output Stream attributes are not matching with input stream definition ");
                 }
 
-            } catch (EventFormatterConfigurationException e) {
-                throw new AxisFault("Error in adding Event Formatter configuration : "+ e.getMessage());
+            } catch (EventFormatterConfigurationException ex) {
+                log.error(ex.getMessage(), ex);
+                throw new AxisFault(ex.getMessage());
             }
         } else {
             throw new AxisFault(eventFormatterName + " is already registered for this tenant");
@@ -604,7 +629,8 @@ public class EventFormatterAdminService extends AbstractAdmin {
 
     public void deployJsonEventFormatterConfiguration(String eventFormatterName,
                                                       String streamNameWithVersion,
-                                                      String transportAdaptorName,
+                                                      String eventAdaptorName,
+                                                      String eventAdaptorType,
                                                       String jsonData,
                                                       EventFormatterPropertyDto[] outputPropertyConfiguration,
                                                       String dataFrom)
@@ -622,22 +648,21 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 eventFormatterConfiguration.setFromStreamVersion(fromStreamProperties[1]);
 
                 AxisConfiguration axisConfiguration = getAxisConfig();
-                int tenantId = CarbonContext.getCurrentContext().getTenantId();
 
                 ToPropertyConfiguration toPropertyConfiguration = new ToPropertyConfiguration();
-                toPropertyConfiguration.setTransportAdaptorName(transportAdaptorName);
-                toPropertyConfiguration.setTransportAdaptorType(getTransportAdaptorType(transportAdaptorName, tenantId));
+                toPropertyConfiguration.setEventAdaptorName(eventAdaptorName);
+                toPropertyConfiguration.setEventAdaptorType(eventAdaptorType);
 
                 // add output message property configuration to the map
                 if (outputPropertyConfiguration != null && outputPropertyConfiguration.length != 0) {
-                    OutputTransportAdaptorMessageConfiguration outputTransportMessageConfiguration = new OutputTransportAdaptorMessageConfiguration();
+                    OutputEventAdaptorMessageConfiguration outputEventMessageConfiguration = new OutputEventAdaptorMessageConfiguration();
 
                     for (EventFormatterPropertyDto eventFormatterProperty : outputPropertyConfiguration) {
                         if (!eventFormatterProperty.getValue().trim().equals("")) {
-                            outputTransportMessageConfiguration.addOutputMessageProperty(eventFormatterProperty.getKey().trim(), eventFormatterProperty.getValue().trim());
+                            outputEventMessageConfiguration.addOutputMessageProperty(eventFormatterProperty.getKey().trim(), eventFormatterProperty.getValue().trim());
                         }
                     }
-                    toPropertyConfiguration.setOutputTransportAdaptorMessageConfiguration(outputTransportMessageConfiguration);
+                    toPropertyConfiguration.setOutputEventAdaptorMessageConfiguration(outputEventMessageConfiguration);
                 }
 
                 eventFormatterConfiguration.setToPropertyConfiguration(toPropertyConfiguration);
@@ -645,6 +670,7 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 JSONOutputMapping jsonOutputMapping = new JSONOutputMapping();
                 jsonOutputMapping.setRegistryResource(validateRegistrySource(dataFrom));
                 jsonOutputMapping.setMappingText(jsonData);
+                jsonOutputMapping.setCustomMappingEnabled(true);
                 List<String> outputEventAttributes = getOutputMappingPropertyList(jsonData);
 
                 eventFormatterConfiguration.setOutputMapping(jsonOutputMapping);
@@ -655,8 +681,9 @@ public class EventFormatterAdminService extends AbstractAdmin {
                     throw new AxisFault("Output Stream attributes are not matching with input stream definition ");
                 }
 
-            } catch (EventFormatterConfigurationException e) {
-                throw new AxisFault("Error in adding Event Formatter configuration : "+ e.getMessage());
+            } catch (EventFormatterConfigurationException ex) {
+                log.error(ex.getMessage(), ex);
+                throw new AxisFault(ex.getMessage());
             }
         } else {
             throw new AxisFault(eventFormatterName + " is already registered for this tenant");
@@ -668,7 +695,7 @@ public class EventFormatterAdminService extends AbstractAdmin {
             String eventFormatterName) throws AxisFault {
 
         EventFormatterService eventFormatterService = EventFormatterAdminServiceValueHolder.getEventFormatterService();
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         AxisConfiguration axisConfiguration = getAxisConfig();
 
         try {
@@ -683,12 +710,12 @@ public class EventFormatterAdminService extends AbstractAdmin {
                 ToPropertyConfiguration toPropertyConfiguration = eventFormatterConfiguration.getToPropertyConfiguration();
                 if (toPropertyConfiguration != null) {
                     ToPropertyConfigurationDto toPropertyConfigurationDto = new ToPropertyConfigurationDto();
-                    toPropertyConfigurationDto.setTransportAdaptorName(toPropertyConfiguration.getTransportAdaptorName());
-                    toPropertyConfigurationDto.setTransportAdaptorType(toPropertyConfiguration.getTransportAdaptorType());
-                    OutputTransportAdaptorMessageConfiguration outputTransportAdaptorMessageConfiguration = toPropertyConfiguration.getOutputTransportAdaptorMessageConfiguration();
-                    if (outputTransportAdaptorMessageConfiguration != null && outputTransportAdaptorMessageConfiguration.getOutputMessageProperties().size() > 0) {
-                        EventFormatterPropertyDto[] eventFormatterPropertyDtos = getOutputEventFormatterMessageConfiguration(outputTransportAdaptorMessageConfiguration.getOutputMessageProperties(), toPropertyConfiguration.getTransportAdaptorType());
-                        toPropertyConfigurationDto.setOutputTransportAdaptorMessageConfiguration(eventFormatterPropertyDtos);
+                    toPropertyConfigurationDto.setEventAdaptorName(toPropertyConfiguration.getEventAdaptorName());
+                    toPropertyConfigurationDto.setEventAdaptorType(toPropertyConfiguration.getEventAdaptorType());
+                    OutputEventAdaptorMessageConfiguration outputEventAdaptorMessageConfiguration = toPropertyConfiguration.getOutputEventAdaptorMessageConfiguration();
+                    if (outputEventAdaptorMessageConfiguration != null && outputEventAdaptorMessageConfiguration.getOutputMessageProperties().size() > 0) {
+                        EventFormatterPropertyDto[] eventFormatterPropertyDtos = getOutputEventFormatterMessageConfiguration(outputEventAdaptorMessageConfiguration.getOutputMessageProperties(), toPropertyConfiguration.getEventAdaptorType());
+                        toPropertyConfigurationDto.setOutputEventAdaptorMessageConfiguration(eventFormatterPropertyDtos);
                     }
 
                     eventFormatterConfigurationDto.setToPropertyConfigurationDto(toPropertyConfigurationDto);
@@ -723,6 +750,7 @@ public class EventFormatterAdminService extends AbstractAdmin {
                         EventOutputPropertyDto[] eventOutputPropertyDtos = new EventOutputPropertyDto[outputPropertyList.size()];
                         int index = 0;
                         for (EventOutputProperty eventOutputProperty : outputPropertyList) {
+                            eventOutputPropertyDtos[index] = new EventOutputPropertyDto();
                             eventOutputPropertyDtos[index].setName(eventOutputProperty.getName());
                             eventOutputPropertyDtos[index].setValueOf(eventOutputProperty.getValueOf());
                             index++;
@@ -751,30 +779,39 @@ public class EventFormatterAdminService extends AbstractAdmin {
             }
 
         } catch (EventFormatterConfigurationException ex) {
-            throw new AxisFault("Error while retrieving the Event Formatter configuration : " + ex.getMessage());
+            log.error(ex.getMessage(), ex);
+            throw new AxisFault(ex.getMessage());
         }
         return null;
     }
 
-    public void setStatisticsEnabled(String eventFormatterName,boolean flag) throws AxisFault {
+    public void setStatisticsEnabled(String eventFormatterName, boolean flag) throws AxisFault {
 
         EventFormatterService eventFormatterService = EventFormatterAdminServiceValueHolder.getEventFormatterService();
         AxisConfiguration axisConfiguration = getAxisConfig();
         try {
             eventFormatterService.setStatisticsEnabled(eventFormatterName, axisConfiguration, flag);
         } catch (EventFormatterConfigurationException e) {
+            log.error(e.getMessage(), e);
             throw new AxisFault(e.getMessage());
         }
     }
-    public void setTracingEnabled(String eventFormatterName,boolean flag) throws AxisFault {
+
+    public void setTracingEnabled(String eventFormatterName, boolean flag) throws AxisFault {
         EventFormatterService eventFormatterService = EventFormatterAdminServiceValueHolder.getEventFormatterService();
         AxisConfiguration axisConfiguration = getAxisConfig();
         try {
             eventFormatterService.setTraceEnabled(eventFormatterName, axisConfiguration, flag);
         } catch (EventFormatterConfigurationException e) {
+            log.error(e.getMessage(), e);
             throw new AxisFault(e.getMessage());
         }
 
+    }
+
+    public String getEventFormatterStatusAsString(String filename) {
+        EventFormatterService eventFormatterService = EventFormatterAdminServiceValueHolder.getEventFormatterService();
+        return eventFormatterService.getEventFormatterStatusAsString(filename);
     }
 
     private EventOutputPropertyDto[] getEventPropertyDtoArray(
@@ -786,7 +823,7 @@ public class EventFormatterAdminService extends AbstractAdmin {
             Iterator<EventOutputProperty> outputPropertyIterator = eventOutputPropertyList.iterator();
             while (outputPropertyIterator.hasNext()) {
                 EventOutputProperty eventOutputProperty = outputPropertyIterator.next();
-                eventOutputPropertyDtos[index] = new EventOutputPropertyDto(eventOutputProperty.getName(), eventOutputProperty.getValueOf(), eventOutputProperty.getType().toString());
+                eventOutputPropertyDtos[index] = new EventOutputPropertyDto(eventOutputProperty.getName(), eventOutputProperty.getValueOf(), eventOutputProperty.getType().toString().toLowerCase());
                 index++;
             }
 
@@ -796,18 +833,18 @@ public class EventFormatterAdminService extends AbstractAdmin {
     }
 
     private EventFormatterPropertyDto[] getOutputEventFormatterMessageConfiguration(
-            Map<String, String> messageProperties, String transportAdaptorType) {
+            Map<String, String> messageProperties, String eventAdaptorType) {
 
-        OutputTransportAdaptorService outputTransportAdaptorService = EventFormatterAdminServiceValueHolder.getOutputTransportAdaptorService();
-        List<Property> outputMessagePropertyList = outputTransportAdaptorService.getTransportMessageDto(transportAdaptorType).getMessageOutPropertyList();
+        OutputEventAdaptorService outputEventAdaptorService = EventFormatterAdminServiceValueHolder.getOutputEventAdaptorService();
+        List<Property> outputMessagePropertyList = outputEventAdaptorService.getEventAdaptorMessageDto(eventAdaptorType).getMessageOutPropertyList();
         if (outputMessagePropertyList != null) {
             EventFormatterPropertyDto[] eventFormatterPropertyDtoArray = new EventFormatterPropertyDto[outputMessagePropertyList.size()];
             int index = 0;
             for (Property property : outputMessagePropertyList) {
-                // create output transport property
+                // create output event property
                 eventFormatterPropertyDtoArray[index] = new EventFormatterPropertyDto(property.getPropertyName(),
                                                                                       messageProperties.get(property.getPropertyName()));
-                // set output transport property parameters
+                // set output event property parameters
                 eventFormatterPropertyDtoArray[index].setSecured(property.isSecured());
                 eventFormatterPropertyDtoArray[index].setRequired(property.isRequired());
                 eventFormatterPropertyDtoArray[index].setDisplayName(property.getDisplayName());
@@ -822,45 +859,48 @@ public class EventFormatterAdminService extends AbstractAdmin {
         return new EventFormatterPropertyDto[0];
     }
 
-
     private boolean checkStreamAttributeValidity(List<String> outputEventAttributes,
                                                  StreamDefinition streamDefinition) {
 
-        List<String> inComingStreamAttributes = new ArrayList<String>();
-        final String PROPERTY_META_PREFIX = "meta_";
-        final String PROPERTY_CORRELATION_PREFIX = "correlation_";
+        if (streamDefinition != null) {
+            List<String> inComingStreamAttributes = new ArrayList<String>();
+            final String PROPERTY_META_PREFIX = "meta_";
+            final String PROPERTY_CORRELATION_PREFIX = "correlation_";
 
-        List<Attribute> metaAttributeList = streamDefinition.getMetaData();
-        List<Attribute> correlationAttributeList = streamDefinition.getCorrelationData();
-        List<Attribute> payloadAttributeList = streamDefinition.getPayloadData();
+            List<Attribute> metaAttributeList = streamDefinition.getMetaData();
+            List<Attribute> correlationAttributeList = streamDefinition.getCorrelationData();
+            List<Attribute> payloadAttributeList = streamDefinition.getPayloadData();
 
 
-        if (metaAttributeList != null) {
-            for (Attribute attribute : metaAttributeList) {
-                inComingStreamAttributes.add(PROPERTY_META_PREFIX + attribute.getName());
+            if (metaAttributeList != null) {
+                for (Attribute attribute : metaAttributeList) {
+                    inComingStreamAttributes.add(PROPERTY_META_PREFIX + attribute.getName());
+                }
             }
-        }
-        if (correlationAttributeList != null) {
-            for (Attribute attribute : correlationAttributeList) {
-                inComingStreamAttributes.add(PROPERTY_CORRELATION_PREFIX + attribute.getName());
+            if (correlationAttributeList != null) {
+                for (Attribute attribute : correlationAttributeList) {
+                    inComingStreamAttributes.add(PROPERTY_CORRELATION_PREFIX + attribute.getName());
+                }
             }
-        }
-        if (payloadAttributeList != null) {
-            for (Attribute attribute : payloadAttributeList) {
-                inComingStreamAttributes.add(attribute.getName());
+            if (payloadAttributeList != null) {
+                for (Attribute attribute : payloadAttributeList) {
+                    inComingStreamAttributes.add(attribute.getName());
+                }
             }
-        }
 
 
-        if (outputEventAttributes.size() > 0) {
-            if (inComingStreamAttributes.containsAll(outputEventAttributes)) {
-                return true;
-            } else {
-                return false;
+            if (outputEventAttributes.size() > 0) {
+                if (inComingStreamAttributes.containsAll(outputEventAttributes)) {
+                    return true;
+                } else {
+                    return false;
+                }
             }
-        }
 
-        return true;
+            return true;
+        } else {
+            return false;
+        }
 
     }
 
@@ -868,18 +908,17 @@ public class EventFormatterAdminService extends AbstractAdmin {
         List<Attribute> metaAttributeList = streamDefinition.getMetaData();
         List<Attribute> correlationAttributeList = streamDefinition.getCorrelationData();
         List<Attribute> payloadAttributeList = streamDefinition.getPayloadData();
-        final String PROPERTY_META_PREFIX = "meta_";
-        final String PROPERTY_CORRELATION_PREFIX = "correlation_";
+
         String attributes = "";
 
         if (metaAttributeList != null) {
             for (Attribute attribute : metaAttributeList) {
-                attributes += PROPERTY_META_PREFIX + attribute.getName() + " " + attribute.getType().toString().toLowerCase() + ", \n";
+                attributes += PropertyAttributeTypeConstants.PROPERTY_META_PREFIX + attribute.getName() + " " + attribute.getType().toString().toLowerCase() + ", \n";
             }
         }
         if (correlationAttributeList != null) {
             for (Attribute attribute : correlationAttributeList) {
-                attributes += PROPERTY_CORRELATION_PREFIX + attribute.getName() + " " + attribute.getType().toString().toLowerCase() + ", \n";
+                attributes += PropertyAttributeTypeConstants.PROPERTY_CORRELATION_PREFIX + attribute.getName() + " " + attribute.getType().toString().toLowerCase() + ", \n";
             }
         }
         if (payloadAttributeList != null) {
@@ -908,7 +947,6 @@ public class EventFormatterAdminService extends AbstractAdmin {
         return mappingTextList;
     }
 
-
     private boolean checkEventFormatterValidity(String eventFormatterName) throws AxisFault {
         try {
             EventFormatterService eventFormatterService = EventFormatterAdminServiceValueHolder.getEventFormatterService();
@@ -926,7 +964,8 @@ public class EventFormatterAdminService extends AbstractAdmin {
             }
 
         } catch (EventFormatterConfigurationException e) {
-            throw new AxisFault("Error in validating the Event Formatter : " +e.getMessage());
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage());
         }
         return true;
     }
@@ -934,6 +973,41 @@ public class EventFormatterAdminService extends AbstractAdmin {
     private boolean validateRegistrySource(String fromData) {
 
         return !fromData.equalsIgnoreCase("inline");
+    }
+
+    private String getPropertyAttributeDataType(String propertyName, StreamDefinition streamDefinition) throws AxisFault{
+
+        if(propertyName != null){
+            List<Attribute> metaDataList = streamDefinition.getMetaData();
+            if(metaDataList != null){
+                for (Attribute attribute : metaDataList){
+                    if(propertyName.equalsIgnoreCase(PropertyAttributeTypeConstants.PROPERTY_META_PREFIX+attribute.getName())){
+                        return attribute.getType().toString().toLowerCase();
+                    }
+                }
+            }
+
+            List<Attribute> correlationDataList = streamDefinition.getCorrelationData();
+            if(correlationDataList != null){
+                for (Attribute attribute : correlationDataList){
+                    if(propertyName.equalsIgnoreCase(PropertyAttributeTypeConstants.PROPERTY_CORRELATION_PREFIX+attribute.getName())){
+                        return attribute.getType().toString().toLowerCase();
+                    }
+                }
+            }
+
+            List<Attribute> payloadDataList = streamDefinition.getPayloadData();
+            if(payloadDataList != null){
+                for (Attribute attribute : payloadDataList){
+                    if(propertyName.equalsIgnoreCase(attribute.getName())){
+                        return attribute.getType().toString().toLowerCase();
+                    }
+                }
+            }
+        }
+
+        throw new AxisFault("Output Stream attributes are not matching with input stream definition");
+
     }
 
 

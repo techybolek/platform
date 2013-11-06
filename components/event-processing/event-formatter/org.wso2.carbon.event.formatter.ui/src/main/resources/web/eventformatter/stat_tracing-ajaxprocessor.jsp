@@ -20,19 +20,19 @@
         import="org.wso2.carbon.event.formatter.ui.EventFormatterUIUtils" %>
 
 <%
-    String transportAdaptorName = request.getParameter("eventFormatterName");
+    String eventAdaptorName = request.getParameter("eventFormatterName");
     String action = request.getParameter("action");
 
-    if (transportAdaptorName != null && action != null) {
+    if (eventAdaptorName != null && action != null) {
         EventFormatterAdminServiceStub stub = EventFormatterUIUtils.getEventFormatterAdminService(config, session, request);
         if ("enableStat".equals(action)) {
-            stub.setStatisticsEnabled(transportAdaptorName,true);
+            stub.setStatisticsEnabled(eventAdaptorName,true);
         } else if ("disableStat".equals(action)) {
-            stub.setStatisticsEnabled(transportAdaptorName,false);
+            stub.setStatisticsEnabled(eventAdaptorName,false);
         } else if ("enableTracing".equals(action)) {
-            stub.setTracingEnabled(transportAdaptorName,true);
+            stub.setTracingEnabled(eventAdaptorName,true);
         } else if ("disableTracing".equals(action)) {
-            stub.setTracingEnabled(transportAdaptorName,false);
+            stub.setTracingEnabled(eventAdaptorName,false);
         }
     }
 

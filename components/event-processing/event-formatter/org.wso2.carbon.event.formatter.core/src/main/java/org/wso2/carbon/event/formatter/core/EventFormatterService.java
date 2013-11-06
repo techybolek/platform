@@ -39,12 +39,12 @@ public interface EventFormatterService {
     /**
      * Method used to undeploy inactive event formatter configuration file from filesystem
      *
-     * @param filePath
+     * @param fileName
      * @param axisConfiguration
      * @throws EventFormatterConfigurationException
      *
      */
-    public void undeployInactiveEventFormatterConfiguration(String filePath,
+    public void undeployInactiveEventFormatterConfiguration(String fileName,
                                                             AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException;
 
@@ -52,14 +52,14 @@ public interface EventFormatterService {
      * Method used to get edit the inactive event formatter configuration info
      *
      * @param eventFormatterConfiguration
-     * @param filePath
+     * @param fileName
      * @param axisConfiguration
      * @throws EventFormatterConfigurationException
      *
      */
     public void editInactiveEventFormatterConfiguration(
             String eventFormatterConfiguration,
-            String filePath,
+            String fileName,
             AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException;
 
@@ -118,12 +118,13 @@ public interface EventFormatterService {
     /**
      * Method used to get the inactive event formatter configuration xml as a string
      *
-     * @param filePath
+     * @param filename
+     * @param axisConfiguration
      * @return
      * @throws EventFormatterConfigurationException
      *
      */
-    public String getInactiveEventFormatterConfigurationContent(String filePath)
+    public String getInactiveEventFormatterConfigurationContent(String filename, AxisConfiguration axisConfiguration)
             throws EventFormatterConfigurationException;
 
 
@@ -181,9 +182,9 @@ public interface EventFormatterService {
     /**
      * Method used to enable/disable the statistics for an event formatter
      *
-     * @param eventFormatterName
-     * @param axisConfiguration
-     * @param flag
+     * @param eventFormatterName the event formatter name to which statistics collecting state should be changed
+     * @param axisConfiguration  the axis configuration for the calling context
+     * @param flag {@literal true} or {@literal false} specifying whether to enable statistics collection or disable
      * @throws EventFormatterConfigurationException
      *
      */
@@ -194,14 +195,23 @@ public interface EventFormatterService {
     /**
      * Method used to enable/disable the tracing for an event formatter
      *
-     * @param eventFormatterName
-     * @param axisConfiguration
-     * @param flag
+     * @param eventFormatterName the event formatter name to which tracing state should be changed
+     * @param axisConfiguration  the axis configuration for the calling context
+     * @param flag {@literal true} or {@literal false} specifying whether to enable tracing or disable
      * @throws EventFormatterConfigurationException
      *
      */
     public void setTraceEnabled(String eventFormatterName, AxisConfiguration axisConfiguration,
                                 boolean flag)
             throws EventFormatterConfigurationException;
+
+    /**
+     * Returns the deployment status and dependency information as a formatted string for event formatter associated
+     * with the filename specified
+     *
+     * @param filename the filename of the event formatter
+     * @return a string description for the status of the event formatter specified
+     */
+    public String getEventFormatterStatusAsString(String filename);
 
 }

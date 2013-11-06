@@ -34,21 +34,21 @@ package org.wso2.carbon.event.builder.admin.internal.ds;/*
 
 
 import org.wso2.carbon.event.builder.core.EventBuilderService;
-import org.wso2.carbon.input.transport.adaptor.core.InputTransportAdaptorService;
-import org.wso2.carbon.input.transport.adaptor.manager.core.InputTransportAdaptorManagerService;
+import org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorService;
+import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorManagerService;
 
 public class EventBuilderAdminServiceValueHolder {
 
     private static EventBuilderService eventBuilderService;
-    private static InputTransportAdaptorManagerService inputTransportAdaptorManagerService;
-    private static InputTransportAdaptorService inputTransportAdaptorService;
+    private static InputEventAdaptorManagerService inputEventAdaptorManagerService;
+    private static InputEventAdaptorService inputEventAdaptorService;
 
-    public static InputTransportAdaptorService getInputTransportAdaptorService() {
-        return inputTransportAdaptorService;
+    public static InputEventAdaptorService getInputEventAdaptorService() {
+        return inputEventAdaptorService;
     }
 
-    public static void registerInputTransportAdaptorService(InputTransportAdaptorService inputTransportAdaptorService) {
-        EventBuilderAdminServiceValueHolder.inputTransportAdaptorService = inputTransportAdaptorService;
+    public static void registerInputEventAdaptorService(InputEventAdaptorService InputEventAdaptorService) {
+        EventBuilderAdminServiceValueHolder.inputEventAdaptorService = InputEventAdaptorService;
     }
 
     public static void registerEventBuilderService(EventBuilderService eventBuilderService) {
@@ -59,12 +59,12 @@ public class EventBuilderAdminServiceValueHolder {
         return EventBuilderAdminServiceValueHolder.eventBuilderService;
     }
 
-    public static void registerInputTransportAdaptorManagerService(
-            InputTransportAdaptorManagerService transportAdaptorManagerService) {
-        EventBuilderAdminServiceValueHolder.inputTransportAdaptorManagerService = transportAdaptorManagerService;
+    public static void registerInputEventAdaptorManagerService(
+            InputEventAdaptorManagerService inputEventAdaptorManagerService) {
+        EventBuilderAdminServiceValueHolder.inputEventAdaptorManagerService = inputEventAdaptorManagerService;
     }
 
-    public static InputTransportAdaptorManagerService getInputTransportAdaptorManagerService() {
-        return EventBuilderAdminServiceValueHolder.inputTransportAdaptorManagerService;
+    public static InputEventAdaptorManagerService getInputEventAdaptorManagerService() {
+        return EventBuilderAdminServiceValueHolder.inputEventAdaptorManagerService;
     }
 }

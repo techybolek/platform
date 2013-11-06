@@ -24,10 +24,10 @@
 <%
     // get Event Builder properties
     EventBuilderAdminServiceStub stub = EventBuilderUIUtils.getEventBuilderAdminService(config, session, request);
-    String transportName = request.getParameter("transportName");
-    if (transportName != null) {
+    String eventName = request.getParameter("eventName");
+    if (eventName != null) {
 
-        EventBuilderPropertyDto[] eventBuilderProperties = stub.getMessageConfigurationProperties(transportName);
+        EventBuilderPropertyDto[] eventBuilderProperties = stub.getMessageConfigurationProperties(eventName);
         String propertiesString;
         propertiesString = new Gson().toJson(eventBuilderProperties);
 %>

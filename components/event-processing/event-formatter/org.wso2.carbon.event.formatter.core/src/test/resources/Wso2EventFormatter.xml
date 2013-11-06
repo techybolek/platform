@@ -20,7 +20,7 @@
             </ef:property>
         </ef:payloadData>
     </ef:mapping>
-    <ef:to transportAdaptorType="agent" transportAdaptorName="localAgentBroker">
+    <ef:to eventAdaptorType="agent" eventAdaptorName="localAgentBroker">
         <ef:property name="stream">analytics_Statistics</ef:property>
         <ef:property name="version">1.3.0</ef:property>
     </ef:to>

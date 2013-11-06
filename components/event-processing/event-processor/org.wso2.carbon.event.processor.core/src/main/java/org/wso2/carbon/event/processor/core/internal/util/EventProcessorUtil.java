@@ -43,7 +43,6 @@ import java.util.List;
 public class EventProcessorUtil {
     private static Log log = LogFactory.getLog(EventProcessorUtil.class);
 
-
     public static StreamDefinition convertToDatabridgeStreamDefinition(
             org.wso2.siddhi.query.api.definition.StreamDefinition siddhiStreamDefinition,
             StreamConfiguration streamConfiguration) {
@@ -69,31 +68,37 @@ public class EventProcessorUtil {
                 }
             }
         }
-        databridgeDefinition.setPayloadData(payload);
-        databridgeDefinition.setMetaData(meta);
-        databridgeDefinition.setCorrelationData(correlation);
+        if (!payload.isEmpty()) {
+            databridgeDefinition.setPayloadData(payload);
+        }
+        if (!meta.isEmpty()) {
+            databridgeDefinition.setMetaData(meta);
+        }
+        if (!correlation.isEmpty()) {
+            databridgeDefinition.setCorrelationData(correlation);
+        }
         return databridgeDefinition;
     }
 
     public static org.wso2.siddhi.query.api.definition.StreamDefinition convertToSiddhiStreamDefinition(
-            StreamDefinition streamDefinition) {
+            StreamDefinition streamDefinition, StreamConfiguration streamConfiguration) {
         org.wso2.siddhi.query.api.definition.StreamDefinition siddhiStreamDefinition = new org.wso2.siddhi.query.api.definition.StreamDefinition();
-        siddhiStreamDefinition.name(streamDefinition.getName());
+        siddhiStreamDefinition.name(streamConfiguration.getSiddhiStreamName());
         if (streamDefinition.getMetaData() != null) {
             for (org.wso2.carbon.databridge.commons.Attribute attribute : streamDefinition.getMetaData()) {
-                siddhiStreamDefinition.attribute(attribute.getName(), convertToSiddhiAttribute(attribute).getType());
-            }
-        }
-
-        if (streamDefinition.getPayloadData() != null) {
-            for (org.wso2.carbon.databridge.commons.Attribute attribute : streamDefinition.getPayloadData()) {
-                siddhiStreamDefinition.attribute(attribute.getName(), convertToSiddhiAttribute(attribute).getType());
+                siddhiStreamDefinition.attribute(attribute.getName(), convertToSiddhiAttribute(attribute, EventProcessorConstants.META + EventProcessorConstants.ATTRIBUTE_SEPARATOR).getType());
             }
         }
 
         if (streamDefinition.getCorrelationData() != null) {
             for (org.wso2.carbon.databridge.commons.Attribute attribute : streamDefinition.getCorrelationData()) {
-                siddhiStreamDefinition.attribute(attribute.getName(), convertToSiddhiAttribute(attribute).getType());
+                siddhiStreamDefinition.attribute(attribute.getName(), convertToSiddhiAttribute(attribute, EventProcessorConstants.CORRELATION + EventProcessorConstants.ATTRIBUTE_SEPARATOR).getType());
+            }
+        }
+
+        if (streamDefinition.getPayloadData() != null) {
+            for (org.wso2.carbon.databridge.commons.Attribute attribute : streamDefinition.getPayloadData()) {
+                siddhiStreamDefinition.attribute(attribute.getName(), convertToSiddhiAttribute(attribute, "").getType());
             }
         }
         return siddhiStreamDefinition;
@@ -127,8 +132,7 @@ public class EventProcessorUtil {
 
     }
 
-    public static Attribute convertToSiddhiAttribute(
-            org.wso2.carbon.databridge.commons.Attribute attribute) {
+    public static Attribute convertToSiddhiAttribute(org.wso2.carbon.databridge.commons.Attribute attribute, String prefix) {
         Attribute.Type type;
         switch (attribute.getType()) {
             case LONG:
@@ -150,12 +154,12 @@ public class EventProcessorUtil {
                 type = Attribute.Type.STRING;
                 break;
         }
-        return new Attribute(attribute.getName(), type);
+        return new Attribute(prefix + attribute.getName(), type);
 
     }
 
     public static String formatXml(String unformattedXml) throws
-                                                          ExecutionPlanConfigurationException {
+            ExecutionPlanConfigurationException {
         try {
             final Document document = parseXmlFile(unformattedXml);
 
@@ -187,7 +191,6 @@ public class EventProcessorUtil {
             throw new ExecutionPlanConfigurationException(e);
         }
     }
-
 
     public static String getStreamId(String streamName, String version) {
         return streamName + EventProcessorConstants.STREAM_SEPARATOR + version;

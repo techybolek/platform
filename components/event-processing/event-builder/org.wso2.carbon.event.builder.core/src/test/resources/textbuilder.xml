@@ -19,7 +19,7 @@
   -->
 
 <eventBuilder name="textbuilder" traceEnabled="true" xmlns="http://wso2.org/carbon/eventbuilder">
-    <from transportAdaptorName="emailTransportAdaptor" transportAdaptorType="email">
+    <from eventAdaptorName="emailEventAdaptor" eventAdaptorType="email">
         <property name="email.in.subject">TestEmailService</property>
     </from>
     <mapping type="text">

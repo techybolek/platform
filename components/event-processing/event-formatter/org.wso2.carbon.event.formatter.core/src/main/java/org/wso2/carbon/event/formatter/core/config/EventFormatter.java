@@ -20,94 +20,111 @@ package org.wso2.carbon.event.formatter.core.config;
 
 
 import org.apache.log4j.Logger;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
-import org.wso2.carbon.event.formatter.core.EventFormatterListener;
-import org.wso2.carbon.event.formatter.core.EventSource;
+import org.wso2.carbon.event.formatter.core.EventFormatterSender;
 import org.wso2.carbon.event.formatter.core.exception.EventFormatterConfigurationException;
+import org.wso2.carbon.event.formatter.core.exception.EventFormatterValidationException;
 import org.wso2.carbon.event.formatter.core.internal.OutputMapper;
 import org.wso2.carbon.event.formatter.core.internal.ds.EventFormatterServiceValueHolder;
+import org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorService;
+import org.wso2.carbon.event.output.adaptor.core.config.OutputEventAdaptorConfiguration;
+import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorManagerService;
+import org.wso2.carbon.event.output.adaptor.manager.core.exception.OutputEventAdaptorManagerConfigurationException;
+import org.wso2.carbon.event.processor.api.send.EventProducer;
+import org.wso2.carbon.event.processor.api.send.exception.EventProducerException;
 import org.wso2.carbon.event.statistics.EventStatisticsMonitor;
-import org.wso2.carbon.output.transport.adaptor.core.OutputTransportAdaptorService;
-import org.wso2.carbon.output.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
-import org.wso2.carbon.output.transport.adaptor.manager.core.OutputTransportAdaptorManagerService;
-import org.wso2.carbon.output.transport.adaptor.manager.core.exception.OutputTransportAdaptorManagerConfigurationException;
+import org.wso2.carbon.event.stream.manager.core.exception.EventStreamConfigurationException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class EventFormatter {
 
     private static final String EVENT_TRACE_LOGGER = "EVENT_TRACE_LOGGER";
+    private final boolean traceEnabled;
+    private final boolean statisticsEnabled;
+    List<String> dynamicMessagePropertyList = new ArrayList<String>();
     private Logger trace = Logger.getLogger(EVENT_TRACE_LOGGER);
     private EventFormatterConfiguration eventFormatterConfiguration = null;
     private int tenantId;
     private Map<String, Integer> propertyPositionMap = new TreeMap<String, Integer>();
-    private OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration = null;
+    private OutputEventAdaptorConfiguration outputEventAdaptorConfiguration = null;
     private OutputMapper outputMapper = null;
     private Object[] eventObject = null;
     private boolean metaFlag = false;
     private boolean correlationFlag = false;
     private boolean payloadFlag = false;
-    private List<EventSource> eventSourceList = null;
-    private EventFormatterListener eventFormatterListener = null;
+    private List<EventProducer> eventProducerList = null;
+    private EventFormatterSender eventFormatterSender = null;
     private String streamId = null;
-    private final boolean traceEnabled;
-    private final boolean statisticsEnabled;
     private EventStatisticsMonitor statisticsMonitor;
     private String beforeTracerPrefix;
     private String afterTracerPrefix;
     private boolean dynamicMessagePropertyEnabled = false;
-    List<String> dynamicMessagePropertyList = new ArrayList<String>();
+    private boolean customMappingEnabled = false;
 
-    public EventFormatter(EventFormatterConfiguration eventFormatterConfiguration,
-                          int tenantId) throws EventFormatterConfigurationException {
+    public EventFormatter(EventFormatterConfiguration eventFormatterConfiguration) throws EventFormatterConfigurationException {
 
         this.eventFormatterConfiguration = eventFormatterConfiguration;
-        this.tenantId = tenantId;
+        this.customMappingEnabled = eventFormatterConfiguration.getOutputMapping().isCustomMappingEnabled();
+        this.tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         String inputStreamName = eventFormatterConfiguration.getFromStreamName();
         String inputStreamVersion = eventFormatterConfiguration.getFromStreamVersion();
-        eventSourceList = getEventSource(inputStreamName, inputStreamVersion, tenantId);
+        eventProducerList = getEventProducers();
 
-        if (eventSourceList == null) {
-            throw new EventFormatterConfigurationException("There is no any event source for the corresponding stream name or version : " + inputStreamName + "-" + inputStreamVersion);
-        }
         //Stream Definition must same for any event source, There are cannot be different stream definition for same stream id in multiple event sourced
-        StreamDefinition inputStreamDefinition = eventSourceList.get(0).getStreamDefinition(inputStreamName, inputStreamVersion, tenantId);
+        StreamDefinition inputStreamDefinition = null;
+
+        if (eventProducerList == null) {
+            throw new EventFormatterConfigurationException("There is no any event producers exist");
+        } else {
+            try {
+                inputStreamDefinition = EventFormatterServiceValueHolder.getEventStreamService().getStreamDefinitionFromStore(inputStreamName, inputStreamVersion, tenantId);
+
+            } catch (EventStreamConfigurationException e) {
+                throw new EventFormatterConfigurationException("Cannot retrieve the stream definition from stream store : " + e.getMessage());
+            }
+        }
+
+        if (inputStreamDefinition == null) {
+            throw new EventFormatterConfigurationException("There is no any event senders for the corresponding stream name or version : " + inputStreamName + "-" + inputStreamVersion);
+        }
         this.eventObject = createEventTemplate(inputStreamDefinition);
         this.streamId = inputStreamDefinition.getStreamId();
         createPropertyPositionMap(inputStreamDefinition);
         outputMapper = EventFormatterServiceValueHolder.getMappingFactoryMap().get(eventFormatterConfiguration.getOutputMapping().getMappingType()).constructOutputMapper(eventFormatterConfiguration, propertyPositionMap, tenantId);
-        setOutputTransportAdaptorConfiguration(tenantId);
-        eventFormatterListener = new EventFormatterListener(this);
+        setOutputEventAdaptorConfiguration(tenantId);
+        eventFormatterSender = new EventFormatterSender(this);
 
-        Map<String, String> messageProperties = eventFormatterConfiguration.getToPropertyConfiguration().getOutputTransportAdaptorMessageConfiguration().getOutputMessageProperties();
-        Iterator it = messageProperties.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pairs = (Map.Entry) it.next();
-            getDynamicOutputMessageProperties(pairs.getValue().toString());
+        Map<String, String> messageProperties = eventFormatterConfiguration.getToPropertyConfiguration().getOutputEventAdaptorMessageConfiguration().getOutputMessageProperties();
+        for (Map.Entry<String, String> entry : messageProperties.entrySet()) {
+            Map.Entry pairs = (Map.Entry) entry;
+            getDynamicOutputMessageProperties(pairs.getValue() != null ? pairs.getValue().toString():"");
         }
 
         if (dynamicMessagePropertyList.size() > 0) {
             dynamicMessagePropertyEnabled = true;
         }
 
-        for (EventSource eventSource : eventSourceList) {
-            eventSource.subscribe(tenantId, streamId, eventFormatterListener);
+        for (EventProducer eventProducer : eventProducerList) {
+            try {
+                eventProducer.subscribe(streamId, eventFormatterSender);
+            } catch (EventProducerException e) {
+                throw new EventFormatterValidationException("Could not subscribe to event producer for stream id : " + streamId, streamId);
+            }
         }
 
         this.traceEnabled = eventFormatterConfiguration.isEnableTracing();
         this.statisticsEnabled = eventFormatterConfiguration.isEnableStatistics();
         if (statisticsEnabled) {
             this.statisticsMonitor = EventFormatterServiceValueHolder.getEventStatisticsService().getEventStatisticMonitor(tenantId, EventFormatterConstants.EVENT_FORMATTER, eventFormatterConfiguration.getEventFormatterName(), null);
-            this.beforeTracerPrefix = tenantId + ":" + EventFormatterConstants.EVENT_FORMATTER + ":" + eventFormatterConfiguration.getFromStreamName() + ", before processing " + System.getProperty("line.separator");
-            this.afterTracerPrefix = tenantId + ":" + EventFormatterConstants.EVENT_FORMATTER + ":" + eventFormatterConfiguration.getFromStreamName() + ", after processing " + System.getProperty("line.separator");
+        }
+        if (traceEnabled) {
+            this.beforeTracerPrefix = "TenantId=" + tenantId + " : " + EventFormatterConstants.EVENT_FORMATTER + " : " + eventFormatterConfiguration.getFromStreamName() + ", before processing " + System.getProperty("line.separator");
+            this.afterTracerPrefix = "TenantId=" + tenantId + " : " + EventFormatterConstants.EVENT_FORMATTER + " : " + eventFormatterConfiguration.getFromStreamName() + ", after processing " + System.getProperty("line.separator");
         }
     }
 
@@ -115,11 +132,12 @@ public class EventFormatter {
         return eventFormatterConfiguration;
     }
 
-    public void sendEvent(Object inObject) throws EventFormatterConfigurationException {
+    public void sendEventData(Object inObject) throws EventFormatterConfigurationException {
 
+        Object outObject;
         if (traceEnabled) {
             if (inObject instanceof Object[]) {
-                trace.info(beforeTracerPrefix + Arrays.toString((Object[]) inObject));
+                trace.info(beforeTracerPrefix + Arrays.deepToString((Object[]) inObject));
             } else {
                 trace.info(beforeTracerPrefix + inObject);
             }
@@ -128,22 +146,26 @@ public class EventFormatter {
             statisticsMonitor.incrementResponse();
         }
 
-        Object outObject = outputMapper.convert(inObject);
+        if (customMappingEnabled) {
+            outObject = outputMapper.convertToMappedInputEvent(inObject);
+        } else {
+            outObject = outputMapper.convertToTypedInputEvent(inObject);
+        }
 
         if (traceEnabled) {
             if (outObject instanceof Object[]) {
-                trace.info(afterTracerPrefix + Arrays.toString((Object[]) outObject));
+                trace.info(afterTracerPrefix + Arrays.deepToString((Object[]) outObject));
             } else {
                 trace.info(afterTracerPrefix + outObject);
             }
         }
 
         if (dynamicMessagePropertyEnabled) {
-            changeDynamicTransportMessageProperties(inObject);
+            changeDynamicEventAdaptorMessageProperties(inObject);
         }
 
-        OutputTransportAdaptorService transportAdaptorService = EventFormatterServiceValueHolder.getOutputTransportAdaptorService();
-        transportAdaptorService.publish(outputTransportAdaptorConfiguration, eventFormatterConfiguration.getToPropertyConfiguration().getOutputTransportAdaptorMessageConfiguration(), outObject, tenantId);
+        OutputEventAdaptorService eventAdaptorService = EventFormatterServiceValueHolder.getOutputEventAdaptorService();
+        eventAdaptorService.publish(outputEventAdaptorConfiguration, eventFormatterConfiguration.getToPropertyConfiguration().getOutputEventAdaptorMessageConfiguration(), outObject, tenantId);
 
     }
 
@@ -169,16 +191,17 @@ public class EventFormatter {
             count += payloadData.length;
         }
 
-        sendEvent(eventObject);
+        sendEventData(eventObject);
     }
 
-    private void setOutputTransportAdaptorConfiguration(int tenantId) {
-        OutputTransportAdaptorManagerService transportAdaptorManagerService = EventFormatterServiceValueHolder.getOutputTransportAdaptorManagerService();
+    private void setOutputEventAdaptorConfiguration(int tenantId)
+            throws EventFormatterConfigurationException {
+        OutputEventAdaptorManagerService eventAdaptorManagerService = EventFormatterServiceValueHolder.getOutputEventAdaptorManagerService();
 
         try {
-            this.outputTransportAdaptorConfiguration = transportAdaptorManagerService.getActiveOutputTransportAdaptorConfiguration(eventFormatterConfiguration.getToPropertyConfiguration().getTransportAdaptorName(), tenantId);
-        } catch (OutputTransportAdaptorManagerConfigurationException e) {
-            throw new EventFormatterConfigurationException("Error while retrieving the output transport adaptor configuration of : " + eventFormatterConfiguration.getToPropertyConfiguration().getTransportAdaptorName(), e);
+            this.outputEventAdaptorConfiguration = eventAdaptorManagerService.getActiveOutputEventAdaptorConfiguration(eventFormatterConfiguration.getToPropertyConfiguration().getEventAdaptorName(), tenantId);
+        } catch (OutputEventAdaptorManagerConfigurationException e) {
+            throw new EventFormatterConfigurationException("Error while retrieving the output event adaptor configuration of : " + eventFormatterConfiguration.getToPropertyConfiguration().getEventAdaptorName(), e);
         }
 
     }
@@ -211,24 +234,8 @@ public class EventFormatter {
         }
     }
 
-    private List<EventSource> getEventSource(String streamName, String streamVersion,
-                                             int tenantId) {
-        List<EventSource> eventSourceList = EventFormatterServiceValueHolder.getEventSourceList();
-
-        List<EventSource> eventSources = new ArrayList<EventSource>();
-        Iterator<EventSource> eventSourceIterator = eventSourceList.iterator();
-        for (; eventSourceIterator.hasNext(); ) {
-            EventSource currentEventSource = eventSourceIterator.next();
-            List<String> streamList = currentEventSource.getAllStreamId(tenantId);
-            Iterator<String> stringIterator = streamList.iterator();
-            for (; stringIterator.hasNext(); ) {
-                String stream = stringIterator.next();
-                if (stream.equals(streamName + ":" + streamVersion)) {
-                    eventSources.add(currentEventSource);
-                }
-            }
-        }
-        return eventSources;
+    private List<EventProducer> getEventProducers() {
+        return EventFormatterServiceValueHolder.getEventProducerList();
     }
 
     private Object[] createEventTemplate(StreamDefinition inputStreamDefinition) {
@@ -254,12 +261,12 @@ public class EventFormatter {
         return streamId;
     }
 
-    public List<EventSource> getEventSourceList() {
-        return eventSourceList;
+    public List<EventProducer> getEventProducerList() {
+        return eventProducerList;
     }
 
-    public EventFormatterListener getEventFormatterListener() {
-        return eventFormatterListener;
+    public EventFormatterSender getEventFormatterSender() {
+        return eventFormatterSender;
     }
 
     private List<String> getDynamicOutputMessageProperties(String messagePropertyValue) {
@@ -274,32 +281,32 @@ public class EventFormatter {
         return dynamicMessagePropertyList;
     }
 
-    private void changeDynamicTransportMessageProperties(Object obj) {
+    private void changeDynamicEventAdaptorMessageProperties(Object obj) {
         Object[] inputObjArray = (Object[]) obj;
 
         for (String dynamicMessageProperty : dynamicMessagePropertyList) {
             if (inputObjArray.length != 0) {
                 int position = propertyPositionMap.get(dynamicMessageProperty);
-                changePropertyValue(position,dynamicMessageProperty,obj);
+                changePropertyValue(position, dynamicMessageProperty, obj);
             }
         }
     }
 
-    private void changePropertyValue(int position,String messageProperty,Object obj){
+    private void changePropertyValue(int position, String messageProperty, Object obj) {
         Object[] inputObjArray = (Object[]) obj;
-        Map<String, String> outputMessageProperties = eventFormatterConfiguration.getToPropertyConfiguration().getOutputTransportAdaptorMessageConfiguration().getOutputMessageProperties();
+        Map<String, String> outputMessageProperties = eventFormatterConfiguration.getToPropertyConfiguration().getOutputEventAdaptorMessageConfiguration().getOutputMessageProperties();
 
         List<String> keys = new ArrayList<String>();
 
         for (Map.Entry<String, String> entry : outputMessageProperties.entrySet()) {
-            String mapValue ="{{"+messageProperty+"}}";
+            String mapValue = "{{" + messageProperty + "}}";
             if (mapValue.equals(entry.getValue())) {
                 keys.add(entry.getKey());
             }
         }
 
-        for (String key : keys){
-            outputMessageProperties.put(key,inputObjArray[position].toString());
+        for (String key : keys) {
+            outputMessageProperties.put(key, inputObjArray[position].toString());
         }
 
     }

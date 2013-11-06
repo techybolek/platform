@@ -34,46 +34,55 @@ public class SiddhiInputEventDispatcher implements EventConsumer {
     private Logger trace = Logger.getLogger(EventProcessorConstants.EVENT_TRACE_LOGGER);
     private static Log log = LogFactory.getLog(SiddhiInputEventDispatcher.class);
 
+    private final String streamId;
     private InputHandler inputHandler;
     private Object owner;
+    private final int tenantId;
     private final boolean traceEnabled;
     private final boolean statisticsEnabled;
     private EventStatisticsMonitor statisticsMonitor;
-    private String tracerPrefix ="";
+    private String tracerPrefix = "";
 
-    public SiddhiInputEventDispatcher(InputHandler inputHandler, ExecutionPlanConfiguration executionPlanConfiguration, int tenantId) {
+    public SiddhiInputEventDispatcher(String streamId, InputHandler inputHandler, ExecutionPlanConfiguration executionPlanConfiguration, int tenantId) {
+        this.streamId = streamId;
         this.inputHandler = inputHandler;
         this.owner = executionPlanConfiguration;
+        this.tenantId = tenantId;
         this.traceEnabled = executionPlanConfiguration.isTracingEnabled();
         this.statisticsEnabled = executionPlanConfiguration.isStatisticsEnabled();
         if (statisticsEnabled) {
-            statisticsMonitor = EventProcessorValueHolder.getEventStatisticsService().getEventStatisticMonitor(tenantId, EventProcessorConstants.EVENT_PROCESSOR, executionPlanConfiguration.getName(), inputHandler.getStreamId());
-            this.tracerPrefix =tenantId+":"+EventProcessorConstants.EVENT_PROCESSOR+":"+executionPlanConfiguration.getName()+","+inputHandler.getStreamId()+", before processing "+System.getProperty("line.separator");
+            statisticsMonitor = EventProcessorValueHolder.getEventStatisticsService().getEventStatisticMonitor(tenantId, EventProcessorConstants.EVENT_PROCESSOR, executionPlanConfiguration.getName(), streamId +" ("+inputHandler.getStreamId()+")");
+        }
+        if (traceEnabled) {
+            this.tracerPrefix = "TenantId=" + tenantId + " : " + EventProcessorConstants.EVENT_PROCESSOR + " : " + executionPlanConfiguration.getName() + "," + streamId + " ("+inputHandler.getStreamId()+"), before processing " + System.getProperty("line.separator");
         }
     }
 
     @Override
-    public void consumeEvents(Object[] events) {
-        try {
-            if (traceEnabled) {
-                trace.info(tracerPrefix + Arrays.toString(events));
-            }
-            if (statisticsEnabled) {
-                for (Object obj : events) {
-                    statisticsMonitor.incrementRequest();
-                }
-            }
-            inputHandler.send(events);
-        } catch (InterruptedException e) {
-            log.error("Error in dispatching events " + events + " to Siddhi stream :" + inputHandler.getStreamId());
+    public void consumeEvents(Object[][] events) {
+
+        if (traceEnabled) {
+            trace.info(tracerPrefix + Arrays.deepToString(events));
         }
+
+        for (Object[] eventData : events) {
+            if (statisticsEnabled) {
+                statisticsMonitor.incrementRequest();
+            }
+            try {
+                inputHandler.send(eventData);
+            } catch (InterruptedException e) {
+                log.error("Error in dispatching event data " + Arrays.deepToString(eventData) + " to Siddhi stream :" + inputHandler.getStreamId());
+            }
+        }
+
     }
 
     @Override
     public void consumeEvents(Event[] events) {
         try {
             if (traceEnabled) {
-                trace.info(tracerPrefix + Arrays.toString(events));
+                trace.info(tracerPrefix + Arrays.deepToString(events));
             }
             if (statisticsEnabled) {
                 for (Object obj : events) {
@@ -82,7 +91,37 @@ public class SiddhiInputEventDispatcher implements EventConsumer {
             }
             inputHandler.send(events);
         } catch (InterruptedException e) {
-            log.error("Error in dispatching events " + events + " to Siddhi stream :" + inputHandler.getStreamId());
+            log.error("Error in dispatching events " + Arrays.deepToString(events) + " to Siddhi stream :" + inputHandler.getStreamId());
+        }
+    }
+
+    @Override
+    public void consumeEvent(Object[] eventData) {
+        try {
+            if (traceEnabled) {
+                trace.info(tracerPrefix + Arrays.deepToString(eventData));
+            }
+            if (statisticsEnabled) {
+                statisticsMonitor.incrementRequest();
+            }
+            inputHandler.send(eventData);
+        } catch (InterruptedException e) {
+            log.error("Error in dispatching event data " + Arrays.deepToString(eventData) + " to Siddhi stream :" + inputHandler.getStreamId());
+        }
+    }
+
+    @Override
+    public void consumeEvent(Event event) {
+        try {
+            if (traceEnabled) {
+                trace.info(tracerPrefix + event);
+            }
+            if (statisticsEnabled) {
+                statisticsMonitor.incrementRequest();
+            }
+            inputHandler.send(event);
+        } catch (InterruptedException e) {
+            log.error("Error in dispatching event " + event + " to Siddhi stream :" + inputHandler.getStreamId());
         }
     }
 

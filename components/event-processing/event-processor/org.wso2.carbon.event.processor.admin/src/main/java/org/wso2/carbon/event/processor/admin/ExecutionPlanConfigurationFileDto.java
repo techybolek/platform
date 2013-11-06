@@ -2,7 +2,7 @@ package org.wso2.carbon.event.processor.admin;
 
 public class ExecutionPlanConfigurationFileDto {
 
-    private String path;
+    private String fileName;
     private String name;
     private String status;
     private String deploymentStatusMessage;
@@ -15,12 +15,12 @@ public class ExecutionPlanConfigurationFileDto {
         this.deploymentStatusMessage = deploymentStatusMessage;
     }
 
-    public String getPath() {
-        return path;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getName() {

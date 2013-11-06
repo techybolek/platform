@@ -19,51 +19,81 @@
 package org.wso2.carbon.event.builder.core.internal.util.helper;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axis2.deployment.DeploymentException;
+import org.apache.axis2.deployment.repository.util.DeploymentFileData;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.event.builder.core.EventBuilderDeployer;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
+import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
 import org.wso2.carbon.event.builder.core.internal.util.XmlFormatter;
-import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.*;
 
 public class EventBuilderConfigurationFileSystemInvoker {
     private static final Log log = LogFactory.getLog(EventBuilderConfigurationFileSystemInvoker.class);
 
-    public static void saveConfigurationToFileSystem(
-            EventBuilderConfiguration eventBuilderConfiguration,
-            String filePath)
+    public static void save(
+            OMElement eventBuilderConfigOMElement,
+            String fileName, AxisConfiguration axisConfiguration)
             throws EventBuilderConfigurationException {
-        String inputMappingType = eventBuilderConfiguration.getInputMapping().getMappingType();
-        OMElement ebConfigElement = EventBuilderConfigHelper.getEventBuilderConfigBuilder(inputMappingType).eventBuilderConfigurationToOM(eventBuilderConfiguration);
-        save(ebConfigElement.toString(), filePath);
+        saveAndDeploy(eventBuilderConfigOMElement.toString(), fileName, axisConfiguration);
     }
 
-    public static void save(String eventBuilderConfigXml, String ebConfigFilePath) {
-        String filename = new File(ebConfigFilePath).getName();
+    public static void saveAndDeploy(String eventBuilderConfigXml, String fileName, AxisConfiguration axisConfiguration) throws EventBuilderConfigurationException {
+        EventBuilderDeployer eventBuilderDeployer = EventBuilderConfigHelper.getEventBuilderDeployer(axisConfiguration);
+        String filePath = getFilePathFromFilename(fileName, axisConfiguration);
         try {
             /* save contents to .xml file */
-            BufferedWriter out = new BufferedWriter(new FileWriter(ebConfigFilePath));
-            out.write(XmlFormatter.format(eventBuilderConfigXml));
+            BufferedWriter out = new BufferedWriter(new FileWriter(filePath));
+            String xmlContent = XmlFormatter.format(eventBuilderConfigXml);
+            eventBuilderDeployer.getDeployedEventBuilderFilePaths().add(filePath);
+            out.write(xmlContent);
             out.close();
-            log.info("Event builder configuration saved to the filesystem :" + filename);
+            log.info("Event builder configuration saved to the filesystem :" + fileName);
+            DeploymentFileData deploymentFileData = new DeploymentFileData(new File(filePath));
+            eventBuilderDeployer.executeManualDeployment(deploymentFileData);
         } catch (IOException e) {
-            log.error("Error while saving event builder configuration: " + filename, e);
+            eventBuilderDeployer.getDeployedEventBuilderFilePaths().remove(filePath);
+            log.error("Error while saving event builder configuration: " + fileName, e);
         }
     }
 
-    public static void deleteConfigurationFromFileSystem(String filePath)
-            throws EventBuilderConfigurationException {
+    public static void save(String eventBuilderConfigXml, String fileName) throws EventBuilderConfigurationException {
+        String filePath = getFilePathFromFilename(fileName);
         try {
+            /* save contents to .xml file */
+            BufferedWriter out = new BufferedWriter(new FileWriter(filePath));
+            String xmlContent = XmlFormatter.format(eventBuilderConfigXml);
+            out.write(xmlContent);
+            out.close();
+            log.info("Event builder configuration saved to the filesystem :" + fileName);
+        } catch (IOException e) {
+            log.error("Error while saving event builder configuration: " + fileName, e);
+        }
+
+    }
+
+    public static void delete(String fileName, AxisConfiguration axisConfiguration)
+            throws EventBuilderConfigurationException {
+
+        try {
+            String filePath = getFilePathFromFilename(fileName, axisConfiguration);
             File file = new File(filePath);
             String filename = file.getName();
             if (file.exists()) {
+                EventBuilderDeployer eventBuilderDeployer = EventBuilderConfigHelper.getEventBuilderDeployer(axisConfiguration);
+                eventBuilderDeployer.getUndeployedEventBuilderFilePaths().add(filePath);
                 boolean fileDeleted = file.delete();
                 if (!fileDeleted) {
                     log.error("Could not delete " + filename);
+                    eventBuilderDeployer.getUndeployedEventBuilderFilePaths().remove(filePath);
                 } else {
                     log.info("Event builder configuration deleted from the file system :" + filename);
+                    eventBuilderDeployer.executeManualUndeployment(filePath);
                 }
             }
         } catch (Exception e) {
@@ -71,13 +101,24 @@ public class EventBuilderConfigurationFileSystemInvoker {
         }
     }
 
+    public static boolean isFileExists(String fileName, AxisConfiguration axisConfiguration) {
+        String filePath = getFilePathFromFilename(fileName, axisConfiguration);
+        File file = new File(filePath);
+        return file.exists();
+    }
 
-    public static String readEventBuilderConfigurationFile(String filePath)
+    public static boolean isFileExists(String fileName) {
+        String filePath = getFilePathFromFilename(fileName);
+        File file = new File(filePath);
+        return file.exists();
+    }
+
+    public static String readEventBuilderConfigurationFile(String fileName, AxisConfiguration axisConfiguration)
             throws EventBuilderConfigurationException {
         BufferedReader bufferedReader = null;
         StringBuilder stringBuilder = new StringBuilder();
         try {
-            bufferedReader = new BufferedReader(new FileReader(filePath));
+            bufferedReader = new BufferedReader(new FileReader(getFilePathFromFilename(fileName, axisConfiguration)));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line).append("\n");
@@ -98,4 +139,24 @@ public class EventBuilderConfigurationFileSystemInvoker {
         return stringBuilder.toString().trim();
     }
 
+    public static void reload(String fileName, AxisConfiguration axisConfiguration) throws EventBuilderConfigurationException {
+        EventBuilderDeployer deployer = EventBuilderConfigHelper.getEventBuilderDeployer(axisConfiguration);
+        try {
+            String filePath = getFilePathFromFilename(fileName, axisConfiguration);
+            deployer.processUndeployment(filePath);
+            deployer.processDeployment(new DeploymentFileData(new File(filePath)));
+        } catch (DeploymentException e) {
+            throw new EventBuilderConfigurationException(e);
+        }
+    }
+
+    private static String getFilePathFromFilename(String filename, AxisConfiguration axisConfiguration) {
+        return new File(axisConfiguration.getRepository().getPath()).getAbsolutePath() + File.separator + EventBuilderConstants.EB_CONFIG_DIRECTORY + File.separator + filename;
+    }
+
+    private static String getFilePathFromFilename(String filename) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String repositoryPath = MultitenantUtils.getAxis2RepositoryPath(tenantId);
+        return new File(repositoryPath).getAbsolutePath() + File.separator + EventBuilderConstants.EB_CONFIG_DIRECTORY + File.separator + filename;
+    }
 }

@@ -18,42 +18,14 @@
 
 package org.wso2.carbon.event.builder.core.internal.type.json;
 
-import org.wso2.carbon.event.builder.core.config.InputMapping;
-import org.wso2.carbon.event.builder.core.internal.config.InputMappingAttribute;
+import org.wso2.carbon.event.builder.core.internal.type.AbstractInputMapping;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class JsonInputMapping implements InputMapping {
-
-    private List<InputMappingAttribute> inputMappingAttributes;
-    private boolean batchProcessingEnabled = false;
-
-    public JsonInputMapping() {
-        this.inputMappingAttributes = new ArrayList<InputMappingAttribute>();
-    }
-
-    public boolean isBatchProcessingEnabled() {
-        return batchProcessingEnabled;
-    }
-
-    public void setBatchProcessingEnabled(boolean batchProcessingEnabled) {
-        this.batchProcessingEnabled = batchProcessingEnabled;
-    }
-
-    public List<InputMappingAttribute> getInputMappingAttributes() {
-        return inputMappingAttributes;
-    }
-
-    public void addInputMappingAttribute(InputMappingAttribute inputMappingAttribute) {
-        inputMappingAttributes.add(inputMappingAttribute);
-    }
+public class JsonInputMapping extends AbstractInputMapping {
 
     @Override
     public String getMappingType() {
         return EventBuilderConstants.EB_JSON_MAPPING_TYPE;
     }
-
 
 }

@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.wso2.carbon.event.processor.core.ExecutionPlanConfiguration;
+import org.wso2.carbon.event.processor.core.exception.ExecutionPlanConfigurationException;
 import org.wso2.carbon.event.processor.core.internal.util.helper.EventProcessorConfigurationHelper;
 
 import javax.xml.stream.XMLInputFactory;
@@ -27,6 +28,13 @@ public class XmlValidationTestCase {
         OMElement out = EventProcessorConfigurationHelper.toOM(config);
         log.info(out.toString());
     }
+
+    @Test
+    public void testOMElementValidation() throws ExecutionPlanConfigurationException, DeploymentException {
+        OMElement om = getExecutionPlanOMElement(xmlFile);
+        EventProcessorConfigurationHelper.validateExecutionPlanConfiguration(om);
+    }
+
 
     private OMElement getExecutionPlanOMElement(String file)
             throws DeploymentException {

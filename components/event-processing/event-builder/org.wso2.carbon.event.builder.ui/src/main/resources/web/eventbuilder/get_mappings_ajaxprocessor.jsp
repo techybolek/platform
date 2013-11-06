@@ -23,15 +23,15 @@
 <%
     // get Event Stream Definition
     EventBuilderAdminServiceStub stub = EventBuilderUIUtils.getEventBuilderAdminService(config, session, request);
-    String transportAdaptorName = request.getParameter("transportAdaptorName");
+    String eventAdaptorName = request.getParameter("eventAdaptorName");
 
 %>
 
 <%
 
-    if (transportAdaptorName != null) {
+    if (eventAdaptorName != null) {
         String supportedMappings;
-        String[] mappingTypes = stub.getSupportedInputMappingTypes(transportAdaptorName);
+        String[] mappingTypes = stub.getSupportedInputMappingTypes(eventAdaptorName);
         supportedMappings = new Gson().toJson(mappingTypes);
 %>
 <%=supportedMappings%>

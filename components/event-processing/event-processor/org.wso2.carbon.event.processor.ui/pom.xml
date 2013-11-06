@@ -23,15 +23,16 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>event-processor</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.event.processor.ui</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0.0</version>
+    <version>1.1.0-SNAPSHOT</version>
     <name>WSO2 Carbon - Event Processor UI</name>
-    <description>This is a Carbon bundle that represent the event processor ui module.
+    <description>This is a Carbon bundle that represent the event processor UI module.
     </description>
     <url>http://wso2.org</url>
 
@@ -41,10 +42,10 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ui</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.event.processor.admin</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.wso2.carbon</groupId>-->
+            <!--<artifactId>org.wso2.carbon.event.processor.admin</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
@@ -57,6 +58,18 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.event.processor.stub</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.event.stream.manager.stub</artifactId>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.wso2.carbon</groupId>-->
+            <!--<artifactId>org.wso2.carbon.event.formatter.stub</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.wso2.carbon</groupId>-->
+            <!--<artifactId>org.wso2.carbon.event.builder.stub</artifactId>-->
+        <!--</dependency>-->
     </dependencies>
 
 
@@ -77,6 +90,7 @@
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.event.processor.stub.*,
+                            org.wso2.carbon.event.stream.manager.stub.*,
                             org.wso2.carbon.utils,
                             org.apache.axis2.*,
                             org.apache.axiom.*,

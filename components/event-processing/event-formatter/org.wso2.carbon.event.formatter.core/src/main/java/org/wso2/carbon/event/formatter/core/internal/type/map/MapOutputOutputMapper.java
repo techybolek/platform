@@ -37,7 +37,7 @@ public class MapOutputOutputMapper implements OutputMapper {
     public MapOutputOutputMapper(EventFormatterConfiguration eventFormatterConfiguration,
                                  Map<String, Integer> propertyPositionMap,
                                  int tenantId) throws
-                                               EventFormatterConfigurationException {
+            EventFormatterConfigurationException {
         this.eventFormatterConfiguration = eventFormatterConfiguration;
         this.propertyPositionMap = propertyPositionMap;
         validateStreamDefinitionWithOutputProperties();
@@ -60,19 +60,25 @@ public class MapOutputOutputMapper implements OutputMapper {
     }
 
     @Override
-    public Object convert(Object obj) {
+    public Object convertToMappedInputEvent(Object obj)
+            throws EventFormatterConfigurationException {
         Object[] inputObjArray = (Object[]) obj;
         Map<Object, Object> eventMapObject = new TreeMap<Object, Object>();
         MapOutputMapping mapOutputMapping = (MapOutputMapping) eventFormatterConfiguration.getOutputMapping();
         List<EventOutputProperty> outputPropertyConfiguration = mapOutputMapping.getOutputPropertyConfiguration();
 
-        if (outputPropertyConfiguration.size() != 0) {
+        if (outputPropertyConfiguration.size() != 0 && inputObjArray.length > 0) {
             for (EventOutputProperty eventOutputProperty : outputPropertyConfiguration) {
                 int position = propertyPositionMap.get(eventOutputProperty.getValueOf());
-                eventMapObject.put(eventOutputProperty.getValueOf(), inputObjArray[position]);
+                eventMapObject.put(eventOutputProperty.getName(), inputObjArray[position]);
             }
         }
         return eventMapObject;
+    }
+
+    @Override
+    public Object convertToTypedInputEvent(Object obj) throws EventFormatterConfigurationException {
+        throw new UnsupportedOperationException("This feature is not yet supported for MapOutputMapping");
     }
 
 }

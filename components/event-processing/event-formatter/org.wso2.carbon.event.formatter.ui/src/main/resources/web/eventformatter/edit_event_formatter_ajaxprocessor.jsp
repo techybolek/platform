@@ -27,7 +27,7 @@
 
         }
     }
-
-%>  <%=msg%>   <%
-
-%>
+    // Since JSP faithfully replicates all spaces, new lines encountered to HTML,
+    // and since msg is output as a response flag, please take care in editing
+    // the snippet surrounding print of msg.
+%><%=msg%><%%>

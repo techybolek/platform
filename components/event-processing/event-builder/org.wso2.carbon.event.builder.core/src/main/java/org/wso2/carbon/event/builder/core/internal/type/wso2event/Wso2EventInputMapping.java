@@ -18,52 +18,10 @@
 
 package org.wso2.carbon.event.builder.core.internal.type.wso2event;
 
-import org.wso2.carbon.event.builder.core.config.InputMapping;
-import org.wso2.carbon.event.builder.core.internal.config.InputMappingAttribute;
+import org.wso2.carbon.event.builder.core.internal.type.AbstractInputMapping;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class Wso2EventInputMapping implements InputMapping {
-
-    List<InputMappingAttribute> metaInputMappingAttributes;
-    List<InputMappingAttribute> correlationInputMappingAttributes;
-    List<InputMappingAttribute> payloadInputMappingAttributes;
-
-
-    public Wso2EventInputMapping() {
-        this.metaInputMappingAttributes = new ArrayList<InputMappingAttribute>();
-        this.correlationInputMappingAttributes = new ArrayList<InputMappingAttribute>();
-        this.payloadInputMappingAttributes = new ArrayList<InputMappingAttribute>();
-    }
-
-    public void addMetaInputEventAttribute(
-            InputMappingAttribute inputMappingAttribute) {
-        this.metaInputMappingAttributes.add(inputMappingAttribute);
-    }
-
-    public void addCorrelationInputEventAttribute(
-            InputMappingAttribute inputMappingAttribute) {
-        this.correlationInputMappingAttributes.add(inputMappingAttribute);
-    }
-
-    public void addPayloadInputEventAttribute(
-            InputMappingAttribute inputMappingAttribute) {
-        this.payloadInputMappingAttributes.add(inputMappingAttribute);
-    }
-
-    public List<InputMappingAttribute> getMetaInputMappingAttributes() {
-        return metaInputMappingAttributes;
-    }
-
-    public List<InputMappingAttribute> getCorrelationInputMappingAttributes() {
-        return correlationInputMappingAttributes;
-    }
-
-    public List<InputMappingAttribute> getPayloadInputMappingAttributes() {
-        return payloadInputMappingAttributes;
-    }
+public class Wso2EventInputMapping extends AbstractInputMapping {
 
     @Override
     public String getMappingType() {

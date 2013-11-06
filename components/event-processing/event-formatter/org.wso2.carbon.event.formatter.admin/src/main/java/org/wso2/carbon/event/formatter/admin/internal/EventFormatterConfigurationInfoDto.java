@@ -24,41 +24,35 @@ package org.wso2.carbon.event.formatter.admin.internal;
 
 public class EventFormatterConfigurationInfoDto {
 
-    private String EventFormatterName;
-
-    private String MappingType;
-
-    private String outTransportAdaptorName;
-
+    private String eventFormatterName;
+    private String mappingType;
+    private String outEventAdaptorName;
     private String inputStreamId;
-
     private boolean enableTracing;
-
     private boolean enableStats;
 
-
     public String getEventFormatterName() {
-        return EventFormatterName;
+        return eventFormatterName;
     }
 
     public void setEventFormatterName(String eventFormatterName) {
-        EventFormatterName = eventFormatterName;
+        this.eventFormatterName = eventFormatterName;
     }
 
     public String getMappingType() {
-        return MappingType;
+        return mappingType;
     }
 
     public void setMappingType(String mappingType) {
-        MappingType = mappingType;
+        this.mappingType = mappingType;
     }
 
-    public String getOutTransportAdaptorName() {
-        return outTransportAdaptorName;
+    public String getOutEventAdaptorName() {
+        return outEventAdaptorName;
     }
 
-    public void setOutTransportAdaptorName(String outTransportAdaptorName) {
-        this.outTransportAdaptorName = outTransportAdaptorName;
+    public void setOutEventAdaptorName(String outEventAdaptorName) {
+        this.outEventAdaptorName = outEventAdaptorName;
     }
 
     public String getInputStreamId() {

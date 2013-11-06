@@ -17,16 +17,14 @@
 package org.wso2.carbon.event.formatter.core.internal.util.helper;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.event.formatter.core.config.EventFormatterConstants;
 import org.wso2.carbon.event.formatter.core.exception.EventFormatterConfigurationException;
 import org.wso2.carbon.event.formatter.core.exception.EventFormatterValidationException;
 import org.wso2.carbon.event.formatter.core.internal.ds.EventFormatterServiceValueHolder;
-import org.wso2.carbon.output.transport.adaptor.core.OutputTransportAdaptorService;
-import org.wso2.carbon.output.transport.adaptor.core.Property;
-import org.wso2.carbon.output.transport.adaptor.core.message.MessageDto;
-import org.wso2.carbon.output.transport.adaptor.core.message.config.OutputTransportAdaptorMessageConfiguration;
+import org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorService;
+import org.wso2.carbon.event.output.adaptor.core.Property;
+import org.wso2.carbon.event.output.adaptor.core.message.MessageDto;
+import org.wso2.carbon.event.output.adaptor.core.message.config.OutputEventAdaptorMessageConfiguration;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -39,7 +37,7 @@ public class EventFormatterConfigurationHelper {
                                                                                               EventFormatterConfigurationException,
                                                                                               EventFormatterValidationException {
 
-        if (eventFormatterOMElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_NAME)) == null) {
+        if (eventFormatterOMElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_NAME)) == null || eventFormatterOMElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_NAME)).trim().isEmpty()) {
             throw new EventFormatterConfigurationException("Need to have an eventFormatter name");
         }
 
@@ -106,22 +104,22 @@ public class EventFormatterConfigurationHelper {
         if (count != 1) {
             throw new EventFormatterConfigurationException("There can be only one 'To' element in Event Formatter configuration file.");
         }
-        String toTransportAdaptorType = toPropertyOMElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_TA_TYPE));
-        String toTransportAdaptorName = toPropertyOMElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_TA_NAME));
+        String toEventAdaptorType = toPropertyOMElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_TA_TYPE));
+        String toEventAdaptorName = toPropertyOMElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_TA_NAME));
 
-        if (toTransportAdaptorType == null || toTransportAdaptorName == null) {
-            throw new EventFormatterConfigurationException("There should be a transport adaptor name and transport adaptor type in Formatter configuration file.");
+        if (toEventAdaptorType == null || toEventAdaptorName == null) {
+            throw new EventFormatterConfigurationException("There should be a event adaptor name and event adaptor type in Formatter configuration file.");
         }
 
-        if (!validateToPropertyConfiguration(toPropertyOMElement, toTransportAdaptorType, toTransportAdaptorName)) {
-            throw new EventFormatterConfigurationException("To property does not contains all the required values for transport adaptor type " + toTransportAdaptorType);
+        if (!validateToPropertyConfiguration(toPropertyOMElement, toEventAdaptorType, toEventAdaptorName)) {
+            throw new EventFormatterConfigurationException("To property does not contains all the required values for event adaptor type " + toEventAdaptorType);
         }
     }
 
 
     private static boolean validateToPropertyConfiguration(OMElement toElement,
-                                                           String transportAdaptorType,
-                                                           String transportAdaptorName)
+                                                           String eventAdaptorType,
+                                                           String eventAdaptorName)
             throws EventFormatterConfigurationException {
 
         List<String> requiredProperties = new ArrayList<String>();
@@ -131,11 +129,11 @@ public class EventFormatterConfigurationHelper {
                 new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_PROPERTY)
         );
 
-        OutputTransportAdaptorService transportAdaptorService = EventFormatterServiceValueHolder.getOutputTransportAdaptorService();
-        MessageDto messageDto = transportAdaptorService.getTransportMessageDto(transportAdaptorType);
+        OutputEventAdaptorService eventAdaptorService = EventFormatterServiceValueHolder.getOutputEventAdaptorService();
+        MessageDto messageDto = eventAdaptorService.getEventAdaptorMessageDto(eventAdaptorType);
 
         if (messageDto == null) {
-            throw new EventFormatterValidationException("Transport Adaptor type : " + transportAdaptorType + " not loaded yet", transportAdaptorName);
+            throw new EventFormatterValidationException("Event Adaptor type : " + eventAdaptorType + " not loaded yet", eventAdaptorName);
         }
 
         List<Property> messagePropertyList = messageDto.getMessageOutPropertyList();
@@ -162,18 +160,18 @@ public class EventFormatterConfigurationHelper {
     }
 
 
-    public static OutputTransportAdaptorMessageConfiguration getOutputTransportMessageConfiguration(
-            String transportAdaptorTypeName) {
-        MessageDto messageDto = EventFormatterServiceValueHolder.getOutputTransportAdaptorService().getTransportMessageDto(transportAdaptorTypeName);
-        OutputTransportAdaptorMessageConfiguration outputTransportMessageConfiguration = null;
+    public static OutputEventAdaptorMessageConfiguration getOutputEventAdaptorMessageConfiguration(
+            String eventAdaptorTypeName) {
+        MessageDto messageDto = EventFormatterServiceValueHolder.getOutputEventAdaptorService().getEventAdaptorMessageDto(eventAdaptorTypeName);
+        OutputEventAdaptorMessageConfiguration outputEventAdaptorMessageConfiguration = null;
         if (messageDto != null && messageDto.getMessageOutPropertyList() != null) {
-            outputTransportMessageConfiguration = new OutputTransportAdaptorMessageConfiguration();
+            outputEventAdaptorMessageConfiguration = new OutputEventAdaptorMessageConfiguration();
             for (Property property : messageDto.getMessageOutPropertyList()) {
-                outputTransportMessageConfiguration.addOutputMessageProperty(property.getPropertyName(), property.getDefaultValue());
+                outputEventAdaptorMessageConfiguration.addOutputMessageProperty(property.getPropertyName(), property.getDefaultValue());
             }
         }
 
-        return outputTransportMessageConfiguration;
+        return outputEventAdaptorMessageConfiguration;
     }
 
     public static String getOutputMappingType(OMElement eventFormatterOMElement) {

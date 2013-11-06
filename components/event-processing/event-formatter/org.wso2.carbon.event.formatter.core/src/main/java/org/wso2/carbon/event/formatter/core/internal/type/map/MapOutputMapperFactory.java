@@ -21,6 +21,7 @@ import org.apache.axiom.om.OMFactory;
 import org.wso2.carbon.event.formatter.core.config.EventFormatterConfiguration;
 import org.wso2.carbon.event.formatter.core.config.OutputMapperFactory;
 import org.wso2.carbon.event.formatter.core.config.OutputMapping;
+import org.wso2.carbon.event.formatter.core.exception.EventFormatterConfigurationException;
 import org.wso2.carbon.event.formatter.core.internal.OutputMapper;
 
 import java.util.Map;
@@ -29,7 +30,7 @@ public class MapOutputMapperFactory implements OutputMapperFactory {
 
 
     @Override
-    public OutputMapping constructOutputMapping(OMElement omElement) {
+    public OutputMapping constructOutputMapping(OMElement omElement) throws EventFormatterConfigurationException {
         return MapMapperConfigurationBuilder.fromOM(omElement);
     }
 
@@ -41,7 +42,7 @@ public class MapOutputMapperFactory implements OutputMapperFactory {
     @Override
     public OutputMapper constructOutputMapper(
             EventFormatterConfiguration eventFormatterConfiguration,
-            Map<String, Integer> propertyPositionMap, int tenantId) {
+            Map<String, Integer> propertyPositionMap, int tenantId) throws EventFormatterConfigurationException {
         return new MapOutputOutputMapper(eventFormatterConfiguration, propertyPositionMap, tenantId);
     }
 }

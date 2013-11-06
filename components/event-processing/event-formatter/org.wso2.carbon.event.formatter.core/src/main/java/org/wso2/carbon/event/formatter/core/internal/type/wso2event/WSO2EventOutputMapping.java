@@ -25,7 +25,7 @@ import org.wso2.carbon.event.formatter.core.internal.config.EventOutputProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WSO2EventOutputMapping implements OutputMapping {
+public class WSO2EventOutputMapping extends OutputMapping {
 
     List<EventOutputProperty> metaWSO2EventOutputPropertyConfiguration;
 

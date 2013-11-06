@@ -32,7 +32,7 @@
         <tr fromElementKey="inputJsonMapping">
             <td colspan="2">
 
-                <h4><fmt:message key="jsonpath.expression.header"/></h4>
+                <h6><fmt:message key="jsonpath.expression.header"/></h6>
                 <table class="styledLeft noBorders spacer-bot"
                        id="inputJsonpathExprTable" style="display:none">
                     <thead>
@@ -60,19 +60,19 @@
                         <td>
                             <input type="text" id="inputPropertyValue"/>
                         </td>
-                        <td class="col-small"><fmt:message key="event.builder.property.name"/> :
+                        <td class="col-small"><fmt:message key="event.builder.property.valueof"/> :
                         </td>
                         <td>
                             <input type="text" id="inputPropertyName"/>
                         </td>
                         <td><fmt:message key="event.builder.property.type"/>:
                             <select id="inputPropertyType">
-                                <option value="java.lang.Integer">Integer</option>
-                                <option value="java.lang.Long">Long</option>
-                                <option value="java.lang.Double">Double</option>
-                                <option value="java.lang.Float">Float</option>
-                                <option value="java.lang.String">String</option>
-                                <option value="java.lang.Boolean">Boolean</option>
+                                <option value="int">int</option>
+                                <option value="long">long</option>
+                                <option value="double">double</option>
+                                <option value="float">float</option>
+                                <option value="string">string</option>
+                                <option value="boolean">boolean</option>
                             </select>
                         </td>
                         <td class="col-small"><fmt:message

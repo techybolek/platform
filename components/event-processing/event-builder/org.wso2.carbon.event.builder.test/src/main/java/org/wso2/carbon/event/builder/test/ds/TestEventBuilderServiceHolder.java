@@ -16,16 +16,21 @@
 package org.wso2.carbon.event.builder.test.ds;
 
 import org.wso2.carbon.event.builder.core.EventBuilderService;
-import org.wso2.carbon.input.transport.adaptor.core.InputTransportAdaptorService;
+import org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorService;
+import org.wso2.carbon.event.processor.api.receive.EventReceiver;
 import org.wso2.carbon.utils.ConfigurationContextService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * singleton class to hold the transport adaptor service
  */
 public final class TestEventBuilderServiceHolder {
     private static TestEventBuilderServiceHolder instance = new TestEventBuilderServiceHolder();
+    private static List<EventReceiver> eventReceiverList = new ArrayList<EventReceiver>();
     private EventBuilderService eventBuilderService;
-    private InputTransportAdaptorService inputTransportAdaptorService;
+    private InputEventAdaptorService inputEventAdaptorService;
     private ConfigurationContextService configurationContextService;
 
     private TestEventBuilderServiceHolder() {
@@ -35,12 +40,20 @@ public final class TestEventBuilderServiceHolder {
         return instance;
     }
 
-    public InputTransportAdaptorService getInputTransportAdaptorService() {
-        return inputTransportAdaptorService;
+    public static void addEventReceiver(EventReceiver eventReceiver) {
+        eventReceiverList.add(eventReceiver);
     }
 
-    public EventBuilderService getEventBuilderService() {
-        return eventBuilderService;
+    public static void removeEventReceiver(EventReceiver eventReceiver) {
+        eventReceiverList.remove(eventReceiver);
+    }
+
+    public static List<EventReceiver> getEventReceiverList() {
+        return eventReceiverList;
+    }
+
+    public InputEventAdaptorService getInputEventAdaptorService() {
+        return inputEventAdaptorService;
     }
 
     public ConfigurationContextService getConfigurationContextService() {
@@ -55,12 +68,16 @@ public final class TestEventBuilderServiceHolder {
         this.eventBuilderService = null;
     }
 
-    public void registerTransportAdaptorService(InputTransportAdaptorService transportAdaptorService) {
-        this.inputTransportAdaptorService = transportAdaptorService;
+    public EventBuilderService getEventBuilderService() {
+        return eventBuilderService;
     }
 
-    public void unregisterTransportAdaptorService(InputTransportAdaptorService transportAdaptorService) {
-        this.inputTransportAdaptorService = null;
+    public void registerInputEventAdaptorService(InputEventAdaptorService inputEventAdaptorService) {
+        this.inputEventAdaptorService = inputEventAdaptorService;
+    }
+
+    public void unregisterInputEventAdaptorService(InputEventAdaptorService inputEventAdaptorService) {
+        this.inputEventAdaptorService = null;
     }
 
     public void registerConfigurationContextService(

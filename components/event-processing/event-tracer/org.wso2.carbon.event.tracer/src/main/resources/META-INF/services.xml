@@ -20,12 +20,13 @@
         <description>
             Admin service to provide details of Trace messages.
         </description>
-	<parameter name="ServiceClass" locked="false">org.wso2.carbon.event.tracer.EventTracerAdminService</parameter>
+        <parameter name="ServiceClass" locked="false">org.wso2.carbon.event.tracer.EventTracerAdminService</parameter>
         <transports>
             <transport>https</transport>
         </transports>
     </service>
     <parameter name="adminService" locked="true">true</parameter>
     <parameter name="hiddenService" locked="true">true</parameter>
+    <parameter name="superTenantService" locked="true">true</parameter>
     <parameter name="AuthorizationAction" locked="true">/permission/admin/monitor/event</parameter>
 </serviceGroup>

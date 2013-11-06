@@ -24,15 +24,14 @@
     <table class="styledLeft noBorders spacer-bot"
            style="width:100%">
         <tbody>
-        <tr fromElementKey="inputXmlMapping">
+        <tr>
             <td colspan="2" class="middle-header">
                 <fmt:message key="event.builder.mapping.xml"/>
             </td>
         </tr>
-        <tr fromElementKey="inputXmlMapping">
+        <tr>
             <td colspan="2">
-
-                <h4><fmt:message key="xpath.prefix.header"/></h4>
+                <h6><fmt:message key="xpath.prefix.header"/></h6>
                 <table class="styledLeft noBorders spacer-bot" id="inputXpathPrefixTable"
                        style="display:none">
                     <thead>
@@ -71,10 +70,23 @@
             </td>
         </tr>
 
-        <tr fromElementKey="inputXmlMapping">
+
+        <tr>
+            <td colspan="2">
+                <table class="normal">
+                    <tbody>
+                    <tr>
+                        <td><fmt:message key="event.builder.parentselector.xpath"/>:</td>
+                        <td><input type="text" id="parentSelectorXpath"></td>
+                    </tr>
+                    </tbody>
+                </table>
+        </tr>
+
+        <tr>
             <td colspan="2">
 
-                <h4><fmt:message key="xpath.expression.header"/></h4>
+                <h6><fmt:message key="xpath.expression.header"/></h6>
                 <table class="styledLeft noBorders spacer-bot"
                        id="inputXpathExprTable" style="display:none">
                     <thead>
@@ -97,28 +109,28 @@
                     <tbody>
                     <tr>
                         <td class="col-small"><fmt:message
-                                key="event.builder.property.xpath"/> :
+                                key="event.builder.property.xpath"/>:
                         </td>
                         <td>
                             <input type="text" id="inputPropertyValue"/>
                         </td>
-                        <td class="col-small"><fmt:message key="event.builder.property.mappedto"/> :
+                        <td class="col-small"><fmt:message key="event.builder.property.mappedto"/>:
                         </td>
                         <td>
                             <input type="text" id="inputPropertyName"/>
                         </td>
-                        <td><fmt:message key="event.builder.property.type"/>:
-                            <select id="inputPropertyType">
-                                <option value="java.lang.Integer">Integer</option>
-                                <option value="java.lang.Long">Long</option>
-                                <option value="java.lang.Double">Double</option>
-                                <option value="java.lang.Float">Float</option>
-                                <option value="java.lang.String">String</option>
-                                <option value="java.lang.Boolean">Boolean</option>
+                        <td><fmt:message key="event.builder.property.type"/>: </td>
+                        <td> <select id="inputPropertyType">
+                                <option value="int">int</option>
+                                <option value="long">long</option>
+                                <option value="double">double</option>
+                                <option value="float">float</option>
+                                <option value="string">string</option>
+                                <option value="boolean">boolean</option>
                             </select>
                         </td>
                         <td class="col-small"><fmt:message
-                                key="event.builder.property.default"/></td>
+                                key="event.builder.property.default"/>:</td>
                         <td><input type="text" id="inputPropertyDefault"/></td>
                         <td><input type="button" class="button"
                                    value="<fmt:message key="add"/>"
@@ -129,18 +141,6 @@
                 </table>
             </td>
         </tr>
-        <tr>
-            <td colspan="2">
-                <table class="normal">
-                    <tbody>
-                    <tr>
-                        <td><fmt:message key="event.builder.batchprocessing.enabled"/></td>
-                        <td><input type="checkbox" id="batchProcessingEnabled"></td>
-                    </tr>
-                    </tbody>
-                </table>
-        </tr>
-
 
         </tbody>
     </table>

@@ -18,27 +18,13 @@
 
 package org.wso2.carbon.event.builder.core.internal.type.text;
 
-import org.wso2.carbon.event.builder.core.config.InputMapping;
-import org.wso2.carbon.event.builder.core.internal.config.InputMappingAttribute;
+import org.wso2.carbon.event.builder.core.internal.type.AbstractInputMapping;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class TextInputMapping implements InputMapping {
-
-    private List<InputMappingAttribute> inputMappingAttributes = new ArrayList<InputMappingAttribute>();
+public class TextInputMapping extends AbstractInputMapping {
 
     @Override
     public String getMappingType() {
         return EventBuilderConstants.EB_TEXT_MAPPING_TYPE;
-    }
-
-    public void addInputMappingAttribute(InputMappingAttribute inputMappingAttribute) {
-        inputMappingAttributes.add(inputMappingAttribute);
-    }
-
-    public List<InputMappingAttribute> getInputMappingAttributes() {
-        return inputMappingAttributes;
     }
 }

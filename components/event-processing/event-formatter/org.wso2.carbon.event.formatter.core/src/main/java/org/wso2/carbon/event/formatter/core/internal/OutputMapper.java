@@ -16,8 +16,12 @@ package org.wso2.carbon.event.formatter.core.internal;
 * limitations under the License.
 */
 
+import org.wso2.carbon.event.formatter.core.exception.EventFormatterConfigurationException;
+
 public interface OutputMapper {
 
-    Object convert(Object obj);
+    public Object convertToMappedInputEvent(Object obj) throws EventFormatterConfigurationException;
+
+    public Object convertToTypedInputEvent(Object obj) throws EventFormatterConfigurationException;
 
 }

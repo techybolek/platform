@@ -18,9 +18,18 @@
 
 package org.wso2.carbon.event.builder.core.config;
 
+/**
+ * This is used as a common interface for all input mapping classes.
+ */
 public interface InputMapping {
 
+    /**
+     * Returns the input mapping type as a string
+     *
+     * @return the input mapping type as a string
+     */
     public String getMappingType();
 
+    public boolean isCustomMappingEnabled();
 
 }

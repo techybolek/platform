@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.event.processor.core.internal.listener;
 
-import org.wso2.carbon.databridge.commons.StreamDefinition;
-import org.wso2.carbon.event.builder.core.BasicEventListener;
+import org.wso2.carbon.databridge.commons.Attribute;
+import org.wso2.carbon.event.processor.api.receive.BasicEventListener;
 import org.wso2.carbon.event.processor.core.internal.stream.EventJunction;
 import org.wso2.carbon.event.processor.core.internal.stream.EventProducer;
 
@@ -31,17 +31,17 @@ public class ExternalStreamListener implements BasicEventListener, EventProducer
     }
 
     @Override
-    public void onEvent(Object[] objects) {
-        eventJunction.dispatchEvents(objects);
+    public void onEvent(Object[] eventData) {
+        eventJunction.dispatchEvent(eventData);
     }
 
     @Override
-    public void onAddDefinition(StreamDefinition streamDefinition) {
+    public void onAddDefinition(Attribute[] definitionAttributes) {
         // ignore
     }
 
     @Override
-    public void onRemoveDefinition(StreamDefinition streamDefinition) {
+    public void onRemoveDefinition(Attribute[] definitionAttributes) {
         // ignore
     }
 

@@ -21,29 +21,29 @@ package org.wso2.carbon.event.builder.core.internal.type.map;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
-import org.wso2.carbon.event.builder.core.config.EventDispatcher;
 import org.wso2.carbon.event.builder.core.config.InputMapper;
 import org.wso2.carbon.event.builder.core.config.InputMapperFactory;
 import org.wso2.carbon.event.builder.core.config.InputMapping;
+import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
 
 public class MapInputMapperFactory implements InputMapperFactory {
 
 
     @Override
-    public InputMapping constructInputMappingFromOM(OMElement omElement) {
-        return MapBuilderConfigBuilder.getInstance().fromOM(omElement);
+    public InputMapping constructInputMappingFromOM(OMElement omElement) throws EventBuilderConfigurationException{
+        return MapInputMappingConfigBuilder.getInstance().fromOM(omElement);
     }
 
     @Override
     public OMElement constructOMFromInputMapping(
             InputMapping outputMapping, OMFactory factory) {
-        return MapBuilderConfigBuilder.getInstance().inputMappingToOM(outputMapping, factory);
+        return MapInputMappingConfigBuilder.getInstance().inputMappingToOM(outputMapping, factory);
     }
 
     @Override
-    public InputMapper constructInputMapper(EventBuilderConfiguration eventBuilderConfiguration,
-                                            EventDispatcher eventDispatcher) {
-        return new MapInputMapper(eventBuilderConfiguration, eventDispatcher);
+    public InputMapper constructInputMapper(EventBuilderConfiguration eventBuilderConfiguration, StreamDefinition inputStreamDefinition) throws EventBuilderConfigurationException{
+        return new MapInputMapper(eventBuilderConfiguration);
     }
 }

@@ -1,5 +1,5 @@
 <%@ page import="org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub" %>
-<%@ page import="org.wso2.carbon.event.processor.ui.UIUtils" %>
+<%@ page import="org.wso2.carbon.event.processor.ui.EventProcessorUIUtils" %>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>
 
 
@@ -8,7 +8,7 @@
     String action = request.getParameter("action");
 
     if (executionPlanName != null && action != null) {
-        EventProcessorAdminServiceStub stub = UIUtils.getEventProcessorAdminService(config, session, request);
+        EventProcessorAdminServiceStub stub = EventProcessorUIUtils.getEventProcessorAdminService(config, session, request);
         if ("enableStat".equals(action)) {
             stub.setStatisticsEnabled(executionPlanName, true);
         } else if ("disableStat".equals(action)) {

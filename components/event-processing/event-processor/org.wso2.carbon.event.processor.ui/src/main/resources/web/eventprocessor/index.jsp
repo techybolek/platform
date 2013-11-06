@@ -4,13 +4,13 @@
 
 <%@ page import="org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub" %>
 <%@ page import="org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto" %>
-<%@ page import="org.wso2.carbon.event.processor.ui.UIUtils" %>
 <%@ page import="org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationFileDto" %>
+<%@ page import="org.wso2.carbon.event.processor.ui.EventProcessorUIUtils" %>
 
 <fmt:bundle basename="org.wso2.carbon.event.processor.ui.i18n.Resources">
 
 <carbon:breadcrumb
-        label="eventprocessor.list"
+        label="execution.plans.breadcrumb"
         resourceBundle="org.wso2.carbon.event.processor.ui.i18n.Resources"
         topPage="false"
         request="<%=request%>"/>
@@ -82,32 +82,34 @@
 
     function disableStat(execPlanName) {
         jQuery.ajax({
-                        type:'POST',
-                        url:'stats_tracing_ajaxprocessor.jsp',
-                        data:'execPlanName=' + execPlanName + '&action=disableStat',
-                        success:function (msg) {
-                            handleCallback(execPlanName, DISABLE, STAT);
-                        },
-                        error:function (msg) {
-                            CARBON.showErrorDialog('<fmt:message key="stat.disable.error"/>' +
-                                                   ' ' + execPlanName);
-                        }
-                    });
+            type: 'POST',
+            url: 'stats_tracing_ajaxprocessor.jsp',
+            data: 'execPlanName=' + execPlanName + '&action=disableStat',
+            async:false,
+            success: function (msg) {
+                handleCallback(execPlanName, DISABLE, STAT);
+            },
+            error: function (msg) {
+                CARBON.showErrorDialog('<fmt:message key="stat.disable.error"/>' +
+                        ' ' + execPlanName);
+            }
+        });
     }
 
     function enableStat(execPlanName) {
         jQuery.ajax({
-                        type:'POST',
-                        url:'stats_tracing_ajaxprocessor.jsp',
-                        data:'execPlanName=' + execPlanName + '&action=enableStat',
-                        success:function (msg) {
-                            handleCallback(execPlanName, ENABLE, STAT);
-                        },
-                        error:function (msg) {
-                            CARBON.showErrorDialog('<fmt:message key="stat.enable.error"/>' +
-                                                   ' ' + execPlanName);
-                        }
-                    });
+            type: 'POST',
+            url: 'stats_tracing_ajaxprocessor.jsp',
+            data: 'execPlanName=' + execPlanName + '&action=enableStat',
+            async:false,
+            success: function (msg) {
+                handleCallback(execPlanName, ENABLE, STAT);
+            },
+            error: function (msg) {
+                CARBON.showErrorDialog('<fmt:message key="stat.enable.error"/>' +
+                        ' ' + execPlanName);
+            }
+        });
     }
 
     function handleCallback(execPlanName, action, type) {
@@ -141,32 +143,34 @@
 
     function enableTracing(execPlanName) {
         jQuery.ajax({
-                        type:'POST',
-                        url:'stats_tracing_ajaxprocessor.jsp',
-                        data:'execPlanName=' + execPlanName + '&action=enableTracing',
-                        success:function (msg) {
-                            handleCallback(execPlanName, ENABLE, TRACE);
-                        },
-                        error:function (msg) {
-                            CARBON.showErrorDialog('<fmt:message key="trace.enable.error"/>' +
-                                                   ' ' + execPlanName);
-                        }
-                    });
+            type: 'POST',
+            url: 'stats_tracing_ajaxprocessor.jsp',
+            data: 'execPlanName=' + execPlanName + '&action=enableTracing',
+            async:false,
+            success: function (msg) {
+                handleCallback(execPlanName, ENABLE, TRACE);
+            },
+            error: function (msg) {
+                CARBON.showErrorDialog('<fmt:message key="trace.enable.error"/>' +
+                        ' ' + execPlanName);
+            }
+        });
     }
 
     function disableTracing(execPlanName) {
         jQuery.ajax({
-                        type:'POST',
-                        url:'stats_tracing_ajaxprocessor.jsp',
-                        data:'execPlanName=' + execPlanName + '&action=disableTracing',
-                        success:function (msg) {
-                            handleCallback(execPlanName, DISABLE, TRACE);
-                        },
-                        error:function (msg) {
-                            CARBON.showErrorDialog('<fmt:message key="trace.disable.error"/>' +
-                                                   ' ' + execPlanName);
-                        }
-                    });
+            type: 'POST',
+            url: 'stats_tracing_ajaxprocessor.jsp',
+            data: 'execPlanName=' + execPlanName + '&action=disableTracing',
+            async:false,
+            success: function (msg) {
+                handleCallback(execPlanName, DISABLE, TRACE);
+            },
+            error: function (msg) {
+                CARBON.showErrorDialog('<fmt:message key="trace.disable.error"/>' +
+                        ' ' + execPlanName);
+            }
+        });
     }
 
 
@@ -180,7 +184,7 @@
 
 
 <%
-    EventProcessorAdminServiceStub stub = UIUtils.getEventProcessorAdminService(config, session, request);
+    EventProcessorAdminServiceStub stub = EventProcessorUIUtils.getEventProcessorAdminService(config, session, request);
     String executionPlanName = request.getParameter("executionPlan");
     int totalActiveExecutionPlanConfigurations = 0;
 
@@ -212,10 +216,11 @@
     Add Execution Plan
 </a>
 <br/> <br/>
+
 <div id="workArea">
 <%=totalActiveExecutionPlanConfigurations%> Active Execution Plans.
 <% if (totalInactiveExecutionPlans > 0) { %><a
-        href="inactive_execution_plan_files_details.jsp"><%=totalInactiveExecutionPlans%>
+        href="inactive_execution_plan_files_details.jsp?ordinal=1"><%=totalInactiveExecutionPlans%>
     <fmt:message
             key="inactive.execution.plans"/></a><% } else {%><%="0"%>
 <fmt:message key="inactive.execution.plans"/> <% } %>
@@ -227,9 +232,9 @@
     %>
     <thead>
     <tr>
-        <th>Execution Plan Name</th>
-        <th>Description</th>
-        <th style="width:30%">Actions</th>
+        <th><fmt:message key="event.processor.execution.plan.name"/></th>
+        <th><fmt:message key="event.processor.description"/></th>
+        <th width="420px"><fmt:message key="event.processor.actions"/></th>
     </tr>
     </thead>
     <tbody>
@@ -238,7 +243,7 @@
     %>
     <tr>
         <td>
-            <a href="execution_plan_details.jsp?execPlan=<%=executionPlanConfigurationDto.getName()%>">
+            <a href="execution_plan_details.jsp?ordinal=1&execPlan=<%=executionPlanConfigurationDto.getName()%>">
                 <%=executionPlanConfigurationDto.getName()%>
             </a>
 
@@ -376,7 +381,7 @@
                     color="#4682b4">Delete</font></a>
             <a style="background-image: url(../admin/images/edit.gif);"
                class="icon-link"
-               href="edit_execution_plan.jsp?execPlanName=<%=executionPlanConfigurationDto.getName()%>"><font
+               href="edit_execution_plan.jsp?ordinal=1&execPlanName=<%=executionPlanConfigurationDto.getName()%>"><font
                     color="#4682b4">Edit</font></a>
 
         </td>

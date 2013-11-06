@@ -31,8 +31,7 @@
         </tr>
         <tr fromElementKey="inputTextMapping">
             <td colspan="2">
-
-                <h4><fmt:message key="regex.definition.header"/></h4>
+                <h6><fmt:message key="regex.definition.header"/></h6>
                 <table class="styledLeft noBorders spacer-bot" id="inputRegexDefTable"
                        style="display:none">
                     <thead>
@@ -48,7 +47,7 @@
                 <table id="addRegexDefinition" class="normal">
                     <tbody>
                     <tr>
-                        <td class="col-small"><fmt:message key="event.builder.regex.expr"/> :
+                        <td class="col-small"><fmt:message key="event.builder.regex.expr"/> : <span class="required">*</span>
                         </td>
                         <td>
                             <input type="text" id="inputRegexDef"/>
@@ -66,14 +65,14 @@
         <tr fromElementKey="inputTextMapping">
             <td colspan="2">
 
-                <h4><fmt:message key="text.mapping.header"/></h4>
+                <h6><fmt:message key="text.mapping.header"/></h6>
                 <table class="styledLeft noBorders spacer-bot"
                        id="inputTextMappingTable" style="display:none">
                     <thead>
                     <th class="leftCol-med"><fmt:message
-                            key="event.builder.property.name"/></th>
-                    <th class="leftCol-med"><fmt:message
                             key="event.builder.property.regex"/></th>
+                    <th class="leftCol-med"><fmt:message
+                            key="event.builder.property.valueof"/></th>
                     <th class="leftCol-med"><fmt:message
                             key="event.builder.property.type"/></th>
                     <th class="leftCol-med"><fmt:message
@@ -88,25 +87,25 @@
                 <table id="addTextMappingTable" class="normal">
                     <tbody>
                     <tr>
-                        <td class="col-small"><fmt:message key="event.builder.property.name"/> :
-                        </td>
-                        <td>
-                            <input type="text" id="inputPropertyName"/>
-                        </td>
                         <td class="col-small"><fmt:message
                                 key="event.builder.property.regex"/> :
                             <select id="inputPropertyValue">
                                 <option value="">No regular expression defined</option>
                             </select>
                         </td>
+                        <td class="col-small"><fmt:message key="event.builder.property.valueof"/> :
+                        </td>
+                        <td>
+                            <input type="text" id="inputPropertyName"/>
+                        </td>
                         <td><fmt:message key="event.builder.property.type"/>:
                             <select id="inputPropertyType">
-                                <option value="java.lang.Integer">Integer</option>
-                                <option value="java.lang.Long">Long</option>
-                                <option value="java.lang.Double">Double</option>
-                                <option value="java.lang.Float">Float</option>
-                                <option value="java.lang.String">String</option>
-                                <option value="java.lang.Boolean">Boolean</option>
+                                <option value="int">int</option>
+                                <option value="long">long</option>
+                                <option value="double">double</option>
+                                <option value="float">float</option>
+                                <option value="string">string</option>
+                                <option value="boolean">boolean</option>
                             </select>
                         </td>
                         <td class="col-small"><fmt:message

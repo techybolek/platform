@@ -8,8 +8,8 @@ public class ExecutionPlanConfigurationDto {
     private StreamConfigurationDto[] importedStreams;
     private StreamConfigurationDto[] exportedStreams;
     private String queryExpressions;
-    private boolean isTracingEnabled;
-    private boolean isStatisticsEnabled;
+    private boolean tracingEnabled;
+    private boolean statisticsEnabled;
 
     public SiddhiConfigurationDto[] getSiddhiConfigurations() {
         return siddhiConfigurations;
@@ -60,18 +60,18 @@ public class ExecutionPlanConfigurationDto {
     }
 
     public boolean isTracingEnabled() {
-        return isTracingEnabled;
+        return tracingEnabled;
     }
 
     public void setTracingEnabled(boolean tracingEnabled) {
-        isTracingEnabled = tracingEnabled;
+        this.tracingEnabled = tracingEnabled;
     }
 
     public boolean isStatisticsEnabled() {
-        return isStatisticsEnabled;
+        return statisticsEnabled;
     }
 
     public void setStatisticsEnabled(boolean statisticsEnabled) {
-        isStatisticsEnabled = statisticsEnabled;
+        this.statisticsEnabled = statisticsEnabled;
     }
 }

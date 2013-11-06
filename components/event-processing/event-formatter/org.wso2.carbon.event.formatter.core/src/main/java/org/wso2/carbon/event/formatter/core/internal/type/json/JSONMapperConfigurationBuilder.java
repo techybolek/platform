@@ -46,25 +46,36 @@ public class JSONMapperConfigurationBuilder {
 
         JSONOutputMapping jsonOutputMapping = new JSONOutputMapping();
 
-        if (!validateJSONMapping(mappingElement)) {
-            throw new EventFormatterConfigurationException("JSON Mapping is not valid, check the output mapping");
-        }
-
-        OMElement innerMappingElement = mappingElement.getFirstChildWithName(
-                new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_INLINE));
-        if (innerMappingElement != null) {
-            jsonOutputMapping.setRegistryResource(false);
+        String customMappingEnabled = mappingElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING));
+        if (customMappingEnabled != null && (customMappingEnabled.equals(EventFormatterConstants.TM_VALUE_DISABLE))) {
+            jsonOutputMapping.setCustomMappingEnabled(false);
         } else {
-            innerMappingElement = mappingElement.getFirstChildWithName(
-                    new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_REGISTRY));
+            jsonOutputMapping.setCustomMappingEnabled(true);
+            if (!validateJSONMapping(mappingElement)) {
+                throw new EventFormatterConfigurationException("JSON Mapping is not valid, check the output mapping");
+            }
+
+            OMElement innerMappingElement = mappingElement.getFirstChildWithName(
+                    new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_INLINE));
             if (innerMappingElement != null) {
-                jsonOutputMapping.setRegistryResource(true);
+                jsonOutputMapping.setRegistryResource(false);
             } else {
-                throw new EventFormatterConfigurationException("XML Mapping is not valid, Mapping should be inline or from registry");
+                innerMappingElement = mappingElement.getFirstChildWithName(
+                        new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_REGISTRY));
+                if (innerMappingElement != null) {
+                    jsonOutputMapping.setRegistryResource(true);
+                } else {
+                    throw new EventFormatterConfigurationException("XML Mapping is not valid, Mapping should be inline or from registry");
+                }
+            }
+
+            if (innerMappingElement.getText() == null || innerMappingElement.getText().trim().isEmpty()) {
+                throw new EventFormatterConfigurationException("There is no any mapping content available");
+
+            } else {
+                jsonOutputMapping.setMappingText(innerMappingElement.getText());
             }
         }
-
-        jsonOutputMapping.setMappingText(innerMappingElement.getText());
 
         return jsonOutputMapping;
     }
@@ -94,6 +105,12 @@ public class JSONMapperConfigurationBuilder {
         mappingOMElement.declareDefaultNamespace(EventFormatterConstants.EF_CONF_NS);
 
         mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_TYPE, EventFormatterConstants.EF_JSON_MAPPING_TYPE, null);
+
+        if (jsonOutputMapping.isCustomMappingEnabled()) {
+            mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING, EventFormatterConstants.TM_VALUE_ENABLE, null);
+        } else {
+            mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING, EventFormatterConstants.TM_VALUE_DISABLE, null);
+        }
 
         OMElement innerMappingElement;
         if (jsonOutputMapping.isRegistryResource()) {

@@ -28,6 +28,7 @@
             <style-class>tools</style-class>
             <icon>../event-tracer/images/tracer.gif</icon>
             <require-permission>/permission/admin/monitor/event</require-permission>
+            <require-super-tenant>true</require-super-tenant>
         </menu>
     </menus>
 </component>

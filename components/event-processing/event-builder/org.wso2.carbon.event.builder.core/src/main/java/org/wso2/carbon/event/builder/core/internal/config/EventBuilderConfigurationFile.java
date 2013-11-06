@@ -25,15 +25,15 @@ public class EventBuilderConfigurationFile {
 
     private String eventBuilderName;
     private String streamWithVersion;
-    private String filePath;
+    private String fileName;
     private DeploymentStatus deploymentStatus;
     private String dependency;
-    private String deploymentStatusMessage;
+    private String deploymentStatusMessage="";
     private AxisConfiguration axisConfiguration;
     private OMElement ebConfigOmElement;
 
-    public EventBuilderConfigurationFile(String filePath) {
-        this.filePath = filePath;
+    public EventBuilderConfigurationFile(String fileName) {
+        this.fileName = fileName;
     }
 
     public OMElement getEbConfigOmElement() {
@@ -92,12 +92,12 @@ public class EventBuilderConfigurationFile {
         this.eventBuilderName = eventBuilderName;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     @Override
@@ -117,7 +117,7 @@ public class EventBuilderConfigurationFile {
         if (streamWithVersion != null ? !streamWithVersion.equals(that.streamWithVersion) : that.streamWithVersion != null) {
             return false;
         }
-        if (filePath != null ? !filePath.equals(that.filePath) : that.filePath != null) {
+        if (fileName != null ? !fileName.equals(that.fileName) : that.fileName != null) {
             return false;
         }
 
@@ -127,9 +127,13 @@ public class EventBuilderConfigurationFile {
     @Override
     public int hashCode() {
         int result = eventBuilderName.hashCode();
-        result = 31 * result + filePath.hashCode();
+        result = 31 * result + fileName.hashCode();
         result = 31 * result + (streamWithVersion != null ? streamWithVersion.hashCode() : 0);
         return result;
     }
 
+    public static enum DeploymentStatus {
+        //Deployed, Waiting for Dependency, Error
+        DEPLOYED, WAITING_FOR_DEPENDENCY, ERROR , WAITING_FOR_STREAM_DEPENDENCY
+    }
 }

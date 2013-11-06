@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.event.builder.core.internal.type.text.config;
 
-import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,12 +29,11 @@ public class RegexData {
     private int matchGroupIndex;
     private List<String> types;
     private List<String> defaultValues;
-    private String originalRegex;
+    private String regex;
 
     public RegexData(String regex) {
-        this.originalRegex = regex;
-        String formattedRegex = EventBuilderConstants.REGEX_FOR_LINE_START + regex + EventBuilderConstants.REGEX_FOR_LINE_END;
-        this.pattern = Pattern.compile(formattedRegex);
+        this.regex = regex;
+        this.pattern = Pattern.compile(regex);
         this.matchGroupIndex = 0;
         types = new ArrayList<String>();
         defaultValues = new ArrayList<String>();
@@ -78,7 +75,7 @@ public class RegexData {
     }
 
     public String getRegex() {
-        return originalRegex;
+        return regex;
     }
 
 }

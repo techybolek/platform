@@ -40,6 +40,11 @@ public class EventBuilderValidationException extends RuntimeException {
         super(message, cause);
     }
 
+    public EventBuilderValidationException(String message, String dependency, Throwable cause) {
+        super(message, cause);
+        this.dependency = dependency;
+    }
+
     public EventBuilderValidationException(Throwable cause) {
         super(cause);
     }

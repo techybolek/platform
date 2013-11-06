@@ -1,7 +1,6 @@
 package org.wso2.carbon.event.formatter.core.internal.ds;
 
 import org.wso2.carbon.event.formatter.core.EventFormatterService;
-import org.wso2.carbon.event.formatter.core.EventSource;
 import org.wso2.carbon.event.formatter.core.config.OutputMapperFactory;
 import org.wso2.carbon.event.formatter.core.internal.CarbonEventFormatterService;
 import org.wso2.carbon.event.formatter.core.internal.type.json.JSONOutputMapperFactory;
@@ -9,10 +8,12 @@ import org.wso2.carbon.event.formatter.core.internal.type.map.MapOutputMapperFac
 import org.wso2.carbon.event.formatter.core.internal.type.text.TextOutputMapperFactory;
 import org.wso2.carbon.event.formatter.core.internal.type.wso2event.WSO2OutputMapperFactory;
 import org.wso2.carbon.event.formatter.core.internal.type.xml.XMLOutputMapperFactory;
+import org.wso2.carbon.event.output.adaptor.core.MessageType;
+import org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorService;
+import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorManagerService;
+import org.wso2.carbon.event.processor.api.send.EventProducer;
 import org.wso2.carbon.event.statistics.EventStatisticsService;
-import org.wso2.carbon.output.transport.adaptor.core.MessageType;
-import org.wso2.carbon.output.transport.adaptor.core.OutputTransportAdaptorService;
-import org.wso2.carbon.output.transport.adaptor.manager.core.OutputTransportAdaptorManagerService;
+import org.wso2.carbon.event.stream.manager.core.EventStreamService;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -24,12 +25,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class EventFormatterServiceValueHolder {
 
-    private static OutputTransportAdaptorService outputTransportAdaptorService;
+    private static OutputEventAdaptorService outputEventAdaptorService;
     private static CarbonEventFormatterService carbonEventFormatterService;
-    private static OutputTransportAdaptorManagerService outputTransportAdaptorManagerService;
+    private static OutputEventAdaptorManagerService outputEventAdaptorManagerService;
     private static ConfigurationContextService configurationContextService;
+    private static EventStreamService eventStreamService;
     private static RegistryService registryService;
-    private static List<EventSource> eventSourceList = new ArrayList<EventSource>();
+    private static List<EventProducer> eventProducerList = new ArrayList<EventProducer>();
     private static ConcurrentHashMap<String, OutputMapperFactory> mappingFactoryMap = new ConcurrentHashMap<String, OutputMapperFactory>() {
     };
 
@@ -56,49 +58,40 @@ public class EventFormatterServiceValueHolder {
 
     }
 
-    public static void registerTransportAdaptorService(
-            OutputTransportAdaptorService transportAdaptorService) {
-        EventFormatterServiceValueHolder.outputTransportAdaptorService = transportAdaptorService;
+    public static void registerEventAdaptorService(
+            OutputEventAdaptorService eventAdaptorService) {
+        EventFormatterServiceValueHolder.outputEventAdaptorService = eventAdaptorService;
     }
 
-    public static OutputTransportAdaptorService getOutputTransportAdaptorService() {
-        return EventFormatterServiceValueHolder.outputTransportAdaptorService;
+    public static OutputEventAdaptorService getOutputEventAdaptorService() {
+        return EventFormatterServiceValueHolder.outputEventAdaptorService;
     }
 
-    public static void registerTransportAdaptorManagerService(
-            OutputTransportAdaptorManagerService transportAdaptorManagerService) {
-        EventFormatterServiceValueHolder.outputTransportAdaptorManagerService = transportAdaptorManagerService;
+    public static void registerEventAdaptorManagerService(
+            OutputEventAdaptorManagerService eventAdaptorManagerService) {
+        EventFormatterServiceValueHolder.outputEventAdaptorManagerService = eventAdaptorManagerService;
     }
 
-    public static OutputTransportAdaptorManagerService getOutputTransportAdaptorManagerService() {
-        return EventFormatterServiceValueHolder.outputTransportAdaptorManagerService;
+    public static OutputEventAdaptorManagerService getOutputEventAdaptorManagerService() {
+        return EventFormatterServiceValueHolder.outputEventAdaptorManagerService;
     }
 
-    public static void unRegisterTransportAdaptorManagerService(
-            OutputTransportAdaptorManagerService transportAdaptorManagerService) {
-        EventFormatterServiceValueHolder.outputTransportAdaptorManagerService = null;
+    public static void unRegisterEventAdaptorManagerService(
+            OutputEventAdaptorManagerService eventAdaptorManagerService) {
+        EventFormatterServiceValueHolder.outputEventAdaptorManagerService = null;
     }
 
-    public static void registerConfigurationContextService(
-            ConfigurationContextService configurationContextService) {
-        EventFormatterServiceValueHolder.configurationContextService = configurationContextService;
-    }
-
-    public static ConfigurationContextService getConfigurationContextService() {
-        return configurationContextService;
-    }
-
-    public static void addEventSource(EventSource eventSource) {
-        eventSourceList.add(eventSource);
+    public static void addEventProducer(EventProducer eventProducer) {
+        eventProducerList.add(eventProducer);
 
     }
 
-    public static void removeEventSource(EventSource eventSource) {
-        eventSourceList.remove(eventSource);
+    public static void removeEventProducer(EventProducer eventProducer) {
+        eventProducerList.remove(eventProducer);
     }
 
-    public static List<EventSource> getEventSourceList() {
-        return eventSourceList;
+    public static List<EventProducer> getEventProducerList() {
+        return eventProducerList;
     }
 
     public static void setRegistryService(RegistryService registryService) {
@@ -121,11 +114,20 @@ public class EventFormatterServiceValueHolder {
         return mappingFactoryMap;
     }
 
-    public static void registerEventStatisticsService(EventStatisticsService eventStatisticsService) {
+    public static void registerEventStatisticsService(
+            EventStatisticsService eventStatisticsService) {
         EventFormatterServiceValueHolder.eventStatisticsService = eventStatisticsService;
     }
 
     public static EventStatisticsService getEventStatisticsService() {
         return eventStatisticsService;
+    }
+
+    public static void registerEventStreamService(EventStreamService eventStreamService) {
+        EventFormatterServiceValueHolder.eventStreamService = eventStreamService;
+    }
+
+    public static EventStreamService getEventStreamService() {
+        return EventFormatterServiceValueHolder.eventStreamService;
     }
 }

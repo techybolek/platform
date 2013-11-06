@@ -43,28 +43,39 @@ public class TextMapperConfigurationBuilder {
             OMElement mappingElement)
             throws EventFormatterValidationException, EventFormatterConfigurationException {
 
-        if (!validateTextMapping(mappingElement)) {
-            throw new EventFormatterConfigurationException("Text Mapping is not valid, check the output mapping");
-        }
-
 
         TextOutputMapping textOutputMapping = new TextOutputMapping();
 
-        OMElement innerMappingElement = mappingElement.getFirstChildWithName(
-                new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_INLINE));
-        if (innerMappingElement != null) {
-            textOutputMapping.setRegistryResource(false);
+        String customMappingEnabled = mappingElement.getAttributeValue(new QName(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING));
+        if (customMappingEnabled != null && (customMappingEnabled.equals(EventFormatterConstants.TM_VALUE_DISABLE))) {
+            textOutputMapping.setCustomMappingEnabled(false);
         } else {
-            innerMappingElement = mappingElement.getFirstChildWithName(
-                    new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_REGISTRY));
+            textOutputMapping.setCustomMappingEnabled(true);
+            if (!validateTextMapping(mappingElement)) {
+                throw new EventFormatterConfigurationException("Text Mapping is not valid, check the output mapping");
+            }
+
+            OMElement innerMappingElement = mappingElement.getFirstChildWithName(
+                    new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_INLINE));
             if (innerMappingElement != null) {
-                textOutputMapping.setRegistryResource(true);
+                textOutputMapping.setRegistryResource(false);
             } else {
-                throw new EventFormatterConfigurationException("Text Mapping is not valid, Mapping should be inline or from registry");
+                innerMappingElement = mappingElement.getFirstChildWithName(
+                        new QName(EventFormatterConstants.EF_CONF_NS, EventFormatterConstants.EF_ELE_MAPPING_REGISTRY));
+                if (innerMappingElement != null) {
+                    textOutputMapping.setRegistryResource(true);
+                } else {
+                    throw new EventFormatterConfigurationException("Text Mapping is not valid, Mapping should be inline or from registry");
+                }
+            }
+
+            if (innerMappingElement.getText() == null || innerMappingElement.getText().trim().isEmpty()) {
+                throw new EventFormatterConfigurationException("There is no any mapping content available");
+
+            } else {
+                textOutputMapping.setMappingText(innerMappingElement.getText());
             }
         }
-
-        textOutputMapping.setMappingText(innerMappingElement.getText());
 
         return textOutputMapping;
     }
@@ -95,6 +106,12 @@ public class TextMapperConfigurationBuilder {
         mappingOMElement.declareDefaultNamespace(EventFormatterConstants.EF_CONF_NS);
 
         mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_TYPE, EventFormatterConstants.EF_TEXT_MAPPING_TYPE, null);
+
+        if (textOutputMapping.isCustomMappingEnabled()) {
+            mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING, EventFormatterConstants.TM_VALUE_ENABLE, null);
+        } else {
+            mappingOMElement.addAttribute(EventFormatterConstants.EF_ATTR_CUSTOM_MAPPING, EventFormatterConstants.TM_VALUE_DISABLE, null);
+        }
 
         OMElement innerMappingElement;
         if (textOutputMapping.isRegistryResource()) {

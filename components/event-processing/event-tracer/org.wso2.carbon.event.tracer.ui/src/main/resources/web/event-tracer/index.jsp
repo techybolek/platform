@@ -189,11 +189,11 @@ function searchTraceLogsCallback() {
         if (ignoreCase.checked) {
             isIgonreCases = true;
         }
-        document.location.href = "index.jsp?op=search&key=" + key + "&ignoreCase=" + isIgonreCases;
+        document.location.href = "index.jsp?ordinal=1&op=search&key=" + key + "&ignoreCase=" + isIgonreCases;
     }
 
     function clearAllNew() {
-        document.location.href = "index.jsp?op=clear";
+        document.location.href = "index.jsp?ordinal=1&op=clear";
     }
 </script>
 
