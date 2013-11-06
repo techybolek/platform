@@ -6,9 +6,7 @@
             <xs:import namespace="http://data.internal.statistics.event.carbon.wso2.org/xsd"/>
             <xs:element name="getGlobalCount">
                 <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="tenantId" type="xs:int"/>
-                    </xs:sequence>
+                    <xs:sequence/>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getGlobalCountResponse">
@@ -21,7 +19,6 @@
             <xs:element name="getElementCount">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="tenantId" type="xs:int"/>
                         <xs:element minOccurs="0" name="categoryName" nillable="true" type="xs:string"/>
                         <xs:element minOccurs="0" name="deploymentName" nillable="true" type="xs:string"/>
                         <xs:element minOccurs="0" name="elementName" nillable="true" type="xs:string"/>
@@ -38,7 +35,6 @@
             <xs:element name="getDeploymentCount">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="tenantId" type="xs:int"/>
                         <xs:element minOccurs="0" name="categoryName" nillable="true" type="xs:string"/>
                         <xs:element minOccurs="0" name="deploymentName" nillable="true" type="xs:string"/>
                     </xs:sequence>
@@ -54,7 +50,6 @@
             <xs:element name="getCategoryCount">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="tenantId" type="xs:int"/>
                         <xs:element minOccurs="0" name="categoryName" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
@@ -258,13 +253,13 @@
     </wsdl:binding>
     <wsdl:service name="EventStatisticsAdminService">
         <wsdl:port name="EventStatisticsAdminServiceHttpsSoap11Endpoint" binding="tns:EventStatisticsAdminServiceSoap11Binding">
-            <soap:address location="https://10.200.1.90:9443/services/EventStatisticsAdminService.EventStatisticsAdminServiceHttpsSoap11Endpoint/"/>
+            <soap:address location="https://10.13.165.220:9443/services/EventStatisticsAdminService.EventStatisticsAdminServiceHttpsSoap11Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="EventStatisticsAdminServiceHttpsSoap12Endpoint" binding="tns:EventStatisticsAdminServiceSoap12Binding">
-            <soap12:address location="https://10.200.1.90:9443/services/EventStatisticsAdminService.EventStatisticsAdminServiceHttpsSoap12Endpoint/"/>
+            <soap12:address location="https://10.13.165.220:9443/services/EventStatisticsAdminService.EventStatisticsAdminServiceHttpsSoap12Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="EventStatisticsAdminServiceHttpsEndpoint" binding="tns:EventStatisticsAdminServiceHttpBinding">
-            <http:address location="https://10.200.1.90:9443/services/EventStatisticsAdminService.EventStatisticsAdminServiceHttpsEndpoint/"/>
+            <http:address location="https://10.13.165.220:9443/services/EventStatisticsAdminService.EventStatisticsAdminServiceHttpsEndpoint/"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

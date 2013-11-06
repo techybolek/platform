@@ -1,32 +1,17 @@
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-                  xmlns:ax2104="http://internal.admin.builder.event.carbon.wso2.org/xsd"
-                  xmlns:ax2105="http://internal.admin.builder.event.carbon.wso2.org/xsd"
                   xmlns:ns="http://internal.admin.builder.event.carbon.wso2.org"
                   xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
-                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:ax2106="http://internal.admin.builder.event.carbon.wso2.org/xsd"
+                  xmlns:ax2107="http://internal.admin.builder.event.carbon.wso2.org/xsd"
+                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
                   xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
                   targetNamespace="http://internal.admin.builder.event.carbon.wso2.org">
     <wsdl:documentation>EventBuilderAdminService</wsdl:documentation>
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
                    targetNamespace="http://internal.admin.builder.event.carbon.wso2.org/xsd">
-            <xs:complexType name="EventBuilderConfigurationDto">
-                <xs:sequence>
-                    <xs:element minOccurs="0" name="batchProcessingEnabled" type="xs:boolean"/>
-                    <xs:element minOccurs="0" name="deploymentStatus" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="eventBuilderConfigName" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="eventBuilderProperties" nillable="true"
-                                type="ax2104:EventBuilderPropertyDto"/>
-                    <xs:element minOccurs="0" name="inputMappingType" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="inputTransportAdaptorName" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="inputTransportAdaptorType" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="statisticsEnabled" type="xs:boolean"/>
-                    <xs:element minOccurs="0" name="toStreamName" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="toStreamVersion" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="traceEnabled" type="xs:boolean"/>
-                </xs:sequence>
-            </xs:complexType>
             <xs:complexType name="EventBuilderPropertyDto">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="defaultValue" nillable="true" type="xs:string"/>
@@ -40,57 +25,64 @@
                     <xs:element minOccurs="0" name="value" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
+            <xs:complexType name="InputEventAdaptorInfoDto">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="inputEventAdaptorName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="inputEventAdaptorType" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="EventBuilderConfigurationDto">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="eventBuilderConfigName" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="eventBuilderProperties" nillable="true"
+                                type="ax2106:EventBuilderPropertyDto"/>
+                    <xs:element minOccurs="0" name="inputEventAdaptorName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="inputEventAdaptorType" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="inputMappingType" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="statisticsEnabled" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="toStreamName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="toStreamVersion" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="traceEnabled" type="xs:boolean"/>
+                </xs:sequence>
+            </xs:complexType>
         </xs:schema>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
                    targetNamespace="http://internal.admin.builder.event.carbon.wso2.org">
             <xs:import namespace="http://internal.admin.builder.event.carbon.wso2.org/xsd"/>
-            <xs:element name="updateEventBuilderWithXml">
+            <xs:element name="undeployInactiveEventBuilderConfiguration">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="eventBuilderConfigXml" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="originalEventBuilderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="filename" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="updateEventBuilderWithDto">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="eventBuilderConfigurationDto" nillable="true"
-                                    type="ax2105:EventBuilderConfigurationDto"/>
-                        <xs:element minOccurs="0" name="originalEventBuilderName" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="removeEventBuilderConfigurationFile">
+            <xs:element name="undeployActiveConfiguration">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="eventBuilderName" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="removeEventBuilder">
+            <xs:element name="setTraceEnabled">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="eventBuilderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="traceEnabled" type="xs:boolean"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getUndeployedFileNames">
-                <xs:complexType>
-                    <xs:sequence/>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getUndeployedFileNamesResponse">
+            <xs:element name="setStatisticsEnabled">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="eventBuilderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="statisticsEnabled" type="xs:boolean"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getSupportedInputMappingTypes">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="inputEventAdaptorName" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -112,14 +104,14 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
-                                    type="ax2105:EventBuilderPropertyDto"/>
+                                    type="ax2107:EventBuilderPropertyDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getMessageConfigurationProperties">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="inputEventAdaptorName" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -127,110 +119,146 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
-                                    type="ax2105:EventBuilderPropertyDto"/>
+                                    type="ax2107:EventBuilderPropertyDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getInputTransportNames">
+            <xs:element name="getInputEventAdaptorInfo">
                 <xs:complexType>
                     <xs:sequence/>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getInputTransportNamesResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getEventBuilderConfigurationsFor">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="deploymentStatusString" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getEventBuilderConfigurationsForResponse">
+            <xs:element name="getInputEventAdaptorInfoResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
-                                    type="ax2105:EventBuilderConfigurationDto"/>
+                                    type="ax2107:InputEventAdaptorInfoDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getEventBuilderConfigurationXml">
+            <xs:element name="getInactiveEventBuilderConfigurationContent">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="eventBuilderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="filename" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getEventBuilderConfigurationXmlResponse">
+            <xs:element name="getInactiveEventBuilderConfigurationContentResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getEventBuilderConfiguration">
+            <xs:element name="getEventBuilderStatusAsString">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="eventBuilderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="filename" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getEventBuilderConfigurationResponse">
+            <xs:element name="getEventBuilderStatusAsStringResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true"
-                                    type="ax2105:EventBuilderConfigurationDto"/>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getAllEventBuilderNames">
+            <xs:element name="getAllInactiveEventBuilderConfigurations">
                 <xs:complexType>
                     <xs:sequence/>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getAllEventBuilderNamesResponse">
+            <xs:element name="getAllInactiveEventBuilderConfigurationsResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getAllEventBuilderConfigurations">
+            <xs:element name="getAllActiveEventBuilderConfigurations">
                 <xs:complexType>
                     <xs:sequence/>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getAllEventBuilderConfigurationsResponse">
+            <xs:element name="getAllActiveEventBuilderConfigurationsResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
-                                    type="ax2105:EventBuilderConfigurationDto"/>
+                                    type="ax2107:EventBuilderConfigurationDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="addEventBuilder">
+            <xs:element name="getActiveEventBuilderConfigurationContent">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="eventBuilderName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getActiveEventBuilderConfigurationContentResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getActiveEventBuilderConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="eventBuilderName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getActiveEventBuilderConfigurationResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true"
+                                    type="ax2107:EventBuilderConfigurationDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="editInactiveEventBuilderConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="filename" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="eventBuilderConfigXml" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="editActiveEventBuilderConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="originalEventBuilderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="eventBuilderConfigXml" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="deployEventBuilderConfiguration">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="eventBuilderConfigurationDto" nillable="true"
-                                    type="ax2105:EventBuilderConfigurationDto"/>
+                                    type="ax2107:EventBuilderConfigurationDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
         </xs:schema>
     </wsdl:types>
-    <wsdl:message name="removeEventBuilderRequest">
-        <wsdl:part name="parameters" element="ns:removeEventBuilder"/>
+    <wsdl:message name="getInactiveEventBuilderConfigurationContentRequest">
+        <wsdl:part name="parameters" element="ns:getInactiveEventBuilderConfigurationContent"/>
     </wsdl:message>
-    <wsdl:message name="removeEventBuilderResponse"/>
-    <wsdl:message name="getUndeployedFileNamesRequest">
-        <wsdl:part name="parameters" element="ns:getUndeployedFileNames"/>
+    <wsdl:message name="getInactiveEventBuilderConfigurationContentResponse">
+        <wsdl:part name="parameters" element="ns:getInactiveEventBuilderConfigurationContentResponse"/>
     </wsdl:message>
-    <wsdl:message name="getUndeployedFileNamesResponse">
-        <wsdl:part name="parameters" element="ns:getUndeployedFileNamesResponse"/>
+    <wsdl:message name="setTraceEnabledRequest">
+        <wsdl:part name="parameters" element="ns:setTraceEnabled"/>
+    </wsdl:message>
+    <wsdl:message name="setTraceEnabledResponse"/>
+    <wsdl:message name="getInputEventAdaptorInfoRequest">
+        <wsdl:part name="parameters" element="ns:getInputEventAdaptorInfo"/>
+    </wsdl:message>
+    <wsdl:message name="getInputEventAdaptorInfoResponse">
+        <wsdl:part name="parameters" element="ns:getInputEventAdaptorInfoResponse"/>
     </wsdl:message>
     <wsdl:message name="getMessageConfigurationPropertiesWithValueRequest">
         <wsdl:part name="parameters" element="ns:getMessageConfigurationPropertiesWithValue"/>
@@ -238,77 +266,87 @@
     <wsdl:message name="getMessageConfigurationPropertiesWithValueResponse">
         <wsdl:part name="parameters" element="ns:getMessageConfigurationPropertiesWithValueResponse"/>
     </wsdl:message>
-    <wsdl:message name="removeEventBuilderConfigurationFileRequest">
-        <wsdl:part name="parameters" element="ns:removeEventBuilderConfigurationFile"/>
-    </wsdl:message>
-    <wsdl:message name="getEventBuilderConfigurationsForRequest">
-        <wsdl:part name="parameters" element="ns:getEventBuilderConfigurationsFor"/>
-    </wsdl:message>
-    <wsdl:message name="getEventBuilderConfigurationsForResponse">
-        <wsdl:part name="parameters" element="ns:getEventBuilderConfigurationsForResponse"/>
-    </wsdl:message>
     <wsdl:message name="getSupportedInputMappingTypesRequest">
         <wsdl:part name="parameters" element="ns:getSupportedInputMappingTypes"/>
     </wsdl:message>
     <wsdl:message name="getSupportedInputMappingTypesResponse">
         <wsdl:part name="parameters" element="ns:getSupportedInputMappingTypesResponse"/>
     </wsdl:message>
-    <wsdl:message name="getEventBuilderConfigurationRequest">
-        <wsdl:part name="parameters" element="ns:getEventBuilderConfiguration"/>
+    <wsdl:message name="undeployActiveConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:undeployActiveConfiguration"/>
     </wsdl:message>
-    <wsdl:message name="getEventBuilderConfigurationResponse">
-        <wsdl:part name="parameters" element="ns:getEventBuilderConfigurationResponse"/>
+    <wsdl:message name="undeployActiveConfigurationResponse"/>
+    <wsdl:message name="getAllActiveEventBuilderConfigurationsRequest">
+        <wsdl:part name="parameters" element="ns:getAllActiveEventBuilderConfigurations"/>
     </wsdl:message>
-    <wsdl:message name="updateEventBuilderWithDtoRequest">
-        <wsdl:part name="parameters" element="ns:updateEventBuilderWithDto"/>
+    <wsdl:message name="getAllActiveEventBuilderConfigurationsResponse">
+        <wsdl:part name="parameters" element="ns:getAllActiveEventBuilderConfigurationsResponse"/>
     </wsdl:message>
-    <wsdl:message name="updateEventBuilderWithDtoResponse"/>
-    <wsdl:message name="addEventBuilderRequest">
-        <wsdl:part name="parameters" element="ns:addEventBuilder"/>
+    <wsdl:message name="setStatisticsEnabledRequest">
+        <wsdl:part name="parameters" element="ns:setStatisticsEnabled"/>
     </wsdl:message>
-    <wsdl:message name="addEventBuilderResponse"/>
-    <wsdl:message name="getInputTransportNamesRequest">
-        <wsdl:part name="parameters" element="ns:getInputTransportNames"/>
+    <wsdl:message name="setStatisticsEnabledResponse"/>
+    <wsdl:message name="editInactiveEventBuilderConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:editInactiveEventBuilderConfiguration"/>
     </wsdl:message>
-    <wsdl:message name="getInputTransportNamesResponse">
-        <wsdl:part name="parameters" element="ns:getInputTransportNamesResponse"/>
+    <wsdl:message name="editInactiveEventBuilderConfigurationResponse"/>
+    <wsdl:message name="getEventBuilderStatusAsStringRequest">
+        <wsdl:part name="parameters" element="ns:getEventBuilderStatusAsString"/>
     </wsdl:message>
-    <wsdl:message name="getAllEventBuilderConfigurationsRequest">
-        <wsdl:part name="parameters" element="ns:getAllEventBuilderConfigurations"/>
+    <wsdl:message name="getEventBuilderStatusAsStringResponse">
+        <wsdl:part name="parameters" element="ns:getEventBuilderStatusAsStringResponse"/>
     </wsdl:message>
-    <wsdl:message name="getAllEventBuilderConfigurationsResponse">
-        <wsdl:part name="parameters" element="ns:getAllEventBuilderConfigurationsResponse"/>
+    <wsdl:message name="getActiveEventBuilderConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:getActiveEventBuilderConfiguration"/>
     </wsdl:message>
-    <wsdl:message name="getEventBuilderConfigurationXmlRequest">
-        <wsdl:part name="parameters" element="ns:getEventBuilderConfigurationXml"/>
+    <wsdl:message name="getActiveEventBuilderConfigurationResponse">
+        <wsdl:part name="parameters" element="ns:getActiveEventBuilderConfigurationResponse"/>
     </wsdl:message>
-    <wsdl:message name="getEventBuilderConfigurationXmlResponse">
-        <wsdl:part name="parameters" element="ns:getEventBuilderConfigurationXmlResponse"/>
+    <wsdl:message name="getAllInactiveEventBuilderConfigurationsRequest">
+        <wsdl:part name="parameters" element="ns:getAllInactiveEventBuilderConfigurations"/>
     </wsdl:message>
-    <wsdl:message name="getAllEventBuilderNamesRequest">
-        <wsdl:part name="parameters" element="ns:getAllEventBuilderNames"/>
+    <wsdl:message name="getAllInactiveEventBuilderConfigurationsResponse">
+        <wsdl:part name="parameters" element="ns:getAllInactiveEventBuilderConfigurationsResponse"/>
     </wsdl:message>
-    <wsdl:message name="getAllEventBuilderNamesResponse">
-        <wsdl:part name="parameters" element="ns:getAllEventBuilderNamesResponse"/>
+    <wsdl:message name="getActiveEventBuilderConfigurationContentRequest">
+        <wsdl:part name="parameters" element="ns:getActiveEventBuilderConfigurationContent"/>
     </wsdl:message>
-    <wsdl:message name="updateEventBuilderWithXmlRequest">
-        <wsdl:part name="parameters" element="ns:updateEventBuilderWithXml"/>
+    <wsdl:message name="getActiveEventBuilderConfigurationContentResponse">
+        <wsdl:part name="parameters" element="ns:getActiveEventBuilderConfigurationContentResponse"/>
     </wsdl:message>
-    <wsdl:message name="updateEventBuilderWithXmlResponse"/>
+    <wsdl:message name="deployEventBuilderConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:deployEventBuilderConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="deployEventBuilderConfigurationResponse"/>
+    <wsdl:message name="undeployInactiveEventBuilderConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:undeployInactiveEventBuilderConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="undeployInactiveEventBuilderConfigurationResponse"/>
     <wsdl:message name="getMessageConfigurationPropertiesRequest">
         <wsdl:part name="parameters" element="ns:getMessageConfigurationProperties"/>
     </wsdl:message>
     <wsdl:message name="getMessageConfigurationPropertiesResponse">
         <wsdl:part name="parameters" element="ns:getMessageConfigurationPropertiesResponse"/>
     </wsdl:message>
+    <wsdl:message name="editActiveEventBuilderConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:editActiveEventBuilderConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="editActiveEventBuilderConfigurationResponse"/>
     <wsdl:portType name="EventBuilderAdminServicePortType">
-        <wsdl:operation name="removeEventBuilder">
-            <wsdl:input message="ns:removeEventBuilderRequest" wsaw:Action="urn:removeEventBuilder"/>
-            <wsdl:output message="ns:removeEventBuilderResponse" wsaw:Action="urn:removeEventBuilderResponse"/>
+        <wsdl:operation name="getInactiveEventBuilderConfigurationContent">
+            <wsdl:input message="ns:getInactiveEventBuilderConfigurationContentRequest"
+                        wsaw:Action="urn:getInactiveEventBuilderConfigurationContent"/>
+            <wsdl:output message="ns:getInactiveEventBuilderConfigurationContentResponse"
+                         wsaw:Action="urn:getInactiveEventBuilderConfigurationContentResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="getUndeployedFileNames">
-            <wsdl:input message="ns:getUndeployedFileNamesRequest" wsaw:Action="urn:getUndeployedFileNames"/>
-            <wsdl:output message="ns:getUndeployedFileNamesResponse" wsaw:Action="urn:getUndeployedFileNamesResponse"/>
+        <wsdl:operation name="setTraceEnabled">
+            <wsdl:input message="ns:setTraceEnabledRequest" wsaw:Action="urn:setTraceEnabled"/>
+            <wsdl:output message="ns:setTraceEnabledResponse" wsaw:Action="urn:setTraceEnabledResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getInputEventAdaptorInfo">
+            <wsdl:input message="ns:getInputEventAdaptorInfoRequest" wsaw:Action="urn:getInputEventAdaptorInfo"/>
+            <wsdl:output message="ns:getInputEventAdaptorInfoResponse"
+                         wsaw:Action="urn:getInputEventAdaptorInfoResponse"/>
         </wsdl:operation>
         <wsdl:operation name="getMessageConfigurationPropertiesWithValue">
             <wsdl:input message="ns:getMessageConfigurationPropertiesWithValueRequest"
@@ -316,62 +354,68 @@
             <wsdl:output message="ns:getMessageConfigurationPropertiesWithValueResponse"
                          wsaw:Action="urn:getMessageConfigurationPropertiesWithValueResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="removeEventBuilderConfigurationFile">
-            <wsdl:input message="ns:removeEventBuilderConfigurationFileRequest"
-                        wsaw:Action="urn:removeEventBuilderConfigurationFile"/>
-        </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfigurationsFor">
-            <wsdl:input message="ns:getEventBuilderConfigurationsForRequest"
-                        wsaw:Action="urn:getEventBuilderConfigurationsFor"/>
-            <wsdl:output message="ns:getEventBuilderConfigurationsForResponse"
-                         wsaw:Action="urn:getEventBuilderConfigurationsForResponse"/>
-        </wsdl:operation>
         <wsdl:operation name="getSupportedInputMappingTypes">
             <wsdl:input message="ns:getSupportedInputMappingTypesRequest"
                         wsaw:Action="urn:getSupportedInputMappingTypes"/>
             <wsdl:output message="ns:getSupportedInputMappingTypesResponse"
                          wsaw:Action="urn:getSupportedInputMappingTypesResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfiguration">
-            <wsdl:input message="ns:getEventBuilderConfigurationRequest"
-                        wsaw:Action="urn:getEventBuilderConfiguration"/>
-            <wsdl:output message="ns:getEventBuilderConfigurationResponse"
-                         wsaw:Action="urn:getEventBuilderConfigurationResponse"/>
+        <wsdl:operation name="undeployActiveConfiguration">
+            <wsdl:input message="ns:undeployActiveConfigurationRequest" wsaw:Action="urn:undeployActiveConfiguration"/>
+            <wsdl:output message="ns:undeployActiveConfigurationResponse"
+                         wsaw:Action="urn:undeployActiveConfigurationResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="updateEventBuilderWithDto">
-            <wsdl:input message="ns:updateEventBuilderWithDtoRequest" wsaw:Action="urn:updateEventBuilderWithDto"/>
-            <wsdl:output message="ns:updateEventBuilderWithDtoResponse"
-                         wsaw:Action="urn:updateEventBuilderWithDtoResponse"/>
+        <wsdl:operation name="getAllActiveEventBuilderConfigurations">
+            <wsdl:input message="ns:getAllActiveEventBuilderConfigurationsRequest"
+                        wsaw:Action="urn:getAllActiveEventBuilderConfigurations"/>
+            <wsdl:output message="ns:getAllActiveEventBuilderConfigurationsResponse"
+                         wsaw:Action="urn:getAllActiveEventBuilderConfigurationsResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="addEventBuilder">
-            <wsdl:input message="ns:addEventBuilderRequest" wsaw:Action="urn:addEventBuilder"/>
-            <wsdl:output message="ns:addEventBuilderResponse" wsaw:Action="urn:addEventBuilderResponse"/>
+        <wsdl:operation name="setStatisticsEnabled">
+            <wsdl:input message="ns:setStatisticsEnabledRequest" wsaw:Action="urn:setStatisticsEnabled"/>
+            <wsdl:output message="ns:setStatisticsEnabledResponse" wsaw:Action="urn:setStatisticsEnabledResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="getInputTransportNames">
-            <wsdl:input message="ns:getInputTransportNamesRequest" wsaw:Action="urn:getInputTransportNames"/>
-            <wsdl:output message="ns:getInputTransportNamesResponse" wsaw:Action="urn:getInputTransportNamesResponse"/>
+        <wsdl:operation name="editInactiveEventBuilderConfiguration">
+            <wsdl:input message="ns:editInactiveEventBuilderConfigurationRequest"
+                        wsaw:Action="urn:editInactiveEventBuilderConfiguration"/>
+            <wsdl:output message="ns:editInactiveEventBuilderConfigurationResponse"
+                         wsaw:Action="urn:editInactiveEventBuilderConfigurationResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="getAllEventBuilderConfigurations">
-            <wsdl:input message="ns:getAllEventBuilderConfigurationsRequest"
-                        wsaw:Action="urn:getAllEventBuilderConfigurations"/>
-            <wsdl:output message="ns:getAllEventBuilderConfigurationsResponse"
-                         wsaw:Action="urn:getAllEventBuilderConfigurationsResponse"/>
+        <wsdl:operation name="getEventBuilderStatusAsString">
+            <wsdl:input message="ns:getEventBuilderStatusAsStringRequest"
+                        wsaw:Action="urn:getEventBuilderStatusAsString"/>
+            <wsdl:output message="ns:getEventBuilderStatusAsStringResponse"
+                         wsaw:Action="urn:getEventBuilderStatusAsStringResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfigurationXml">
-            <wsdl:input message="ns:getEventBuilderConfigurationXmlRequest"
-                        wsaw:Action="urn:getEventBuilderConfigurationXml"/>
-            <wsdl:output message="ns:getEventBuilderConfigurationXmlResponse"
-                         wsaw:Action="urn:getEventBuilderConfigurationXmlResponse"/>
+        <wsdl:operation name="getActiveEventBuilderConfiguration">
+            <wsdl:input message="ns:getActiveEventBuilderConfigurationRequest"
+                        wsaw:Action="urn:getActiveEventBuilderConfiguration"/>
+            <wsdl:output message="ns:getActiveEventBuilderConfigurationResponse"
+                         wsaw:Action="urn:getActiveEventBuilderConfigurationResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="getAllEventBuilderNames">
-            <wsdl:input message="ns:getAllEventBuilderNamesRequest" wsaw:Action="urn:getAllEventBuilderNames"/>
-            <wsdl:output message="ns:getAllEventBuilderNamesResponse"
-                         wsaw:Action="urn:getAllEventBuilderNamesResponse"/>
+        <wsdl:operation name="getAllInactiveEventBuilderConfigurations">
+            <wsdl:input message="ns:getAllInactiveEventBuilderConfigurationsRequest"
+                        wsaw:Action="urn:getAllInactiveEventBuilderConfigurations"/>
+            <wsdl:output message="ns:getAllInactiveEventBuilderConfigurationsResponse"
+                         wsaw:Action="urn:getAllInactiveEventBuilderConfigurationsResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="updateEventBuilderWithXml">
-            <wsdl:input message="ns:updateEventBuilderWithXmlRequest" wsaw:Action="urn:updateEventBuilderWithXml"/>
-            <wsdl:output message="ns:updateEventBuilderWithXmlResponse"
-                         wsaw:Action="urn:updateEventBuilderWithXmlResponse"/>
+        <wsdl:operation name="getActiveEventBuilderConfigurationContent">
+            <wsdl:input message="ns:getActiveEventBuilderConfigurationContentRequest"
+                        wsaw:Action="urn:getActiveEventBuilderConfigurationContent"/>
+            <wsdl:output message="ns:getActiveEventBuilderConfigurationContentResponse"
+                         wsaw:Action="urn:getActiveEventBuilderConfigurationContentResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="deployEventBuilderConfiguration">
+            <wsdl:input message="ns:deployEventBuilderConfigurationRequest"
+                        wsaw:Action="urn:deployEventBuilderConfiguration"/>
+            <wsdl:output message="ns:deployEventBuilderConfigurationResponse"
+                         wsaw:Action="urn:deployEventBuilderConfigurationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="undeployInactiveEventBuilderConfiguration">
+            <wsdl:input message="ns:undeployInactiveEventBuilderConfigurationRequest"
+                        wsaw:Action="urn:undeployInactiveEventBuilderConfiguration"/>
+            <wsdl:output message="ns:undeployInactiveEventBuilderConfigurationResponse"
+                         wsaw:Action="urn:undeployInactiveEventBuilderConfigurationResponse"/>
         </wsdl:operation>
         <wsdl:operation name="getMessageConfigurationProperties">
             <wsdl:input message="ns:getMessageConfigurationPropertiesRequest"
@@ -379,11 +423,17 @@
             <wsdl:output message="ns:getMessageConfigurationPropertiesResponse"
                          wsaw:Action="urn:getMessageConfigurationPropertiesResponse"/>
         </wsdl:operation>
+        <wsdl:operation name="editActiveEventBuilderConfiguration">
+            <wsdl:input message="ns:editActiveEventBuilderConfigurationRequest"
+                        wsaw:Action="urn:editActiveEventBuilderConfiguration"/>
+            <wsdl:output message="ns:editActiveEventBuilderConfigurationResponse"
+                         wsaw:Action="urn:editActiveEventBuilderConfigurationResponse"/>
+        </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="EventBuilderAdminServiceSoap11Binding" type="ns:EventBuilderAdminServicePortType">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-        <wsdl:operation name="removeEventBuilder">
-            <soap:operation soapAction="urn:removeEventBuilder" style="document"/>
+        <wsdl:operation name="getInactiveEventBuilderConfigurationContent">
+            <soap:operation soapAction="urn:getInactiveEventBuilderConfigurationContent" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -391,8 +441,17 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getUndeployedFileNames">
-            <soap:operation soapAction="urn:getUndeployedFileNames" style="document"/>
+        <wsdl:operation name="setTraceEnabled">
+            <soap:operation soapAction="urn:setTraceEnabled" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getInputEventAdaptorInfo">
+            <soap:operation soapAction="urn:getInputEventAdaptorInfo" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -409,12 +468,6 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="removeEventBuilderConfigurationFile">
-            <soap:operation soapAction="urn:removeEventBuilderConfigurationFile" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-        </wsdl:operation>
         <wsdl:operation name="getSupportedInputMappingTypes">
             <soap:operation soapAction="urn:getSupportedInputMappingTypes" style="document"/>
             <wsdl:input>
@@ -424,8 +477,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfigurationsFor">
-            <soap:operation soapAction="urn:getEventBuilderConfigurationsFor" style="document"/>
+        <wsdl:operation name="getAllActiveEventBuilderConfigurations">
+            <soap:operation soapAction="urn:getAllActiveEventBuilderConfigurations" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -433,8 +486,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfiguration">
-            <soap:operation soapAction="urn:getEventBuilderConfiguration" style="document"/>
+        <wsdl:operation name="undeployActiveConfiguration">
+            <soap:operation soapAction="urn:undeployActiveConfiguration" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -442,8 +495,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="updateEventBuilderWithDto">
-            <soap:operation soapAction="urn:updateEventBuilderWithDto" style="document"/>
+        <wsdl:operation name="editInactiveEventBuilderConfiguration">
+            <soap:operation soapAction="urn:editInactiveEventBuilderConfiguration" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -451,8 +504,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="addEventBuilder">
-            <soap:operation soapAction="urn:addEventBuilder" style="document"/>
+        <wsdl:operation name="setStatisticsEnabled">
+            <soap:operation soapAction="urn:setStatisticsEnabled" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -460,8 +513,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getInputTransportNames">
-            <soap:operation soapAction="urn:getInputTransportNames" style="document"/>
+        <wsdl:operation name="getEventBuilderStatusAsString">
+            <soap:operation soapAction="urn:getEventBuilderStatusAsString" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -469,8 +522,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfigurationXml">
-            <soap:operation soapAction="urn:getEventBuilderConfigurationXml" style="document"/>
+        <wsdl:operation name="getActiveEventBuilderConfiguration">
+            <soap:operation soapAction="urn:getActiveEventBuilderConfiguration" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -478,26 +531,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getAllEventBuilderConfigurations">
-            <soap:operation soapAction="urn:getAllEventBuilderConfigurations" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="updateEventBuilderWithXml">
-            <soap:operation soapAction="urn:updateEventBuilderWithXml" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getAllEventBuilderNames">
-            <soap:operation soapAction="urn:getAllEventBuilderNames" style="document"/>
+        <wsdl:operation name="getAllInactiveEventBuilderConfigurations">
+            <soap:operation soapAction="urn:getAllInactiveEventBuilderConfigurations" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -514,11 +549,47 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="undeployInactiveEventBuilderConfiguration">
+            <soap:operation soapAction="urn:undeployInactiveEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="deployEventBuilderConfiguration">
+            <soap:operation soapAction="urn:deployEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getActiveEventBuilderConfigurationContent">
+            <soap:operation soapAction="urn:getActiveEventBuilderConfigurationContent" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editActiveEventBuilderConfiguration">
+            <soap:operation soapAction="urn:editActiveEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="EventBuilderAdminServiceSoap12Binding" type="ns:EventBuilderAdminServicePortType">
         <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-        <wsdl:operation name="removeEventBuilder">
-            <soap12:operation soapAction="urn:removeEventBuilder" style="document"/>
+        <wsdl:operation name="getInactiveEventBuilderConfigurationContent">
+            <soap12:operation soapAction="urn:getInactiveEventBuilderConfigurationContent" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -526,8 +597,17 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getUndeployedFileNames">
-            <soap12:operation soapAction="urn:getUndeployedFileNames" style="document"/>
+        <wsdl:operation name="setTraceEnabled">
+            <soap12:operation soapAction="urn:setTraceEnabled" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getInputEventAdaptorInfo">
+            <soap12:operation soapAction="urn:getInputEventAdaptorInfo" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -544,12 +624,6 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="removeEventBuilderConfigurationFile">
-            <soap12:operation soapAction="urn:removeEventBuilderConfigurationFile" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-        </wsdl:operation>
         <wsdl:operation name="getSupportedInputMappingTypes">
             <soap12:operation soapAction="urn:getSupportedInputMappingTypes" style="document"/>
             <wsdl:input>
@@ -559,8 +633,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfigurationsFor">
-            <soap12:operation soapAction="urn:getEventBuilderConfigurationsFor" style="document"/>
+        <wsdl:operation name="getAllActiveEventBuilderConfigurations">
+            <soap12:operation soapAction="urn:getAllActiveEventBuilderConfigurations" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -568,8 +642,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfiguration">
-            <soap12:operation soapAction="urn:getEventBuilderConfiguration" style="document"/>
+        <wsdl:operation name="undeployActiveConfiguration">
+            <soap12:operation soapAction="urn:undeployActiveConfiguration" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -577,8 +651,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="updateEventBuilderWithDto">
-            <soap12:operation soapAction="urn:updateEventBuilderWithDto" style="document"/>
+        <wsdl:operation name="editInactiveEventBuilderConfiguration">
+            <soap12:operation soapAction="urn:editInactiveEventBuilderConfiguration" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -586,8 +660,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="addEventBuilder">
-            <soap12:operation soapAction="urn:addEventBuilder" style="document"/>
+        <wsdl:operation name="setStatisticsEnabled">
+            <soap12:operation soapAction="urn:setStatisticsEnabled" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -595,8 +669,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getInputTransportNames">
-            <soap12:operation soapAction="urn:getInputTransportNames" style="document"/>
+        <wsdl:operation name="getEventBuilderStatusAsString">
+            <soap12:operation soapAction="urn:getEventBuilderStatusAsString" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -604,8 +678,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfigurationXml">
-            <soap12:operation soapAction="urn:getEventBuilderConfigurationXml" style="document"/>
+        <wsdl:operation name="getActiveEventBuilderConfiguration">
+            <soap12:operation soapAction="urn:getActiveEventBuilderConfiguration" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -613,26 +687,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getAllEventBuilderConfigurations">
-            <soap12:operation soapAction="urn:getAllEventBuilderConfigurations" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="updateEventBuilderWithXml">
-            <soap12:operation soapAction="urn:updateEventBuilderWithXml" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getAllEventBuilderNames">
-            <soap12:operation soapAction="urn:getAllEventBuilderNames" style="document"/>
+        <wsdl:operation name="getAllInactiveEventBuilderConfigurations">
+            <soap12:operation soapAction="urn:getAllInactiveEventBuilderConfigurations" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -649,11 +705,47 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="undeployInactiveEventBuilderConfiguration">
+            <soap12:operation soapAction="urn:undeployInactiveEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="deployEventBuilderConfiguration">
+            <soap12:operation soapAction="urn:deployEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getActiveEventBuilderConfigurationContent">
+            <soap12:operation soapAction="urn:getActiveEventBuilderConfigurationContent" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editActiveEventBuilderConfiguration">
+            <soap12:operation soapAction="urn:editActiveEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="EventBuilderAdminServiceHttpBinding" type="ns:EventBuilderAdminServicePortType">
         <http:binding verb="POST"/>
-        <wsdl:operation name="removeEventBuilder">
-            <http:operation location="removeEventBuilder"/>
+        <wsdl:operation name="getInactiveEventBuilderConfigurationContent">
+            <http:operation location="getInactiveEventBuilderConfigurationContent"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -661,8 +753,17 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getUndeployedFileNames">
-            <http:operation location="getUndeployedFileNames"/>
+        <wsdl:operation name="setTraceEnabled">
+            <http:operation location="setTraceEnabled"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getInputEventAdaptorInfo">
+            <http:operation location="getInputEventAdaptorInfo"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -679,12 +780,6 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="removeEventBuilderConfigurationFile">
-            <http:operation location="removeEventBuilderConfigurationFile"/>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:input>
-        </wsdl:operation>
         <wsdl:operation name="getSupportedInputMappingTypes">
             <http:operation location="getSupportedInputMappingTypes"/>
             <wsdl:input>
@@ -694,8 +789,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfigurationsFor">
-            <http:operation location="getEventBuilderConfigurationsFor"/>
+        <wsdl:operation name="getAllActiveEventBuilderConfigurations">
+            <http:operation location="getAllActiveEventBuilderConfigurations"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -703,8 +798,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfiguration">
-            <http:operation location="getEventBuilderConfiguration"/>
+        <wsdl:operation name="undeployActiveConfiguration">
+            <http:operation location="undeployActiveConfiguration"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -712,8 +807,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="updateEventBuilderWithDto">
-            <http:operation location="updateEventBuilderWithDto"/>
+        <wsdl:operation name="editInactiveEventBuilderConfiguration">
+            <http:operation location="editInactiveEventBuilderConfiguration"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -721,8 +816,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="addEventBuilder">
-            <http:operation location="addEventBuilder"/>
+        <wsdl:operation name="setStatisticsEnabled">
+            <http:operation location="setStatisticsEnabled"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -730,8 +825,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getInputTransportNames">
-            <http:operation location="getInputTransportNames"/>
+        <wsdl:operation name="getEventBuilderStatusAsString">
+            <http:operation location="getEventBuilderStatusAsString"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -739,8 +834,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getEventBuilderConfigurationXml">
-            <http:operation location="getEventBuilderConfigurationXml"/>
+        <wsdl:operation name="getActiveEventBuilderConfiguration">
+            <http:operation location="getActiveEventBuilderConfiguration"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -748,26 +843,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getAllEventBuilderConfigurations">
-            <http:operation location="getAllEventBuilderConfigurations"/>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="updateEventBuilderWithXml">
-            <http:operation location="updateEventBuilderWithXml"/>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getAllEventBuilderNames">
-            <http:operation location="getAllEventBuilderNames"/>
+        <wsdl:operation name="getAllInactiveEventBuilderConfigurations">
+            <http:operation location="getAllInactiveEventBuilderConfigurations"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -784,21 +861,57 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="undeployInactiveEventBuilderConfiguration">
+            <http:operation location="undeployInactiveEventBuilderConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="deployEventBuilderConfiguration">
+            <http:operation location="deployEventBuilderConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getActiveEventBuilderConfigurationContent">
+            <http:operation location="getActiveEventBuilderConfigurationContent"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editActiveEventBuilderConfiguration">
+            <http:operation location="editActiveEventBuilderConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="EventBuilderAdminService">
         <wsdl:port name="EventBuilderAdminServiceHttpsSoap11Endpoint"
                    binding="ns:EventBuilderAdminServiceSoap11Binding">
             <soap:address
-                    location="https://192.168.1.100:9443/services/EventBuilderAdminService.EventBuilderAdminServiceHttpsSoap11Endpoint/"/>
+                    location="https://10.100.0.75:9443/services/EventBuilderAdminService.EventBuilderAdminServiceHttpsSoap11Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="EventBuilderAdminServiceHttpsSoap12Endpoint"
                    binding="ns:EventBuilderAdminServiceSoap12Binding">
             <soap12:address
-                    location="https://192.168.1.100:9443/services/EventBuilderAdminService.EventBuilderAdminServiceHttpsSoap12Endpoint/"/>
+                    location="https://10.100.0.75:9443/services/EventBuilderAdminService.EventBuilderAdminServiceHttpsSoap12Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="EventBuilderAdminServiceHttpsEndpoint" binding="ns:EventBuilderAdminServiceHttpBinding">
             <http:address
-                    location="https://192.168.1.100:9443/services/EventBuilderAdminService.EventBuilderAdminServiceHttpsEndpoint/"/>
+                    location="https://10.100.0.75:9443/services/EventBuilderAdminService.EventBuilderAdminServiceHttpsEndpoint/"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
