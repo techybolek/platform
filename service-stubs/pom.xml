@@ -249,7 +249,15 @@
 				<module>org.wso2.carbon.identity.authenticator.krb5.stub</module>
 				<module>org.wso2.carbon.hdfs.mgt.stub</module>
 				<module>org.wso2.carbon.mapred.mgt.stub</module>
-  </modules>
+				<module>org.wso2.carbon.event.processor.stub</module>
+				<module>org.wso2.carbon.event.builder.stub</module>
+				<module>org.wso2.carbon.event.formatter.stub</module>
+				<module>org.wso2.carbon.event.input.adaptor.manager.stub</module>
+				<module>org.wso2.carbon.event.output.adaptor.manager.stub</module>
+				<module>org.wso2.carbon.event.tracer.stub</module>
+				<module>org.wso2.carbon.event.statistics.stub</module>
+				<module>org.wso2.carbon.event.stream.manager.stub</module>
+    </modules>
 
     <build>
         <plugins>
