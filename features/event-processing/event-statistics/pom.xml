@@ -20,46 +20,46 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
-        <artifactId>carbon-features</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+    <artifactId>event-processing-feature</artifactId>
+    <groupId>org.wso2.carbon</groupId>
+    <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>event-tracer-feature</artifactId>
+    <artifactId>event-statistics-feature</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Event Tracer Feature Aggregator Module</name>
+    <name>WSO2 Carbon - Event Statistics Feature Aggregator Module</name>
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.event.tracer.feature</module>
-        <module>org.wso2.carbon.event.tracer.server.feature</module>
-        <module>org.wso2.carbon.event.tracer.ui.feature</module>
+        <module>org.wso2.carbon.event.statistics.feature</module>
+        <module>org.wso2.carbon.event.statistics.server.feature</module>
+        <module>org.wso2.carbon.event.statistics.ui.feature</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.event.tracer</artifactId>
-                <version>${wso2carbon.version.event.tracer}</version>
+                <artifactId>org.wso2.carbon.event.statistics</artifactId>
+                <version>${wso2carbon.version.event.statistics}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.event.tracer.ui</artifactId>
-                <version>${wso2carbon.version.event.tracer}</version>
+                <artifactId>org.wso2.carbon.event.statistics.ui</artifactId>
+                <version>${wso2carbon.version.event.statistics}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.event.tracer.stub</artifactId>
-                <version>${wso2carbon.version.event.tracer}</version>
+                <artifactId>org.wso2.carbon.event.statistics.stub</artifactId>
+                <version>${wso2carbon.version.event.statistics}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <properties>
-        <wso2carbon.version.event.tracer>1.0.0-SNAPSHOT</wso2carbon.version.event.tracer>
+        <wso2carbon.version.event.statistics>1.0.0-SNAPSHOT</wso2carbon.version.event.statistics>
     </properties>
 
 </project>

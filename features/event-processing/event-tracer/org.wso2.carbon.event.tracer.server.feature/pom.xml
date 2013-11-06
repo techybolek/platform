@@ -23,28 +23,20 @@
         <groupId>org.wso2.carbon</groupId>
         <artifactId>event-tracer-feature</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.event.tracer.feature</artifactId>
+    <artifactId>org.wso2.carbon.event.tracer.server.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Event Tracer Feature</name>
+    <name>WSO2 Carbon - Event Tracer Core Feature</name>
     <url>http://wso2.org</url>
-    <description>This feature contains the bundles required for Event Tracer functionality</description>
+    <description>This feature contains the core bundles required for Back-end Event Tracer functionality</description>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.event.tracer.server.feature</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.event.tracer.ui.feature</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
+            <artifactId>org.wso2.carbon.event.tracer</artifactId>
         </dependency>
     </dependencies>
 
@@ -62,12 +54,17 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.event.tracer</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
-                            <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.event.tracer.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.event.tracer.ui.feature</includedFeatureDef>
-                            </includedFeatures>
+                            <id>org.wso2.carbon.event.tracer.server</id>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
+                            <adviceFile>
+                                <properties>
+                                    <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
+                                    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
+                                </properties>
+                            </adviceFile>
+                            <bundles>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.event.tracer</bundleDef>
+                            </bundles>
                         </configuration>
                     </execution>
                 </executions>
