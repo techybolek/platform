@@ -40,7 +40,7 @@ public class MultiplyExpressionExecutorInt implements ExpressionExecutor {
 
     }
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return Attribute.Type.INT;
     }
 

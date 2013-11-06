@@ -39,7 +39,7 @@ public class AddExpressionExecutorFloat implements ExpressionExecutor {
                ((Number) rightExpressionExecutor.execute(event)).floatValue();
     }
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return Attribute.Type.FLOAT;
     }
 

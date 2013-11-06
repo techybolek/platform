@@ -51,6 +51,16 @@ tokens {
   PARTITION_TYPE;
   LAST;
   SNAPSHOT;
+  TABLE_PARAMETER;
+  YEAR;
+  MONTH;
+  WEEK;
+  DAY;
+  HOUR;
+  MIN;
+  SEC;
+  MILLI_SEC;
+
 }
 
 @header {
@@ -113,7 +123,7 @@ definitionTableFinal
     ;
 
 definitionTable 
-	:'define' 'table' id '(' attributeName type (',' attributeName type )* ')' ('from' tableType '.' dataSourceName ':' databaseName '.' tableName )?  ->  ^(id (^(IN_ATTRIBUTE attributeName type))+ ^(TABLE  tableType dataSourceName databaseName tableName)? )
+	:'define' 'table' id '(' attributeName type (',' attributeName type )* ')' ('from' '(' tableParamName '=' tableParamValue (',' tableParamName '=' tableParamValue )* ')' )?  ->  ^(id (^(IN_ATTRIBUTE attributeName type))+ ^(TABLE (^(TABLE_PARAMETER tableParamName tableParamValue))+ )? )
 	;
 
 queryFinal
@@ -456,35 +466,35 @@ timeExpr
 	;
 
 yearValue
-	: POSITIVE_INT_VAL ( 'years' | 'year')
+	: POSITIVE_INT_VAL ( years | year)  ->  ^(YEAR POSITIVE_INT_VAL)
 	;
 
 monthValue
-	: POSITIVE_INT_VAL ( 'months' | 'month')
+	: POSITIVE_INT_VAL ( months | month)  ->   ^(MONTH POSITIVE_INT_VAL)
 	;
 
 weekValue
-	: POSITIVE_INT_VAL ( 'weeks' | 'week')
+	: POSITIVE_INT_VAL ( weeks | week) ->   ^(WEEK POSITIVE_INT_VAL)
 	;
 
 dayValue
-	: POSITIVE_INT_VAL ( 'days' | 'day')
+	: POSITIVE_INT_VAL ( days | day)  ->   ^(DAY POSITIVE_INT_VAL)
 	;
 
 hourValue
-	: POSITIVE_INT_VAL ( 'hours' |   'hour' )
+	: POSITIVE_INT_VAL ( hours |   hour ) ->   ^(HOUR POSITIVE_INT_VAL)
 	;
 
 minuteValue
-	: POSITIVE_INT_VAL ( 'minutes' |  'min'  | 'minute'  )
+	: POSITIVE_INT_VAL ( minutes |  min  | minute  ) ->   ^(MIN POSITIVE_INT_VAL)
 	;
 
 secondValue
-	: POSITIVE_INT_VAL ('seconds' | 'second' | 'sec'  )
+	: POSITIVE_INT_VAL (seconds | second | sec  )  ->   ^(SEC POSITIVE_INT_VAL)
 	;
 
-milliSecondValue  returns [long value]
-	: POSITIVE_INT_VAL ( 'milliseconds' |  'millisecond'  )
+milliSecondValue
+	: POSITIVE_INT_VAL ( milliseconds |  millisecond  )  ->   ^(MILLI_SEC POSITIVE_INT_VAL)
 	;
 
 intVal: '-'? POSITIVE_INT_VAL -> ^(SIGNED_VAL  POSITIVE_INT_VAL '-'?);
@@ -511,6 +521,10 @@ dataSourceName : id;
 
 stringVal: STRING_VAL;
 
+tableParamName : stringVal;
+
+tableParamValue : stringVal;
+
 type: 'string' |'int' |'long' |'float' |'double' |'bool';
 
 POSITIVE_INT_VAL:  NUM('I'|'i')?;
@@ -529,6 +543,44 @@ ID_QUOTES : '`'('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*'`' {set
 ID : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
 
 //('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-'|','|' '|'\t')*
+
+years :  {input.LT(1).getText().equals("years")}? ID ;
+
+year :  {input.LT(1).getText().equals("year")}? ID ;
+
+months :  {input.LT(1).getText().equals("months")}? ID ;
+
+month :  {input.LT(1).getText().equals("month")}? ID ;
+
+weeks :  {input.LT(1).getText().equals("weeks")}? ID ;
+
+week :  {input.LT(1).getText().equals("week")}? ID ;
+
+days :  {input.LT(1).getText().equals("days")}? ID ;
+
+day :  {input.LT(1).getText().equals("day")}? ID ;
+
+hours :  {input.LT(1).getText().equals("hours")}? ID ;
+
+hour :  {input.LT(1).getText().equals("hour")}? ID ;
+
+minutes :  {input.LT(1).getText().equals("minutes")}? ID ;
+
+min :  {input.LT(1).getText().equals("min")}? ID ;
+
+minute :  {input.LT(1).getText().equals("minute")}? ID ;
+
+seconds :  {input.LT(1).getText().equals("seconds")}? ID ;
+
+second :  {input.LT(1).getText().equals("second")}? ID ;
+
+sec :  {input.LT(1).getText().equals("sec")}? ID ;
+
+milliseconds :  {input.LT(1).getText().equals("milliseconds")}? ID ;
+
+millisecond :  {input.LT(1).getText().equals("millisecond")}? ID ;
+
+
 
 STRING_VAL
 	:'\'' ( ~('\u0000'..'\u001f' | '\\' | '\''| '\"' ) )* '\'' {setText(getText().substring(1, getText().length()-1));}

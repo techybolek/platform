@@ -96,6 +96,7 @@ public class StreamParser {
 
         if (queryStream instanceof WindowStream) {
             WindowProcessor windowProcessor = generateWindowProcessor(queryEventSource, siddhiContext, null, false);
+            windowProcessor.initWindow();
             simpleHandlerProcessor.setNext(windowProcessor);
             queryPartComposite.getPreSelectProcessingElementList().add(windowProcessor);
         } else {
@@ -151,29 +152,29 @@ public class StreamParser {
         JoinProcessor leftRemoveStreamJoinProcessor;
         JoinProcessor rightRemoveStreamJoinProcessor;
         Lock lock;
-        if (siddhiContext.isDistributedProcessing()) {
+        if (siddhiContext.isDistributedProcessingEnabled()) {
             lock = siddhiContext.getHazelcastInstance().getLock(siddhiContext.getElementIdGenerator().createNewId() + "-join-lock");
         } else {
             lock = new ReentrantLock();
         }
         switch (((JoinStream) queryStream).getTrigger()) {
             case LEFT:
-                leftInStreamJoinProcessor = new LeftInStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessing(), lock, fromDB);
-                rightInStreamJoinProcessor = new RightInStreamJoinProcessor(onConditionExecutor, false, siddhiContext.isDistributedProcessing(), lock, fromDB);
-                leftRemoveStreamJoinProcessor = new LeftRemoveStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessing(), lock, fromDB);
-                rightRemoveStreamJoinProcessor = new RightRemoveStreamJoinProcessor(onConditionExecutor, false, siddhiContext.isDistributedProcessing(), lock, fromDB);
+                leftInStreamJoinProcessor = new LeftInStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
+                rightInStreamJoinProcessor = new RightInStreamJoinProcessor(onConditionExecutor, false, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
+                leftRemoveStreamJoinProcessor = new LeftRemoveStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
+                rightRemoveStreamJoinProcessor = new RightRemoveStreamJoinProcessor(onConditionExecutor, false, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
                 break;
             case RIGHT:
-                leftInStreamJoinProcessor = new LeftInStreamJoinProcessor(onConditionExecutor, false, siddhiContext.isDistributedProcessing(), lock, fromDB);
-                rightInStreamJoinProcessor = new RightInStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessing(), lock, fromDB);
-                leftRemoveStreamJoinProcessor = new LeftRemoveStreamJoinProcessor(onConditionExecutor, false, siddhiContext.isDistributedProcessing(), lock, fromDB);
-                rightRemoveStreamJoinProcessor = new RightRemoveStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessing(), lock, fromDB);
+                leftInStreamJoinProcessor = new LeftInStreamJoinProcessor(onConditionExecutor, false, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
+                rightInStreamJoinProcessor = new RightInStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
+                leftRemoveStreamJoinProcessor = new LeftRemoveStreamJoinProcessor(onConditionExecutor, false, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
+                rightRemoveStreamJoinProcessor = new RightRemoveStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
                 break;
             default:
-                leftInStreamJoinProcessor = new LeftInStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessing(), lock, fromDB);
-                rightInStreamJoinProcessor = new RightInStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessing(), lock, fromDB);
-                leftRemoveStreamJoinProcessor = new LeftRemoveStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessing(), lock, fromDB);
-                rightRemoveStreamJoinProcessor = new RightRemoveStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessing(), lock, fromDB);
+                leftInStreamJoinProcessor = new LeftInStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
+                rightInStreamJoinProcessor = new RightInStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
+                leftRemoveStreamJoinProcessor = new LeftRemoveStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
+                rightRemoveStreamJoinProcessor = new RightRemoveStreamJoinProcessor(onConditionExecutor, true, siddhiContext.isDistributedProcessingEnabled(), lock, fromDB);
                 break;
         }
         Constant within = ((JoinStream) queryStream).getWithin();
@@ -215,6 +216,9 @@ public class StreamParser {
         rightInStreamJoinProcessor.setWindowProcessor(rightWindowProcessor);
         rightWindowProcessor.setNext(rightRemoveStreamJoinProcessor);
 
+        //init window
+        leftWindowProcessor.initWindow();
+        rightWindowProcessor.initWindow();
 
         //joinStreamPacker prev
         rightInStreamJoinProcessor.setOppositeWindowProcessor(leftInStreamJoinProcessor.getWindowProcessor());
@@ -399,6 +403,7 @@ public class StreamParser {
         TransformProcessor transformProcessor = (TransformProcessor) SiddhiClassLoader.loadProcessor(queryEventSource.getTransformer().getName(), queryEventSource.getTransformer().getExtension(),
                                                                                                      TransformProcessor.class, TransformExtensionHolder.getInstance(siddhiContext));
 
+        siddhiContext.addEternalReferencedHolder(transformProcessor);
         transformProcessor.setSiddhiContext(siddhiContext);
         transformProcessor.setInStreamDefinition((StreamDefinition) queryEventSource.getInDefinition());
         List<ExpressionExecutor> expressionExecutors = new LinkedList<ExpressionExecutor>();
@@ -452,6 +457,8 @@ public class StreamParser {
         WindowProcessor windowProcessor = (WindowProcessor) SiddhiClassLoader.loadProcessor(window.getName(), window.getExtension(),
                                                                                             WindowProcessor.class, WindowExtensionHolder.getInstance(siddhiContext));
 
+        siddhiContext.addEternalReferencedHolder(windowProcessor);
+
 //                    Window window = new TimeWindowProcessor();
         windowProcessor.setSiddhiContext(siddhiContext);
         windowProcessor.setDefinition(queryEventSource.getOutDefinition());
@@ -465,7 +472,7 @@ public class StreamParser {
         windowProcessor.setElementId(siddhiContext.getElementIdGenerator().createNewId());
 
         if (lock == null) {
-            if (siddhiContext.isDistributedProcessing()) {
+            if (siddhiContext.isDistributedProcessingEnabled()) {
                 windowProcessor.setLock(siddhiContext.getHazelcastInstance().getLock(windowProcessor.getElementId() + "-lock"));
             } else {
                 windowProcessor.setLock(new ReentrantLock());
@@ -475,7 +482,7 @@ public class StreamParser {
         }
         //for persistence
         siddhiContext.getPersistenceService().addPersister(windowProcessor);
-        windowProcessor.init(async);
+        windowProcessor.setAsync(async);
         return windowProcessor;
     }
 
@@ -489,7 +496,7 @@ public class StreamParser {
         }
         TransformProcessor transformProcessor = (TransformProcessor) SiddhiClassLoader.loadProcessor(queryEventSource.getTransformer().getName(), queryEventSource.getTransformer().getExtension(),
                                                                                                      TransformProcessor.class, TransformExtensionHolder.getInstance(siddhiContext));
-
+        siddhiContext.addEternalReferencedHolder(transformProcessor);
         transformProcessor.setSiddhiContext(siddhiContext);
         transformProcessor.setInStreamDefinition((StreamDefinition) queryEventSource.getInDefinition());
         List<ExpressionExecutor> expressionExecutors = new LinkedList<ExpressionExecutor>();

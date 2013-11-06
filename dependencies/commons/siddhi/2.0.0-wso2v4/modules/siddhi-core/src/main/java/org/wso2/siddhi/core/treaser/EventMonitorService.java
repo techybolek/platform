@@ -21,18 +21,18 @@ import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.StreamEvent;
 
-public class EventTracerService {
+public class EventMonitorService {
     private SiddhiContext siddhiContext;
     private volatile boolean enableTrace;
     private volatile boolean enableStats;
-    private EventTracer eventTracer = new PassThrewEventTracer();
+    private EventMonitor eventMonitor = new PassThrewEventMonitor();
 
-    public EventTracerService(SiddhiContext siddhiContext) {
+    public EventMonitorService(SiddhiContext siddhiContext) {
         this.siddhiContext = siddhiContext;
     }
 
-    public void setEventTracer(EventTracer eventTracer) {
-        this.eventTracer = eventTracer;
+    public void setEventMonitor(EventMonitor eventMonitor) {
+        this.eventMonitor = eventMonitor;
     }
 
     public void setEnableTrace(boolean enableTrace) {
@@ -53,13 +53,13 @@ public class EventTracerService {
 
     public void trace(ComplexEvent complexEvent, String message) {
         if (enableTrace) {
-            eventTracer.trace(complexEvent, message);
+            eventMonitor.trace(complexEvent, message);
         }
     }
 
     public void calculateStats(StreamEvent streamEvent) {
         if (enableStats) {
-            eventTracer.calculateStats(streamEvent);
+            eventMonitor.calculateStats(streamEvent);
         }
     }
 

@@ -18,13 +18,13 @@
 package org.wso2.siddhi.core.extension.holder;
 
 import org.wso2.siddhi.core.config.SiddhiContext;
-import org.wso2.siddhi.core.executor.function.ExecutorFunction;
+import org.wso2.siddhi.core.executor.function.FunctionExecutor;
 
 public class ExecutorExtensionHolder extends AbstractExtensionHolder {
     private static ExecutorExtensionHolder instance;
 
     private ExecutorExtensionHolder(SiddhiContext siddhiContext) {
-        super(ExecutorFunction.class, siddhiContext);
+        super(FunctionExecutor.class, siddhiContext);
     }
 
     public static ExecutorExtensionHolder getInstance(SiddhiContext siddhiContext) {

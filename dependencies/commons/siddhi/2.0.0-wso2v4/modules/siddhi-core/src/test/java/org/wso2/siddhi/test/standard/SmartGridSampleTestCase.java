@@ -236,7 +236,7 @@ public class SmartGridSampleTestCase {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 if (inEvents != null) {
 //                    junit.framework.Assert.assertTrue("IBM".equals(getData(newEventData, 0, 0)) || "WSO2".equals(getData(newEventData, 0, 0)));
-                    eventCount++;
+                    eventCount+=inEvents.length;
                 }
                 eventArrived = true;
             }
@@ -294,7 +294,7 @@ public class SmartGridSampleTestCase {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 if (inEvents != null) {
 //                    junit.framework.Assert.assertTrue("IBM".equals(getData(newEventData, 0, 0)) || "WSO2".equals(getData(newEventData, 0, 0)));
-                    eventCount++;
+                    eventCount+=inEvents.length;
                 }
                 eventArrived = true;
             }

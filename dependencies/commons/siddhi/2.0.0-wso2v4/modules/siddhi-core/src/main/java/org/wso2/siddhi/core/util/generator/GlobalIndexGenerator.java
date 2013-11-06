@@ -17,18 +17,18 @@
 */
 package org.wso2.siddhi.core.util.generator;
 
-import com.hazelcast.core.AtomicNumber;
+import com.hazelcast.core.IAtomicLong;
 import org.wso2.siddhi.core.config.SiddhiContext;
 
 public class GlobalIndexGenerator {
 
 
-    private static AtomicNumber one;
-    private static AtomicNumber two;
+    private static IAtomicLong one;
+    private static IAtomicLong two;
 
     public GlobalIndexGenerator(SiddhiContext siddhiContext) {
-        one = siddhiContext.getHazelcastInstance().getAtomicNumber("GlobalIndexGenerator-one");
-        two = siddhiContext.getHazelcastInstance().getAtomicNumber("GlobalIndexGenerator-two");
+        one = siddhiContext.getHazelcastInstance().getAtomicLong("GlobalIndexGenerator-one");
+        two = siddhiContext.getHazelcastInstance().getAtomicLong("GlobalIndexGenerator-two");
     }
 
     public synchronized String getNewIndex() {

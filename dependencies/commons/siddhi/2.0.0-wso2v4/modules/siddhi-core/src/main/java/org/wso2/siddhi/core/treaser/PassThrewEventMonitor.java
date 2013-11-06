@@ -19,7 +19,7 @@ package org.wso2.siddhi.core.treaser;
 
 import org.wso2.siddhi.core.event.ComplexEvent;
 
-public class PassThrewEventTracer extends EventTracer {
+public class PassThrewEventMonitor extends EventMonitor {
     @Override
     public void trace(ComplexEvent complexEvent, String message) {
         //ignore

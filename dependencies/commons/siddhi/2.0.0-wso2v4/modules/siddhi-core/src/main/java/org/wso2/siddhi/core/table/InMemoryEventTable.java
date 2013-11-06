@@ -50,7 +50,7 @@ public class InMemoryEventTable implements EventTable, Persister {
         elementId = siddhiContext.getElementIdGenerator().createNewId();
         this.tableDefinition = tableDefinition;
         this.queryEventSource = new QueryEventSource(tableDefinition.getTableId(), tableDefinition.getTableId(), tableDefinition, null, null, null);
-        if (siddhiContext.isDistributedProcessing()) {
+        if (siddhiContext.isDistributedProcessingEnabled()) {
             enableRemoveAndAdd = true;
             this.list = new SiddhiListGrid<StreamEvent>(elementId, siddhiContext);
         } else {

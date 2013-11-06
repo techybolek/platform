@@ -37,7 +37,7 @@ import org.wso2.siddhi.core.executor.expression.divide.DivideExpressionExecutorD
 import org.wso2.siddhi.core.executor.expression.divide.DivideExpressionExecutorFloat;
 import org.wso2.siddhi.core.executor.expression.divide.DivideExpressionExecutorInt;
 import org.wso2.siddhi.core.executor.expression.divide.DivideExpressionExecutorLong;
-import org.wso2.siddhi.core.executor.function.ExecutorFunction;
+import org.wso2.siddhi.core.executor.function.FunctionExecutor;
 import org.wso2.siddhi.core.executor.expression.minus.MinusExpressionExecutorDouble;
 import org.wso2.siddhi.core.executor.expression.minus.MinusExpressionExecutorFloat;
 import org.wso2.siddhi.core.executor.expression.minus.MinusExpressionExecutorInt;
@@ -142,11 +142,12 @@ public class ExecutorParser {
             for (Expression expression : ((ConditionExtension) condition).getParameters()) {
                 expressionExecutors.add(parseExpression(expression, queryEventSourceList, currentStreamReference, processInDefinition, siddhiContext));
             }
-            ExecutorFunction expressionExecutor = (ExecutorFunction) SiddhiClassLoader.loadExtensionImplementation(((ExpressionExtension) Expression.extension(((ConditionExtension) condition).getNamespace(), ((ConditionExtension) condition).getFunction(), ((ConditionExtension) condition).getParameters())), ExecutorExtensionHolder.getInstance(siddhiContext));
+            FunctionExecutor expressionExecutor = (FunctionExecutor) SiddhiClassLoader.loadExtensionImplementation(((ExpressionExtension) Expression.extension(((ConditionExtension) condition).getNamespace(), ((ConditionExtension) condition).getFunction(), ((ConditionExtension) condition).getParameters())), ExecutorExtensionHolder.getInstance(siddhiContext));
+            siddhiContext.addEternalReferencedHolder(expressionExecutor);
             expressionExecutor.setSiddhiContext(siddhiContext);
             expressionExecutor.setAttributeExpressionExecutors(expressionExecutors);
             expressionExecutor.init();
-            if(expressionExecutor.getType()!= Attribute.Type.BOOL){
+            if(expressionExecutor.getReturnType()!= Attribute.Type.BOOL){
                 throw new OperationNotSupportedException(((FunctionCondition) condition).getFunction()+" of class "+expressionExecutor.getClass().getName()+" does not return bool hence it cannot be used as a condition");
             }
             return new BooleanConditionExecutor(expressionExecutor);
@@ -155,11 +156,12 @@ public class ExecutorParser {
             for (Expression expression : ((FunctionCondition) condition).getParameters()) {
                 expressionExecutors.add(parseExpression(expression, queryEventSourceList, currentStreamReference, processInDefinition, siddhiContext));
             }
-            ExecutorFunction expressionExecutor= (ExecutorFunction) SiddhiClassLoader.loadSiddhiImplementation(((FunctionExpression) Expression.function(((FunctionCondition) condition).getFunction(),((FunctionCondition) condition).getParameters())).getFunction(), ExecutorFunction.class);
+            FunctionExecutor expressionExecutor= (FunctionExecutor) SiddhiClassLoader.loadSiddhiImplementation(((FunctionExpression) Expression.function(((FunctionCondition) condition).getFunction(),((FunctionCondition) condition).getParameters())).getFunction(), FunctionExecutor.class);
+            siddhiContext.addEternalReferencedHolder(expressionExecutor);
             expressionExecutor.setSiddhiContext(siddhiContext);
             expressionExecutor.setAttributeExpressionExecutors(expressionExecutors);
             expressionExecutor.init();
-            if(expressionExecutor.getType()!= Attribute.Type.BOOL){
+            if(expressionExecutor.getReturnType()!= Attribute.Type.BOOL){
                 throw new OperationNotSupportedException(((FunctionCondition) condition).getFunction()+" of class "+expressionExecutor.getClass().getName()+" does not return bool hence it cannot be used as a condition");
             }
             return new BooleanConditionExecutor(expressionExecutor);
@@ -266,7 +268,8 @@ public class ExecutorParser {
             for (Expression innerExpression : ((ExpressionExtension) expression).getParameters()) {
                 innerExpressionExecutors.add(parseExpression(innerExpression, queryEventSourceList, currentStreamReference, processInStreamDefinition, siddhiContext));
             }
-            ExecutorFunction expressionExecutor = (ExecutorFunction) SiddhiClassLoader.loadExtensionImplementation((ExpressionExtension) expression, ExecutorExtensionHolder.getInstance(siddhiContext));
+            FunctionExecutor expressionExecutor = (FunctionExecutor) SiddhiClassLoader.loadExtensionImplementation((ExpressionExtension) expression, ExecutorExtensionHolder.getInstance(siddhiContext));
+            siddhiContext.addEternalReferencedHolder(expressionExecutor);
             expressionExecutor.setSiddhiContext(siddhiContext);
             expressionExecutor.setAttributeExpressionExecutors(innerExpressionExecutors);
             expressionExecutor.init();
@@ -276,7 +279,8 @@ public class ExecutorParser {
             for (Expression innerExpression : ((FunctionExpression) expression).getParameters()) {
                 innerExpressionExecutors.add(parseExpression(innerExpression, queryEventSourceList, currentStreamReference, processInStreamDefinition, siddhiContext));
             }
-            ExecutorFunction expressionExecutor= (ExecutorFunction) SiddhiClassLoader.loadSiddhiImplementation(((FunctionExpression) expression).getFunction(), ExecutorFunction.class);
+            FunctionExecutor expressionExecutor= (FunctionExecutor) SiddhiClassLoader.loadSiddhiImplementation(((FunctionExpression) expression).getFunction(), FunctionExecutor.class);
+            siddhiContext.addEternalReferencedHolder(expressionExecutor);
             expressionExecutor.setSiddhiContext(siddhiContext);
             expressionExecutor.setAttributeExpressionExecutors(innerExpressionExecutors);
             expressionExecutor.init();
@@ -288,16 +292,16 @@ public class ExecutorParser {
 
     private static Attribute.Type parseArithmeticOperationResultType(
             ExpressionExecutor leftExpressionExecutor, ExpressionExecutor rightExpressionExecutor) {
-        if (leftExpressionExecutor.getType() == Attribute.Type.DOUBLE || rightExpressionExecutor.getType() == Attribute.Type.DOUBLE) {
+        if (leftExpressionExecutor.getReturnType() == Attribute.Type.DOUBLE || rightExpressionExecutor.getReturnType() == Attribute.Type.DOUBLE) {
             return Attribute.Type.DOUBLE;
-        } else if (leftExpressionExecutor.getType() == Attribute.Type.FLOAT || rightExpressionExecutor.getType() == Attribute.Type.FLOAT) {
+        } else if (leftExpressionExecutor.getReturnType() == Attribute.Type.FLOAT || rightExpressionExecutor.getReturnType() == Attribute.Type.FLOAT) {
             return Attribute.Type.FLOAT;
-        } else if (leftExpressionExecutor.getType() == Attribute.Type.LONG || rightExpressionExecutor.getType() == Attribute.Type.LONG) {
+        } else if (leftExpressionExecutor.getReturnType() == Attribute.Type.LONG || rightExpressionExecutor.getReturnType() == Attribute.Type.LONG) {
             return Attribute.Type.LONG;
-        } else if (leftExpressionExecutor.getType() == Attribute.Type.INT || rightExpressionExecutor.getType() == Attribute.Type.INT) {
+        } else if (leftExpressionExecutor.getReturnType() == Attribute.Type.INT || rightExpressionExecutor.getReturnType() == Attribute.Type.INT) {
             return Attribute.Type.INT;
         } else {
-            throw new ArithmeticException(leftExpressionExecutor.getType() + " or " + rightExpressionExecutor.getType() + " cannot be multiplied");
+            throw new ArithmeticException(leftExpressionExecutor.getReturnType() + " or " + rightExpressionExecutor.getReturnType() + " cannot be multiplied");
         }
     }
 

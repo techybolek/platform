@@ -252,7 +252,7 @@ public class TimeWindowTestCase {
 
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume int) ");
 
-        String queryReference = siddhiManager.addQuery("from cseEventStream#window.time(5 seconds) " +
+        String queryReference = siddhiManager.addQuery("from cseEventStream#window.time(1 sec) " +
                                                        "select symbol , sum(price) as sumPrice " +
                                                        "group by symbol " +
                                                        "insert  into StockQuote for expired-events;");

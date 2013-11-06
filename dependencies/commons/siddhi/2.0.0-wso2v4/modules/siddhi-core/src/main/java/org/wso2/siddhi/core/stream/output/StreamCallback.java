@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.StreamEvent;
-import org.wso2.siddhi.core.treaser.EventTracerService;
+import org.wso2.siddhi.core.treaser.EventMonitorService;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.SchedulerElement;
 import org.wso2.siddhi.core.stream.StreamReceiver;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.SchedulerSiddhiQueue;
@@ -35,13 +35,13 @@ public abstract class StreamCallback implements Runnable, StreamReceiver, Schedu
     private String streamId;
     private SiddhiContext siddhiContext;
     static final Logger log = Logger.getLogger(StreamCallback.class);
-    private EventTracerService eventTracerService;
+    private EventMonitorService eventMonitorService;
 
 
     public void setSiddhiContext(SiddhiContext context) {
         this.siddhiContext = context;
         this.threadPoolExecutor = context.getThreadPoolExecutor();
-        this.eventTracerService = context.getEventTracerService();
+        this.eventMonitorService = context.getEventMonitorService();
         this.inputQueue = new SchedulerSiddhiQueue<StreamEvent>(this);
 
     }
@@ -77,8 +77,8 @@ public abstract class StreamCallback implements Runnable, StreamReceiver, Schedu
     }
 
     private void send(StreamEvent event) {
-        if (eventTracerService.isEnableStats()) {
-            eventTracerService.trace(event, " on Stream Callback");
+        if (eventMonitorService.isEnableTrace()) {
+            eventMonitorService.trace(event, " on Stream Callback");
         }
         receive(event.toArray());
     }

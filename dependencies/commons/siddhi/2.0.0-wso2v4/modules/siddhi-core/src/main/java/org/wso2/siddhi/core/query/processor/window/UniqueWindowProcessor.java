@@ -17,6 +17,7 @@
 */
 package org.wso2.siddhi.core.query.processor.window;
 
+import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.AtomicEvent;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.StreamEvent;
@@ -24,8 +25,10 @@ import org.wso2.siddhi.core.event.in.InEvent;
 import org.wso2.siddhi.core.event.in.InListEvent;
 import org.wso2.siddhi.core.event.remove.RemoveEvent;
 import org.wso2.siddhi.core.event.remove.RemoveListEvent;
+import org.wso2.siddhi.core.query.QueryPostProcessingElement;
 import org.wso2.siddhi.core.util.collection.map.SiddhiMap;
 import org.wso2.siddhi.core.util.collection.map.SiddhiMapGrid;
+import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.Variable;
 
@@ -38,13 +41,6 @@ public class UniqueWindowProcessor extends WindowProcessor {
     private SiddhiMap<StreamEvent> map;
     private int[] attributePositions;
 
-    @Override
-    public void setParameters(Expression[] parameters) {
-        uniqueAttributeNames = new String[parameters.length];
-        for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
-            uniqueAttributeNames[i] = ((Variable) parameters[i]).getAttributeName();
-        }
-    }
 
     @Override
     protected void processEvent(InEvent event) {
@@ -109,7 +105,7 @@ public class UniqueWindowProcessor extends WindowProcessor {
 
     @Override
     public Iterator<StreamEvent> iterator(String predicate) {
-        if (siddhiContext.isDistributedProcessing()) {
+        if (siddhiContext.isDistributedProcessingEnabled()) {
             return ((SiddhiMapGrid<StreamEvent>) map).iterator(predicate);
         } else {
             return map.iterator();
@@ -127,9 +123,14 @@ public class UniqueWindowProcessor extends WindowProcessor {
     }
 
     @Override
-    protected void initWindow() {
-        if (siddhiContext.isDistributedProcessing()) {
-            map = new SiddhiMapGrid<StreamEvent>(elementId, siddhiContext);
+    protected void init(Expression[] parameters, QueryPostProcessingElement nextProcessor, AbstractDefinition streamDefinition, String elementId, boolean async, SiddhiContext siddhiContext) {
+        uniqueAttributeNames = new String[parameters.length];
+        for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
+            uniqueAttributeNames[i] = ((Variable) parameters[i]).getAttributeName();
+        }
+
+        if (this.siddhiContext.isDistributedProcessingEnabled()) {
+            map = new SiddhiMapGrid<StreamEvent>(elementId, this.siddhiContext);
         } else {
             map = new SiddhiMap<StreamEvent>();
         }
@@ -138,6 +139,7 @@ public class UniqueWindowProcessor extends WindowProcessor {
             String attributeName = uniqueAttributeNames[i];
             attributePositions[i] = definition.getAttributePosition(attributeName);
         }
+
     }
 
     private String generateKey(InEvent event) {
@@ -148,4 +150,8 @@ public class UniqueWindowProcessor extends WindowProcessor {
         return stringBuilder.toString();
     }
 
+    @Override
+    public void destroy(){
+
+    }
 }

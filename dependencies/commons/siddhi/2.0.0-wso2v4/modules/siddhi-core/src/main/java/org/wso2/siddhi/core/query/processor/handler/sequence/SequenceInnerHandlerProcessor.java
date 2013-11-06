@@ -72,7 +72,7 @@ public class SequenceInnerHandlerProcessor
         this.currentState = state.getStateNumber();
         this.complexEventSize = complexEventSize;
         this.filterProcessor = filterProcessor;
-        this.distributedProcessing = siddhiContext.isDistributedProcessing();
+        this.distributedProcessing = siddhiContext.isDistributedProcessingEnabled();
         this.siddhiContext = siddhiContext;
         this.elementId = elementId;
         if (distributedProcessing) {

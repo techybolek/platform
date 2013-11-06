@@ -17,10 +17,13 @@
 */
 package org.wso2.siddhi.core.query.processor.window;
 
+import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.StreamEvent;
 import org.wso2.siddhi.core.event.in.InEvent;
 import org.wso2.siddhi.core.event.in.InListEvent;
+import org.wso2.siddhi.core.query.QueryPostProcessingElement;
 import org.wso2.siddhi.core.table.EventTable;
+import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.Iterator;
@@ -31,11 +34,6 @@ public class TableWindowProcessor extends WindowProcessor {
 
     public TableWindowProcessor(EventTable eventTable) {
         this.eventTable = eventTable;
-    }
-
-    @Override
-    public void setParameters(Expression[] parameters) {
-        // ignore
     }
 
     @Override
@@ -69,8 +67,13 @@ public class TableWindowProcessor extends WindowProcessor {
     }
 
     @Override
-    protected void initWindow() {
+    protected void init(Expression[] parameters, QueryPostProcessingElement nextProcessor, AbstractDefinition streamDefinition, String elementId, boolean async, SiddhiContext siddhiContext) {
         // ignore
+    }
+
+    @Override
+    public void destroy(){
+
     }
 
 }

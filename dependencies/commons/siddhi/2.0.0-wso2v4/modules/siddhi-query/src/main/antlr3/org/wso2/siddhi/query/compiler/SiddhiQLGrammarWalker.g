@@ -110,7 +110,7 @@ definitionTable returns [TableDefinition tableDefinition]
     @init{
         $tableDefinition = QueryFactory.createTableDefinition();
     }
-	:  ^(id {$tableDefinition.name($id.value);}  (^(IN_ATTRIBUTE attributeName type {$tableDefinition.attribute($attributeName.value, $type.type);}))+  (^(TABLE  tableType dataSourceName databaseName tableName {$tableDefinition.from($tableType.value, $dataSourceName.value, $databaseName.value, $tableName.value);}))? )
+	:  ^(id {$tableDefinition.name($id.value);}  (^(IN_ATTRIBUTE attributeName type {$tableDefinition.attribute($attributeName.value, $type.type);}))+  (^(TABLE  (^(TABLE_PARAMETER tableParamName tableParamValue {$tableDefinition.from($tableParamName.value, $tableParamValue.value);}))+))? )
 	;
 
 queryFinal returns [Query queryFinal]
@@ -424,35 +424,35 @@ constant returns [Expression expression]
 	;
 
 yearValue returns [long value]
-	: a= POSITIVE_INT_VAL ( 'years' | 'year')  {$value =  Time.year(Integer.parseInt($a.text)).value();}
+	: ^(YEAR a= POSITIVE_INT_VAL  {$value =  Time.year(Integer.parseInt($a.text)).value();}  )
 	;
 
 monthValue returns [long value]
-	: a = POSITIVE_INT_VAL ( 'months' | 'month') {$value =  Time.month(Integer.parseInt($a.text)).value();}
+	: ^(MONTH a = POSITIVE_INT_VAL {$value =  Time.month(Integer.parseInt($a.text)).value();} )
 	;
 
 weekValue returns [long value]
-	: a = POSITIVE_INT_VAL ( 'weeks' | 'week')  {$value =  Time.week(Integer.parseInt($a.text)).value();}
+	: ^(WEEK a = POSITIVE_INT_VAL  {$value =  Time.week(Integer.parseInt($a.text)).value();}   )
 	;
 
 dayValue  returns [long value]
-	: a = POSITIVE_INT_VAL ('days' | 'day')  {$value =  Time.day(Integer.parseInt($a.text)).value();}
+	: ^(DAY a = POSITIVE_INT_VAL {$value =  Time.day(Integer.parseInt($a.text)).value();}   )
 	;
 
 hourValue  returns [long value]
-	: a = POSITIVE_INT_VAL ('hours' | 'hour') {$value =  Time.hour(Integer.parseInt($a.text)).value();}
+	: ^(HOUR a = POSITIVE_INT_VAL  {$value =  Time.hour(Integer.parseInt($a.text)).value();} )
 	;
 
 minuteValue  returns [long value]
-	: a = POSITIVE_INT_VAL ('minutes' | 'minute' | 'min') {$value = Time.minute(Integer.parseInt($a.text)).value();}
+	: ^(MIN a = POSITIVE_INT_VAL  {$value = Time.minute(Integer.parseInt($a.text)).value();} )
 	;
 
 secondValue returns [long value]
-	: a= POSITIVE_INT_VAL ('seconds' | 'second' | 'sec') {$value =  Time.sec(Integer.parseInt($a.text)).value();}
+	: ^(SEC a= POSITIVE_INT_VAL  {$value =  Time.sec(Integer.parseInt($a.text)).value(); }  )
 	;
 
 milliSecondValue  returns [long value]
-	: a = POSITIVE_INT_VAL ('milliseconds' | 'millisecond')  {$value =  Time.milliSec(Integer.parseInt($a.text)).value();}
+	: ^(MILLI_SEC a = POSITIVE_INT_VAL {$value =  Time.milliSec(Integer.parseInt($a.text)).value();} )
 	;
 
 partitionId returns [String value]
@@ -481,7 +481,7 @@ streamAttributeName returns [String stream, String attribute]
 attributeName returns [String value]
 	:^( ATTRIBUTE id {$value=$id.value;})
 	;	
- 
+
 join returns [JoinStream.Type type]
 	:  ^('join' ^('outer' 'left'))  {$type=JoinStream.Type.LEFT_OUTER_JOIN;}	{System.err.println("Left outer join not yet supported!");}
 	|  ^('join' ^('outer' 'right'))	{$type=JoinStream.Type.RIGHT_OUTER_JOIN;} 	{System.err.println("Right outer join not yet supported!");}
@@ -539,6 +539,14 @@ tableType returns [String value]
 
 dataSourceName returns [String value]
     : id {$value=$id.value;}
+    ;
+
+tableParamName returns [String value]
+    : stringVal {$value=$stringVal.value;}
+    ;
+
+tableParamValue returns [String value]
+    : stringVal {$value=$stringVal.value;}
     ;
 
 

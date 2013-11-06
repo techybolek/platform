@@ -17,17 +17,18 @@
 */
 package org.wso2.siddhi.core.query.selector.attribute.handler;
 
+import org.wso2.siddhi.core.extension.EternalReferencedHolder;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.io.Serializable;
 
-public interface OutputAttributeAggregator extends Serializable {
+public interface OutputAttributeAggregator extends Serializable, EternalReferencedHolder {
 
-    public Attribute.Type getType();
+    Attribute.Type getReturnType();
 
-    Object processInEventAttribute(Object obj);
+    Object processAdd(Object obj);
 
-    Object processRemoveEventAttribute(Object obj);
+    Object processRemove(Object obj);
 
-    OutputAttributeAggregator createNewInstance();
+    OutputAttributeAggregator newInstance();
 }

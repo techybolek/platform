@@ -20,8 +20,8 @@ package org.wso2.siddhi.core.treaser;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 
-public class LogEventTracer extends EventTracer {
-    static final Logger log = Logger.getLogger(LogEventTracer.class);
+public class LogEventMonitor extends EventMonitor {
+    static final Logger log = Logger.getLogger(LogEventMonitor.class);
 
     @Override
     public void trace(ComplexEvent complexEvent, String message) {

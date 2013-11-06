@@ -21,60 +21,33 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.table.SiddhiDataSource;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.sql.DataSource;
 
 
 public class RDBMSUpdataTestCase {
 
 
     static final Logger log = Logger.getLogger(RDBMSDeleteTestCase.class);
-    SiddhiDataSource dataSource = new SiddhiDataSource() {
-        @Override
-        public Connection getConnection() throws ClassNotFoundException, SQLException {
-            Class.forName(RDBMSTestConstants.MYSQL_DRIVER_CLASS);
-            try {
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
-            } catch (Exception ex) {
-                Connection connection = DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
-                Statement statement = connection.createStatement();
-                statement.executeUpdate("CREATE DATABASE cepdb");
-                statement.close();
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/cepdb", RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
-            }
-        }
-
-        @Override
-        public String getType() {
-            return "MYSQL";
-        }
-
-        @Override
-        public String getName() {
-            return "cepDataSource";
-        }
-    };
+    private static String dataSourceName = "cepDataSource";
+    private DataSource dataSource = new BasicDataSource();
 
     @Test
     public void testQuery1() throws InterruptedException {
         log.info("UpdateFromTableTestCase test1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long) ");
         siddhiManager.defineStream("define stream cseUpdateEventStream (symbol string, price float, volume long) ");
-        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable");
+        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  " + createFromClause("cepDataSource","cepdb","cepEventTable",null));
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
                 "insert into cseEventTable;");
 
         siddhiManager.addQuery("from cseUpdateEventStream " +
-                "update cseEventTable;");
+                "insert into cseEventTable;");
         InputHandler cseEventStream = siddhiManager.getInputHandler("cseEventStream");
         cseEventStream.send(new Object[]{"WSO2", 55.6f, 100l});
         cseEventStream.send(new Object[]{"IBM", 75.6f, 100l});
@@ -91,11 +64,11 @@ public class RDBMSUpdataTestCase {
         log.info("UpdateFromTableTestCase test2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long) ");
         siddhiManager.defineStream("define stream cseUpdateEventStream (symbol string, price float, volume long) ");
-        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable");
+        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  " + createFromClause("cepDataSource","cepdb","cepEventTable", null));
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
                 "insert into cseEventTable;");
@@ -119,11 +92,11 @@ public class RDBMSUpdataTestCase {
         log.info("UpdateFromTableTestCase test1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long) ");
         siddhiManager.defineStream("define stream cseUpdateEventStream (symbol string, price float, volume long) ");
-        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable");
+        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  " + createFromClause("cepDataSource","cepdb","cepEventTable", null));
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
                 "insert into cseEventTable;");
@@ -140,5 +113,15 @@ public class RDBMSUpdataTestCase {
         Thread.sleep(500);
         siddhiManager.shutdown();
 
+    }
+
+    private String createFromClause(String dataSourceName, String databaseName, String tableName, String createQuery) {
+        String query = "from ( 'datasource.name'='" +dataSourceName + "','database.name'='"+
+                databaseName + "','table.name'='" + tableName + "'";
+        if (createQuery != null) {
+            query = query + ",'create.query'='" + createQuery +"'";
+        }
+        query = query + ")";
+        return query;
     }
 }

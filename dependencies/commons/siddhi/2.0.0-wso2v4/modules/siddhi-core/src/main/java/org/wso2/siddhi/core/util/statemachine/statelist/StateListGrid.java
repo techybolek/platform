@@ -17,28 +17,20 @@
 */
 package org.wso2.siddhi.core.util.statemachine.statelist;
 
-import com.hazelcast.core.AtomicNumber;
+import com.hazelcast.core.IAtomicLong;
 import com.hazelcast.core.IMap;
 import com.hazelcast.query.SqlPredicate;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.StateEvent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class StateListGrid extends StateList<StateEvent> {
     static final Logger log = Logger.getLogger(StateListGrid.class);
     private IMap<String, StateEvent> map;
     private SiddhiContext siddhiContext;
-    private AtomicNumber inited;
+    private IAtomicLong inited;
     private ValueComparator valueComparator = new ValueComparator();
 //    private long firstIndex = Long.MIN_VALUE;
 //    private long lastIndex = Long.MIN_VALUE;
@@ -54,7 +46,7 @@ public class StateListGrid extends StateList<StateEvent> {
             log.debug("StateListGrid created with id: "+id);
         }
         map = siddhiContext.getHazelcastInstance().getMap(id);
-        inited=siddhiContext.getHazelcastInstance().getAtomicNumber(id);
+        inited=siddhiContext.getHazelcastInstance().getAtomicLong(id);
     }
 
 

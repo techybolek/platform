@@ -30,12 +30,12 @@ public class MaxOutputAttributeAggregatorLong implements OutputAttributeAggregat
     private volatile Long maxValue = null;
     private final static Attribute.Type type = Attribute.Type.LONG;
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 
     @Override
-    public synchronized Object processInEventAttribute(Object obj) {
+    public synchronized Object processAdd(Object obj) {
         Long value = ((Long) obj);
         for (Iterator<Long> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
             if (iterator.next() < value) {
@@ -54,14 +54,19 @@ public class MaxOutputAttributeAggregatorLong implements OutputAttributeAggregat
     }
 
     @Override
-    public synchronized Object processRemoveEventAttribute(Object obj) {
+    public synchronized Object processRemove(Object obj) {
         maxDeque.removeFirstOccurrence(obj);
         maxValue = maxDeque.peekFirst();
         return maxValue;
     }
 
     @Override
-    public OutputAttributeAggregator createNewInstance() {
+    public OutputAttributeAggregator newInstance() {
         return new MaxOutputAttributeAggregatorLong();
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

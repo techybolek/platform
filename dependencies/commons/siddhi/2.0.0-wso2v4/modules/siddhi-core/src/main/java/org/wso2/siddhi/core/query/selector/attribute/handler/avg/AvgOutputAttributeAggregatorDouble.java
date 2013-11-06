@@ -26,12 +26,12 @@ public class AvgOutputAttributeAggregatorDouble implements OutputAttributeAggreg
     private long count=0;
     private  static final Attribute.Type type = Attribute.Type.DOUBLE;
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 
     @Override
-    public Object processInEventAttribute(Object obj) {
+    public Object processAdd(Object obj) {
         count++;
         value += (Double) obj;
         if (count == 0) {
@@ -41,7 +41,7 @@ public class AvgOutputAttributeAggregatorDouble implements OutputAttributeAggreg
     }
 
     @Override
-    public Object processRemoveEventAttribute(Object obj) {
+    public Object processRemove(Object obj) {
         count--;
         value -= (Double) obj;
         if (count == 0) {
@@ -51,7 +51,12 @@ public class AvgOutputAttributeAggregatorDouble implements OutputAttributeAggreg
     }
 
     @Override
-    public OutputAttributeAggregator createNewInstance() {
+    public OutputAttributeAggregator newInstance() {
         return new AvgOutputAttributeAggregatorDouble();
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

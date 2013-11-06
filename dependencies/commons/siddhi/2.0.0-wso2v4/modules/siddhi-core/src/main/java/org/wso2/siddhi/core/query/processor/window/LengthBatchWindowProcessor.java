@@ -1,15 +1,18 @@
 package org.wso2.siddhi.core.query.processor.window;
 
 
+import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.StreamEvent;
 import org.wso2.siddhi.core.event.in.InEvent;
 import org.wso2.siddhi.core.event.in.InListEvent;
 import org.wso2.siddhi.core.event.remove.RemoveEvent;
 import org.wso2.siddhi.core.event.remove.RemoveListEvent;
+import org.wso2.siddhi.core.query.QueryPostProcessingElement;
 import org.wso2.siddhi.core.util.collection.queue.ISiddhiQueue;
 import org.wso2.siddhi.core.util.collection.queue.SiddhiQueue;
 import org.wso2.siddhi.core.util.collection.queue.SiddhiQueueGrid;
+import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.constant.IntConstant;
 
@@ -22,11 +25,6 @@ public class LengthBatchWindowProcessor extends WindowProcessor {
     private int lengthToKeep;
     private List<InEvent> newEventList;
     private List<RemoveEvent> oldEventList;
-
-    @Override
-    public void setParameters(Expression[] parameters) {
-        lengthToKeep = ((IntConstant) parameters[0]).getValue();
-    }
 
     private ISiddhiQueue<StreamEvent> window;
 
@@ -60,7 +58,7 @@ public class LengthBatchWindowProcessor extends WindowProcessor {
 
     @Override
     public Iterator<StreamEvent> iterator(String predicate) {
-        if (siddhiContext.isDistributedProcessing()) {
+        if (siddhiContext.isDistributedProcessingEnabled()) {
             return ((SiddhiQueueGrid<StreamEvent>) window).iterator(predicate);
         } else {
             return window.iterator();
@@ -114,17 +112,26 @@ public class LengthBatchWindowProcessor extends WindowProcessor {
     }
 
     @Override
-    protected void initWindow() {
-        if (siddhiContext.isDistributedProcessing()) {
-            window = new SiddhiQueueGrid<StreamEvent>(elementId, siddhiContext, async);
+    protected void init(Expression[] parameters, QueryPostProcessingElement nextProcessor, AbstractDefinition streamDefinition, String elementId, boolean async, SiddhiContext siddhiContext) {
+        lengthToKeep = ((IntConstant) parameters[0]).getValue();
+
+        if (this.siddhiContext.isDistributedProcessingEnabled()) {
+            window = new SiddhiQueueGrid<StreamEvent>(elementId, this.siddhiContext, this.async);
         } else {
             window = new SiddhiQueue<StreamEvent>();
         }
         oldEventList = new ArrayList<RemoveEvent>();
-        if (siddhiContext.isDistributedProcessing()) {
-            newEventList = siddhiContext.getHazelcastInstance().getList(elementId + "-newEventList");
+        if (this.siddhiContext.isDistributedProcessingEnabled()) {
+            newEventList = this.siddhiContext.getHazelcastInstance().getList(elementId + "-newEventList");
         } else {
             newEventList = new ArrayList<InEvent>();
         }
+
     }
+
+    @Override
+    public void destroy(){
+
+    }
+
 }

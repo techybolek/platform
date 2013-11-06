@@ -25,24 +25,29 @@ public class SumOutputAttributeAggregatorFloat implements OutputAttributeAggrega
     private double value = 0.0;
     private static final Attribute.Type type = Attribute.Type.DOUBLE;
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 
     @Override
-    public Object processInEventAttribute(Object obj) {
+    public Object processAdd(Object obj) {
         value += ((Float) obj).doubleValue();
         return value;
     }
 
     @Override
-    public Object processRemoveEventAttribute(Object obj) {
+    public Object processRemove(Object obj) {
         value -= ((Float) obj).doubleValue();
         return value;
     }
 
     @Override
-    public OutputAttributeAggregator createNewInstance() {
+    public OutputAttributeAggregator newInstance() {
         return new SumOutputAttributeAggregatorFloat();
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

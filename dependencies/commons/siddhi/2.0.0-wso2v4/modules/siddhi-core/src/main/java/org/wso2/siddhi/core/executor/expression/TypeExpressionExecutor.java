@@ -36,7 +36,7 @@ public class TypeExpressionExecutor implements ExpressionExecutor {
     }
 
     @Override
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return Attribute.Type.TYPE;
     }
 

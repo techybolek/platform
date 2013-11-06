@@ -27,12 +27,12 @@ public class AvgOutputAttributeAggregatorFloat implements OutputAttributeAggrega
     private final static Attribute.Type type = Attribute.Type.DOUBLE;
 
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return this.type;
     }
 
     @Override
-    public Object processInEventAttribute(Object obj) {
+    public Object processAdd(Object obj) {
         if(obj==null){
             System.out.println(obj);
         }
@@ -45,7 +45,7 @@ public class AvgOutputAttributeAggregatorFloat implements OutputAttributeAggrega
     }
 
     @Override
-    public Object processRemoveEventAttribute(Object obj) {
+    public Object processRemove(Object obj) {
         count--;
         value -= (Float) obj;
         if(count==0){
@@ -55,7 +55,12 @@ public class AvgOutputAttributeAggregatorFloat implements OutputAttributeAggrega
     }
 
     @Override
-    public OutputAttributeAggregator createNewInstance() {
+    public OutputAttributeAggregator newInstance() {
         return new AvgOutputAttributeAggregatorFloat();
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

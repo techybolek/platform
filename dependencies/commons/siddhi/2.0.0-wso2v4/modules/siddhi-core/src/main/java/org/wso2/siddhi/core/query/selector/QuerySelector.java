@@ -108,7 +108,7 @@ public class QuerySelector implements QueryPostProcessingElement {
 
         havingConditionExecutor = generateHavingExecutor(selector.getHavingCondition(), outputStreamDefinition, eventTableMap, siddhiContext);
 
-        distributedProcessing = siddhiContext.isDistributedProcessing();
+        distributedProcessing = siddhiContext.isDistributedProcessingEnabled();
 
         this.outputRateManager = outputRateManager;
 

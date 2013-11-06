@@ -45,6 +45,7 @@ public class PatternInnerHandlerProcessor
         implements InnerHandlerProcessor, PreSelectProcessingElement, Persister {
 
     static final Logger log = Logger.getLogger(PatternInnerHandlerProcessor.class);
+    protected final int currentState;
     protected int complexEventSize;
     protected PatternState state;
     protected PatternState nextState;
@@ -52,11 +53,10 @@ public class PatternInnerHandlerProcessor
     protected FilterProcessor filterProcessor;
     protected StateList<StateEvent> currentEvents;
     protected StateList<StateEvent> nextEvents;
-    protected final int currentState;
     protected String elementId;
     protected PersistenceStore persistenceStore;
-    private long within = -1;
     protected boolean distributedProcessing;
+    protected int processedEventsToBeDropped[] = null;
     protected SiddhiContext siddhiContext;
     protected QuerySelector querySelector;
     protected PatternInnerHandlerProcessor nextEveryStateInnerHandlerProcessor;
@@ -65,6 +65,7 @@ public class PatternInnerHandlerProcessor
     protected PatternInnerHandlerProcessor nextStateInnerHandlerProcessor;
     protected PatternInnerHandlerProcessor partnerStateInnerHandlerProcessor;
     protected PatternInnerHandlerProcessor stateInnerHandlerProcessor;
+    private long within = -1;
 
 
     public PatternInnerHandlerProcessor(PatternState state,
@@ -76,7 +77,7 @@ public class PatternInnerHandlerProcessor
         this.nextEveryState = state.getNextEveryState();
         this.currentState = state.getStateNumber();
         this.complexEventSize = complexEventSize;
-        this.distributedProcessing = siddhiContext.isDistributedProcessing();
+        this.distributedProcessing = siddhiContext.isDistributedProcessingEnabled();
         this.siddhiContext = siddhiContext;
         this.filterProcessor = filterProcessor;
         this.elementId = siddhiContext.getElementIdGenerator().createNewId();
@@ -153,7 +154,16 @@ public class PatternInnerHandlerProcessor
         if (state.isLast()) {
             sendEvent(stateEvent);
         }
+        cleanUpEvent(stateEvent);
         passToNextStates(stateEvent);
+    }
+
+    protected void cleanUpEvent(StateEvent stateEvent) {
+        if (processedEventsToBeDropped != null) {
+            for (int i = 0; i < processedEventsToBeDropped.length; i++) {
+                stateEvent.setStreamEvent(processedEventsToBeDropped[i], null);
+            }
+        }
     }
 
     protected Collection<StateEvent> getCollection() {
@@ -196,7 +206,6 @@ public class PatternInnerHandlerProcessor
             e.printStackTrace();
         }
     }
-
 
     public void moveNextEventsToCurrentEvents() {
         //todo need to check which is faster
@@ -267,7 +276,6 @@ public class PatternInnerHandlerProcessor
         querySelector.process(atomicEvent);
     }
 
-
     public void setNext(QuerySelector querySelector) {
         this.querySelector = querySelector;
     }
@@ -314,7 +322,7 @@ public class PatternInnerHandlerProcessor
 
     @Override
     public void setProcessedEventsToBeDropped(int[] processedEventsToBeDropped) {
-        // TODO Implement for patterns
+        this.processedEventsToBeDropped = processedEventsToBeDropped;
 
     }
 

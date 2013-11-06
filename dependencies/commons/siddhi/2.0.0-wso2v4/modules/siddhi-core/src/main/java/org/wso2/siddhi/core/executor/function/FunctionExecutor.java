@@ -20,11 +20,12 @@ package org.wso2.siddhi.core.executor.function;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.AtomicEvent;
 import org.wso2.siddhi.core.executor.expression.ExpressionExecutor;
+import org.wso2.siddhi.core.extension.EternalReferencedHolder;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.List;
 
-public abstract class ExecutorFunction implements ExpressionExecutor {
+public abstract class FunctionExecutor implements ExpressionExecutor, EternalReferencedHolder {
 
     protected List<ExpressionExecutor> attributeExpressionExecutors;
     protected SiddhiContext siddhiContext;
@@ -41,7 +42,7 @@ public abstract class ExecutorFunction implements ExpressionExecutor {
         attributeSize = attributeExpressionExecutors.size();
         attributeTypes = new Attribute.Type[attributeExpressionExecutors.size()];
         for (int i = 0; i < attributeExpressionExecutors.size(); i++) {
-            attributeTypes[i] = attributeExpressionExecutors.get(i).getType();
+            attributeTypes[i] = attributeExpressionExecutors.get(i).getReturnType();
         }
     }
 
@@ -60,8 +61,24 @@ public abstract class ExecutorFunction implements ExpressionExecutor {
     }
 
 
-    public abstract void init();
+    public void init() {
+        init(attributeTypes, siddhiContext);
+    }
 
+    /**
+     * The initialization method for FunctionExecutor
+     *
+     * @param attributeTypes are the type if the  attributes to the executor function
+     * @param siddhiContext  SiddhiContext
+     */
+    public abstract void init(Attribute.Type[] attributeTypes, SiddhiContext siddhiContext);
+
+    /**
+     * The main executions method which will be called upon event arrival
+     *
+     * @param data the runtime values of the attributeExpressionExecutors
+     * @return
+     */
     protected abstract Object process(Object data);
 
 }

@@ -17,7 +17,7 @@
 */
 package org.wso2.siddhi.core.util.collection.queue;
 
-import com.hazelcast.core.AtomicNumber;
+import com.hazelcast.core.IAtomicLong;
 import com.hazelcast.core.IMap;
 import com.hazelcast.query.SqlPredicate;
 import org.apache.log4j.Logger;
@@ -32,8 +32,8 @@ public class SiddhiQueueGrid<T> extends SiddhiQueue<T> {
     static final Logger log = Logger.getLogger(SiddhiQueueGrid.class);
 
     protected IMap<String, T> map;
-    protected AtomicNumber firstIndex;
-    protected AtomicNumber lastIndex;
+    protected IAtomicLong firstIndex;
+    protected IAtomicLong lastIndex;
     protected String elementId;
     protected SiddhiContext siddhiContext;
     protected boolean async = true;
@@ -47,8 +47,8 @@ public class SiddhiQueueGrid<T> extends SiddhiQueue<T> {
         }
         this.elementId = elementId + "-"+this.getClass().getSimpleName();
 
-        firstIndex = siddhiContext.getHazelcastInstance().getAtomicNumber(this.elementId + "-FirstIndex");
-        lastIndex = siddhiContext.getHazelcastInstance().getAtomicNumber(this.elementId + "-LastIndex");
+        firstIndex = siddhiContext.getHazelcastInstance().getAtomicLong(this.elementId + "-FirstIndex");
+        lastIndex = siddhiContext.getHazelcastInstance().getAtomicLong(this.elementId + "-LastIndex");
         map = siddhiContext.getHazelcastInstance().getMap(this.elementId);
     }
 

@@ -17,6 +17,7 @@
 */
 package org.wso2.siddhi.core.executor.function;
 
+import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.AtomicEvent;
 import org.wso2.siddhi.core.exception.QueryCreationException;
 import org.wso2.siddhi.core.executor.expression.ConstantExpressionExecutor;
@@ -27,8 +28,9 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.TimeZone;
 
-public class ConvertExecutorFunction extends ExecutorFunction {
+public class ConvertFunctionExecutor extends FunctionExecutor {
 
     private Attribute.Type returnType;
     private ExpressionExecutor variableExecutor;
@@ -41,7 +43,7 @@ public class ConvertExecutorFunction extends ExecutorFunction {
 
 
     @Override
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return returnType;
     }
 
@@ -50,9 +52,8 @@ public class ConvertExecutorFunction extends ExecutorFunction {
     // convert(foo<string>,long,"MM-YY")
     // convert(foo<string>,string,"MM-YY","MM-YYYY")
     // convert(foo<long>,string,"MM-YY")
-
     @Override
-    public void init() {
+    public void init(Attribute.Type[] attributeTypes, SiddhiContext siddhiContext) {
         if (attributeSize < 2 || attributeSize > 4) {
             throw new QueryCreationException("Convert has to have 2 to 4 expressions; attribute, to converted type and 1 or 2 optional formats, but " + attributeSize + " expressions provided!");
         }
@@ -71,23 +72,24 @@ public class ConvertExecutorFunction extends ExecutorFunction {
         if (attributeSize == 3) {
             format1Expression = attributeExpressionExecutors.get(2);
 
-            if ((variableExecutor.getType() != Attribute.Type.LONG || returnType != Attribute.Type.STRING || format1Expression.getType() != Attribute.Type.STRING) &&
-                (variableExecutor.getType() != Attribute.Type.STRING || returnType != Attribute.Type.LONG || format1Expression.getType() != Attribute.Type.STRING)) {
+            if ((variableExecutor.getReturnType() != Attribute.Type.LONG || returnType != Attribute.Type.STRING || format1Expression.getReturnType() != Attribute.Type.STRING) &&
+                (variableExecutor.getReturnType() != Attribute.Type.STRING || returnType != Attribute.Type.LONG || format1Expression.getReturnType() != Attribute.Type.STRING)) {
                 throw new QueryCreationException("Convert only supports (<string variable>,<long type>,<string format>) or (<long variable>,<string type>,<string format>) or (<string variable>,<string type>,<string format>,<string format>) " +
-                                                 "but here (" + variableExecutor.getType() + "," + returnType + "," + format1Expression.getType() + ") is provided ");
+                                                 "but here (" + variableExecutor.getReturnType() + "," + returnType + "," + format1Expression.getReturnType() + ") is provided ");
             }
             if (!(format1Expression instanceof ConstantExpressionExecutor)) {
                 runningAttributes = 3;
             } else {
                 format1 = new SimpleDateFormat((String) format1Expression.execute(null));
+                format1.setTimeZone(TimeZone.getTimeZone("UTC"));
             }
         }
         if (attributeSize == 4) {
             format1Expression = attributeExpressionExecutors.get(2);
             format2Expression = attributeExpressionExecutors.get(3);
-            if (variableExecutor.getType() != Attribute.Type.STRING || returnType != Attribute.Type.STRING || format1Expression.getType() != Attribute.Type.STRING || format2Expression.getType() != Attribute.Type.STRING) {
+            if (variableExecutor.getReturnType() != Attribute.Type.STRING || returnType != Attribute.Type.STRING || format1Expression.getReturnType() != Attribute.Type.STRING || format2Expression.getReturnType() != Attribute.Type.STRING) {
                 throw new QueryCreationException("Convert only supports (<string variable>,<long type>,<string format>) or (<long variable>,<string type>,<string format>) or (<string variable>,<string type>,<string format>,<string format>) " +
-                                                 "but here (" + variableExecutor.getType() + "," + returnType + "," + format1Expression.getType() + "," + format2Expression.getType() + ") is provided ");
+                                                 "but here (" + variableExecutor.getReturnType() + "," + returnType + "," + format1Expression.getReturnType() + "," + format2Expression.getReturnType() + ") is provided ");
             }
             if (!(format1Expression instanceof ConstantExpressionExecutor) || !(format2Expression instanceof ConstantExpressionExecutor)) {
                 runningAttributes = 4;
@@ -101,7 +103,7 @@ public class ConvertExecutorFunction extends ExecutorFunction {
         switch (returnType) {
 
             case STRING:
-                switch (variableExecutor.getType()) {
+                switch (variableExecutor.getReturnType()) {
 
                     case STRING:
                         if (attributeSize == 4) {
@@ -191,7 +193,7 @@ public class ConvertExecutorFunction extends ExecutorFunction {
 
                 break;
             case INT:
-                switch (variableExecutor.getType()) {
+                switch (variableExecutor.getReturnType()) {
                     case STRING:
                         typeConverter = new TypeConverter() {
                             @Override
@@ -289,7 +291,7 @@ public class ConvertExecutorFunction extends ExecutorFunction {
                 }
                 break;
             case LONG:
-                switch (variableExecutor.getType()) {
+                switch (variableExecutor.getReturnType()) {
 
                     case STRING:
                         if (attributeSize == 3) {
@@ -300,6 +302,7 @@ public class ConvertExecutorFunction extends ExecutorFunction {
                                     public Object convert(Object obj) {
                                         Object[] objects = (Object[]) obj;
                                         SimpleDateFormat format1 = new SimpleDateFormat((String) objects[1]);
+                                        format1.setTimeZone(TimeZone.getTimeZone("UTC"));
                                         try {
                                             return format1.parse((String) objects[0]).getTime();
                                         } catch (ParseException e) {
@@ -312,7 +315,7 @@ public class ConvertExecutorFunction extends ExecutorFunction {
                                     @Override
                                     public Object convert(Object obj) {
                                         try {
-                                            return format1.parse((String)obj).getTime();
+                                            return format1.parse((String) obj).getTime();
                                         } catch (ParseException e) {
                                             return null;
                                         }
@@ -419,7 +422,7 @@ public class ConvertExecutorFunction extends ExecutorFunction {
                 }
                 break;
             case FLOAT:
-                switch (variableExecutor.getType()) {
+                switch (variableExecutor.getReturnType()) {
 
                     case STRING:
                         typeConverter = new TypeConverter() {
@@ -518,7 +521,7 @@ public class ConvertExecutorFunction extends ExecutorFunction {
                 }
                 break;
             case DOUBLE:
-                switch (variableExecutor.getType()) {
+                switch (variableExecutor.getReturnType()) {
 
                     case STRING:
                         typeConverter = new TypeConverter() {
@@ -617,7 +620,7 @@ public class ConvertExecutorFunction extends ExecutorFunction {
                 }
                 break;
             case BOOL:
-                switch (variableExecutor.getType()) {
+                switch (variableExecutor.getReturnType()) {
 
                     case STRING:
                         typeConverter = new TypeConverter() {
@@ -745,5 +748,10 @@ public class ConvertExecutorFunction extends ExecutorFunction {
 
     interface TypeConverter {
         Object convert(Object obj);
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

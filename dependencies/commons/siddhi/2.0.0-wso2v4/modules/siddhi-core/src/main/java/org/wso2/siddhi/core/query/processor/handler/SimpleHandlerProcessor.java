@@ -70,7 +70,7 @@ public class SimpleHandlerProcessor implements HandlerProcessor, PreSelectProces
     @Override
     public void receive(StreamEvent streamEvent) {
 //        System.out.println(event);
-        if (context.isAsyncProcessing() || context.isDistributedProcessing()) {
+        if (context.isAsyncProcessing() || context.isDistributedProcessingEnabled()) {
             inputQueue.put(streamEvent);
         } else {
             if (streamEvent instanceof AtomicEvent) {

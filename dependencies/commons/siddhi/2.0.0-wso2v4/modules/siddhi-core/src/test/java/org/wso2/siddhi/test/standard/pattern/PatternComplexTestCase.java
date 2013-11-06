@@ -33,6 +33,7 @@ import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.query.Query;
 import org.wso2.siddhi.query.api.query.input.pattern.Pattern;
 import org.wso2.siddhi.query.api.query.input.pattern.element.LogicalElement;
+import org.wso2.siddhi.query.compiler.exception.SiddhiPraserException;
 
 public class PatternComplexTestCase {
     static final Logger log = Logger.getLogger(PatternComplexTestCase.class);
@@ -193,5 +194,205 @@ public class PatternComplexTestCase {
 
         Assert.assertEquals(1,eventCount);
     }
+
+    @Test
+    public void testPatternComplexQuery3() throws InterruptedException, SiddhiPraserException {
+        log.info("testPatternComplex3  OUT 3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.defineStream("define stream cseEventStream ( symbol string, price float, volume int )");
+        String queryReference = siddhiManager.addQuery("from every e1 = cseEventStream [ price >= 50 and volume > 100 ] -> e2 = cseEventStream [price <= 40 ] <2:> -> e3 = cseEventStream [volume <= 70 ] " +
+                "select e1.symbol as symbol1,e2[last].symbol as symbol2,e3.symbol as symbol3 " +
+                "insert into StockQuote;");
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (eventCount == 0) {
+                    Assert.assertArrayEquals(new Object[]{"IBM", "FB", "WSO2"}, inEvents[0].getData());
+                } else if (eventCount == 1) {
+                    Assert.assertArrayEquals(new Object[]{"ADP", "WSO2", "AMZN"}, inEvents[0].getData());
+                } else if (eventCount == 2) {
+                    Assert.assertArrayEquals(new Object[]{"WSO2", "QQQ", "CSCO"}, inEvents[0].getData());
+                } else {
+                    Assert.fail();
+                }
+                eventCount++;
+            }
+        });
+        InputHandler cseStreamHandler = siddhiManager.getInputHandler("cseEventStream");
+
+        cseStreamHandler.send(new Object[]{"IBM", 75.6f, 105});
+        Thread.sleep(1200);
+        cseStreamHandler.send(new Object[]{"GOOG", 39.8f, 91});
+        cseStreamHandler.send(new Object[]{"FB", 35f, 81});
+        cseStreamHandler.send(new Object[]{"WSO2", 21f, 61});
+        cseStreamHandler.send(new Object[]{"ADP", 50f, 101});
+        cseStreamHandler.send(new Object[]{"GOOG", 41.2f, 90});
+        cseStreamHandler.send(new Object[]{"FB", 40f, 100});
+        cseStreamHandler.send(new Object[]{"WSO2", 33.6f, 85});
+        cseStreamHandler.send(new Object[]{"AMZN", 23.5f, 55});
+        cseStreamHandler.send(new Object[]{"WSO2", 51.7f, 180});
+        cseStreamHandler.send(new Object[]{"TXN", 34f, 61});
+        cseStreamHandler.send(new Object[]{"QQQ", 24.6f, 45});
+        cseStreamHandler.send(new Object[]{"CSCO", 181.6f, 40});
+        cseStreamHandler.send(new Object[]{"WSO2", 53.7f, 200});
+        Thread.sleep(1000);
+
+        siddhiManager.shutdown();
+
+        Assert.assertEquals("Number of success events", 3, eventCount);
+
+    }
+
+    @Test
+    public void testSimpleQueryForMemoryOptimization() throws InterruptedException, SiddhiPraserException {
+        log.info("testSimpleSequenceForMemoryOptimization  OUT 3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.defineStream("define stream cseEventStream ( symbol string, price float, volume int )");
+        siddhiManager.defineStream("define stream lseEventStream ( symbol string, price float, volume int )");
+        String queryReference = siddhiManager.addQuery("from every e1 = cseEventStream [ price >= 50 and volume > 100 ] -> e2 = lseEventStream [price <= 40 ] <1:> -> e3 = lseEventStream [volume <= 70 ] " +
+                "select e3.symbol as symbol1,e2[0].symbol as symbol2,e3.volume as symbol3 " +
+                "insert into StockQuote;");
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (eventCount == 0) {
+                    Assert.assertArrayEquals(new Object[]{"WSO2", "GOOG", 65}, inEvents[0].getData());
+                } else if (eventCount == 1) {
+                    Assert.assertArrayEquals(new Object[]{"WSO2", "DDD", 60}, inEvents[0].getData());
+                } else {
+                    Assert.fail();
+                }
+                eventCount++;
+            }
+        });
+        InputHandler cseStreamHandler = siddhiManager.getInputHandler("cseEventStream");
+        InputHandler lseStreamHandler = siddhiManager.getInputHandler("lseEventStream");
+
+        cseStreamHandler.send(new Object[]{"IBM", 75.6f, 105});
+        Thread.sleep(1200);
+        lseStreamHandler.send(new Object[]{"GOOG", 21f, 81});
+        lseStreamHandler.send(new Object[]{"WSO2", 176.6f, 65});
+        cseStreamHandler.send(new Object[]{"BIRT", 21f, 81});
+        cseStreamHandler.send(new Object[]{"AMBA", 126.6f, 165});
+        lseStreamHandler.send(new Object[]{"DDD", 23f, 181});
+        lseStreamHandler.send(new Object[]{"BIRT", 21f, 86});
+        lseStreamHandler.send(new Object[]{"BIRT", 21f, 82});
+        lseStreamHandler.send(new Object[]{"WSO2", 176.6f, 60});
+        cseStreamHandler.send(new Object[]{"AMBA", 126.6f, 165});
+        lseStreamHandler.send(new Object[]{"DOX", 16.2f, 25});
+
+        Thread.sleep(1000);
+
+        siddhiManager.shutdown();
+
+        Assert.assertEquals("Number of success events", 2, eventCount);
+
+    }
+
+    @Test
+    public void testAdvancedQueryForMemoryOptimization() throws InterruptedException, SiddhiPraserException {
+        log.info("testAdvancedSequenceForMemoryOptimization  OUT 2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.defineStream("define stream cseEventStream ( symbol string, price float, volume int )");
+        siddhiManager.defineStream("define stream lseEventStream ( symbol string, price float, volume int )");
+        String queryReference = siddhiManager.addQuery("from e1 = cseEventStream [ price >= 50 and volume > 100 ] -> e2 = lseEventStream [e1.symbol != 'AMBA' ] -> e3 = lseEventStream [volume <= 70 ] " +
+                "select e3.symbol as symbol1,e2[0].symbol as symbol2,e3.volume as symbol3 " +
+                "insert into StockQuote;");
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (eventCount == 0) {
+                    Assert.assertArrayEquals(new Object[]{"WSO2", "GOOG", 65}, inEvents[0].getData());
+                } else {
+                    Assert.fail();
+                }
+                eventCount++;
+            }
+        });
+        InputHandler cseStreamHandler = siddhiManager.getInputHandler("cseEventStream");
+        InputHandler lseStreamHandler = siddhiManager.getInputHandler("lseEventStream");
+
+        cseStreamHandler.send(new Object[]{"IBM", 75.6f, 105});
+        Thread.sleep(1200);
+        lseStreamHandler.send(new Object[]{"GOOG", 21f, 81});
+        lseStreamHandler.send(new Object[]{"WSO2", 176.6f, 65});
+        cseStreamHandler.send(new Object[]{"BIRT", 21f, 81});
+        cseStreamHandler.send(new Object[]{"AMBA", 126.6f, 165});
+        lseStreamHandler.send(new Object[]{"DDD", 23f, 181});
+        lseStreamHandler.send(new Object[]{"BIRT", 21f, 86});
+        lseStreamHandler.send(new Object[]{"BIRT", 21f, 82});
+        lseStreamHandler.send(new Object[]{"WSO2", 176.6f, 60});
+        cseStreamHandler.send(new Object[]{"AMBA", 126.6f, 165});
+        lseStreamHandler.send(new Object[]{"DOX", 16.2f, 25});
+
+        Thread.sleep(1000);
+
+        siddhiManager.shutdown();
+
+        Assert.assertEquals("Number of success events", 1, eventCount);
+
+    }
+
+
+    @Test
+    public void testAdvancedQueryForMemoryOptimization1() throws InterruptedException, SiddhiPraserException {
+        log.info("testAdvancedSequenceForMemoryOptimization1  OUT 2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.defineStream("define stream cseEventStream ( symbol string, price float, volume int )");
+        siddhiManager.defineStream("define stream lseEventStream ( symbol string, price float, volume int )");
+//        String queryReference = siddhiManager.addQuery("from every e1 = cseEventStream -> e2 = lseEventStream [e1.symbol != 'AMBA' ] <2:> -> e3 = lseEventStream [volume <= 70 ] " +
+        String queryReference = siddhiManager.addQuery("from every e1 = cseEventStream -> e2 = lseEventStream [e1.symbol != 'AMBA' ] <2:> -> e3 = lseEventStream [volume <= 70 ] " +
+                "select e3.symbol as symbol1,e2[0].symbol as symbol2,e3.volume as symbol3 " +
+                "insert into StockQuote;");
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (eventCount == 0) {
+                    Assert.assertArrayEquals(new Object[]{"WSO2", "GOOG", 65}, inEvents[0].getData());
+                } else if (eventCount == 1) {
+                    Assert.assertArrayEquals(new Object[]{"IBN", "DDD", 70}, inEvents[0].getData());
+                } else {
+                    Assert.fail();
+                }
+                eventCount++;
+            }
+        });
+        InputHandler cseStreamHandler = siddhiManager.getInputHandler("cseEventStream");
+        InputHandler lseStreamHandler = siddhiManager.getInputHandler("lseEventStream");
+
+        cseStreamHandler.send(new Object[]{"IBM", 75.6f, 105});
+        Thread.sleep(1200);
+        lseStreamHandler.send(new Object[]{"GOOG", 21f, 51});
+        lseStreamHandler.send(new Object[]{"FBX", 21f, 81});
+        lseStreamHandler.send(new Object[]{"WSO2", 176.6f, 65});
+        cseStreamHandler.send(new Object[]{"BIRT", 21f, 81});
+        cseStreamHandler.send(new Object[]{"AMBA", 126.6f, 165});
+        lseStreamHandler.send(new Object[]{"DDD", 23f, 181});
+        lseStreamHandler.send(new Object[]{"BIRT", 21f, 86});
+        lseStreamHandler.send(new Object[]{"IBN", 21f, 70});
+        lseStreamHandler.send(new Object[]{"WSO2", 176.6f, 90});
+        cseStreamHandler.send(new Object[]{"AMBA", 126.6f, 165});
+        lseStreamHandler.send(new Object[]{"DOX", 16.2f, 25});
+
+        Thread.sleep(1000);
+
+        siddhiManager.shutdown();
+
+        Assert.assertEquals("Number of success events", 2, eventCount);
+
+    }
+
 
 }

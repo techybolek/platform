@@ -19,6 +19,8 @@ package org.wso2.siddhi.core.executor.conditon;
 
 import org.wso2.siddhi.core.event.AtomicEvent;
 import org.wso2.siddhi.core.table.EventTable;
+import org.wso2.siddhi.core.table.predicate.PredicateBuilder;
+import org.wso2.siddhi.core.table.predicate.PredicateTreeNode;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
 public class InConditionExecutor implements ConditionExecutor {
@@ -42,8 +44,8 @@ public class InConditionExecutor implements ConditionExecutor {
     }
 
     @Override
-    public String constructSQLPredicate(AtomicEvent newEvent, TableDefinition tableDefinition) {
-        return "*";
+    public PredicateTreeNode constructPredicate(AtomicEvent newEvent, TableDefinition tableDefinition, PredicateBuilder predicateBuilder) {
+        return predicateBuilder.buildVariableExpression("*");
     }
 
 }

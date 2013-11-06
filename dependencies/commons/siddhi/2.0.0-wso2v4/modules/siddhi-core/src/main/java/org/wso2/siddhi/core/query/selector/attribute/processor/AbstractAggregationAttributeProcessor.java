@@ -58,9 +58,10 @@ public abstract class AbstractAggregationAttributeProcessor implements Attribute
         this.elementId = elementId;
         Attribute.Type[] attributeTypes = new Attribute.Type[expressionExecutors.size()];
         for (int i = 0; i < expressionExecutors.size(); i++) {
-            attributeTypes[i] = expressionExecutors.get(i).getType();
+            attributeTypes[i] = expressionExecutors.get(i).getReturnType();
         }
         this.sampleOutputAttributeAggregator = outputAttributeAggregatorFactory.createAttributeAggregator(attributeTypes);
+        siddhiContext.addEternalReferencedHolder(sampleOutputAttributeAggregator);
         size = expressionExecutors.size();
     }
 
@@ -71,15 +72,15 @@ public abstract class AbstractAggregationAttributeProcessor implements Attribute
                 data[i] = expressionExecutors.get(i).execute(event);
             }
             if (event instanceof RemoveStream) {
-                return outputAttributeAggregator.processRemoveEventAttribute(data);
+                return outputAttributeAggregator.processRemove(data);
             } else {
-                return outputAttributeAggregator.processInEventAttribute(data);
+                return outputAttributeAggregator.processAdd(data);
             }
         } else {
             if (event instanceof RemoveStream) {
-                return outputAttributeAggregator.processRemoveEventAttribute(expressionExecutors.get(0).execute(event));
+                return outputAttributeAggregator.processRemove(expressionExecutors.get(0).execute(event));
             } else {
-                return outputAttributeAggregator.processInEventAttribute(expressionExecutors.get(0).execute(event));
+                return outputAttributeAggregator.processAdd(expressionExecutors.get(0).execute(event));
             }
         }
     }
@@ -87,7 +88,7 @@ public abstract class AbstractAggregationAttributeProcessor implements Attribute
 
     @Override
     public Attribute.Type getOutputType() {
-        return sampleOutputAttributeAggregator.getType();
+        return sampleOutputAttributeAggregator.getReturnType();
     }
 
     @Override

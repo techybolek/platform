@@ -25,7 +25,7 @@ import org.wso2.siddhi.core.event.StreamEvent;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class EventTracer {
+public abstract class EventMonitor {
     public abstract void trace(ComplexEvent complexEvent, String message);
 
     private ConcurrentHashMap<String, AtomicLong> streamStatsMap = new ConcurrentHashMap();

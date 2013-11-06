@@ -77,14 +77,14 @@ public class PatternHandlerProcessor
                     break;
                 }
                 eventCounter++;
-                precess(streamEvent);
+                process(streamEvent);
             }
         } catch (Throwable t) {
             log.error(t.getMessage(), t);
         }
     }
 
-    private void precess(StreamEvent streamEvent) {
+    private void process(StreamEvent streamEvent) {
         try {
             //in reverse order to execute the later states first to overcome to dependencies of count states
             for (int i = patternInnerHandlerProcessorListSize - 1; i >= 0; i--) {
@@ -101,17 +101,16 @@ public class PatternHandlerProcessor
     @Override
     public void receive(StreamEvent streamEvent) {
         LogHelper.logMethod(log, streamEvent);
-//        System.out.println(event);
-        if (siddhiContext.isAsyncProcessing() || siddhiContext.isDistributedProcessing()) {
+        if (siddhiContext.isAsyncProcessing() || siddhiContext.isDistributedProcessingEnabled()) {
             if (log.isDebugEnabled()) {
-                LogHelper.debugLogMessage(log, streamEvent, "added to inputQueue");
+                LogHelper.debugLogMessage(log, streamEvent, " added to inputQueue");
             }
             inputQueue.put(streamEvent);
         } else {
             if (log.isDebugEnabled()) {
-                LogHelper.debugLogMessage(log, streamEvent, "sent to precess");
+                LogHelper.debugLogMessage(log, streamEvent, " sent to process");
             }
-            precess(streamEvent);
+            process(streamEvent);
         }
 
     }

@@ -31,13 +31,13 @@ public class AttributeProcessorFactory {
             boolean groupBy) {
         String newElementId = siddhiContext.getElementIdGenerator().createNewId();
         if (groupBy) {
-            if (siddhiContext.isDistributedProcessing()) {
+            if (siddhiContext.isDistributedProcessingEnabled()) {
                 return new DistributedGroupByAggregationAttributeProcessor(expressions, queryEventSourceList, outputAttributeAggregatorFactory, newElementId, siddhiContext);
             } else {
                 return new GroupByAttributeAggregatorProcessor(expressions, queryEventSourceList, outputAttributeAggregatorFactory, newElementId, siddhiContext);
             }
         } else {
-            if (siddhiContext.isDistributedProcessing()) {
+            if (siddhiContext.isDistributedProcessingEnabled()) {
                 return new DistributedAggregationAttributeProcessor(expressions, queryEventSourceList, outputAttributeAggregatorFactory, newElementId, siddhiContext);
             } else {
                 return new AggregationAttributeProcessor(expressions, queryEventSourceList, outputAttributeAggregatorFactory, newElementId, siddhiContext);

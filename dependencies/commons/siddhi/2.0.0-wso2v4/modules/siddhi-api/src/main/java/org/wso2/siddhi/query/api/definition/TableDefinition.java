@@ -17,6 +17,9 @@
 */
 package org.wso2.siddhi.query.api.definition;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class TableDefinition extends AbstractDefinition {
 
     private ExternalTable externalTable = null;
@@ -50,48 +53,39 @@ public class TableDefinition extends AbstractDefinition {
     }
 
 
-    public TableDefinition from(String tableType, String dataSourceName, String databaseName, String tableName) {
-        this.externalTable = new ExternalTable(tableType, dataSourceName, databaseName, tableName);
+    public TableDefinition from(String paramName, String paramValue) {
+        if (externalTable == null) {
+            externalTable = new ExternalTable();
+        }
+        externalTable.parameter(paramName, paramValue);
         return this;
     }
 
 
     public class ExternalTable {
-        private String tableType;
-        private String databaseName;
-        private String tableName;
-        private String dataSourceName;
 
-        public ExternalTable(String tableType, String dataSourceName, String databaseName, String tableName) {
-            this.tableType = tableType;
-            this.databaseName = databaseName;
-            this.tableName = tableName;
-            this.dataSourceName = dataSourceName;
+        private Map<String, String> tableParameters;
+
+        public ExternalTable() {
+            tableParameters = new ConcurrentHashMap<String, String>(4);
         }
 
-        public String getTableType() {
-            return tableType;
+        public void parameter(String parameterName, String parameterValue) {
+            this.tableParameters.put(parameterName, parameterValue);
         }
 
-        public String getDatabaseName() {
-            return databaseName;
+        public String getParameter(String parameterName) {
+            return this.tableParameters.get(parameterName);
         }
 
-        public String getTableName() {
-            return tableName;
-        }
-
-        public String getDataSourceName() {
-            return dataSourceName;
+        public Map<String, String> getParameters() {
+            return this.tableParameters;
         }
 
         @Override
         public String toString() {
             return "ExternalTable{" +
-                    "tableType='" + tableType + '\'' +
-                    "dataSourceName='" + dataSourceName + '\'' +
-                    ", databaseName='" + databaseName + '\'' +
-                    ", tableName='" + tableName + '\'' +
+                    this.tableParameters.toString() +
                     '}';
         }
     }

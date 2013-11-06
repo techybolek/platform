@@ -92,6 +92,14 @@ public class FilterTestCase {
         Assert.assertNotNull(query);
     }
 
+    @Test
+    public void Test9() throws RecognitionException, SiddhiPraserException {
+        Query query = SiddhiCompiler.parseQuery("from  cseEventStream[(price==foo.price and foo.try>5) in foo]  " +
+                                                "select symbol, min(price) as minPrice "
+        );
+        Assert.assertNotNull(query);
+    }
+
 }
 
 

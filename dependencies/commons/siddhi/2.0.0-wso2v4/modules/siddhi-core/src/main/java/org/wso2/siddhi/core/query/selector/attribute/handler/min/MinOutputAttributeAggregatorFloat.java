@@ -30,12 +30,12 @@ public class MinOutputAttributeAggregatorFloat implements OutputAttributeAggrega
     private volatile Float minValue = null;
     private  static final Attribute.Type type = Attribute.Type.FLOAT;
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 
     @Override
-    public synchronized Object processInEventAttribute(Object obj) {
+    public synchronized Object processAdd(Object obj) {
         Float value = ((Float) obj);
         for (Iterator<Float> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
 
@@ -53,14 +53,19 @@ public class MinOutputAttributeAggregatorFloat implements OutputAttributeAggrega
     }
 
     @Override
-    public synchronized Object processRemoveEventAttribute(Object obj) {
+    public synchronized Object processRemove(Object obj) {
         minDeque.removeFirstOccurrence(obj);
         minValue = minDeque.peekFirst();
         return minValue;
     }
 
     @Override
-    public OutputAttributeAggregator createNewInstance() {
+    public OutputAttributeAggregator newInstance() {
         return new MinOutputAttributeAggregatorFloat();
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

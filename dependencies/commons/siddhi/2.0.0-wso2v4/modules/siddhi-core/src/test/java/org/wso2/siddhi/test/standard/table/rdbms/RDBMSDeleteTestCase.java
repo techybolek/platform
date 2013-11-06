@@ -21,44 +21,17 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.table.SiddhiDataSource;
 import org.wso2.siddhi.query.api.QueryFactory;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.sql.DataSource;
 
 public class RDBMSDeleteTestCase {
     static final Logger log = Logger.getLogger(RDBMSDeleteTestCase.class);
-    SiddhiDataSource dataSource = new SiddhiDataSource() {
-        @Override
-        public Connection getConnection() throws ClassNotFoundException, SQLException {
-            Class.forName(RDBMSTestConstants.MYSQL_DRIVER_CLASS);
-            try {
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
-            } catch (Exception ex) {
-                Connection connection = DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
-                Statement statement = connection.createStatement();
-                statement.executeUpdate("CREATE DATABASE cepdb");
-                statement.close();
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/cepdb", RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
 
-            }
-        }
-
-        @Override
-        public String getType() {
-            return "MYSQL";
-        }
-
-        @Override
-        public String getName() {
-            return "cepDataSource";
-        }
-    };
+    private static String dataSourceName = "cepDataSource";
+    private DataSource dataSource = new BasicDataSource();
 
     @Test
     /*
@@ -68,12 +41,12 @@ public class RDBMSDeleteTestCase {
         log.info("DeleteFromTableTestCase test5 OUT size 2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long) ");
         siddhiManager.defineStream("define stream cseDeleteEventStream (symbol string, price float, volume long) ");
 
-        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable");
+        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long) " + createFromClause("cepDataSource","cepdb","cepEventTable",null));
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
                 "insert into cseEventTable;");
@@ -100,11 +73,11 @@ public class RDBMSDeleteTestCase {
         log.info("DeleteFromTableTestCase test5 OUT size 2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long) ");
         siddhiManager.defineStream("define stream cseDeleteEventStream (symbol string, price float, volume long) ");
-        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable");
+        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  " + createFromClause("cepDataSource","cepdb","cepEventTable",null));
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
                 "insert into cseEventTable;");
@@ -132,11 +105,11 @@ public class RDBMSDeleteTestCase {
         log.info("DeleteFromTableTestCase test5 OUT size 2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long) ");
         siddhiManager.defineStream("define stream cseDeleteEventStream (symbol string, price float, volume long) ");
-        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable ");
+        siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long) "+ createFromClause("cepDataSource","cepdb","cepEventTable", null));
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
                 "insert into cseEventTable;");
@@ -160,11 +133,21 @@ public class RDBMSDeleteTestCase {
     @Test
     public void testSingleerDefinition() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         TableDefinition tableDefinition = QueryFactory.createTableDefinition();
-        tableDefinition.name("cseEventTable").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT).from("MYSQL", "cepDataSource", "cepdb", "cepEventTable");
+        tableDefinition.name("cseEventTable").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT).from("datasource.name", "cepDataSource").from("database.name" ,"cepdb").from("table.name", "cepEventTable");
         siddhiManager.defineTable(tableDefinition);
+    }
+
+    private String createFromClause(String dataSourceName, String databaseName, String tableName, String createQuery) {
+        String query = "from ( 'datasource.name'='" +dataSourceName + "','database.name'='"+
+                databaseName + "','table.name'='" + tableName + "'";
+        if (createQuery != null) {
+            query = query + ",'create.query'='" + createQuery +"'";
+        }
+        query = query + ")";
+        return query;
     }
 
 }

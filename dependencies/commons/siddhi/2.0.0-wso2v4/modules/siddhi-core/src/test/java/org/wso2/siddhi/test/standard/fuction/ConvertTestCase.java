@@ -241,7 +241,7 @@ public class ConvertTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventCount++;
-                Assert.assertEquals(1358879400000l, inEvents[0].getData0());
+                Assert.assertEquals(1358899200000l, inEvents[0].getData0());
 
             }
         });
@@ -341,7 +341,7 @@ public class ConvertTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventCount++;
-                Assert.assertEquals(1358879400000l, inEvents[0].getData0());
+                Assert.assertEquals(1358899200000l, inEvents[0].getData0());
 
             }
         });

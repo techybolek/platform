@@ -25,24 +25,29 @@ public class CountOutputAttributeAggregator implements OutputAttributeAggregator
     private long value = 0;
     private  static final Attribute.Type type = Attribute.Type.LONG;
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 
     @Override
-    public Object processInEventAttribute(Object obj) {
+    public Object processAdd(Object obj) {
         value ++;
         return value;
     }
 
     @Override
-    public Object processRemoveEventAttribute(Object obj) {
+    public Object processRemove(Object obj) {
         value --;
         return value;
     }
 
     @Override
-    public OutputAttributeAggregator createNewInstance() {
+    public OutputAttributeAggregator newInstance() {
         return new CountOutputAttributeAggregator();
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

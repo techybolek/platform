@@ -17,29 +17,31 @@
 */
 package org.wso2.siddhi.core.executor.function;
 
+import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.exception.QueryCreationException;
+import org.wso2.siddhi.core.executor.expression.ExpressionExecutor;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
-public class CoalesceExecutorFunction extends ExecutorFunction {
+public class CoalesceFunctionExecutor extends FunctionExecutor {
 
     Attribute.Type returnType;
 
     @Override
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return returnType;
     }
 
+
     @Override
-    public void init() {
-        Attribute.Type type = attributeTypes[0];
-        for (Attribute.Type aType : attributeTypes) {
-            if (type != aType) {
+    public void init(Attribute.Type[] attributeTypes, SiddhiContext siddhiContext) {
+        Attribute.Type type = attributeExpressionExecutors.get(0).getReturnType();
+        for (ExpressionExecutor expressionExecutor : attributeExpressionExecutors) {
+            if (type != expressionExecutor.getReturnType()) {
                 throw new QueryCreationException("Coalesce cannot have parameters with different type");
             }
         }
         returnType = type;
     }
-
 
     protected Object process(Object obj) {
         if (obj instanceof Object[]) {
@@ -52,6 +54,11 @@ public class CoalesceExecutorFunction extends ExecutorFunction {
         } else {
             return obj;
         }
+
+    }
+
+    @Override
+    public void destroy(){
 
     }
 

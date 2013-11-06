@@ -18,16 +18,19 @@
 package org.wso2.siddhi.core.query.processor.window;
 
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.AtomicEvent;
 import org.wso2.siddhi.core.event.StreamEvent;
 import org.wso2.siddhi.core.event.in.InEvent;
 import org.wso2.siddhi.core.event.in.InListEvent;
 import org.wso2.siddhi.core.event.remove.RemoveEvent;
 import org.wso2.siddhi.core.event.remove.RemoveListEvent;
+import org.wso2.siddhi.core.query.QueryPostProcessingElement;
 import org.wso2.siddhi.core.util.EventConverter;
 import org.wso2.siddhi.core.util.collection.queue.SiddhiQueue;
 import org.wso2.siddhi.core.util.collection.queue.SiddhiQueueGrid;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.timestamp.SchedulerTimestampSiddhiQueueGrid;
+import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.Variable;
 import org.wso2.siddhi.query.api.expression.constant.IntConstant;
@@ -44,7 +47,7 @@ public class ExternalTimeWindowProcessor extends WindowProcessor {
     private int timeStampAttributePosition;
 
     @Override
-    public void setParameters(Expression[] parameters) {
+    protected void init(Expression[] parameters, QueryPostProcessingElement nextProcessor, AbstractDefinition streamDefinition, String elementId, boolean async, SiddhiContext siddhiContext) {
         if (parameters[1] instanceof IntConstant) {
             timeToKeep = ((IntConstant) parameters[1]).getValue();
         } else {
@@ -52,6 +55,12 @@ public class ExternalTimeWindowProcessor extends WindowProcessor {
         }
         timeStampAttributeName = ((Variable) parameters[0]).getAttributeName();
         timeStampAttributePosition = definition.getAttributePosition(timeStampAttributeName);
+
+        if (this.siddhiContext.isDistributedProcessingEnabled()) {
+            window = new SiddhiQueueGrid<StreamEvent>(elementId, this.siddhiContext, this.async);
+        } else {
+            window = new SiddhiQueue<StreamEvent>();
+        }
     }
 
     @Override
@@ -86,7 +95,7 @@ public class ExternalTimeWindowProcessor extends WindowProcessor {
             long currentTime = (Long) listEvent.getEvent(listEvent.getActiveEvents() - 1).getData(timeStampAttributePosition);
             removeExpiredEvent(currentTime);
             long expireTime = currentTime + timeToKeep;
-            if (!async && siddhiContext.isDistributedProcessing()) {
+            if (!async && siddhiContext.isDistributedProcessingEnabled()) {
                 for (int i = 0, activeEvents = listEvent.getActiveEvents(); i < activeEvents; i++) {
                     window.put(new RemoveEvent(listEvent.getEvent(i), expireTime));
                 }
@@ -106,21 +115,13 @@ public class ExternalTimeWindowProcessor extends WindowProcessor {
 
     @Override
     public Iterator<StreamEvent> iterator(String predicate) {
-        if (siddhiContext.isDistributedProcessing()) {
+        if (siddhiContext.isDistributedProcessingEnabled()) {
             return ((SchedulerTimestampSiddhiQueueGrid<StreamEvent>) window).iterator(predicate);
         } else {
             return window.iterator();
         }
     }
 
-    @Override
-    protected void initWindow() {
-        if (siddhiContext.isDistributedProcessing()) {
-            window = new SiddhiQueueGrid<StreamEvent>(elementId, siddhiContext, async);
-        } else {
-            window = new SiddhiQueue<StreamEvent>();
-        }
-    }
 
     @Override
     protected Object[] currentState() {
@@ -132,5 +133,9 @@ public class ExternalTimeWindowProcessor extends WindowProcessor {
         window.restoreState(data);
     }
 
+    @Override
+    public void destroy() {
+
+    }
 }
 

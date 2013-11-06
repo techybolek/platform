@@ -18,6 +18,8 @@
 package org.wso2.siddhi.core.executor.conditon;
 
 import org.wso2.siddhi.core.event.AtomicEvent;
+import org.wso2.siddhi.core.table.predicate.PredicateBuilder;
+import org.wso2.siddhi.core.table.predicate.PredicateTreeNode;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
 public class NotConditionExecutor implements ConditionExecutor {
@@ -46,14 +48,12 @@ public class NotConditionExecutor implements ConditionExecutor {
 
 
     @Override
-    public String constructSQLPredicate(AtomicEvent newEvent, TableDefinition tableDefinition) {
-        String value = conditionExecutor.constructSQLPredicate(newEvent, tableDefinition);
-        if (value.equals("*")) {
-            return "*";
+    public PredicateTreeNode constructPredicate(AtomicEvent newEvent, TableDefinition tableDefinition, PredicateBuilder predicateBuilder) {
+        PredicateTreeNode value = conditionExecutor.constructPredicate(newEvent, tableDefinition, predicateBuilder);
+        if (value.toString().equals("*")) {
+            return predicateBuilder.buildVariableExpression("*");
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("(").append(" !(").append(value).append(")");
-            return sb.toString();
+            return predicateBuilder.buildNotCondition(value);
         }
     }
 

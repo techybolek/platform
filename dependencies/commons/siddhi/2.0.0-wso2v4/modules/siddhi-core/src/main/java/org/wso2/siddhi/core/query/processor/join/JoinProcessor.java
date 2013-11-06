@@ -115,6 +115,7 @@ public abstract class JoinProcessor implements QueryPostProcessingElement, PreSe
         if (atomicEvent instanceof Event && triggerEventTypeCheck((Event) atomicEvent)) {
             if (triggerEvent) {
                 acquireLock();
+                ListAtomicEvent listAtomicEvent = createNewListAtomicEvent();
                 Iterator<StreamEvent> iterator = getStreamEventIterator((Event) atomicEvent);
 
                 while (iterator.hasNext()) {
@@ -125,13 +126,12 @@ public abstract class JoinProcessor implements QueryPostProcessingElement, PreSe
                         if (isEventsWithin((Event) atomicEvent, windowStreamEvent)) {
                             StateEvent newEvent = createNewEvent((Event) atomicEvent, (Event) windowStreamEvent);
                             if (onConditionExecutor.execute(newEvent)) {
-                                querySelector.process(newEvent);
+                                listAtomicEvent.addEvent(newEvent);
                             }
                         } else {
                             break;
                         }
                     } else if (windowStreamEvent instanceof ListEvent) {
-                        ListAtomicEvent listAtomicEvent = createNewListAtomicEvent();
                         Event[] events = ((ListEvent) windowStreamEvent).getEvents();
                         for (Event event : events) {
 //                            Event newEvent = (new InComplexEvent(new Event[]{((Event) complexEvent), ((Event) events[i])}));
@@ -144,10 +144,12 @@ public abstract class JoinProcessor implements QueryPostProcessingElement, PreSe
                                 break;
                             }
                         }
-                        sendEventList(listAtomicEvent);
                     } else {
                         //todo error Complex atomicEvent not supported
                     }
+                }
+                if(listAtomicEvent.getActiveEvents()>0){
+                    sendEventList(listAtomicEvent);
                 }
                 if (atomicEvent instanceof InStream) {
                     windowProcessor.process(atomicEvent);

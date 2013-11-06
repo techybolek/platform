@@ -18,6 +18,8 @@
 package org.wso2.siddhi.core.executor.conditon;
 
 import org.wso2.siddhi.core.event.AtomicEvent;
+import org.wso2.siddhi.core.table.predicate.PredicateBuilder;
+import org.wso2.siddhi.core.table.predicate.PredicateTreeNode;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
 public class AndConditionExecutor implements ConditionExecutor {
@@ -37,23 +39,21 @@ public class AndConditionExecutor implements ConditionExecutor {
 
     @Override
     public String constructFilterQuery(AtomicEvent newEvent, int level) {
-        return constructQuery(newEvent, level, null);
+        return constructQuery(newEvent, level, null, null);
     }
 
     @Override
-    public String constructSQLPredicate(AtomicEvent newEvent, TableDefinition tableDefinition) {
-        return constructQuery(newEvent, SQL_LEVEL, tableDefinition);
+    public PredicateTreeNode constructPredicate(AtomicEvent newEvent, TableDefinition tableDefinition, PredicateBuilder predicateBuilder) {
+        PredicateTreeNode left = leftConditionExecutor.constructPredicate(newEvent, tableDefinition, predicateBuilder);
+        PredicateTreeNode right = rightConditionExecutor.constructPredicate(newEvent, tableDefinition, predicateBuilder);
+
+        return predicateBuilder.buildBinaryCondition(left, right, PredicateBuilder.BinaryOperator.AND);
     }
 
-    public String constructQuery(AtomicEvent newEvent, int level, TableDefinition tableDefinition) {
+    public String constructQuery(AtomicEvent newEvent, int level, TableDefinition tableDefinition, PredicateBuilder predicateBuilder) {
         String left, right;
-        if (level == SQL_LEVEL) {
-            left = leftConditionExecutor.constructSQLPredicate(newEvent, tableDefinition);
-            right = rightConditionExecutor.constructSQLPredicate(newEvent, tableDefinition);
-        } else {
-            left = leftConditionExecutor.constructFilterQuery(newEvent, 1);
-            right = rightConditionExecutor.constructFilterQuery(newEvent, 1);
-        }
+        left = leftConditionExecutor.constructFilterQuery(newEvent, 1);
+        right = rightConditionExecutor.constructFilterQuery(newEvent, 1);
         if (left.equals("*") || right.equals("*")) {
             return "*";
         } else if (left.equals("*")) {

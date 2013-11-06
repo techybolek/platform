@@ -28,6 +28,8 @@ import org.wso2.siddhi.core.executor.conditon.compare.not_equal.NotEqualCompareC
 import org.wso2.siddhi.core.executor.expression.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.expression.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.expression.VariableExpressionExecutor;
+import org.wso2.siddhi.core.table.predicate.PredicateBuilder;
+import org.wso2.siddhi.core.table.predicate.PredicateTreeNode;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
 public abstract class CompareConditionExecutor implements ConditionExecutor {
@@ -52,15 +54,88 @@ public abstract class CompareConditionExecutor implements ConditionExecutor {
 
     @Override
     public String constructFilterQuery(AtomicEvent newEvent, int level) {
-        return constructQuery(newEvent, level, null);
+        return constructQuery(newEvent, level, null, null);
     }
 
     @Override
-    public String constructSQLPredicate(AtomicEvent newEvent, TableDefinition tableDefinition) {
-        return constructQuery(newEvent, SQL_LEVEL, tableDefinition);
+    public PredicateTreeNode constructPredicate(AtomicEvent newEvent, TableDefinition tableDefinition, PredicateBuilder predicateBuilder) {
+        PredicateTreeNode left;
+        PredicateTreeNode right;
+        boolean interchange = false;
+        if (leftExpressionExecutor instanceof ConstantExpressionExecutor) {
+            Object obj = leftExpressionExecutor.execute(newEvent);
+            left = predicateBuilder.buildValue(obj);
+
+            interchange = true;
+        } else if (leftExpressionExecutor instanceof VariableExpressionExecutor) {
+            left = ((VariableExpressionExecutor) leftExpressionExecutor).constructPredicate(newEvent, tableDefinition, predicateBuilder);
+            if (left.toString().startsWith("'")) {
+                interchange = true;
+            }
+        } else {
+            return predicateBuilder.buildVariableExpression("*");
+        }
+        if (rightExpressionExecutor instanceof ConstantExpressionExecutor) {
+            Object obj = rightExpressionExecutor.execute(newEvent);
+            right = predicateBuilder.buildValue(obj);
+
+
+            if (interchange) {
+                return predicateBuilder.buildVariableExpression("*");
+            }
+        } else if (rightExpressionExecutor instanceof VariableExpressionExecutor) {
+            right = ((VariableExpressionExecutor) rightExpressionExecutor).constructPredicate(newEvent, tableDefinition, predicateBuilder);
+            if (right.toString().startsWith("'") && interchange) {
+                return predicateBuilder.buildVariableExpression("*");
+            }
+        } else {
+            return predicateBuilder.buildVariableExpression("*");
+        }
+
+
+        if (this instanceof EqualCompareConditionExecutor) {
+            if (interchange) {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(right, left, PredicateBuilder.ComparisonType.EQUALS));
+            } else {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(left, right, PredicateBuilder.ComparisonType.EQUALS));
+            }
+        } else if (this instanceof GreaterThenCompareConditionExecutor) {
+            if (interchange) {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(right, left, PredicateBuilder.ComparisonType.LESS_THAN));
+            } else {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(left, right, PredicateBuilder.ComparisonType.GREATER_THAN));
+            }
+        } else if (this instanceof GreaterThenEqualCompareConditionExecutor) {
+            if (interchange) {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(right, left, PredicateBuilder.ComparisonType.LESS_THAN_OR_EQUALS));
+            } else {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(left, right, PredicateBuilder.ComparisonType.GREATER_THAN_OR_EQUALS));
+            }
+        } else if (this instanceof LessThenCompareConditionExecutor) {
+            if (interchange) {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(right, left, PredicateBuilder.ComparisonType.GREATER_THAN));
+            } else {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(left, right, PredicateBuilder.ComparisonType.LESS_THAN));
+            }
+        } else if (this instanceof LessThenEqualCompareConditionExecutor) {
+            if (interchange) {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(right, left, PredicateBuilder.ComparisonType.GREATER_THAN_OR_EQUALS));
+            } else {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(left, right, PredicateBuilder.ComparisonType.LESS_THAN_OR_EQUALS));
+            }
+        } else if (this instanceof NotEqualCompareConditionExecutor) {
+            if (interchange) {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(right, left, PredicateBuilder.ComparisonType.NOT_EQUALS));
+            } else {
+                return predicateBuilder.wrapPredicate(predicateBuilder.buildCompareCondition(left, right, PredicateBuilder.ComparisonType.NOT_EQUALS));
+            }
+        } else {
+            return predicateBuilder.buildVariableExpression("*");
+        }
+
     }
 
-    public String constructQuery(AtomicEvent newEvent, int level, TableDefinition tableDefinition) {
+    public String constructQuery(AtomicEvent newEvent, int level, TableDefinition tableDefinition, PredicateBuilder predicateBuilder) {
         String left;
         String right;
         boolean interchange = false;
@@ -73,11 +148,7 @@ public abstract class CompareConditionExecutor implements ConditionExecutor {
             }
             interchange = true;
         } else if (leftExpressionExecutor instanceof VariableExpressionExecutor) {
-            if (level == SQL_LEVEL) {
-                left = ((VariableExpressionExecutor) leftExpressionExecutor).constructSQLPredicate(newEvent, tableDefinition);
-            } else {
-                left = ((VariableExpressionExecutor) leftExpressionExecutor).constructFilterQuery(newEvent, level);
-            }
+            left = ((VariableExpressionExecutor) leftExpressionExecutor).constructFilterQuery(newEvent, level);
             if (left.startsWith("'")) {
                 interchange = true;
             }
@@ -85,7 +156,6 @@ public abstract class CompareConditionExecutor implements ConditionExecutor {
             return "*";
         }
         if (rightExpressionExecutor instanceof ConstantExpressionExecutor) {
-//            Object obj = leftExpressionExecutor.execute(newEvent);  todo this was the unmodified one.
             Object obj = rightExpressionExecutor.execute(newEvent);
             if (obj instanceof String) {
                 right = "'" + obj.toString() + "'";
@@ -96,18 +166,15 @@ public abstract class CompareConditionExecutor implements ConditionExecutor {
                 return "*";
             }
         } else if (rightExpressionExecutor instanceof VariableExpressionExecutor) {
-            if (level == SQL_LEVEL) {
-                right = ((VariableExpressionExecutor) rightExpressionExecutor).constructSQLPredicate(newEvent, tableDefinition);
-            } else {
-                right = ((VariableExpressionExecutor) rightExpressionExecutor).constructFilterQuery(newEvent, level);
+            right = ((VariableExpressionExecutor) rightExpressionExecutor).constructFilterQuery(newEvent, level);
 
-            }
             if (right.startsWith("'") && interchange) {
                 return "*";
             }
         } else {
             return "*";
         }
+
         if (this instanceof EqualCompareConditionExecutor) {
             if (interchange) {
                 return "(" + right + convertOperator(" == ", level) + left + ")";
@@ -147,12 +214,12 @@ public abstract class CompareConditionExecutor implements ConditionExecutor {
         } else {
             return "*";
         }
+//        }
 
     }
 
     protected String convertOperator(String operator, int level) {
-        // todo extend for other sql specific operators.
-        if (level == SQL_LEVEL && operator.contains("==")) {
+        if (level == PREDICATE_LEVEL && operator.contains("==")) {
             return " = ";
         }
         return operator;

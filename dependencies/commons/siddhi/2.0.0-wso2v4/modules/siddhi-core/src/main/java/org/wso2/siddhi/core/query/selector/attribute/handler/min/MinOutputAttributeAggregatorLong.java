@@ -30,12 +30,12 @@ public class MinOutputAttributeAggregatorLong implements OutputAttributeAggregat
     private volatile Long minValue = null;
     private  static final Attribute.Type type = Attribute.Type.LONG;
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 
     @Override
-    public synchronized Object processInEventAttribute(Object obj) {
+    public synchronized Object processAdd(Object obj) {
         Long value = ((Long) obj);
         for (Iterator<Long> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
 
@@ -53,14 +53,19 @@ public class MinOutputAttributeAggregatorLong implements OutputAttributeAggregat
     }
 
     @Override
-    public synchronized Object processRemoveEventAttribute(Object obj) {
+    public synchronized Object processRemove(Object obj) {
         minDeque.removeFirstOccurrence(obj);
         minValue = minDeque.peekFirst();
         return minValue;
     }
 
     @Override
-    public OutputAttributeAggregator createNewInstance() {
+    public OutputAttributeAggregator newInstance() {
         return new MinOutputAttributeAggregatorLong();
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

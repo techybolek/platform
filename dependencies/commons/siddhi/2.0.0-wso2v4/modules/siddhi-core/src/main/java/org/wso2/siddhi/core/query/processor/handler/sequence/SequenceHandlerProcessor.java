@@ -62,14 +62,14 @@ public class SequenceHandlerProcessor
 
     @Override
     public void receive(StreamEvent streamEvent) {
-        if (siddhiContext.isAsyncProcessing() || siddhiContext.isDistributedProcessing()) {
+        if (siddhiContext.isAsyncProcessing() || siddhiContext.isDistributedProcessingEnabled()) {
             if (log.isDebugEnabled()) {
-                log.debug("PatternHandlerProcessor -> inputQueue");
+                log.debug("SequenceHandlerProcessor -> inputQueue");
             }
             inputQueue.put(streamEvent);
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("PatternHandlerProcessor -> precess");
+                log.debug("SequenceHandlerProcessor -> process");
             }
             process(streamEvent);
         }

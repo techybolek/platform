@@ -30,12 +30,12 @@ public class MaxOutputAttributeAggregatorFloat implements OutputAttributeAggrega
     private volatile Float maxValue = null;
     private final static Attribute.Type type = Attribute.Type.FLOAT;
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 
     @Override
-    public synchronized Object processInEventAttribute(Object obj) {
+    public synchronized Object processAdd(Object obj) {
         Float value = ((Float) obj);
         for (Iterator<Float> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
 
@@ -55,14 +55,19 @@ public class MaxOutputAttributeAggregatorFloat implements OutputAttributeAggrega
     }
 
     @Override
-    public synchronized Object processRemoveEventAttribute(Object obj) {
+    public synchronized Object processRemove(Object obj) {
         maxDeque.removeFirstOccurrence(obj);
         maxValue = maxDeque.peekFirst();
         return maxValue;
     }
 
     @Override
-    public OutputAttributeAggregator createNewInstance() {
+    public OutputAttributeAggregator newInstance() {
         return new MaxOutputAttributeAggregatorFloat();
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

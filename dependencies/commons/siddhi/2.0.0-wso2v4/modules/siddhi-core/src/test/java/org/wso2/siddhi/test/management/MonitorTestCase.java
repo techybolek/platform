@@ -25,11 +25,11 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.treaser.EventTracer;
-import org.wso2.siddhi.core.treaser.LogEventTracer;
+import org.wso2.siddhi.core.treaser.EventMonitor;
+import org.wso2.siddhi.core.treaser.LogEventMonitor;
 import org.wso2.siddhi.core.util.EventPrinter;
 
-public class TraceTestCase {
+public class MonitorTestCase {
 
     static final Logger log = Logger.getLogger(PersistenceTestCase.class);
 
@@ -49,13 +49,13 @@ public class TraceTestCase {
 
     @Test
     public void testFilterQuery1() throws InterruptedException {
-        log.info("Filter test1");
+        log.info("Monitor test1");
 
-        EventTracer eventTracer = new LogEventTracer();
+        EventMonitor eventMonitor = new LogEventMonitor();
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        siddhiManager.setEventTracer(eventTracer);
+        siddhiManager.setEventMonitor(eventMonitor);
         siddhiManager.enableStats(true);
         siddhiManager.enableTrace(true);
 
@@ -80,29 +80,30 @@ public class TraceTestCase {
         Thread.sleep(500);
         Assert.assertEquals(1, count);
 
-        Assert.assertTrue(eventTracer.getStatStartTime() < eventTracer.getLastUpdateTime());
-        Assert.assertEquals(2, eventTracer.getStreamStats().values().size()) ;
-        Assert.assertEquals(2l, eventTracer.getStreamStats().get("cseEventStream").longValue()) ;
-        Assert.assertEquals(1l, eventTracer.getStreamStats().get("OutputStream").longValue()) ;
+        Assert.assertTrue(eventMonitor.getStatStartTime() < eventMonitor.getLastUpdateTime());
+        Assert.assertEquals(2, eventMonitor.getStreamStats().values().size()) ;
+        Assert.assertEquals(2l, eventMonitor.getStreamStats().get("cseEventStream").longValue()) ;
+        Assert.assertEquals(1l, eventMonitor.getStreamStats().get("OutputStream").longValue()) ;
 
         inputHandler.send(new Object[]{"GOOG", 55.6f, 99l});
 
-        Assert.assertEquals(2, eventTracer.getStreamStats().values().size()) ;
-        Assert.assertEquals(3l, eventTracer.getStreamStats().get("cseEventStream").longValue()) ;
-        Assert.assertEquals(2l, eventTracer.getStreamStats().get("OutputStream").longValue()) ;
+        Assert.assertEquals(2, eventMonitor.getStreamStats().values().size()) ;
+        Assert.assertEquals(3l, eventMonitor.getStreamStats().get("cseEventStream").longValue()) ;
+        Assert.assertEquals(2l, eventMonitor.getStreamStats().get("OutputStream").longValue()) ;
 
-        eventTracer.resetStats();
-        Assert.assertEquals(0, eventTracer.getStreamStats().values().size()) ;
+        eventMonitor.resetStats();
+        Assert.assertEquals(0, eventMonitor.getStreamStats().values().size()) ;
+        Thread.sleep(100);
 
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100l});
         inputHandler.send(new Object[]{"FB", 57.6f, 10l});
         Thread.sleep(500);
         Assert.assertEquals(3, count);
 
-        Assert.assertTrue(eventTracer.getStatStartTime() < eventTracer.getLastUpdateTime());
-        Assert.assertEquals(2, eventTracer.getStreamStats().values().size()) ;
-        Assert.assertEquals(2l, eventTracer.getStreamStats().get("cseEventStream").longValue()) ;
-        Assert.assertEquals(1l, eventTracer.getStreamStats().get("OutputStream").longValue()) ;
+        Assert.assertTrue(eventMonitor.getStatStartTime() < eventMonitor.getLastUpdateTime());
+        Assert.assertEquals(2, eventMonitor.getStreamStats().values().size()) ;
+        Assert.assertEquals(2l, eventMonitor.getStreamStats().get("cseEventStream").longValue()) ;
+        Assert.assertEquals(1l, eventMonitor.getStreamStats().get("OutputStream").longValue()) ;
 
         siddhiManager.shutdown();
 

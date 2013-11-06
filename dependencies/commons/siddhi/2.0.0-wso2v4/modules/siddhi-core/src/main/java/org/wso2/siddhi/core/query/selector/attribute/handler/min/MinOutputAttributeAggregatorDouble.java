@@ -30,12 +30,12 @@ public class MinOutputAttributeAggregatorDouble implements OutputAttributeAggreg
     private volatile Double minValue = null;
     private  static final Attribute.Type type = Attribute.Type.DOUBLE;
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 
     @Override
-    public synchronized Object processInEventAttribute(Object obj) {
+    public synchronized Object processAdd(Object obj) {
         Double value = ((Double) obj);
         for (Iterator<Double> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
 
@@ -53,14 +53,19 @@ public class MinOutputAttributeAggregatorDouble implements OutputAttributeAggreg
     }
 
     @Override
-    public synchronized Object processRemoveEventAttribute(Object obj) {
+    public synchronized Object processRemove(Object obj) {
         minDeque.removeFirstOccurrence(obj);
         minValue = minDeque.peekFirst();
         return minValue;
     }
 
     @Override
-    public OutputAttributeAggregator createNewInstance() {
+    public OutputAttributeAggregator newInstance() {
         return new MinOutputAttributeAggregatorDouble();
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

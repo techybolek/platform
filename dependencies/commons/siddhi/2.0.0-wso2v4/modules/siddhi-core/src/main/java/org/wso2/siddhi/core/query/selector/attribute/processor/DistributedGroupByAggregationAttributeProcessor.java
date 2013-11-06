@@ -29,7 +29,7 @@ import org.wso2.siddhi.query.api.query.QueryEventSource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 public class DistributedGroupByAggregationAttributeProcessor extends AbstractAggregationAttributeProcessor implements GroupByAttributeProcessor {
 
@@ -37,10 +37,12 @@ public class DistributedGroupByAggregationAttributeProcessor extends AbstractAgg
 
     private IMap<String, OutputAttributeAggregator> distributedAggregatorMap;
     private volatile boolean lockedAcquired = false;
+    private volatile Lock lock;
     private volatile Map<String, OutputAttributeAggregator> tempAggregatorMap = new HashMap<String, OutputAttributeAggregator>();
 
     public DistributedGroupByAggregationAttributeProcessor(Expression[] expressions, List<QueryEventSource> queryEventSourceList, OutputAttributeAggregatorFactory outputAttributeAggregatorFactory, String elementId, SiddhiContext siddhiContext) {
         super(expressions, queryEventSourceList, outputAttributeAggregatorFactory, elementId, siddhiContext);
+        lock = siddhiContext.getHazelcastInstance().getLock(elementId+"-lock");
         distributedAggregatorMap = siddhiContext.getHazelcastInstance().getMap(elementId + "-GroupByMap");
     }
 
@@ -48,12 +50,12 @@ public class DistributedGroupByAggregationAttributeProcessor extends AbstractAgg
 
         OutputAttributeAggregator currentOutputAttributeAggregator = null;
         if (!lockedAcquired) {
-            distributedAggregatorMap.lock(key);
-
+            lock.lock();
             try {
                 currentOutputAttributeAggregator = distributedAggregatorMap.getAsync(key).get();
                 if (currentOutputAttributeAggregator == null) {
-                    currentOutputAttributeAggregator = sampleOutputAttributeAggregator.createNewInstance();
+                    currentOutputAttributeAggregator = sampleOutputAttributeAggregator.newInstance();
+                    siddhiContext.addEternalReferencedHolder(currentOutputAttributeAggregator);
                 }
             } catch (Exception e) {
                 log.error(e);
@@ -64,7 +66,8 @@ public class DistributedGroupByAggregationAttributeProcessor extends AbstractAgg
                 try {
                     currentOutputAttributeAggregator = distributedAggregatorMap.getAsync(key).get();
                     if (currentOutputAttributeAggregator == null) {
-                        currentOutputAttributeAggregator = sampleOutputAttributeAggregator.createNewInstance();
+                        currentOutputAttributeAggregator = sampleOutputAttributeAggregator.newInstance();
+                        siddhiContext.addEternalReferencedHolder(currentOutputAttributeAggregator);
                     }
                     tempAggregatorMap.put(key, currentOutputAttributeAggregator);
                 } catch (Exception e) {
@@ -75,7 +78,9 @@ public class DistributedGroupByAggregationAttributeProcessor extends AbstractAgg
         }
         Object value = process(event, currentOutputAttributeAggregator);
         if (!lockedAcquired) {
-            distributedAggregatorMap.putAndUnlock(key, currentOutputAttributeAggregator);
+//            distributedAggregatorMap.putAndUnlock(key, currentOutputAttributeAggregator);
+            distributedAggregatorMap.put(key, currentOutputAttributeAggregator);
+            lock.unlock();
         }
         return value;
     }
@@ -97,7 +102,9 @@ public class DistributedGroupByAggregationAttributeProcessor extends AbstractAgg
     @Override
     public synchronized void lock() {
         if (!lockedAcquired) {
-            lockedAcquired = distributedAggregatorMap.lockMap(Integer.MAX_VALUE, TimeUnit.SECONDS);
+            lock.lock();
+//            lockedAcquired = distributedAggregatorMap.lockMap(Integer.MAX_VALUE, TimeUnit.SECONDS);
+            lockedAcquired = true;
             if (!lockedAcquired) {
                 log.warn("Map lock for elementId " + elementId + " could not be acquired within " + Integer.MAX_VALUE + " Secs");
             }
@@ -112,7 +119,8 @@ public class DistributedGroupByAggregationAttributeProcessor extends AbstractAgg
             }
             tempAggregatorMap.clear();
             lockedAcquired = false;
-            distributedAggregatorMap.unlockMap();
+//            distributedAggregatorMap.unlockMap();
+            lock.unlock();
         }
     }
 

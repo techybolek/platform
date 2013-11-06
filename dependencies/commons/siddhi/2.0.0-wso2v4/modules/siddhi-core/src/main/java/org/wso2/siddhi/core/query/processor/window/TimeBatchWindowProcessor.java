@@ -18,15 +18,18 @@
 package org.wso2.siddhi.core.query.processor.window;
 
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.StreamEvent;
 import org.wso2.siddhi.core.event.in.InEvent;
 import org.wso2.siddhi.core.event.in.InListEvent;
 import org.wso2.siddhi.core.event.remove.RemoveEvent;
 import org.wso2.siddhi.core.event.remove.RemoveListEvent;
 import org.wso2.siddhi.core.persistence.ThreadBarrier;
+import org.wso2.siddhi.core.query.QueryPostProcessingElement;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.ISchedulerSiddhiQueue;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.SchedulerSiddhiQueue;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.SchedulerSiddhiQueueGrid;
+import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.constant.IntConstant;
 import org.wso2.siddhi.query.api.expression.constant.LongConstant;
@@ -47,15 +50,6 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Runnabl
     private List<RemoveEvent> oldEventList;
     private ThreadBarrier threadBarrier;
     private ISchedulerSiddhiQueue<StreamEvent> window;
-
-    @Override
-    public void setParameters(Expression[] parameters) {
-        if (parameters[0] instanceof IntConstant) {
-            timeToKeep = ((IntConstant) parameters[0]).getValue();
-        } else {
-            timeToKeep = ((LongConstant) parameters[0]).getValue();
-        }
-    }
 
     @Override
     protected void processEvent(InEvent event) {
@@ -87,30 +81,13 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Runnabl
 
     @Override
     public Iterator<StreamEvent> iterator(String predicate) {
-        if (siddhiContext.isDistributedProcessing()) {
+        if (siddhiContext.isDistributedProcessingEnabled()) {
             return ((SchedulerSiddhiQueueGrid<StreamEvent>) window).iterator(predicate);
         } else {
             return window.iterator();
         }
     }
 
-    @Override
-    protected void initWindow() {
-        oldEventList = new ArrayList<RemoveEvent>();
-        if (siddhiContext.isDistributedProcessing()) {
-            newEventList = siddhiContext.getHazelcastInstance().getList(elementId + "-newEventList");
-        } else {
-            newEventList = new ArrayList<InEvent>();
-        }
-
-        if (siddhiContext.isDistributedProcessing()) {
-            window = new SchedulerSiddhiQueueGrid<StreamEvent>(elementId, this, siddhiContext, async);
-        } else {
-            window = new SchedulerSiddhiQueue<StreamEvent>(this);
-        }
-        //Ordinary scheduling
-        window.schedule();
-    }
 
     @Override
     public void run() {
@@ -153,7 +130,7 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Runnabl
                     }
                 }
             } catch (Throwable t) {
-                log.error(t.getMessage(),t);
+                log.error(t.getMessage(), t);
             }
         } finally {
             releaseLock();
@@ -176,6 +153,31 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Runnabl
     }
 
     @Override
+    protected void init(Expression[] parameters, QueryPostProcessingElement nextProcessor, AbstractDefinition streamDefinition, String elementId, boolean async, SiddhiContext siddhiContext) {
+        if (parameters[0] instanceof IntConstant) {
+            timeToKeep = ((IntConstant) parameters[0]).getValue();
+        } else {
+            timeToKeep = ((LongConstant) parameters[0]).getValue();
+        }
+
+        oldEventList = new ArrayList<RemoveEvent>();
+        if (this.siddhiContext.isDistributedProcessingEnabled()) {
+            newEventList = this.siddhiContext.getHazelcastInstance().getList(elementId + "-newEventList");
+        } else {
+            newEventList = new ArrayList<InEvent>();
+        }
+
+        if (this.siddhiContext.isDistributedProcessingEnabled()) {
+            window = new SchedulerSiddhiQueueGrid<StreamEvent>(elementId, this, this.siddhiContext, this.async);
+        } else {
+            window = new SchedulerSiddhiQueue<StreamEvent>(this);
+        }
+        //Ordinary scheduling
+        window.schedule();
+
+    }
+
+    @Override
     public void schedule() {
         eventRemoverScheduler.schedule(this, timeToKeep, TimeUnit.MILLISECONDS);
     }
@@ -193,4 +195,8 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Runnabl
         this.threadBarrier = threadBarrier;
     }
 
+    @Override
+    public void destroy(){
+
+    }
 }

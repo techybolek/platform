@@ -56,6 +56,7 @@ public class PatternQueryCreator extends QueryCreator {
         QueryPartComposite queryPartComposite = StreamParser.parsePatternStream(query.getInputStream(), patternStateList, queryEventSourceList, streamTableDefinitionMap, eventTableMap, siddhiContext);
         QuerySelector querySelector = constructQuerySelector(outputRateManager);
         queryPartComposite.setQuerySelector(querySelector);
+        StateParser.populateMemoryOptimizationParameters(patternStateList, query.getSelector(), queryPartComposite.getHandlerProcessorList());
         return queryPartComposite;
     }
 }

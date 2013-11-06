@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.exception.QueryNotExistException;
+import org.wso2.siddhi.core.extension.EternalReferencedHolder;
 import org.wso2.siddhi.core.persistence.PersistenceService;
 import org.wso2.siddhi.core.persistence.PersistenceStore;
 import org.wso2.siddhi.core.persistence.ThreadBarrier;
@@ -39,8 +40,8 @@ import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.table.InMemoryEventTable;
 import org.wso2.siddhi.core.table.RDBMSEventTable;
-import org.wso2.siddhi.core.treaser.EventTracer;
-import org.wso2.siddhi.core.treaser.EventTracerService;
+import org.wso2.siddhi.core.treaser.EventMonitor;
+import org.wso2.siddhi.core.treaser.EventMonitorService;
 import org.wso2.siddhi.core.util.SiddhiThreadFactory;
 import org.wso2.siddhi.core.util.generator.GlobalIndexGenerator;
 import org.wso2.siddhi.query.api.ExecutionPlan;
@@ -52,6 +53,7 @@ import org.wso2.siddhi.query.api.query.Query;
 import org.wso2.siddhi.query.compiler.SiddhiCompiler;
 import org.wso2.siddhi.query.compiler.exception.SiddhiPraserException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -79,8 +81,25 @@ public class SiddhiManager {
     }
 
     public SiddhiManager(SiddhiConfiguration siddhiConfiguration) {
-        this.siddhiContext = new SiddhiContext(siddhiConfiguration.getQueryPlanIdentifier(), siddhiConfiguration.isDistributedProcessing());
-        this.siddhiContext.setSiddhiInstanceIdentifier(siddhiConfiguration.getInstanceIdentifier());
+
+        if (siddhiConfiguration.isDistributedProcessing()) {
+            HazelcastInstance hazelcastInstance = Hazelcast.getHazelcastInstanceByName(siddhiConfiguration.getInstanceIdentifier());
+            if (hazelcastInstance == null) {
+                this.siddhiContext = new SiddhiContext(siddhiConfiguration.getQueryPlanIdentifier(), SiddhiContext.ProcessingState.ENABLE_INTERNAL);
+                Config hazelcastConf = new Config();
+                hazelcastConf.setProperty("hazelcast.logging.type", "log4j");
+                hazelcastConf.getGroupConfig().setName(siddhiConfiguration.getQueryPlanIdentifier());
+                hazelcastConf.setInstanceName(siddhiConfiguration.getInstanceIdentifier());
+                hazelcastInstance = Hazelcast.newHazelcastInstance(hazelcastConf);
+            } else {
+                this.siddhiContext = new SiddhiContext(siddhiConfiguration.getQueryPlanIdentifier(), SiddhiContext.ProcessingState.ENABLE_EXTERNAL);
+            }
+            siddhiContext.setHazelcastInstance(hazelcastInstance);
+            siddhiContext.setGlobalIndexGenerator(new GlobalIndexGenerator(siddhiContext));
+        } else {
+            this.siddhiContext = new SiddhiContext(siddhiConfiguration.getQueryPlanIdentifier(), SiddhiContext.ProcessingState.DISABLED);
+        }
+
         this.siddhiContext.setEventBatchSize(siddhiConfiguration.getEventBatchSize());
         this.siddhiContext.setAsyncProcessing(siddhiConfiguration.isAsyncProcessing());
         this.siddhiContext.setSiddhiExtensions(siddhiConfiguration.getSiddhiExtensions());
@@ -91,23 +110,11 @@ public class SiddhiManager {
                                                                         TimeUnit.MICROSECONDS,
                                                                         new LinkedBlockingQueue<Runnable>(),
                                                                         new SiddhiThreadFactory("Executor")));
-        this.siddhiContext.setScheduledExecutorService(Executors.newScheduledThreadPool(siddhiConfiguration.getThreadSchedulerCorePoolSize(),new SiddhiThreadFactory("Scheduler")));
+        this.siddhiContext.setScheduledExecutorService(Executors.newScheduledThreadPool(siddhiConfiguration.getThreadSchedulerCorePoolSize(), new SiddhiThreadFactory("Scheduler")));
         this.siddhiContext.setPersistenceService(new PersistenceService(siddhiContext));
-        this.siddhiContext.setEventTracerService(new EventTracerService(siddhiContext));
+        this.siddhiContext.setEventMonitorService(new EventMonitorService(siddhiContext));
 
-        if (siddhiContext.isDistributedProcessing()) {
 
-            HazelcastInstance hazelcastInstance = Hazelcast.getHazelcastInstanceByName(siddhiContext.getSiddhiInstanceIdentifier());
-            if (hazelcastInstance == null) {
-                Config hazelcastConf = new Config();
-                hazelcastConf.setProperty("hazelcast.logging.type", "log4j");
-                hazelcastConf.getGroupConfig().setName(siddhiContext.getQueryPlanIdentifier());
-                hazelcastConf.setInstanceName(siddhiContext.getSiddhiInstanceIdentifier());
-                hazelcastInstance = Hazelcast.newHazelcastInstance(hazelcastConf);
-            }
-            siddhiContext.setHazelcastInstance(hazelcastInstance);
-            siddhiContext.setGlobalIndexGenerator(new GlobalIndexGenerator(siddhiContext));
-        }
     }
 
 
@@ -116,7 +123,7 @@ public class SiddhiManager {
             streamTableDefinitionMap.put(streamDefinition.getStreamId(), streamDefinition);
             StreamJunction streamJunction = streamJunctionMap.get(streamDefinition.getStreamId());
             if (streamJunction == null) {
-                streamJunction = new StreamJunction(streamDefinition.getStreamId(), siddhiContext.getEventTracerService());
+                streamJunction = new StreamJunction(streamDefinition.getStreamId(), siddhiContext.getEventMonitorService());
                 streamJunctionMap.put(streamDefinition.getStreamId(), streamJunction);
             }
             InputHandler inputHandler = new InputHandler(streamDefinition.getStreamId(), streamJunction, siddhiContext);
@@ -339,7 +346,7 @@ public class SiddhiManager {
         streamCallback.setSiddhiContext(siddhiContext);
         StreamJunction streamJunction = streamJunctionMap.get(streamId);
         if (streamJunction == null) {
-            streamJunction = new StreamJunction(streamId, siddhiContext.getEventTracerService());
+            streamJunction = new StreamJunction(streamId, siddhiContext.getEventMonitorService());
             streamJunctionMap.put(streamId, streamJunction);
         }
         streamJunction.addEventFlow(streamCallback);
@@ -359,7 +366,10 @@ public class SiddhiManager {
     public void shutdown() {
         siddhiContext.getThreadPoolExecutor().shutdown();
         siddhiContext.getScheduledExecutorService().shutdownNow();
-        if (siddhiContext.isDistributedProcessing()) {
+        for(EternalReferencedHolder eternalReferencedHolder:siddhiContext.getEternalReferencedHolders()){
+            eternalReferencedHolder.destroy();
+        }
+        if (siddhiContext.getDistributedProcessingState() == SiddhiContext.ProcessingState.ENABLE_INTERNAL) {
             try {
                 siddhiContext.getHazelcastInstance().getLifecycleService().shutdown();
             } catch (IllegalStateException ignore) {
@@ -380,20 +390,30 @@ public class SiddhiManager {
         }
     }
 
+    public List<StreamDefinition> getStreamDefinitions() {
+        List<StreamDefinition> streamDefinitions = new ArrayList<StreamDefinition>(streamTableDefinitionMap.size());
+        for (AbstractDefinition abstractDefinition: streamTableDefinitionMap.values()) {
+            if (abstractDefinition instanceof StreamDefinition) {
+                streamDefinitions.add((StreamDefinition) abstractDefinition);
+            }
+        }
+        return streamDefinitions;
+    }
+
     public void setPersistStore(PersistenceStore persistStore) {
         siddhiContext.getPersistenceService().setPersistenceStore(persistStore);
     }
 
-    public void setEventTracer(EventTracer eventTracer) {
-        siddhiContext.getEventTracerService().setEventTracer(eventTracer);
+    public void setEventMonitor(EventMonitor eventMonitor) {
+        siddhiContext.getEventMonitorService().setEventMonitor(eventMonitor);
     }
 
     public void enableStats(boolean enableStats) {
-        siddhiContext.getEventTracerService().setEnableStats(enableStats);
+        siddhiContext.getEventMonitorService().setEnableStats(enableStats);
     }
 
     public void enableTrace(boolean enableTrace) {
-        siddhiContext.getEventTracerService().setEnableTrace(enableTrace);
+        siddhiContext.getEventMonitorService().setEnableTrace(enableTrace);
     }
 
 

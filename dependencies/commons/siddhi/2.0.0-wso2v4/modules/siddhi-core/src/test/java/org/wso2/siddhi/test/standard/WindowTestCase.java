@@ -610,4 +610,43 @@ public class WindowTestCase {
         Assert.assertEquals("Number of output event value", 3, count);
         siddhiManager.shutdown();
     }
+
+    @Test
+    public void testWindowQuery14() throws InterruptedException {
+        log.info("Window test14");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+
+        siddhiManager.defineStream("define stream cseStream ( symbol string, price float, volume int )");
+
+        String queryReference = siddhiManager.addQuery("from cseStream#window.time(12000) " +
+                                                       "select  symbol , min(price) as avgPrice " +
+                                                       "insert into outStream for all-events ;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+//                if (inEvents != null) {
+//                    count += inEvents.length;
+//                } else {
+//                    Assert.fail("Remove events emitted");
+//                }
+                eventArrived = true;
+            }
+
+        });
+        InputHandler inputHandler = siddhiManager.getInputHandler("cseStream");
+        inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100});
+        inputHandler.send(new Object[]{"WSO2", 27.6f, 100});
+        inputHandler.send(new Object[]{"WSO2", 127.6f, 100});
+
+        Thread.sleep(1000);
+
+        Assert.assertEquals("Event arrived", true, eventArrived);
+//        Assert.assertEquals("Number of output event value", 3, count);
+        siddhiManager.shutdown();
+    }
 }

@@ -19,7 +19,10 @@ package org.wso2.siddhi.core.query.processor.handler.pattern;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
-import org.wso2.siddhi.core.event.*;
+import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.event.ListEvent;
+import org.wso2.siddhi.core.event.StateEvent;
+import org.wso2.siddhi.core.event.StreamEvent;
 import org.wso2.siddhi.core.event.in.InListEvent;
 import org.wso2.siddhi.core.event.management.PersistenceManagementEvent;
 import org.wso2.siddhi.core.persistence.PersistenceObject;
@@ -27,6 +30,7 @@ import org.wso2.siddhi.core.query.processor.filter.FilterProcessor;
 import org.wso2.siddhi.core.query.statemachine.pattern.CountPatternState;
 import org.wso2.siddhi.core.query.statemachine.pattern.LogicPatternState;
 import org.wso2.siddhi.core.util.statemachine.statelist.StateListGrid;
+import org.wso2.siddhi.query.api.utils.SiddhiConstants;
 
 public class CountPatternInnerHandlerProcessor extends PatternInnerHandlerProcessor {
     static final Logger log = Logger.getLogger(CountPatternInnerHandlerProcessor.class);
@@ -36,7 +40,7 @@ public class CountPatternInnerHandlerProcessor extends PatternInnerHandlerProces
     public CountPatternInnerHandlerProcessor(CountPatternState state,
                                              FilterProcessor firstSimpleQueryStreamProcessor,
                                              int complexEventSize, SiddhiContext siddhiContext, String elementId) {
-        super(state, firstSimpleQueryStreamProcessor, complexEventSize,siddhiContext, elementId);
+        super(state, firstSimpleQueryStreamProcessor, complexEventSize, siddhiContext, elementId);
         this.min = state.getMin();
         this.max = state.getMax();
 
@@ -47,12 +51,12 @@ public class CountPatternInnerHandlerProcessor extends PatternInnerHandlerProces
         if (log.isDebugEnabled()) {
             log.debug("cr state=" + currentState + " event=" + event + " ||eventBank=" + currentEvents);
         }
-        for (StateEvent currentEvent :getCollection()) {
+        for (StateEvent currentEvent : getCollection()) {
             if (isEventsWithin(event, currentEvent)) {
                 if (currentEvent.getEventState() <= (state.getStateNumber())) {
                     ListEvent listEvent = (ListEvent) currentEvent.getStreamEvent(currentState);
                     if (listEvent == null) {
-                        listEvent = new InListEvent(max);
+                        listEvent = new InListEvent(max == SiddhiConstants.UNLIMITED ? min : max);
                         currentEvent.setStreamEvent(currentState, listEvent);
                     }
 //                System.out.println("---" + currentEvent);
@@ -71,7 +75,6 @@ public class CountPatternInnerHandlerProcessor extends PatternInnerHandlerProces
         }
     }
 
-
     public synchronized void addToNextEvents(StateEvent stateEvent) {
         if (min == 0) {
             stateInnerHandlerProcessor.processSuccessEvent(stateEvent);
@@ -87,7 +90,7 @@ public class CountPatternInnerHandlerProcessor extends PatternInnerHandlerProces
 
     public void updateToNextEvents(StateEvent updateContainingStateEvent, int updatingState) {
 //        System.out.println("add to next ss");
-        ((StateListGrid)nextEvents).update(updateContainingStateEvent, updatingState);
+        ((StateListGrid) nextEvents).update(updateContainingStateEvent, updatingState);
         if (nextState != null) {
             if (log.isDebugEnabled()) {
                 log.debug("update ->" + nextState.getStateNumber());
@@ -96,7 +99,7 @@ public class CountPatternInnerHandlerProcessor extends PatternInnerHandlerProces
                 if (log.isDebugEnabled()) {
                     log.debug("update ->" + ((LogicPatternState) nextState).getPartnerState().getStateNumber());
                 }
-               nextPartnerStateInnerHandlerProcessor.updateToNextEvents(updateContainingStateEvent, updatingState);
+                nextPartnerStateInnerHandlerProcessor.updateToNextEvents(updateContainingStateEvent, updatingState);
             }
             nextStateInnerHandlerProcessor.updateToNextEvents(updateContainingStateEvent, updatingState);
         }
@@ -112,7 +115,7 @@ public class CountPatternInnerHandlerProcessor extends PatternInnerHandlerProces
 
     @Override
     public void save(PersistenceManagementEvent persistenceManagementEvent) {
-        persistenceStore.save(persistenceManagementEvent, elementId, new PersistenceObject(currentEvents.currentState(),nextEvents.currentState()));
+        persistenceStore.save(persistenceManagementEvent, elementId, new PersistenceObject(currentEvents.currentState(), nextEvents.currentState()));
     }
 
     @Override
@@ -121,7 +124,6 @@ public class CountPatternInnerHandlerProcessor extends PatternInnerHandlerProces
         currentEvents.restoreState((Object[]) persistenceObject.getData()[0]);
         nextEvents.restoreState((Object[]) persistenceObject.getData()[1]);
     }
-
 
     protected void processSuccessEvent(StateEvent stateEvent) {
         if (log.isDebugEnabled()) {
@@ -158,7 +160,7 @@ public class CountPatternInnerHandlerProcessor extends PatternInnerHandlerProces
                         }
                         nextPartnerStateInnerHandlerProcessor.addToNextEvents((StateEvent) stateEvent);
                     }
-                   nextStateInnerHandlerProcessor.addToNextEvents(stateEvent);
+                    nextStateInnerHandlerProcessor.addToNextEvents(stateEvent);
                     addOnlyToNextEvents(stateEvent);
                 }
                 if (nextEveryState != null) {
@@ -176,11 +178,12 @@ public class CountPatternInnerHandlerProcessor extends PatternInnerHandlerProces
                         if (log.isDebugEnabled()) {
                             log.debug("->" + ((LogicPatternState) nextEveryState).getPartnerState().getStateNumber());
                         }
-                       nextEveryPartnerStateInnerHandlerProcessor.addToNextEvents(newStateEvent);
+                        nextEveryPartnerStateInnerHandlerProcessor.addToNextEvents(newStateEvent);
                     }
                     nextEveryStateInnerHandlerProcessor.addToNextEvents(newStateEvent);
                 }
-            } else if (activeEvents >= ((CountPatternState) state).getMin() && activeEvents <= ((CountPatternState) state).getMax()) {
+            } else if (activeEvents >= ((CountPatternState) state).getMin() && activeEvents <= ((CountPatternState) state).getMax() || activeEvents >= ((CountPatternState) state).getMin() && ((CountPatternState) state).getMax() == SiddhiConstants.UNLIMITED) {
+                cleanUpEvent(stateEvent);
                 addOnlyToNextEvents(stateEvent);
                 if (distributedProcessing) {
                     if (nextState != null) {

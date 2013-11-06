@@ -609,7 +609,7 @@ public class PatternCountTestCase {
 
     @Test
     public void testQuery11() throws InterruptedException, SiddhiPraserException {
-        log.info("test10  OUT 1");
+        log.info("test11  OUT 1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.defineStream("define stream cseEventStream ( symbol string, price float, volume int )");
@@ -644,7 +644,41 @@ public class PatternCountTestCase {
 
     }
 
+    @Test
+    public void testQuery12() throws InterruptedException, SiddhiPraserException {
+        log.info("test12  OUT 1");
 
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.defineStream("define stream cseEventStream ( symbol string, price float, volume int )");
+        String queryReference = siddhiManager.addQuery("from e1 = cseEventStream [ price >= 50 and volume > 100 ] -> e2 = cseEventStream [price <= 40 ] <2:> -> e3 = cseEventStream [volume <= 70 ] " +
+                "select e1.symbol as symbol1,e2[last].symbol as symbol2,e3.symbol as symbol3 " +
+                "insert into StockQuote;");
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
 
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (eventCount == 0) {
+                    Assert.assertArrayEquals(new Object[]{"IBM", "FB", "WSO2"}, inEvents[0].getData());
+                } else {
+                    Assert.fail();
+                }
+                eventCount++;
+            }
+        });
+        InputHandler cseStreamHandler = siddhiManager.getInputHandler("cseEventStream");
+
+        cseStreamHandler.send(new Object[]{"IBM", 75.6f, 105});
+        Thread.sleep(1200);
+        cseStreamHandler.send(new Object[]{"GOOG", 21f, 91});
+        cseStreamHandler.send(new Object[]{"FB", 21f, 81});
+        cseStreamHandler.send(new Object[]{"WSO2", 21f, 61});
+        Thread.sleep(1000);
+
+        siddhiManager.shutdown();
+
+        Assert.assertEquals("Number of success events", 1, eventCount);
+
+    }
 
 }

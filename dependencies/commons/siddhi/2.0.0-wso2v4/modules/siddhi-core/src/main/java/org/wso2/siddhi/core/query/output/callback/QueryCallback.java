@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.StreamEvent;
-import org.wso2.siddhi.core.treaser.EventTracerService;
+import org.wso2.siddhi.core.treaser.EventMonitorService;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.SchedulerElement;
 import org.wso2.siddhi.core.util.CallbackEventComposite;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.SchedulerSiddhiQueue;
@@ -36,13 +36,13 @@ public abstract class QueryCallback implements Runnable, SchedulerElement {
     private SiddhiContext siddhiContext;
     private StreamDefinition streamDefinition;
     static final Logger log = Logger.getLogger(QueryCallback.class);
-    private EventTracerService eventTracerService;
+    private EventMonitorService eventMonitorService;
 
 
     public void setSiddhiContext(SiddhiContext context) {
         this.siddhiContext = context;
         this.threadPoolExecutor = context.getThreadPoolExecutor();
-        this.eventTracerService = context.getEventTracerService();
+        this.eventMonitorService = context.getEventMonitorService();
         this.inputQueue = new SchedulerSiddhiQueue<CallbackEventComposite>(this);
     }
 
@@ -84,13 +84,13 @@ public abstract class QueryCallback implements Runnable, SchedulerElement {
 
     private void send(long timeStamp, StreamEvent currentEvent, StreamEvent expiredEvent) {
         if (currentEvent != null) {
-            if (eventTracerService.isEnableStats()) {
-                eventTracerService.trace(currentEvent, " current event on Query Callback");
+            if (eventMonitorService.isEnableTrace()) {
+                eventMonitorService.trace(currentEvent, " current event on Query Callback");
             }
             receive(timeStamp, currentEvent.toArray(), null);
         } else if (expiredEvent != null) {
-            if (eventTracerService.isEnableStats()) {
-                eventTracerService.trace(expiredEvent, " expired event on Query Callback");
+            if (eventMonitorService.isEnableTrace()) {
+                eventMonitorService.trace(expiredEvent, " expired event on Query Callback");
             }
             receive(timeStamp, null, expiredEvent.toArray());
         } else {

@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.event.in.InListEvent;
 import org.wso2.siddhi.core.event.in.InStream;
 import org.wso2.siddhi.core.event.management.PersistenceManagementEvent;
 import org.wso2.siddhi.core.executor.expression.ExpressionExecutor;
+import org.wso2.siddhi.core.extension.EternalReferencedHolder;
 import org.wso2.siddhi.core.persistence.PersistenceObject;
 import org.wso2.siddhi.core.persistence.PersistenceStore;
 import org.wso2.siddhi.core.persistence.Persister;
@@ -35,7 +36,7 @@ import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.List;
 
-public abstract class TransformProcessor implements Persister, MarkedElement {
+public abstract class TransformProcessor implements Persister, MarkedElement,EternalReferencedHolder {
     static final Logger log = Logger.getLogger(TransformProcessor.class);
     protected String elementId;
     protected PersistenceStore persistenceStore;
@@ -121,7 +122,11 @@ public abstract class TransformProcessor implements Persister, MarkedElement {
         return outStreamDefinition;
     }
 
-    public abstract void init();
+    public void initTransformProcessor() {
+        init(parameters,expressionExecutors,inStreamDefinition,outStreamDefinition,elementId,siddhiContext);
+    }
+
+    protected abstract void init(Expression[] parameters, List<ExpressionExecutor> expressionExecutors, StreamDefinition inStreamDefinition, StreamDefinition outStreamDefinition, String elementId, SiddhiContext siddhiContext);
 
 
     public void setExpressionExecutors(List<ExpressionExecutor> expressionExecutors) {

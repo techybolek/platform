@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.event.StreamEvent;
 import org.wso2.siddhi.core.event.in.InEvent;
 import org.wso2.siddhi.core.event.in.InListEvent;
 import org.wso2.siddhi.core.event.management.PersistenceManagementEvent;
+import org.wso2.siddhi.core.extension.EternalReferencedHolder;
 import org.wso2.siddhi.core.persistence.PersistenceObject;
 import org.wso2.siddhi.core.persistence.PersistenceStore;
 import org.wso2.siddhi.core.persistence.Persister;
@@ -42,7 +43,7 @@ import java.util.concurrent.locks.Lock;
  * The common interface for all windows, windows always holds RemoveEvents within them.
  * This only processes InStreamEvents
  */
-public abstract class WindowProcessor implements Persister, MarkedElement, PreSelectProcessingElement, QueryPostProcessingElement {
+public abstract class WindowProcessor implements Persister, MarkedElement, PreSelectProcessingElement, QueryPostProcessingElement, EternalReferencedHolder {
     protected static final Logger log = Logger.getLogger(WindowProcessor.class);
 
     protected String elementId;
@@ -50,10 +51,21 @@ public abstract class WindowProcessor implements Persister, MarkedElement, PreSe
     protected SiddhiContext siddhiContext;
     private Lock lock;
     protected QueryPostProcessingElement nextProcessor;
-    protected boolean async;
     protected AbstractDefinition definition;
+    protected boolean async;
+    protected Expression[] parameters;
 
-    public abstract void setParameters(Expression[] parameters);
+    public void setParameters(Expression[] parameters) {
+        this.parameters = parameters;
+    }
+
+    public void setDefinition(AbstractDefinition definition) {
+        this.definition = definition;
+    }
+
+    public void setAsync(boolean async) {
+        this.async = async;
+    }
 
     @Override
     public void process(AtomicEvent atomicEvent) {
@@ -87,6 +99,11 @@ public abstract class WindowProcessor implements Persister, MarkedElement, PreSe
     }
 
     @Override
+    public String getElementId() {
+        return elementId;
+    }
+
+    @Override
     public void setPersistenceStore(PersistenceStore persistenceStore) {
         this.persistenceStore = persistenceStore;
     }
@@ -105,10 +122,6 @@ public abstract class WindowProcessor implements Persister, MarkedElement, PreSe
     }
 
     protected abstract void restoreState(Object[] data);
-
-    public void setSiddhiContext(SiddhiContext siddhiContext) {
-        this.siddhiContext = siddhiContext;
-    }
 
     public void setLock(Lock lock) {
         this.lock = lock;
@@ -148,19 +161,15 @@ public abstract class WindowProcessor implements Persister, MarkedElement, PreSe
         this.nextProcessor = querySelector;
     }
 
-    @Override
-    public String getElementId() {
-        return elementId;
+    public void setSiddhiContext(SiddhiContext siddhiContext) {
+        this.siddhiContext = siddhiContext;
     }
 
-    public final void init(boolean async) {
-        this.async = async;
-        initWindow();
+    public final void initWindow() {
+        init(parameters, nextProcessor, definition, elementId, async, siddhiContext);
     }
 
-    protected abstract void initWindow();
+    protected abstract void init(Expression[] parameters, QueryPostProcessingElement nextProcessor, AbstractDefinition streamDefinition, String elementId, boolean async, SiddhiContext siddhiContext);
 
-    public void setDefinition(AbstractDefinition definition) {
-        this.definition = definition;
-    }
+
 }

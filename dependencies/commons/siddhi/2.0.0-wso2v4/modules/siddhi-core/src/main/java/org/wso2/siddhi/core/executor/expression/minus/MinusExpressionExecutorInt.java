@@ -40,7 +40,7 @@ public class MinusExpressionExecutorInt implements ExpressionExecutor {
 
     }
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return Attribute.Type.INT;
     }
 

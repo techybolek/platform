@@ -61,7 +61,9 @@ public class TableJoinTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
-                eventCount++;
+                if(inEvents!=null){
+                    eventCount+=inEvents.length;
+                }
             }
 
         });

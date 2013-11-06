@@ -18,13 +18,15 @@
 package org.wso2.siddhi.core.config;
 
 import com.hazelcast.core.HazelcastInstance;
+import org.wso2.siddhi.core.extension.EternalReferencedHolder;
 import org.wso2.siddhi.core.persistence.PersistenceService;
 import org.wso2.siddhi.core.persistence.ThreadBarrier;
-import org.wso2.siddhi.core.table.SiddhiDataSource;
-import org.wso2.siddhi.core.treaser.EventTracerService;
+import org.wso2.siddhi.core.treaser.EventMonitorService;
 import org.wso2.siddhi.core.util.generator.ElementIdGenerator;
 import org.wso2.siddhi.core.util.generator.GlobalIndexGenerator;
 
+import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -35,25 +37,27 @@ public class SiddhiContext {
     private boolean asyncProcessing;
     private int eventBatchSize;
     private PersistenceService persistenceService;
-    private String siddhiInstanceIdentifier;
     private ThreadBarrier threadBarrier;
     private ThreadPoolExecutor threadPoolExecutor;
     private ScheduledExecutorService scheduledExecutorService;
-    private boolean distributedProcessing;
+    private ProcessingState distributedProcessingState;
     private ElementIdGenerator elementIdGenerator;
     private GlobalIndexGenerator globalIndexGenerator;
     private HazelcastInstance hazelcastInstance;
     private String queryPlanIdentifier;
     private List<Class> siddhiExtensions;
-    private ConcurrentHashMap<String, SiddhiDataSource> siddhiDataSources;
-    private EventTracerService eventTracerService;
+    private List<EternalReferencedHolder> eternalReferencedHolders;
+    private ConcurrentHashMap<String, DataSource> siddhiDataSources;
+    private EventMonitorService eventMonitorService;
 
+    public enum ProcessingState {ENABLE_INTERNAL,ENABLE_EXTERNAL,DISABLED}
 
-    public SiddhiContext(String queryPlanIdentifier, boolean distributedProcessing) {
+    public SiddhiContext(String queryPlanIdentifier, ProcessingState distributedProcessingState) {
         this.queryPlanIdentifier = queryPlanIdentifier;
-        this.distributedProcessing = distributedProcessing;
-        elementIdGenerator = new ElementIdGenerator(queryPlanIdentifier);
-        this.siddhiDataSources = new ConcurrentHashMap<String, SiddhiDataSource>();
+        this.distributedProcessingState = distributedProcessingState;
+        this.elementIdGenerator = new ElementIdGenerator(queryPlanIdentifier);
+        this.siddhiDataSources = new ConcurrentHashMap<String, DataSource>();
+        this.eternalReferencedHolders = new ArrayList<EternalReferencedHolder>();
     }
 
     public boolean isAsyncProcessing() {
@@ -80,10 +84,6 @@ public class SiddhiContext {
         return persistenceService;
     }
 
-    public String getSiddhiInstanceIdentifier() {
-        return siddhiInstanceIdentifier;
-    }
-
     public void setThreadBarrier(ThreadBarrier threadBarrier) {
         this.threadBarrier = threadBarrier;
     }
@@ -108,10 +108,13 @@ public class SiddhiContext {
         return scheduledExecutorService;
     }
 
-    public boolean isDistributedProcessing() {
-        return distributedProcessing;
+    public boolean isDistributedProcessingEnabled() {
+        return distributedProcessingState != ProcessingState.DISABLED;
     }
 
+    public ProcessingState getDistributedProcessingState() {
+        return distributedProcessingState;
+    }
 
     public ElementIdGenerator getElementIdGenerator() {
         return elementIdGenerator;
@@ -134,10 +137,6 @@ public class SiddhiContext {
         this.globalIndexGenerator = globalIndexGenerator;
     }
 
-    public void setSiddhiInstanceIdentifier(String siddhiInstanceIdentifier) {
-        this.siddhiInstanceIdentifier = siddhiInstanceIdentifier;
-    }
-
     public String getQueryPlanIdentifier() {
         return queryPlanIdentifier;
     }
@@ -150,19 +149,27 @@ public class SiddhiContext {
         return siddhiExtensions;
     }
 
-    public SiddhiDataSource getSiddhiDataSource(String type, String name) {
-        return siddhiDataSources.get(type + "." + name);
+    public DataSource getDataSource(String name) {
+        return siddhiDataSources.get(name);
     }
 
-    public void addSiddhiDataSource(SiddhiDataSource dataSource) {
-        siddhiDataSources.put(dataSource.getType() + "." + dataSource.getName(), dataSource);
+    public void addDataSource(String name, DataSource dataSource) {
+        siddhiDataSources.put(name, dataSource);
     }
 
-    public EventTracerService getEventTracerService() {
-        return eventTracerService;
+    public EventMonitorService getEventMonitorService() {
+        return eventMonitorService;
     }
 
-    public void setEventTracerService(EventTracerService eventTracerService) {
-        this.eventTracerService = eventTracerService;
+    public void setEventMonitorService(EventMonitorService eventMonitorService) {
+        this.eventMonitorService = eventMonitorService;
+    }
+
+    public void addEternalReferencedHolder(EternalReferencedHolder eternalReferencedHolder) {
+        eternalReferencedHolders.add(eternalReferencedHolder);
+    }
+
+    public List<EternalReferencedHolder> getEternalReferencedHolders() {
+        return eternalReferencedHolders;
     }
 }

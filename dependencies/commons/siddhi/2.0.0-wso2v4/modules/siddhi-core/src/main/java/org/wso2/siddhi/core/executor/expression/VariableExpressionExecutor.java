@@ -17,12 +17,10 @@
 */
 package org.wso2.siddhi.core.executor.expression;
 
-import org.wso2.siddhi.core.event.AtomicEvent;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.event.ListEvent;
-import org.wso2.siddhi.core.event.StateEvent;
-import org.wso2.siddhi.core.event.StreamEvent;
+import org.wso2.siddhi.core.event.*;
 import org.wso2.siddhi.core.event.in.InEvent;
+import org.wso2.siddhi.core.table.predicate.PredicateBuilder;
+import org.wso2.siddhi.core.table.predicate.PredicateTreeNode;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -176,7 +174,7 @@ public class VariableExpressionExecutor implements ExpressionExecutor {
         }
     }
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 
@@ -202,25 +200,28 @@ public class VariableExpressionExecutor implements ExpressionExecutor {
         }
     }
 
-    public String constructSQLPredicate(AtomicEvent newEvent, TableDefinition tableDefinition) {
+    public PredicateTreeNode constructPredicate(AtomicEvent newEvent, TableDefinition tableDefinition, PredicateBuilder predicateBuilder) {
 //            if (!((Event) newEvent).getStreamId().equals(streamReference)) {
         //TODO check what if user has given "as" reference for the table in Join
         //TODO is only TableId used ?
-            if (tableDefinition.getTableId().equals(streamReference)) {
-                Object[] attributeArray = new Object[attributePosition + 1];
-                attributeArray[attributePosition] = attributeName;
+        if (tableDefinition.getTableId().equals(streamReference)) {
+            Object[] attributeArray = new Object[attributePosition + 1];
+            attributeArray[attributePosition] = attributeName;
 //                newEvent = new InEvent("dbEventStream", System.currentTimeMillis(), attributeArray);
-                newEvent = new InEvent(streamReference, System.currentTimeMillis(), attributeArray);
-                return execute(newEvent).toString();
-            } else {
-                Object obj = execute(newEvent);
-                Object value = ((Event) newEvent).getData(attributePosition);
-                // wrap with quotes for string types.
-                if (value != null && value instanceof String) {
+            newEvent = new InEvent(streamReference, System.currentTimeMillis(), attributeArray);
+            return predicateBuilder.buildVariableExpression(execute(newEvent).toString());
+        } else {
+            Object obj = execute(newEvent);
+            Object value = ((Event) newEvent).getData(attributePosition);
+            // wrap with quotes for string types.
+                /*if (value != null && value instanceof String) {
                     return "'" + obj.toString() + "'";
                 }
-                return obj.toString();
-            }
+                return obj.toString();*/
+
+            // todo - check the validity of this line.
+            return predicateBuilder.buildValue(obj);
+        }
 
     }
 }

@@ -39,7 +39,8 @@ public class GroupByAttributeAggregatorProcessor extends AbstractAggregationAttr
     public synchronized Object process(AtomicEvent event, String key) {
         OutputAttributeAggregator currentOutputAttributeAggregator = aggregatorMap.get(key);
         if (currentOutputAttributeAggregator == null) {
-            currentOutputAttributeAggregator = sampleOutputAttributeAggregator.createNewInstance();
+            currentOutputAttributeAggregator = sampleOutputAttributeAggregator.newInstance();
+            siddhiContext.addEternalReferencedHolder(currentOutputAttributeAggregator);
             aggregatorMap.put(key, currentOutputAttributeAggregator);
         }
         return process(event, currentOutputAttributeAggregator);

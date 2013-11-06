@@ -18,6 +18,7 @@
 package org.wso2.siddhi.core.query.processor.window;
 
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.AtomicEvent;
 import org.wso2.siddhi.core.event.ListEvent;
 import org.wso2.siddhi.core.event.StreamEvent;
@@ -27,10 +28,12 @@ import org.wso2.siddhi.core.event.remove.RemoveEvent;
 import org.wso2.siddhi.core.event.remove.RemoveListEvent;
 import org.wso2.siddhi.core.event.remove.RemoveStream;
 import org.wso2.siddhi.core.persistence.ThreadBarrier;
+import org.wso2.siddhi.core.query.QueryPostProcessingElement;
 import org.wso2.siddhi.core.util.EventConverter;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.timestamp.ISchedulerTimestampSiddhiQueue;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.timestamp.SchedulerTimestampSiddhiQueue;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.timestamp.SchedulerTimestampSiddhiQueueGrid;
+import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.constant.IntConstant;
 import org.wso2.siddhi.query.api.expression.constant.LongConstant;
@@ -49,15 +52,6 @@ public class TimeWindowProcessor extends WindowProcessor implements RunnableWind
     private ISchedulerTimestampSiddhiQueue<StreamEvent> window;
 
     @Override
-    public void setParameters(Expression[] parameters) {
-        if (parameters[0] instanceof IntConstant) {
-            timeToKeep = ((IntConstant) parameters[0]).getValue();
-        } else {
-            timeToKeep = ((LongConstant) parameters[0]).getValue();
-        }
-    }
-
-    @Override
     public void processEvent(InEvent event) {
         acquireLock();
         try {
@@ -73,7 +67,7 @@ public class TimeWindowProcessor extends WindowProcessor implements RunnableWind
     public void processEvent(InListEvent listEvent) {
         acquireLock();
         try {
-            if (!async && siddhiContext.isDistributedProcessing()) {
+            if (!async && siddhiContext.isDistributedProcessingEnabled()) {
                 long expireTime = System.currentTimeMillis() + timeToKeep;
                 for (int i = 0, activeEvents = listEvent.getActiveEvents(); i < activeEvents; i++) {
                     window.put(new RemoveEvent(listEvent.getEvent(i), expireTime));
@@ -94,19 +88,10 @@ public class TimeWindowProcessor extends WindowProcessor implements RunnableWind
 
     @Override
     public Iterator<StreamEvent> iterator(String predicate) {
-        if (siddhiContext.isDistributedProcessing()) {
+        if (siddhiContext.isDistributedProcessingEnabled()) {
             return ((SchedulerTimestampSiddhiQueueGrid<StreamEvent>) window).iterator(predicate);
         } else {
             return window.iterator();
-        }
-    }
-
-    @Override
-    protected void initWindow() {
-        if (siddhiContext.isDistributedProcessing()) {
-            window = new SchedulerTimestampSiddhiQueueGrid<StreamEvent>(elementId, this, siddhiContext, async);
-        } else {
-            window = new SchedulerTimestampSiddhiQueue<StreamEvent>(this);
         }
     }
 
@@ -124,7 +109,7 @@ public class TimeWindowProcessor extends WindowProcessor implements RunnableWind
                     long timeDiff = ((RemoveStream) streamEvent).getExpiryTime() - System.currentTimeMillis();
                     try {
                         if (timeDiff > 0) {
-                            if (siddhiContext.isDistributedProcessing()) {
+                            if (siddhiContext.isDistributedProcessingEnabled()) {
                                 //should not use sleep as it will not release the lock, hence it will fail in distributed case
                                 eventRemoverScheduler.schedule(this, timeDiff, TimeUnit.MILLISECONDS);
                                 break;
@@ -151,7 +136,7 @@ public class TimeWindowProcessor extends WindowProcessor implements RunnableWind
                 }
             }
         } catch (Throwable t) {
-           log.error(t.getMessage(),t);
+            log.error(t.getMessage(), t);
         } finally {
             releaseLock();
         }
@@ -166,6 +151,22 @@ public class TimeWindowProcessor extends WindowProcessor implements RunnableWind
     protected void restoreState(Object[] data) {
         window.restoreState(data);
         window.reSchedule();
+    }
+
+    @Override
+    protected void init(Expression[] parameters, QueryPostProcessingElement nextProcessor, AbstractDefinition streamDefinition, String elementId, boolean async, SiddhiContext siddhiContext) {
+        if (parameters[0] instanceof IntConstant) {
+            timeToKeep = ((IntConstant) parameters[0]).getValue();
+        } else {
+            timeToKeep = ((LongConstant) parameters[0]).getValue();
+        }
+
+        if (this.siddhiContext.isDistributedProcessingEnabled()) {
+            window = new SchedulerTimestampSiddhiQueueGrid<StreamEvent>(elementId, this, this.siddhiContext, this.async);
+        } else {
+            window = new SchedulerTimestampSiddhiQueue<StreamEvent>(this);
+        }
+
     }
 
     public void scheduleNow() {
@@ -183,6 +184,11 @@ public class TimeWindowProcessor extends WindowProcessor implements RunnableWind
 
     public void setThreadBarrier(ThreadBarrier threadBarrier) {
         this.threadBarrier = threadBarrier;
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }
 

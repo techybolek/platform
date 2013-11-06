@@ -29,7 +29,7 @@ public class PassThroughAttributeProcessor implements NonGroupingAttributeProces
 
     @Override
     public Attribute.Type getOutputType() {
-        return expressionExecutor.getType();
+        return expressionExecutor.getReturnType();
     }
 
     public Object process(AtomicEvent event){

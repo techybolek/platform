@@ -37,7 +37,7 @@ public class ConstantExpressionExecutor implements ExpressionExecutor {
         return value;
     }
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 

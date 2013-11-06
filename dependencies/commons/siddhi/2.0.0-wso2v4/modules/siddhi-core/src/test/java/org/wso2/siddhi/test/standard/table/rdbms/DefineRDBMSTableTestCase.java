@@ -21,86 +21,57 @@ import org.junit.Test;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
 import org.wso2.siddhi.core.exception.QueryCreationException;
-import org.wso2.siddhi.core.table.SiddhiDataSource;
 import org.wso2.siddhi.query.api.QueryFactory;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.sql.DataSource;
 
 public class DefineRDBMSTableTestCase {
 
-    SiddhiDataSource dataSource = new SiddhiDataSource() {
-        @Override
-        public Connection getConnection() throws ClassNotFoundException, SQLException {
-            Class.forName(RDBMSTestConstants.MYSQL_DRIVER_CLASS);
-            try {
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
-            } catch (Exception ex) {
-                Connection connection = DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
-                Statement statement = connection.createStatement();
-                statement.executeUpdate("CREATE DATABASE cepdb");
-                statement.close();
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/" + "cepdb", RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
-
-            }
-        }
-
-        @Override
-        public String getType() {
-            return "MYSQL";
-        }
-
-        @Override
-        public String getName() {
-            return "cepDataSource";
-        }
-    };
+    private static String dataSourceName = "cepDataSource";
+    private DataSource dataSource = new BasicDataSource();
 
 
     @Test
     public void testSingleDefinition() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
         TableDefinition tableDefinition = QueryFactory.createTableDefinition();
         tableDefinition.name("cseEventTable").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT);
-        tableDefinition.from("MYSQL", "cepDataSource", "cepdb", "testTable");
-
+        tableDefinition.from("datasource.name", "cepDataSource" ).from( "database.name", "cepdb").from("table.name", "testTable");
         siddhiManager.defineTable(tableDefinition);
     }
 
     @Test
     public void testSingleDefinitionQuery() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
-        siddhiManager.defineTable("define table cseEventTable(symbol string, price int, volume float) from MYSQL.cepDataSource:cepdb.cepSingleDefinitionTable");
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
+        siddhiManager.defineTable("define table cseEventTable(symbol string, price int, volume float) from ('datasource.name'= 'cepDataSource', 'database.name'='cepdb', 'table.name'='epSingleDefinitionTable', 'create.query'='CREATE TABLE epTestTable (name VARCHAR(40), address VARCHAR(200))')");
     }
 
     @Test(expected = DifferentDefinitionAlreadyExistException.class)
     public void testAddingTwoSameDefinition1() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
-        siddhiManager.defineTable("define table cseEventTable(symbol string, price int, volume float) from MYSQL.cepDataSource:cepdb.cepEventTable0");
-        siddhiManager.defineTable("define table cseEventTable(symbols string, price int, volume float) from MYSQL.cepDataSource:cepdb.cepEventTable0");
+        siddhiManager.defineTable("define table cseEventTable(symbol string, price int, volume float) from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTable0')");
+        siddhiManager.defineTable("define table cseEventTable(symbols string, price int, volume float) from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTable0')");
     }
 
     @Test(expected = DifferentDefinitionAlreadyExistException.class)
     public void testAddingTwoSameDefinition2() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
-        siddhiManager.defineTable("define table cseEventTable(symbol string, volume float) from MYSQL.cepDataSource:cepdb.cepEventTableDiff");
-        siddhiManager.defineTable("define table cseEventTable(symbols string, price int, volume float) from MYSQL.cepDataSource:cepdb.cepEventTableDiff");
+        siddhiManager.defineTable("define table cseEventTable(symbol string, volume float) from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTableDiff')");
+        siddhiManager.defineTable("define table cseEventTable(symbols string, price int, volume float) from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTableDiff')");
     }
 
     @Test
     public void testAddingTwoSameDefinition3() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         siddhiManager.defineTable("define table cseEventTable(symbol string, price int, volume float) ");
         siddhiManager.defineTable("define table cseEventTable(symbol string, price int, volume float) ");
@@ -109,25 +80,25 @@ public class DefineRDBMSTableTestCase {
     @Test(expected = DifferentDefinitionAlreadyExistException.class)
     public void testAddingTwoSameDefinition4() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         siddhiManager.defineStream("define stream cseEventTable(symbol string, price int, volume float) ");
-        siddhiManager.defineTable("define table cseEventTable(symbol string, price int, volume float) from MYSQL.cepDataSource:cepdb.cepEventTableTwoDiff ");
+        siddhiManager.defineTable("define table cseEventTable(symbol string, price int, volume float) from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTableTwoDiff') ");
     }
 
     @Test(expected = DifferentDefinitionAlreadyExistException.class)
     public void testAddingTwoSameDefinition5() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
-        siddhiManager.defineTable("define table cseEventTable(symbol string, price int, volume float)  from MYSQL.cepDataSource:cepdb.cepEventTableTwoDiff");
+        siddhiManager.defineTable("define table cseEventTable(symbol string, price int, volume float)  from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTableTwoDiff')");
         siddhiManager.defineStream("define stream cseEventTable(symbol string, price int, volume float)");
     }
 
     @Test(expected = DifferentDefinitionAlreadyExistException.class)
     public void testOutputDefinition() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long) ");
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
@@ -135,15 +106,15 @@ public class DefineRDBMSTableTestCase {
                 "insert into OutputStream ;");
 
 
-        siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepEventTable1");
+        siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTable1')");
     }
 
     @Test
     public void testOutputDefinition2() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
-        siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepEventTable2");
+        siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTable2')");
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long) ");
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
                 "select * " +
@@ -156,9 +127,9 @@ public class DefineRDBMSTableTestCase {
         String ts = Float.toString(Float.MIN_VALUE);
         System.out.println(ts.length());
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
-        siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepEventTable ");
+        siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTable') ");
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long, time long) ");
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
                 "select * " +
@@ -168,9 +139,9 @@ public class DefineRDBMSTableTestCase {
     @Test(expected = QueryCreationException.class)
     public void testOutputDefinition4() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
-        siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepEventTable4 ");
+        siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTable4') ");
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume int) ");
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
                 "select * " +
@@ -181,9 +152,9 @@ public class DefineRDBMSTableTestCase {
     @Test
     public void testOutputDefinition5() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
-        siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepEventTable5 ");
+        siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from ('datasource.name'='cepDataSource','database.name'='cepdb','table.name'='cepEventTable5') ");
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, test long) ");
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
                 "select * " +
@@ -194,11 +165,11 @@ public class DefineRDBMSTableTestCase {
     @Test
     public void testSingleerDefinition() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().addSiddhiDataSource(dataSource);
+        siddhiManager.getSiddhiContext().addDataSource(dataSourceName, dataSource);
 
         TableDefinition tableDefinition = QueryFactory.createTableDefinition();
-        tableDefinition.name("cseEventTable").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT).from("MYSQL", "cepDataSource", "", "");
-        tableDefinition.from("MYSQL", "cepDataSource", "cepdb", "testEventTable");
+        tableDefinition.name("cseEventTable").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT).from("datasource.name", "cepDataSource");
+        tableDefinition.from("datasource.name", "cepDataSource").from("database.name", "cepdb").from("table.name", "testEventTable");
 
         siddhiManager.defineTable(tableDefinition);
     }

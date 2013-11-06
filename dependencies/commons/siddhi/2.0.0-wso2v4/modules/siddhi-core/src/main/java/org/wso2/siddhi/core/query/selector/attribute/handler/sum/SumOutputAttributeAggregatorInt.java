@@ -25,24 +25,29 @@ public class SumOutputAttributeAggregatorInt implements OutputAttributeAggregato
     private long value = 0L;
     private  static final Attribute.Type type = Attribute.Type.LONG;
 
-    public Attribute.Type getType() {
+    public Attribute.Type getReturnType() {
         return type;
     }
 
     @Override
-    public Object processInEventAttribute(Object obj) {
+    public Object processAdd(Object obj) {
         value += ((Integer) obj).longValue();
         return value;
     }
 
     @Override
-    public Object processRemoveEventAttribute(Object obj) {
+    public Object processRemove(Object obj) {
         value -= ((Integer) obj).longValue();
         return value;
     }
 
     @Override
-    public OutputAttributeAggregator createNewInstance() {
+    public OutputAttributeAggregator newInstance() {
         return new SumOutputAttributeAggregatorInt();
+    }
+
+    @Override
+    public void destroy(){
+
     }
 }

@@ -41,7 +41,8 @@ public class DistributedAggregationAttributeProcessor extends AbstractAggregatio
         super(expressions, queryEventSourceList, outputAttributeAggregatorFactory, elementId, siddhiContext);
         distributedAggregatorMap = siddhiContext.getHazelcastInstance().getMap("SimpleDistributedAggregatorMap");
         distributedAggregatorMap.lock(elementId);
-        outputAttributeAggregator = sampleOutputAttributeAggregator.createNewInstance();
+        outputAttributeAggregator = sampleOutputAttributeAggregator.newInstance();
+        siddhiContext.addEternalReferencedHolder(outputAttributeAggregator);
         distributedAggregatorMap.putIfAbsent(elementId, outputAttributeAggregator);
         distributedAggregatorMap.unlock(elementId);
     }
@@ -61,7 +62,11 @@ public class DistributedAggregationAttributeProcessor extends AbstractAggregatio
         }
         Object value = process(event, currentOutputAttributeAggregator);
         if (!lockedAcquired) {
-            distributedAggregatorMap.putAndUnlock(elementId, currentOutputAttributeAggregator);
+//            distributedAggregatorMap.putAndUnlock(elementId, currentOutputAttributeAggregator);
+            synchronized (distributedAggregatorMap) {
+                distributedAggregatorMap.put(elementId, currentOutputAttributeAggregator);
+                distributedAggregatorMap.unlock(elementId);
+            }
         }
         return value;
     }
@@ -97,7 +102,9 @@ public class DistributedAggregationAttributeProcessor extends AbstractAggregatio
     @Override
     public synchronized void unlock() {
         lockedAcquired = false;
-        distributedAggregatorMap.putAndUnlock(elementId, outputAttributeAggregator);
+//        distributedAggregatorMap.putAndUnlock(elementId, outputAttributeAggregator);
+        distributedAggregatorMap.put(elementId, outputAttributeAggregator);
+        distributedAggregatorMap.unlock(elementId);
     }
 
 }
