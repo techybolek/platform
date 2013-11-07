@@ -39,9 +39,7 @@ import org.wso2.carbon.dataservices.core.dispatch.BatchRequestParticipant;
 import org.wso2.carbon.dataservices.core.engine.*;
 
 import javax.xml.stream.XMLStreamWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.sql.Date;
@@ -1587,6 +1585,8 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             setBinaryValue(queryType, paramName, value, paramType, stmt, index);
         } else if (DBConstants.DataTypes.BLOB.equals(sqlType)) {
             setBlobValue(queryType, paramName, value, paramType, stmt, index);
+        } else if (DBConstants.DataTypes.CLOB.equals(sqlType)) {
+           setClobValue(queryType, paramName, value, paramType, stmt, index);
         } else if (DBConstants.DataTypes.ORACLE_REF_CURSOR.equals(sqlType)) {
             setOracleRefCusor(stmt, index);
         } else if (DBConstants.DataTypes.STRUCT.equals(sqlType)) {
@@ -1597,6 +1597,32 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             throw new DataServiceFault("[" + this.getDataService().getName()
                     + "]  Found Unsupported data type : " + sqlType + " as input parameter.");
         }
+    }
+
+    private void setClobValue(int queryType, String paramName,
+                           String value, String paramType, PreparedStatement sqlQuery, int i)
+         throws SQLException, DataServiceFault {
+         if ("IN".equals(paramType)) {
+             if (value == null) {
+                 sqlQuery.setNull(i + 1, java.sql.Types.CLOB);
+             } else {
+                 sqlQuery.setClob(i + 1, new BufferedReader(new StringReader(value)),
+                                        value.length());
+             }
+         } else if ("INOUT".equals(paramType)) {
+             if (value == null) {
+                 ((CallableStatement) sqlQuery).setNull(i + 1,
+                                        java.sql.Types.CLOB);
+             } else {
+                 ((CallableStatement) sqlQuery).setClob(i + 1,
+                                        new BufferedReader(new StringReader(value)), value.length());
+             }
+             ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
+                                java.sql.Types.CLOB);
+         } else {
+             ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
+                                java.sql.Types.CLOB);
+         }
     }
 
     private void setArrayValue(PreparedStatement sqlQuery, int i, String paramType,
@@ -2133,6 +2159,10 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 return new ParamValue(elementValue == null ? null
                         : this.getBase64StringFromInputStream(((Blob) elementValue)
                                 .getBinaryStream()));
+            } else if (type.equals(DBConstants.DataTypes.CLOB)) {
+                elementValue = cs.getClob(ordinal);
+                return new ParamValue(elementValue == null ? null :
+                       deriveValueFromClob((Clob) elementValue));
             } else if (type.equals(DBConstants.DataTypes.STRUCT)) {
                 elementValue = cs.getObject(ordinal);
                 return new ParamValue(elementValue == null ? null : (Struct) elementValue);
@@ -2173,6 +2203,30 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             }
         } catch (SQLException e) {
             throw new DataServiceFault(e, "Error in getting sql output parameter values.");
+        }
+    }
+
+    private String deriveValueFromClob(Clob data) throws DataServiceFault {
+        Reader r = null;
+        try {
+            StringBuilder sb = new StringBuilder();
+            r = new BufferedReader((data).getCharacterStream());
+            int pos;
+            while ((pos = r.read()) != -1) {
+                sb.append((char)pos);
+            }
+            return sb.toString();
+        } catch(IOException e) {
+            throw new DataServiceFault(e, "Error occurred while reading CLOB value");
+        } catch (SQLException e) {
+            throw new DataServiceFault(e, "Error occurred while reading CLOB value");
+        } finally {
+            if (r != null) {
+                try {
+                    r.close();
+                } catch (IOException ignore) {
+                }
+            }
         }
     }
 
