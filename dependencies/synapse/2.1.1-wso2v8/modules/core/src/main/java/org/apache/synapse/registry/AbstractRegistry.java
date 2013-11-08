@@ -19,6 +19,7 @@
 
 package org.apache.synapse.registry;
 
+import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.commons.logging.Log;
@@ -60,8 +61,13 @@ public abstract class AbstractRegistry implements Registry {
 
         // if we have not cached the referenced object, fetch it and its RegistryEntry
         } else if (!entry.isCached()) {
-            omNode = lookup(entry.getKey());
-            entry.setEntryProperties(getResourceProperties(entry.getKey()));
+            try {
+                omNode = lookup(entry.getKey());
+                entry.setEntryProperties(getResourceProperties(entry.getKey()));
+            } catch (OMException e) {
+                log.error("Error reading registry resource file : " + entry.getKey(), e);
+            }
+
             if (omNode == null && entry.getEntryProperties() != null &&
                     !entry.getEntryProperties().isEmpty()) {
                 // Collection

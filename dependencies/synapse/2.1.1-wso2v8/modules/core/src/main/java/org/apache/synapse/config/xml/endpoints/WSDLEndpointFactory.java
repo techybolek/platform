@@ -34,6 +34,7 @@ import org.apache.synapse.endpoints.EndpointDefinition;
 
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URL;
 import java.util.Properties;
@@ -152,6 +153,8 @@ public class WSDLEndpointFactory extends DefaultEndpointFactory {
                         }
                     } catch (ConnectException e) {
                         log.warn("Could not connect to the WSDL endpoint " + wsdlURI.trim(), e);
+                    } catch (IOException e) {
+                        log.warn("Could not read the WSDL endpoint " + wsdlURI.trim(), e);
                     } catch (Exception e) {
                         handleException("Couldn't create endpoint from the given WSDL URI : "
                                 + e.getMessage(), e);
