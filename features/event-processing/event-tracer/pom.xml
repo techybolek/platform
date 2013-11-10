@@ -22,12 +22,12 @@
     <parent>
     <artifactId>event-processing-feature</artifactId>
     <groupId>org.wso2.carbon</groupId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>event-tracer-feature</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Event Tracer Feature Aggregator Module</name>
     <url>http://wso2.org</url>
@@ -43,23 +43,23 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.event.tracer</artifactId>
-                <version>${wso2carbon.version.event.tracer}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.event.tracer.ui</artifactId>
-                <version>${wso2carbon.version.event.tracer}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.event.tracer.stub</artifactId>
-                <version>${wso2carbon.version.event.tracer}</version>
+                <version>${cep.stub.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <properties>
-        <wso2carbon.version.event.tracer>1.0.0-SNAPSHOT</wso2carbon.version.event.tracer>
+        <cep.stub.version>1.0.0-SNAPSHOT</cep.stub.version>
     </properties>
 
 </project>
