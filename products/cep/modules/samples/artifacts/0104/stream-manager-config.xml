@@ -1,0 +1,25 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="org.wso2.sample.login.data" version="1.1.0">
+        <payloadData>
+            <property name="user_name" type="STRING"/>
+            <property name="ip_address" type="STRING"/>
+            <property name="browser" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="org.wso2.sample.login.info" version="1.0.0">
+        <payloadData>
+            <property name="username" type="STRING"/>
+            <property name="ipAddress" type="STRING"/>
+            <property name="browser" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="org.wso2.sample.out.login.alerts" version="1.0.0">
+        <payloadData>
+            <property name="username" type="STRING"/>
+            <property name="ip1" type="STRING"/>
+            <property name="ip2" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+</streamManagerConfiguration>

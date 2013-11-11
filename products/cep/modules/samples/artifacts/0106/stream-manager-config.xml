@@ -1,0 +1,27 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="outputBuildFailStatisticsStream" version="1.0.0">
+        <payloadData>
+            <property name="userID" type="STRING"/>
+            <property name="timestamp" type="STRING"/>
+	    <property name="project" type="DOUBLE"/>
+            <property name="team" type="STRING"/>
+	    <property name="userName" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="buildfail_Statistics" version="1.3.2">
+	<metaData>
+	    <property name="ipAdd" type="STRING"/>
+	</metaData>
+        <payloadData>
+            <property name="userID" type="STRING"/>
+            <property name="timestamp" type="STRING"/>
+	    <property name="userName" type="STRING"/>
+            <property name="project" type="STRING"/>
+	    <property name="status" type="STRING"/>
+            <property name="team" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+</streamManagerConfiguration>
+

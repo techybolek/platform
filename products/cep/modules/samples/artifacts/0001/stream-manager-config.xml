@@ -1,0 +1,23 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="org.wso2.sample.service.data" version="1.0.0">
+        <description>Statistics</description>
+        <nickName>Service statistics</nickName>
+        <metaData>
+            <property name="request_url" type="STRING"/>
+            <property name="remote_address" type="STRING"/>
+            <property name="content_type" type="STRING"/>
+            <property name="user_agent" type="STRING"/>
+            <property name="host" type="STRING"/>
+            <property name="referer" type="STRING"/>
+        </metaData>
+        <payloadData>
+            <property name="service_name" type="STRING"/>
+            <property name="operation_name" type="STRING"/>
+            <property name="timestamp" type="LONG"/>
+            <property name="response_time" type="LONG"/>
+            <property name="request_count" type="INT"/>
+            <property name="response_count" type="INT"/>
+            <property name="fault_count" type="INT"/>
+        </payloadData>
+    </streamDefinition>
+</streamManagerConfiguration>

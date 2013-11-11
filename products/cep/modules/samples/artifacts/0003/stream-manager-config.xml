@@ -1,0 +1,9 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="org.wso2.sample.purchase.orders" version="1.0.0">
+        <payloadData>
+            <property name="cardId" type="STRING"/>
+            <property name="amount" type="DOUBLE"/>
+            <property name="countryCode" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+</streamManagerConfiguration>

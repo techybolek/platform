@@ -1,0 +1,22 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="atmStatsStream" version="1.0.0">
+        <payloadData>
+            <property name="cardNo" type="STRING"/>
+            <property name="cardHolderName" type="STRING"/>
+            <property name="amountWithdrawed" type="DOUBLE"/>
+            <property name="transactionTime" type="STRING"/>
+            <property name="location" type="STRING"/>
+            <property name="cardHolderMobile" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="possibleFraudStream" version="1.0.0">
+        <payloadData>
+            <property name="cardNo" type="STRING"/>
+            <property name="cardHolderName" type="STRING"/>
+            <property name="amountWithdrawed" type="STRING"/>
+            <property name="location" type="STRING"/>
+            <property name="cardHolderMobile" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+</streamManagerConfiguration>

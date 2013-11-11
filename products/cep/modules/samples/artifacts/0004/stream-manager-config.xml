@@ -1,0 +1,10 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="org.wso2.sample.service.management" version="1.4.0">
+        <payloadData>
+            <property name="action" type="STRING"/>
+            <property name="service" type="STRING"/>
+            <property name="person" type="STRING"/>
+            <property name="days" type="INT"/>
+        </payloadData>
+    </streamDefinition>
+</streamManagerConfiguration>

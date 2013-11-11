@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventFormatter name="FraudTransactionEventFormatter"
+  statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventformatter">
+  <from streamName="possibleFraudStream" version="1.0.0"/>
+  <mapping type="xml">
+    <inline>
+      <PossibleFraud xmlns="">
+        <cardHolderName>{{cardHolderName}}</cardHolderName>
+        <cardNo>{{cardNo}}</cardNo>
+        <amountWithdrawed>{{amountWithdrawed}}</amountWithdrawed>
+        <location>{{location}}</location>
+        <cardHolderMobile>{{cardHolderMobile}}</cardHolderMobile>
+      </PossibleFraud>
+    </inline>
+  </mapping>
+  <to eventAdaptorName="wsEventSender" eventAdaptorType="ws-event">
+    <property name="topic">foo/bar</property>
+  </to>
+</eventFormatter>

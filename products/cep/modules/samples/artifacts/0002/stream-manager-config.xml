@@ -1,0 +1,8 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="org.wso2.sample.stock.quote.basic" version="1.0.0">
+        <payloadData>
+            <property name="price" type="DOUBLE"/>
+            <property name="symbol" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+</streamManagerConfiguration>

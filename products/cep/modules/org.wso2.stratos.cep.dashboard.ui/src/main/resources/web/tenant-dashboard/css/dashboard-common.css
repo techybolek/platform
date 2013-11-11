@@ -28,6 +28,12 @@
     z-index: 100;
 }
 
+.tip-content-empty {
+    padding: 10px !important;
+    width: 182px;
+    z-index: 100;
+}
+
 .tip-bottom {
     background: transparent url(../images/tip-bottom.png) no-repeat left top;
     height: 11px;

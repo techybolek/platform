@@ -7,34 +7,42 @@
     <parent>
         <groupId>org.wso2.cep</groupId>
         <artifactId>cep-parent</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <version>3.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
 
     <groupId>org.wso2.cep</groupId>
     <artifactId>dependencies</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <packaging>pom</packaging>
 
-    <name>WSO2 Carbon - Patch releases - Aggregator Module</name>
+    <name>WSO2 Carbon - Dependencies - Aggregator Module</name>
     <url>http://wso2.org</url>
 
     <modules>
 
-        <!--<module>../../../dependencies/commons/siddhi/2.0.0-wso2v4</module>-->
+	    <module>../../../../dependencies/commons/siddhi/2.0.0-wso2v4</module>
+	    <module>../../../../platform-integration/test-automation-framework/4.2.1/org.wso2.carbon.automation.api</module>
+<!---->
+	    <!--module>../../../../service-stubs/org.wso2.carbon.output.transport.adaptor.manager.stub/1.0.0</module-->
+	    <!--module>../../../../service-stubs/org.wso2.carbon.input.transport.adaptor.manager.stub/1.0.0</module-->
+	    <module>../../../../service-stubs/org.wso2.carbon.event.input.adaptor.manager.stub/1.0.0</module>
+	    <module>../../../../service-stubs/org.wso2.carbon.event.output.adaptor.manager.stub/1.0.0</module>
+	    <module>../../../../service-stubs/org.wso2.carbon.event.builder.stub/1.0.1</module>
+	    <module>../../../../service-stubs/org.wso2.carbon.event.formatter.stub/1.0.1</module>
+	    <module>../../../../service-stubs/org.wso2.carbon.event.tracer.stub/1.0.0</module>
+	    <module>../../../../service-stubs/org.wso2.carbon.event.statistics.stub/1.0.0</module>
+	    <module>../../../../service-stubs/org.wso2.carbon.event.processor.stub/1.0.1</module>
 
-        <module>../../../service-stubs/org.wso2.carbon.transport.adaptor.manager.stub</module>
-        <module>../../../service-stubs/org.wso2.carbon.event.builder.stub</module>
+	    <module>../../../../components/event-processing</module>
+	    <module>../../../../components/webapp-mgt/org.wso2.carbon.webapp.mgt/4.2.1</module>
 
-        <module>../../../components/transport-adaptor</module>
-        <module>../../../components/transport-adaptor-manager</module>
-        <module>../../../components/event-builder</module>
-        <module>../../../components/event-processor</module>
-
-        <module>../../../features/transport-adaptor</module>
-        <module>../../../features/transport-adaptor-manager</module>
-        <module>../../../features/event-builder</module>
+	    <module>../../../../features/caramel/0.9.0.ALPHA1.wso2v1</module>
+	    <module>../../../../features/event-processing</module>
+	    <module>../../../../features/hostobjects</module>
+	    <module>../../../../features/webapp-mgt/org.wso2.carbon.webapp.mgt.server.feature/4.2.1</module>
+	    <module>../../../../features/webapp-mgt/org.wso2.carbon.webapp.mgt.feature/4.2.1</module>
 
         <!-- Start of Data-bridge -->
         <!--<module>../../../components/data-bridge/org.wso2.carbon.databridge.persistence.cassandra</module>-->

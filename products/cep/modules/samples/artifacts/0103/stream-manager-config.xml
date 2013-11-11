@@ -1,0 +1,22 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="FlightArrivalStatsStream" version="1.0.0">
+        <payloadData>
+            <property name="flightName" type="STRING"/>
+            <property name="flightId" type="STRING"/>
+            <property name="flightType" type="STRING"/>
+            <property name="arrivalTime" type="STRING"/>
+            <property name="trackNo" type="STRING"/>
+            <property name="status" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="delayedFlightStream" version="1.0.0">
+        <payloadData>
+            <property name="flightName" type="STRING"/>
+            <property name="flightId" type="STRING"/>
+            <property name="flightType" type="STRING"/>
+            <property name="arrivalTime" type="STRING"/>
+            <property name="trackNo" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+</streamManagerConfiguration>

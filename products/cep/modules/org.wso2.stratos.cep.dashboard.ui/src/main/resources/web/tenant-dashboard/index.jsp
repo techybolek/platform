@@ -73,12 +73,12 @@
         .tip-table td.cep6 {
             background-image: url(../../carbon/tenant-dashboard/images/cep6.png);
         }
-        .tip-table td.cep7 {
-            background-image: url(../../carbon/tenant-dashboard/images/cep7.png);
-        }
-        .tip-table td.cep8 {
-            background-image: url(../../carbon/tenant-dashboard/images/cep8.png);
-        }
+        /*.tip-table td.cep7 {*/
+            /*background-image: url(../../carbon/tenant-dashboard/images/cep7.png);*/
+        /*}*/
+        /*.tip-table td.cep8 {*/
+            /*background-image: url(../../carbon/tenant-dashboard/images/cep8.png);*/
+        /*}*/
     </style>
     <%--
     Capp, Bucket, Broker, Topic
@@ -86,7 +86,7 @@
 
 
     --%>
-    <h2 class="dashboard-title">WSO2 CEP quick start dashboard</h2>
+    <h2 class="dashboard-title">WSO2 CEP Quick Start Dashboard</h2>
     <table class="tip-table">
         <tr>
             <td class="tip-top cep1"></td>
@@ -103,16 +103,16 @@
                     <%
                         if (hasCAppMgtPermission) {
                     %>
-                    <a class="tip-title" href="../carbonapps/app_upload.jsp?region=region1&item=apps_add_menu">Carbon Application</a> <br/>
+                    <a class="tip-title" href="../inputeventadaptormanager/index.jsp">Input Event Adaptors</a> <br/>
                     <%
                     } else {
                     %>
-                    <h3 class="tip-title">Carbon Application</h3> <br/>
+                    <h3 class="tip-title">Input Event Adaptors</h3> <br/>
                     <%
                         }
                     %>
 
-                    <p>Carbon Application aRchives (CAR) contains Buckets and other deployable artifacts to deploy and manage them through the production lifecycle</p>
+                    <p>Input Event Adaptors receives events from external event sources</p>
 
                 </div>
             </td>
@@ -123,16 +123,16 @@
                     <%
                         if (hasCEPMgtPermission) {
                     %>
-                    <a class="tip-title" href="../CEP/cep_buckets.jsp?region=region1&item=cep_buckets_add_menu">Bucket</a> <br/>
+                    <a class="tip-title" href="../eventbuilder/index.jsp">Event Builder</a> <br/>
                     <%
                     } else {
                     %>
-                    <h3 class="tip-title">Bucket</h3> <br/>
+                    <h3 class="tip-title">Event Builder</h3> <br/>
                     <%
                         }
                     %>
 
-                    <p>Bucket contains different queries, input & output event streams and event mappings that maps external events to event streams.</p>
+                    <p>Event Builder maps the incoming messages/events to event streams.</p>
 
                 </div>
             </td>
@@ -142,17 +142,17 @@
                     <%
                         if (hasBrokerMgtPermission) {
                     %>
-                    <a class="tip-title" href="../brokermanager/create_broker.jsp?region=region1&item=brokermanager_add_menu">Broker</a> <br/>
+                    <a class="tip-title" href="../eventprocessor/index.jsp">Execution Plan</a> <br/>
                     <%
                     } else {
                     %>
-                    <h3 class="tip-title">Broker</h3> <br/>
+                    <h3 class="tip-title">Execution Plan</h3> <br/>
                     <%
                         }
                     %>
 
 
-                    <p>Broker can be of different types, such as Local, WS-Event, JMS and Agent. They should be configured to receive and publish events.</p>
+                    <p>Execution Plan contains the execution logic that need to be performed on the event streams.</p>
 
                 </div>
             </td>
@@ -162,16 +162,16 @@
                     <%
                         if (hasTopicMgtPermission) {
                     %>
-                    <a class="tip-title" href="../topics/topic_add.jsp?region=region1&item=topics_add_menu">Topic</a> <br/>
+                    <a class="tip-title" href="../eventformatter/index.jsp">Event Formatter</a> <br/>
                     <%
                     } else {
                     %>
-                    <h3 class="tip-title">Topic</h3> <br/>
+                    <h3 class="tip-title">Event Formatter</h3> <br/>
                     <%
                         }
                     %>
 
-                     <p>Topic allows to distribute messages to multiple subscribers and receive from multiple publishers. Topics are mapped to input & output streams of backend runtimes.</p>
+                     <p>Event Formatter maps the event streams to output messages/events.</p>
 
                 </div>
             </td>
@@ -193,9 +193,9 @@
             <td class="tip-empty"></td>
             <td class="tip-top cep6"></td>
             <td class="tip-empty"></td>
-            <td class="tip-top cep7"></td>
-            <td class="tip-empty "></td>
-            <td class="tip-top cep8"></td>
+            <td class="tip-content-empty"></td>
+            <td class="tip-empty"></td>
+            <td class="tip-content-empty"></td>
         </tr>
         <tr>
             <td class="tip-content">
@@ -203,17 +203,17 @@
                     <%
                     if (hasServiceMgtPermission) {
                     %>
-                    <a class="tip-title" href="../service-mgt/index.jsp?region=region1&item=services_list_menu">Local Broker Service</a> <br/>
+                    <a class="tip-title" href="../outputeventadaptormanager/index.jsp">Output Event Adaptors</a> <br/>
                     <%
                     } else {
                     %>
-                    <h3 class="tip-title">Local Broker Service</h3> <br/>
+                    <h3 class="tip-title">Output Event Adaptors</h3> <br/>
                     <%
                         }
                     %>
 
 
-                    <p>Local broker service end points are formed according to the input topics of local broker and they are used to receive incoming events.</p>
+                    <p>Output Event Adaptors sends events out</p>
 
                 </div>
             </td>
@@ -223,7 +223,7 @@
                     <%
                         if (hasStatsPermission) {
                     %>
-                    <a class="tip-title" href="../cep-statistics/index.jsp?region=region4&item=cep_server_statistics_menu">Monitoring CEP</a> <br/>
+                    <a class="tip-title" href="../event-statistics/event_statistics_view.jsp?region=region4&item=event_statistics_menu">Monitoring CEP</a> <br/>
                     <%
                     } else {
                     %>
@@ -234,51 +234,55 @@
                     <p>Shows real-time accumulative statistics of all CEP operations.</p>
                 </div>
             </td>
-            <td class="tip-empty"></td>
-            <td class="tip-content">
-                <div class="tip-content-lifter">
-                    <%
-                        if (hasStatsPermission) {
-                    %>
-                    <a class="tip-title" href="../cep-statistics/bucket_index.jsp?region=region4&item=cep_bucket_statistics_menu">Monitoring Buckets</a> <br/>
-                    <%
-                    } else {
-                    %>
-                    <h3 class="tip-title">Monitoring Buckets</h3> <br/>
-                    <%
-                        }
-                    %>
-                    <p>Shows real-time statistics of a particular bucket and all of its topics.</p>
+            <%--<td class="tip-empty"></td>--%>
+            <%--<td class="tip-content">--%>
+                <%--<div class="tip-content-lifter">--%>
+                    <%--<%--%>
+                        <%--if (hasStatsPermission) {--%>
+                    <%--%>--%>
+                    <%--<a class="tip-title" href="../event-tracer/index.jsp">Tracing Events</a> <br/>--%>
+                    <%--<%--%>
+                    <%--} else {--%>
+                    <%--%>--%>
+                    <%--<h3 class="tip-title">Tracing Events</h3> <br/>--%>
+                    <%--<%--%>
+                        <%--}--%>
+                    <%--%>--%>
+                    <%--<p>this helps to debug execution flows by showing which events went through which module at runtime.</p>--%>
 
-                </div>
-            </td>
-            <td class="tip-empty"></td>
-            <td class="tip-content">
-                <div class="tip-content-lifter">
-                    <%
-                        if (hasStatsPermission) {
-                    %>
-                    <a class="tip-title" href="../cep-statistics/broker_index.jsp?region=region4&item=cep_broker_statistics_menu">Monitoring Brokers</a> <br/>
-                    <%
-                    } else {
-                    %>
-                    <h3 class="tip-title">Monitoring Brokers</h3> <br/>
-                    <%
-                        }
-                    %>
-                    <p>Shows real-time statistics of a particular broker and all of its topics.</p>
+                <%--</div>--%>
+            <%--</td>--%>
+            <%--<td class="tip-empty"></td>--%>
+            <%--<td class="tip-content">--%>
+                <%--<div class="tip-content-lifter">--%>
+                    <%--<%--%>
+                        <%--if (hasStatsPermission) {--%>
+                    <%--%>--%>
+                    <%--<a class="tip-title" href="../eventexecutionplanwizard/create_executionPlanWizard.jsp?region=region1&item=execution_plan_add_menu">Execution Plan Config Wizard</a> <br/>--%>
+                    <%--<%--%>
+                    <%--} else {--%>
+                    <%--%>--%>
+                    <%--<h3 class="tip-title">Execution Plan Config Wizard</h3> <br/>--%>
+                    <%--<%--%>
+                        <%--}--%>
+                    <%--%>--%>
+                    <%--<p>The wizard to configure the the full execution flow</p>--%>
 
-                </div>
-            </td>
+                <%--</div>--%>
+            <%--</td>--%>
+            <td class="tip-empty"></td>
+            <td class="tip-content-empty"></td>
+            <td class="tip-empty"></td>
+            <td class="tip-content-empty"></td>
         </tr>
         <tr>
             <td class="tip-bottom"></td>
             <td class="tip-empty"></td>
             <td class="tip-bottom"></td>
             <td class="tip-empty"></td>
-            <td class="tip-bottom"></td>
+            <td class="tip-content-empty"></td>
             <td class="tip-empty"></td>
-            <td class="tip-bottom"></td>
+            <td class="tip-content-empty"></td>
         </tr>
     </table>
 <p>

@@ -1,0 +1,38 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="org.wso2.sample.pizza.order" version="1.0.0">
+        <correlationData>
+            <property name="OrderNo" type="INT"/>
+        </correlationData>
+        <payloadData>
+            <property name="Type" type="STRING"/>
+            <property name="Size" type="STRING"/>
+            <property name="Quantity" type="INT"/>
+            <property name="Contact" type="STRING"/>
+            <property name="Address" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="org.wso2.sample.pizza.delivery" version="1.0.0">
+        <correlationData>
+            <property name="OrderNo" type="INT"/>
+        </correlationData>
+        <payloadData>
+            <property name="PaymentType" type="STRING"/>
+            <property name="Address" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="org.wso2.sample.pizza.order" version="1.0.0">
+        <correlationData>
+            <property name="OrderNo" type="INT"/>
+        </correlationData>
+        <payloadData>
+            <property name="Type" type="STRING"/>
+            <property name="Size" type="STRING"/>
+            <property name="Quantity" type="INT"/>
+            <property name="Contact" type="STRING"/>
+            <property name="Address" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+</streamManagerConfiguration>

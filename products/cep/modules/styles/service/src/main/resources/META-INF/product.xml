@@ -18,9 +18,8 @@
 <product xmlns="http://products.wso2.org/carbon">
     <properties>
         <property name="userforum">http://stackoverflow.com/questions/tagged/wso2/</property>
-        <property name="userguide">http://docs.wso2.org/wiki/display/CEP00/</property>
+        <property name="userguide">http://docs.wso2.org/display/CEP300/</property>
         <property name="mailinglist">http://wso2.org/mail</property>
         <property name="issuetracker">https://wso2.org/jira/browse/CEP</property>
-        <property name="webAdminConsoleTitle">WSO2 Stratos Complex Event Processor</property>
     </properties>
 </product>

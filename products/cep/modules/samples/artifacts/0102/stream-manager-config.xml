@@ -1,0 +1,32 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="org.wso2.sample.stock.quote.basic" version="1.0.0">
+        <payloadData>
+            <property name="price" type="DOUBLE"/>
+            <property name="symbol" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="org.wso2.sample.twitter.feed" version="1.0.0">
+        <payloadData>
+            <property name="company" type="STRING"/>
+            <property name="wordCount" type="INT"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="org.wso2.sample.predicted.stock.quotes" version="1.0.0">
+        <payloadData>
+            <property name="company" type="STRING"/>
+            <property name="amount" type="DOUBLE"/>
+            <property name="words" type="LONG"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="twitterFeed" version="1.0.0">
+        <payloadData>
+            <property name="company" type="STRING"/>
+            <property name="wordCount" type="INT"/>
+        </payloadData>
+    </streamDefinition>
+
+
+</streamManagerConfiguration>

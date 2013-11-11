@@ -1,0 +1,21 @@
+{
+    "sites": [
+        {
+            "name": 'CEP Dashboard',
+            "tags": "dashboard,cep,gadgets,analytics",
+            "rate": 4,
+            "attributes": {
+                "overview_status": "CREATED",
+                "overview_name": 'CEP Dashboard',
+                "overview_version": '1.0.0',
+                "overview_url": '/cep-dash/',
+                "overview_provider": 'admin',
+                "images_thumbnail": '/portal/sites/cep-dash/thumbnail.png',
+                "images_banner": '/portal/sites/cep-dash/banner.jpg',
+                "overview_description": "CEP Dashboard is a sample dashboard created using WSO2 UES, its a custom layout comprised of some graphing gadgets to illustrate statistics and data"
+
+            }
+        }
+
+    ]
+}

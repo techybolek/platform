@@ -1,0 +1,31 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="org.wso2.sample.mediation.stats" version="1.0.0">
+        <metaData>
+            <property name="host" type="STRING"/>
+        </metaData>
+        <payloadData>
+            <property name="direction" type="STRING"/>
+            <property name="timestamp" type="LONG"/>
+            <property name="resource_id" type="STRING"/>
+            <property name="stats_type" type="STRING"/>
+            <property name="max_processing_time" type="LONG"/>
+            <property name="avg_processing_time" type="DOUBLE"/>
+            <property name="min_processing_time" type="LONG"/>
+            <property name="fault_count" type="INT"/>
+            <property name="count" type="INT"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="org.wso2.sample.out.mediation.stats" version="1.0.0">
+        <metaData>
+            <property name="host" type="STRING"/>
+        </metaData>
+        <payloadData>
+            <property name="timestamp" type="LONG"/>
+            <property name="resource_id" type="STRING"/>
+            <property name="direction" type="STRING"/>
+            <property name="fault_count" type="INT"/>
+            <property name="count" type="INT"/>
+        </payloadData>
+    </streamDefinition>
+</streamManagerConfiguration>

@@ -1,6 +1,6 @@
 -*.stub*
 -*.stub_
--*.stub_4.0.0
+-*.stub_4.2.0
 -*.stub-
 -org.eclipse.*
 -*.equinox.*

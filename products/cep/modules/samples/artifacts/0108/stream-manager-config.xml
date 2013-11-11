@@ -1,0 +1,31 @@
+<streamManagerConfiguration xmlns="http://wso2.org/carbon/streammanager">
+    <streamDefinition name="deliveryStream" version="1.0.0">
+        <metaData>
+            <property name="deliveryNo" type="STRING"/>
+        </metaData>
+        <payloadData>
+            <property name="orderNo" type="STRING"/>
+            <property name="areaName" type="STRING"/>
+            <property name="time" type="LONG"/>
+            <property name="totalBill" type="DOUBLE"/>
+            <property name="deliveredBy" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="orderStream" version="1.0.0">        
+        <payloadData>
+            <property name="orderNo" type="STRING"/>
+            <property name="customerName" type="STRING"/>
+            <property name="telephoneNo" type="STRING"/>
+            <property name="orderInfo" type="STRING"/>
+            <property name="orderedTime" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+
+    <streamDefinition name="deliveredOrders" version="1.0.0">
+        <payloadData>
+            <property name="sumOrderId" type="LONG"/>
+            <property name="customerName" type="STRING"/>
+        </payloadData>
+    </streamDefinition>
+</streamManagerConfiguration>
