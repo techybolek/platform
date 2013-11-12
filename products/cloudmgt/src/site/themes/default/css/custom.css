@@ -455,4 +455,6 @@ input.error {
 .helper_text .helper_text_bold {
     font-weight: bold;
 }
-
+div.user{
+    margin-right:12px;
+}
