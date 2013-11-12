@@ -68,7 +68,12 @@ file.close();
                  <input type="hidden" name="imagePath" id="imagePath" value=""/>
             </div>
         </div>
-
+  <div class="af_container">
+            <div class="af_row">
+                <div class="col-2"></div>
+                    <a onclick="window.location.href='user.jag'" href="#"><nbr>Change Password</nbr></a>
+            </div>
+        </div>
     </article>
 	<div class="helper_text">
 		<p class="helper_text_bold">You are now signed in.</p> 
