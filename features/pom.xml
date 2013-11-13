@@ -137,6 +137,7 @@
         <module>apimgt</module>
 	    <module>andes</module>
 	    <module>data-agents</module>
+	    <module>hostobjects</module>
 	    <module>bam2</module>
 	    <module>analytics</module>
 	    <!-- module>gadget-ide</module -->
