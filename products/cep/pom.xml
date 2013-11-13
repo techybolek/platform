@@ -240,7 +240,7 @@
 
     <properties>
         <!--carbon.platform.version>${carbon.platform.version}</carbon.platform.version-->
-        <carbon.kernel.version>4.2.0</carbon.kernel.version>
+        <carbon.kernel.version>4.2.0-SNAPSHOT</carbon.kernel.version>
         <javax.servlet.version>${version.javax.servlet}</javax.servlet.version>
         <javax.servlet.jsp.version>${version.javax.servlet.jsp}</javax.servlet.jsp.version>
         <apache.derby.version>${version.wso2.derby}</apache.derby.version>

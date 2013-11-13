@@ -282,7 +282,7 @@
                                     org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent.feature:${stratos.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.stratos.deployment.feature:2.2.1
+				    org.wso2.carbon:org.wso2.carbon.stratos.deployment.feature:${stratos.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.load.balance.agent.server.feature:${stratos.version}
