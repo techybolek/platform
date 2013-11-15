@@ -2,7 +2,6 @@
 <%
  var userName =  session.get("LOGGED_IN_USER");
 var log = new Log();
-log.info("userName "+ userName);
 session.put("wso2carbon.admin.logged.in", userName);
 
 %>

@@ -12,7 +12,7 @@ site = require("/site/conf/site.json");
 if (action == "changePassword") {
     var oldPassword = request.getParameter("oldPassword");
     var newPassword = request.getParameter("password");
-    log.info("Inside User.jag oldPassword "+oldPassword+" new password "+newPassword);
+   
     try {
         var result = mod.changePassword(oldPassword, newPassword);
         if (result != null) {

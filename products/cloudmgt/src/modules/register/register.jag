@@ -253,8 +253,8 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
              //
          }
         var sqlString = upperString+" "+lowerString;
-        log.info(sqlString);
         db.query(sqlString);
+        db.close();
     }
 
 
