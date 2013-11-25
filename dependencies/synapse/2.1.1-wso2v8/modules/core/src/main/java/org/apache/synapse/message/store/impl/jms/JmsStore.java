@@ -102,7 +102,8 @@ public class JmsStore extends AbstractMessageStore {
     private Connection producerConnection;
     /** lock protecting the producer connection */
     private final Object producerLock = new Object();
-
+    /** records the last retried time between the broker and ESB */
+    private long retryTime = -1;
 
     public MessageProducer getProducer() {
         JmsProducer producer = new JmsProducer(this);
@@ -159,10 +160,18 @@ public class JmsStore extends AbstractMessageStore {
     public MessageConsumer getConsumer() {
         JmsConsumer consumer =  new JmsConsumer(this);
         consumer.setId(nextConsumerId());
-        Connection connection;
+        Connection connection = null;
         try {
-            connection = newConnection();
+            // Had to add a condition to avoid piling up log files with the error message and throttle retries.
+            // need to improve this to allow the client to configure it.
+            if ((System.currentTimeMillis() - retryTime) >= 3000) {
+                connection = newConnection();
+                retryTime = -1;
+            }
         } catch (JMSException e) {
+
+            retryTime = System.currentTimeMillis();
+
             if (logger.isDebugEnabled()) {
                 logger.error("Could not create a Message Consumer for "
                              + nameString() + ". Could not create connection.");
