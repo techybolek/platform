@@ -364,7 +364,9 @@ function showKaptcha(captcha) {
 							<div class="input_row_col">
 								<input type="text" id="captcha-user-answer" name="captcha-user-answer" class="required" />
 							</div>
-							
+							<div class="input_row">
+								<a class="link" onclick="generateCaptcha();">Regenerate captcha</a>
+							</div>
 							
 						</div>
 						<div class="input_row subs-cont">

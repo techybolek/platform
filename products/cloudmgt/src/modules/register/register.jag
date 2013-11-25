@@ -1,6 +1,7 @@
 <%
 include("/jagg/jagg.jag");
 include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
 
 var log = new Log();
 var modManager = jagg.module("manager");
@@ -31,13 +32,15 @@ var tls = emailOM.sender.tls.toString();
 emailFile.close();
 var registerOrganization = function (organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan) {
 
-    var ws = require("ws");
-    var creatTenant = new ws.WSRequest();
-    var options = new Array();
-    options.useSOAP = 1.1;
-    options.action = "http://wso2.org/process";
-    options.mep = "in-only";
-    options["rampart"] = { user : ADMIN_USERNAME, userPassword :ADMIN_PASSWORD };
+var tenantId = modManager.getTenantId(organizationDomain);
+var ws = require("ws");
+var creatTenant = new ws.WSRequest();
+var options = new Array();
+options.useSOAP = 1.1;
+options.action = "http://wso2.org/bps/sample/process";
+options.mep = "in-only";
+
+    options["rampart"] = { user : getProperty(ADMIN_USERNAME), userPassword : getProperty(ADMIN_PASSWORD) };
     options["policy"] = <wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
     xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
     wsu:Id="UTOverTransport">
@@ -84,21 +87,23 @@ var registerOrganization = function (organizationDomain,adminUsername,adminPassw
             </wsp:All>
         </wsp:ExactlyOne>
     </wsp:Policy>;
-    var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
-        '<admin xmlns="http://wso2.org/bps/sample">'+adminUsername+'</admin>'+
-        '<firstName xmlns="http://wso2.org/bps/sample">'+firstName+'</firstName>'+
-        '<lastName xmlns="http://wso2.org/bps/sample">'+lastName+'</lastName>'+
-        '<adminPassword xmlns="http://wso2.org/bps/sample">'+adminPassword+'</adminPassword>'+
-        '<tenantDomain xmlns="http://wso2.org/bps/sample">'+organizationDomain+'</tenantDomain>'+
-        '<email xmlns="http://wso2.org/bps/sample">'+email+'</email>'+
-        '<active xmlns="http://wso2.org/bps/sample">true</active>'+
-        '<successKey xmlns="http://wso2.org/bps/sample">key</successKey>'+
-        '<createdDate xmlns="http://wso2.org/bps/sample">2001-12-31T12:00:00</createdDate>'+
-        '<originatedService xmlns="http://wso2.org/bps/sample">WSO2 App Factory</originatedService>'+
-        '<usagePlan xmlns="http://wso2.org/bps/sample">'+usagePlan+'</usagePlan>'+
-        '</p:CreateTenantRequest>';
+var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
+    '<admin xmlns="http://wso2.org/bps/sample">'+adminUsername+'</admin>'+
+    '<firstName xmlns="http://wso2.org/bps/sample">'+firstName+'</firstName>'+
+    '<lastName xmlns="http://wso2.org/bps/sample">'+lastName+'</lastName>'+
+    '<adminPassword xmlns="http://wso2.org/bps/sample">'+adminPassword+'</adminPassword>'+
+    '<tenantDomain xmlns="http://wso2.org/bps/sample">'+organizationDomain+'</tenantDomain>'+
+    '<tenantId xmlns="http://wso2.org/bps/sample">'+tenantId+'</tenantId>'+
+    '<email xmlns="http://wso2.org/bps/sample">'+email+'</email>'+
+    '<active xmlns="http://wso2.org/bps/sample">true</active>'+
+    '<successKey xmlns="http://wso2.org/bps/sample">key</successKey>'+
+    '<createdDate xmlns="http://wso2.org/bps/sample">2001-12-31T12:00:00</createdDate>'+
+    '<originatedService xmlns="http://wso2.org/bps/sample">WSO2 App Factory</originatedService>'+
+    '<usagePlan xmlns="http://wso2.org/bps/sample">'+usagePlan+'</usagePlan>'+
+    '</p:CreateTenantRequest>';
 
-    log.info("[Test log] paylod deployTaggedArtifact----------------" + payload);
+   
+ log.info("[Test log] paylod deployTaggedArtifact----------------" + payload);
 
     var result;
     try {

@@ -333,7 +333,18 @@ var getTenantAwareUsername = function(username) {
                 } else {        // else assume super tenant
                     tenantAwareUsername = SUPER_TENANT_DOMAIN_NAME;
                 }
-     return tenantAwareUsername; 
-}
+     return tenantAwareUsername;
+} ;
+
+/**
+ * Resolve tenantId from tenantDomain by using carbon TenantManager.
+ * @param tenantDomain
+ * @return {*}
+ */
+var getTenantId = function (tenantDomain) {
+    var carbon = require('carbon');
+    var tenantManager = carbon.multitenancy.getTenantManager();
+    return tenantManager.getTenantId(tenantDomain);
+};
 
 %>
