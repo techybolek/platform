@@ -96,6 +96,8 @@ span.error {
 
 
    function doSubmit() {
+        var isOrganizationNameValid = validateOrganizationNameAlphaNumeric();
+        if(isOrganizationNameValid){
         var submitButton = document.getElementById('submitbtn');
     	submitButton.disabled = true;
         $('#submitbtn').css('background-color','#F9BFBB');
@@ -177,6 +179,7 @@ span.error {
                     }
                 });
             });
+       }
     }
  
  
@@ -227,6 +230,26 @@ function generateCaptcha() {
         });
     }
 
+function validateOrganizationNameAlphaNumeric(){
+                      var isOrganizationNameValid=true;
+               var organizationName = $("#organization").val();
+               var patternForSpace = / /g;
+                var isSpace = patternForSpace.test(organizationName);
+
+                var patternForNonAlphaNumericChars = /[^\w\s]/gi;
+                var isInvalidChar = patternForNonAlphaNumericChars.test(organizationName);
+
+                if (isSpace == true || isInvalidChar == true) {
+                       jagg.message({
+                        content: 'Invalid Organization Name - Create an Organization which has only alphanumeric characters', type: 'error'
+                    });
+                               isOrganizationNameValid = false;
+                } else {
+                       $('#organization').val(organizationName);
+                               isOrganizationNameValid = true;
+                }
+                       return isOrganizationNameValid;
+     }
 function showKaptcha(captcha) {
     var captchaInfo = jQuery.parseJSON(captcha);
     var captchaPath = captchaInfo.path;
