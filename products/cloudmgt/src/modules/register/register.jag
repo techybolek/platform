@@ -107,7 +107,7 @@ var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
     '</p:CreateTenantRequest>';
 
    
- log.info("[Test log] paylod deployTaggedArtifact----------------" + payload);
+ log.info("*******[Test log] paylod deployTaggedArtifact----------------" + payload);
 
     var result;
     try {
@@ -118,10 +118,8 @@ var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
 
         return result;
     } catch (e) {
-        log.error("Error while registering organization " + organizationDomain + " : " + e.message +
-                    " : " + e.javaException.getCause().getMessage());
-        throw "Error while registering organization " + organizationDomain + " : " + e.message +
-                    " : " + e.javaException.getCause().getMessage();
+        log.error("Error while registering organization " + organizationDomain + " : " + e.message);
+        throw "Error while registering organization " + organizationDomain + " : " + e.message;
     }
 }
 
@@ -171,10 +169,8 @@ var registerOrg = function (organizationDomain,adminUsername,adminPassword, firs
 
         return result;
     } catch (e) {
-	    log.error("Error while registering organization " + organizationDomain + " : " + e.message +
-                " : " + e.javaException.getCause().getMessage());
-        throw "Error while registering organization " + organizationDomain + " : " + e.message +
-                " : " + e.javaException.getCause().getMessage();    
+	    log.error("Error while registering organization " + organizationDomain + " : " + e.message);
+        throw "Error while registering organization " + organizationDomain + " : " + e.message;    
     }
 }
 

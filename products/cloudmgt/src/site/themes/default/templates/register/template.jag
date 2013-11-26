@@ -152,14 +152,14 @@ span.error {
                         function (result) {
                             $('.message_box').empty();
                             jagg.message({content:'You have successfully registered to WSO2 Cloud.',type:'info',cbk:function(){
-                                    window.location.href = "https://cloudmgt.cloudpreview.wso2.com/cloudmgt";
+                                    window.location.href = "https://milestones.appfactory.wso2.com:9443/cloudmgt";
                                 }
                             });
                         },
                         function (jqXHR, textStatus, errorThrown) {
                             $('.message_box').empty();
                             jagg.message({content:'Error while sending registration email.',type:'error',cbk:function(){
-                                    window.location.href = "https://cloudpreview.wso2.com";
+                                    window.location.href = "https://milestones.appfactory.wso2.com:9443";
                                 }
                             });
                         });
@@ -167,7 +167,7 @@ span.error {
                     function (jqXHR, textStatus, errorThrown) {
                         $('.message_box').empty();
                         jagg.message({content:'Error while storing subscription details.',type:'error',cbk:function(){
-                                window.location.href = "https://cloudpreview.wso2.com";
+                                window.location.href = "https://milestones.appfactory.wso2.com:9443";
                             }
                         });
                     });

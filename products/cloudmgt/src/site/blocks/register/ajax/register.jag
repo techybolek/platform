@@ -32,7 +32,7 @@ if (action == "registerOrganization") {
             throw "Error while registering an organization "+organizationDomain;
         }
     } catch(e) {
-        throw "Error while registering an organization "+organizationDomain;
+        throw "Error while registering an organization "+organizationDomain + e.message;
     }
 } else if (action == "registerOrg") {
     var organizationDomain = request.getParameter("organizationDomain");
@@ -63,7 +63,7 @@ if (action == "registerOrganization") {
             print("Domain is not available to register");
         }
         else {
-            throw "Error while registering an organization" +organizationDomain;
+            throw "Error while registering an organization" +organizationDomain + e.message;
         }
     }
 
