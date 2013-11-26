@@ -7,6 +7,7 @@
          </subscriptions>
      <ServerUrls>
         <AppFactory>https://localhost:9443/services/</AppFactory>
+        <cloudmgtURL>https://milestones.appfactory.wso2.com:9443/cloudmgt</cloudmgtURL>
         <BPS>https://localhost:9543/services/</BPS>
         <Greg>https://localhost:9443/services/</Greg>
     </ServerUrls>

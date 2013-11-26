@@ -12,7 +12,7 @@ for(var i=0;i<doc.subscriptions.type.length();i++) {
    typeArr[i] =types[i].toString();
 }
 var AFServerUrl = doc.ServerUrls.AppFactory.toString();
-
+var cloudmgtURL =  doc.ServerUrls.cloudmgtURL.toString();
 file.close();
 var eulaFile = new File("/site/conf/eula.xml");
 eulaFile.open("r");
@@ -120,8 +120,9 @@ span.error {
         var organizationDomain = $("#domainName").attr('value');
         var imagePath = document.getElementById("imagePath").val;
         var secretKey = document.getElementById("secretKey").val;
+        var cloudmgtURL =  $("#cloudmgtURL").attr('value');;
         var userAnswer = $("#captcha-user-answer").attr('value');
-
+        alert(cloudmgtURL);
         document.getElementById('form_div').innerHTML = "";
 
         jagg.message({content:'Your request to register in WSO2 Cloud has been submitted. Please wait.',type:'info'});
@@ -152,14 +153,14 @@ span.error {
                         function (result) {
                             $('.message_box').empty();
                             jagg.message({content:'You have successfully registered to WSO2 Cloud.',type:'info',cbk:function(){
-                                    window.location.href = "https://milestones.appfactory.wso2.com:9443/cloudmgt";
+                                    window.location.href = cloudmgtURL;
                                 }
                             });
                         },
                         function (jqXHR, textStatus, errorThrown) {
                             $('.message_box').empty();
                             jagg.message({content:'Error while sending registration email.',type:'error',cbk:function(){
-                                    window.location.href = "https://milestones.appfactory.wso2.com:9443";
+                                    window.location.href = cloudmgtURL;
                                 }
                             });
                         });
@@ -167,7 +168,7 @@ span.error {
                     function (jqXHR, textStatus, errorThrown) {
                         $('.message_box').empty();
                         jagg.message({content:'Error while storing subscription details.',type:'error',cbk:function(){
-                                window.location.href = "https://milestones.appfactory.wso2.com:9443";
+                                window.location.href = cloudmgtURL;
                             }
                         });
                     });
@@ -417,15 +418,18 @@ function showKaptcha(captcha) {
                                        onclick="activateSubmit(form.activateButton.checked)"/>I have read and accepted
                              the terms in the license agreement above.</label></td>
                      </div>
+                        <input type="hidden" name="cloudmgtURL" id="cloudmgtURL" value="<%=cloudmgtURL%>"/>
+
                      <div class="input_row btn_row">
                          <input id="submitbtn" type='submit' disabled="disabled" value='Create My Account' class='btn'/>
                      </div>
+                     
 
                  </form>
 
                     <input type="hidden" name="secretKey" id="secretKey" value=""/>
                     <input type="hidden" name="imagePath" id="imagePath" value=""/>
-
+                 
                 </section>
                 </div>
                 <div class="signin">
