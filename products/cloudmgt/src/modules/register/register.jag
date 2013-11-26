@@ -13,6 +13,9 @@ var doc= new XML(data);
 //var url = doc.dbConfig.(@name == "cloud_mgt").url.toString();
 //var userName = doc.dbConfig.(@name == "cloud_mgt").userName.toString();
 //var password = doc.dbConfig.(@name == "cloud_mgt").password.toString();
+var ADMIN_USERNAME = doc.SSORelyingParty.AdminUserName.toString();
+var ADMIN_PASSWORD = doc.SSORelyingParty.AdminPassword.toString();
+
 var AFURL = doc.ServerUrls.AppFactory.toString();
 var BPSURL = doc.ServerUrls.BPS.toString();
 file.close();
@@ -40,7 +43,7 @@ options.useSOAP = 1.1;
 options.action = "http://wso2.org/bps/sample/process";
 options.mep = "in-only";
 
-    options["rampart"] = { user : getProperty(ADMIN_USERNAME), userPassword : getProperty(ADMIN_PASSWORD) };
+   options["rampart"] = { user : ADMIN_USERNAME, userPassword :ADMIN_PASSWORD };
     options["policy"] = <wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
     xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
     wsu:Id="UTOverTransport">
@@ -87,6 +90,7 @@ options.mep = "in-only";
             </wsp:All>
         </wsp:ExactlyOne>
     </wsp:Policy>;
+
 var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
     '<admin xmlns="http://wso2.org/bps/sample">'+adminUsername+'</admin>'+
     '<firstName xmlns="http://wso2.org/bps/sample">'+firstName+'</firstName>'+
