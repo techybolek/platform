@@ -122,7 +122,6 @@ span.error {
         var secretKey = document.getElementById("secretKey").val;
         var cloudmgtURL =  $("#cloudmgtURL").attr('value');;
         var userAnswer = $("#captcha-user-answer").attr('value');
-        alert(cloudmgtURL);
         document.getElementById('form_div').innerHTML = "";
 
         jagg.message({content:'Your request to register in WSO2 Cloud has been submitted. Please wait.',type:'info'});
