@@ -46,6 +46,30 @@ var changePassword = function(oldPassword, newPassword) {
         
     }
 
+var updatePasswordWithUserInput = function(username, newPassword,userAnswer,secretKey,confirmationKey) {
+        var admin;
+        var tenantDomain;
+        var atIndex = username.lastIndexOf('@');
+        if (username != null) {
+          admin = username;
+          tenantDomain = "";
+          if (atIndex != -1) {
+             admin = username.substring(0, atIndex);
+             tenantDomain = username.substring(atIndex + 1, username.length);
+          }
+        }
+        var adminService = server.osgiService('org.wso2.carbon.admin.mgt.services.AdminManagementService');
+	var captchaInfoBean = new org.wso2.carbon.captcha.mgt.beans.CaptchaInfoBean();
+        var adminInfoBean = new org.wso2.carbon.admin.mgt.beans.AdminMgtInfoBean();
+        adminInfoBean.setTenantLessUserName(admin);
+        adminInfoBean.setTenantDomain(tenantDomain);
+        adminInfoBean.setPassword(newPassword);
+        captchaInfoBean.setSecretKey(secretKey);
+        captchaInfoBean.setUserAnswer(userAnswer);
+        adminService.updatePasswordWithUserInput(adminInfoBean,captchaInfoBean,confirmationKey);
+        return true;
+    }
+
 
 %>
 

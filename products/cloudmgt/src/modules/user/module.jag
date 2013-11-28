@@ -1,8 +1,0 @@
-<%
-jagg.module("user", {
-changePassword: function () {
-        return jagg.require(jagg.getModulesDir() + "user/user.jag").changePassword.apply(this, arguments);
-    },
-   
-});
-%>

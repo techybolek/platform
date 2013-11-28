@@ -6,15 +6,15 @@ var log = new Log();
 (function () {
 var mod, obj, result,
 action = request.getParameter("action"),
-mod = jagg.module("user"),
+mod = jagg.module("user/initiate"),
 site = require("/site/conf/site.json");
 
-if (action == "changePassword") {
-    var oldPassword = request.getParameter("oldPassword");
-    var newPassword = request.getParameter("password");
-   
+if (action == "initiatePasswordReset") {
+    var secretKey = request.getParameter("secretKey");
+    var userAnswer = request.getParameter("userAnswer");
+     var username = request.getParameter("username");
     try {
-        var result = mod.changePassword(oldPassword, newPassword);
+        var result = mod.initiatePasswordReset(username,secretKey, userAnswer);
         if (result != null) {
             print(result);
         } else {

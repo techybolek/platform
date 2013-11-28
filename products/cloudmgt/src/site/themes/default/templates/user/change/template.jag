@@ -1,4 +1,4 @@
-<% jagg.template("user", function(inputs, outputs, jagg) { %>
+<% jagg.template("user/change", function(inputs, outputs, jagg) { %>
 <%
  var userName =  session.get("LOGGED_IN_USER");
 var log = new Log();
@@ -82,7 +82,7 @@ span.error {
    function doSubmit() {
         var oldPassword = $("#oldPassword").attr('value');
         var password  = $("#password").attr('value');
-        jagg.post("../blocks/user/ajax/user.jag", {
+        jagg.post("../blocks/user/change/ajax/user.jag", {
                          action:"changePassword",
                          oldPassword:oldPassword,
                          password:password
@@ -162,7 +162,7 @@ span.error {
 						</div>
 						
                      <div class="input_row btn_row">
-                         <input id="submitbtn" type='submit' value='Change Password' class='btn'/>
+                         <input id="submitbtn" type='submit' value='Reset Password' class='btn'/>
                      </div>
 
                  </form>

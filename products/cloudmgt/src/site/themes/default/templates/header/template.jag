@@ -22,7 +22,7 @@ jagg.template("header", function(inputs, outputs, jagg) {
 	var sessionId = session.getId();
 	var requestURI = request.getRequestURI();
 	var checkSSO = true;
-	if(requestURI.indexOf("register.jag") != -1) {
+	if(requestURI.indexOf("register.jag") != -1 || requestURI.indexOf("initiate.jag") != -1 || requestURI.indexOf("reset.jag") != -1|| requestURI.indexOf("password_verifier") != -1) {
 		checkSSO = false;
 	}else if(requestURI.indexOf("confirmemail.jag") != -1) {
 		checkSSO = false;
