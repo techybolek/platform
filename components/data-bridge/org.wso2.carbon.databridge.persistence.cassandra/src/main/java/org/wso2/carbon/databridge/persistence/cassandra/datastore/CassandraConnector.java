@@ -117,6 +117,7 @@ public class CassandraConnector {
     private static final String COMPARATOR_BOOL_TYPE = "org.apache.cassandra.db.marshal.BooleanType";
     private static final String COMPARATOR_DOUBLE_TYPE = "org.apache.cassandra.db.marshal.DoubleType";
     private static final String COMPARATOR_FLOAT_TYPE = "org.apache.cassandra.db.marshal.FloatType";
+    private static final String COMPARATOR_INT32_TYPE = "org.apache.cassandra.db.marshal.Int32Type";
 
     private int port = 0;
     private String localAddress = null;
@@ -135,7 +136,7 @@ public class CassandraConnector {
 
     static {
         attributeComparatorMap.put(AttributeType.STRING, ComparatorType.UTF8TYPE.getClassName());
-        attributeComparatorMap.put(AttributeType.INT, ComparatorType.INTEGERTYPE.getClassName());
+        attributeComparatorMap.put(AttributeType.INT, COMPARATOR_INT32_TYPE);
         attributeComparatorMap.put(AttributeType.LONG, ComparatorType.LONGTYPE.getClassName());
         attributeComparatorMap.put(AttributeType.FLOAT, COMPARATOR_FLOAT_TYPE);
         attributeComparatorMap.put(AttributeType.DOUBLE, COMPARATOR_DOUBLE_TYPE);
