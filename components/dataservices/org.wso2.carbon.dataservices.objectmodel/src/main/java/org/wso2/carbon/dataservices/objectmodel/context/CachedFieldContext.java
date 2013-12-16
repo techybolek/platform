@@ -65,7 +65,7 @@ public abstract class CachedFieldContext implements FieldContext {
         CachedFieldContext result = this.recursiveCacheLookup(headPath, 
                 format).getChildData(path.getTail(), format);
         /* add to the cache */
-        cache.addToFieldCache(path.getAbsolutePath(), result);
+        cache.addToFieldCache(path, result);
         return result;
     }
     
@@ -75,10 +75,7 @@ public abstract class CachedFieldContext implements FieldContext {
     }
     
     public void clearFieldCache() throws FieldContextException {
-        for (FieldContext ctx : this.getFieldContextCache().getFieldContextsOfHead(
-                this.getPath())) {
-            ctx.close();
-        }
+        this.getFieldContextCache().clearCacheForHead(this.getPath());
     }
     
     @Override

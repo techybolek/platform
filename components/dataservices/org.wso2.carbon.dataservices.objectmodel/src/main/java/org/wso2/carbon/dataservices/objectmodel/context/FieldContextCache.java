@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.dataservices.objectmodel.context;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,20 +30,34 @@ public class FieldContextCache {
     
     private Map<String, CachedFieldContext> fieldContextCache = new HashMap<String, CachedFieldContext>();
     
-    public void addToFieldCache(String path, CachedFieldContext fieldCtx) {
-        this.fieldContextCache.put(path, fieldCtx);
+    private Map<String, List<CachedFieldContext>> subFieldContextMapping = new HashMap<String, 
+            List<CachedFieldContext>>();
+    
+    public void addToFieldCache(FieldContextPath path, CachedFieldContext fieldCtx) {
+        this.fieldContextCache.put(path.getAbsolutePath(), fieldCtx);
+        this.addToSubFieldContextMapping(path, fieldCtx);
+    }
+    
+    private void addToSubFieldContextMapping(FieldContextPath path, CachedFieldContext fieldCtx) {
+        String headPath = path.getHeadPath().getAbsolutePath();
+        List<CachedFieldContext> subFields = this.subFieldContextMapping.get(headPath);
+        if (subFields == null) {
+            subFields = new ArrayList<CachedFieldContext>();
+            this.subFieldContextMapping.put(headPath, subFields);
+        }
+        subFields.add(fieldCtx);
     }
 
     public CachedFieldContext getCachedField(String path) {
         return this.fieldContextCache.get(path);
     }
     
-    public List<CachedFieldContext> getFieldContextsOfHead(String path) {
-        return null;
-    }
-    
-    public void clearCacheForHead(String name) {
-        
+    public void clearCacheForHead(String path) throws FieldContextException {
+        for (CachedFieldContext ctx : this.subFieldContextMapping.get(path)) {
+            this.fieldContextCache.remove(ctx.getPath());
+            ctx.close();
+        }
+        this.subFieldContextMapping.remove(path);
     }
     
 }
