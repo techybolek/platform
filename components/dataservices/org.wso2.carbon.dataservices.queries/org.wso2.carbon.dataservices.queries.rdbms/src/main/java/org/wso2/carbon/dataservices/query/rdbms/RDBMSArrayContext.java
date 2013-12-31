@@ -21,9 +21,11 @@ package org.wso2.carbon.dataservices.query.rdbms;
 import java.sql.Array;
 import java.sql.SQLException;
 
-import org.wso2.carbon.com.core.model.DataFormat;
-import org.wso2.carbon.com.core.fieldcontext.FieldContextException;
-import org.wso2.carbon.com.core.fieldcontext.FieldContextPath.PathComponent;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextCache;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextException;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextPath;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextPath.PathComponent;
+import org.wso2.carbon.dataservices.objectmodel.types.DataFormat;
 
 /**
  * This class represents an RDBMS Array context field implementation.
@@ -34,7 +36,8 @@ public class RDBMSArrayContext extends AbstractRDBMSObjectFieldContext {
 	
 	private int currentIndex;
 	
-	public RDBMSArrayContext(Array sqlArray) throws FieldContextException {
+	public RDBMSArrayContext(String path, FieldContextCache cache, Array sqlArray) throws FieldContextException {
+	    super(path, cache);
 		try {
 			this.dataArray = (Object[]) sqlArray.getArray();
 			this.currentIndex = -1;
@@ -45,8 +48,9 @@ public class RDBMSArrayContext extends AbstractRDBMSObjectFieldContext {
 	}
 
 	@Override
-	protected Object getRDBMSResultValue(PathComponent comp, DataFormat format)
+	protected Object getRDBMSResultValue(FieldContextPath childPath, DataFormat format)
 			throws SQLException {
+	    PathComponent comp = childPath.getTail();
 		if (!comp.isIndex()) {
 			throw new SQLException("The RDBMS Array must be given an array index to " +
 					"access an component: " + comp.toString());

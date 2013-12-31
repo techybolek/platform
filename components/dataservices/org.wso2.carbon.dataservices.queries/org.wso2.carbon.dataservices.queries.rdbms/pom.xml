@@ -33,6 +33,14 @@
     <url>http://wso2.org</url>
     <description>WSO2 Data Services Queries RDBMS Bundle</description>
 
+    <!--dependencies>
+        <dependency>
+           <groupId>org.wso2.carbon</groupId>
+           <artifactId>org.wso2.carbon.dataservices.objectmodel</artifactId>
+           <version>4.2.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies-->
+
     <build>
         <plugins>
             <plugin>
@@ -57,4 +65,13 @@
         </plugins>
     </build>
 
+    <dependencies>
+    	<dependency>
+    		<groupId>org.wso2.carbon</groupId>
+    		<artifactId>
+    			org.wso2.carbon.dataservices.objectmodel
+    		</artifactId>
+    		<version>4.2.0-SNAPSHOT</version>
+    	</dependency>
+    </dependencies>
 </project>

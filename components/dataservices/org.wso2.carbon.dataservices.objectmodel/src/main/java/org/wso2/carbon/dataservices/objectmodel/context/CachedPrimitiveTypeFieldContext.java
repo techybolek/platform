@@ -21,20 +21,16 @@ package org.wso2.carbon.dataservices.objectmodel.context;
 import org.wso2.carbon.dataservices.objectmodel.types.DataFormat;
 
 /**
- * This class represents a primitive type field context.
+ * This class represents a cached primitive type field context.
  */
-public class PrimitiveTypeFieldContext implements FieldContext {
+public class CachedPrimitiveTypeFieldContext extends CachedFieldContext {
 
     private Object object;
 
-    public PrimitiveTypeFieldContext(Object object) {
+    public CachedPrimitiveTypeFieldContext(String path, FieldContextCache fieldContextCache, 
+            Object object) {
+        super(path, fieldContextCache);
         this.object = object;
-    }
-
-    @Override
-    public FieldContext getSubContext(FieldContextPath path, DataFormat format)
-            throws FieldContextException {
-        throw new FieldContextException("No subcontext for this context at: " + path);
     }
 
     @Override
@@ -48,7 +44,9 @@ public class PrimitiveTypeFieldContext implements FieldContext {
     }
 
     @Override
-    public void close() throws FieldContextException {
+    public CachedFieldContext getChildData(FieldContextPath childPath, DataFormat format)
+            throws FieldContextException {
+        throw new FieldContextException("No subcontext for this context at: " + this.getPath());
     }
 
 }

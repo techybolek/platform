@@ -18,7 +18,6 @@
  */
 package org.wso2.carbon.dataservices.objectmodel.context;
 
-import org.wso2.carbon.dataservices.objectmodel.context.FieldContextPath.PathComponent;
 import org.wso2.carbon.dataservices.objectmodel.types.DataFormat;
 
 /**
@@ -26,28 +25,41 @@ import org.wso2.carbon.dataservices.objectmodel.types.DataFormat;
  */
 public abstract class CachedFieldContext implements FieldContext {
     
+    private String path;
+    
+    private FieldContextCache fieldContextCache;
+        
+    public CachedFieldContext(String path, FieldContextCache fieldContextCache) {
+        this.path = path;
+        this.fieldContextCache = fieldContextCache;
+    }
+    
     /**
      * Returns the child data of the current context.
-     * @param comp The path component of the sub context it should return
+     * @param comp The path of the sub context it should return
      * @param format The data format
      * @return The sub-field-context 
      * @throws FieldContextException
      */
-    public abstract CachedFieldContext getChildData(PathComponent comp, DataFormat format) 
+    public abstract CachedFieldContext getChildData(FieldContextPath childPath, DataFormat format) 
             throws FieldContextException;
-    
-    /**
-     * Returns the field context cache.
-     * @return The field context cache
-     */
-    protected abstract FieldContextCache getFieldContextCache();
-    
+
     /**
      * Returns the current context path.
      * @return The context path
      */
-    protected abstract String getPath();
-    
+    protected String getPath() {
+        return path;
+    }
+
+    /**
+     * Returns the field context cache.
+     * @return The field context cache
+     */
+    protected FieldContextCache getFieldContextCache() {
+        return fieldContextCache;
+    }
+
     private CachedFieldContext recursiveCacheLookup(FieldContextPath path, 
             DataFormat format) throws FieldContextException {
         FieldContextCache cache = this.getFieldContextCache();
@@ -63,7 +75,7 @@ public abstract class CachedFieldContext implements FieldContext {
         }
         /* recursively look up the item */
         CachedFieldContext result = this.recursiveCacheLookup(headPath, 
-                format).getChildData(path.getTail(), format);
+                format).getChildData(path, format);
         /* add to the cache */
         cache.addToFieldCache(path, result);
         return result;

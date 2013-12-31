@@ -23,53 +23,59 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Struct;
 
-import org.wso2.carbon.com.core.fieldcontext.AbstractObjectFieldContext;
-import org.wso2.carbon.com.core.model.ContainerType;
-import org.wso2.carbon.com.core.model.DataFormat;
-import org.wso2.carbon.com.core.fieldcontext.FieldContext;
-import org.wso2.carbon.com.core.fieldcontext.FieldContextException;
-import org.wso2.carbon.com.core.fieldcontext.PrimitiveTypeFieldContext;
-import org.wso2.carbon.com.core.fieldcontext.FieldContextPath.PathComponent;
-import org.wso2.carbon.com.core.model.DataType;
+import org.wso2.carbon.dataservices.objectmodel.context.CachedFieldContext;
+import org.wso2.carbon.dataservices.objectmodel.context.CachedObjectFieldContext;
+import org.wso2.carbon.dataservices.objectmodel.context.CachedPrimitiveTypeFieldContext;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextCache;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextException;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextPath;
+import org.wso2.carbon.dataservices.objectmodel.types.ContainerType;
+import org.wso2.carbon.dataservices.objectmodel.types.DataFormat;
+import org.wso2.carbon.dataservices.objectmodel.types.DataType;
 
 /**
  * This class represents an abstract RDBMS field context implementation.
  */
-public abstract class AbstractRDBMSObjectFieldContext extends AbstractObjectFieldContext {
+public abstract class AbstractRDBMSObjectFieldContext extends CachedObjectFieldContext {
 
-	@Override
-	protected FieldContext getResultValue(PathComponent comp, DataFormat format)
+	public AbstractRDBMSObjectFieldContext(String path, FieldContextCache fieldContextCache) {
+        super(path, fieldContextCache);
+    }
+
+    @Override
+	protected CachedFieldContext getResultValue(FieldContextPath childPath, DataFormat format)
 			throws FieldContextException {
 		Object objResult;
 		try {
-			objResult = this.getRDBMSResultValue(comp, format);
+			objResult = this.getRDBMSResultValue(childPath, format);
 		} catch (SQLException e) {
 			throw new FieldContextException("Error in reading RDBMS result: " + e.getMessage(), e);
 		}
-		FieldContext fieldCtx;
+		CachedFieldContext fieldCtx = null;
 		if (DataType.OBJECT.equals(format.getDataType())) {
 			if (objResult instanceof Array) {
-            	fieldCtx = new RDBMSArrayContext((Array) objResult);
+            	//fieldCtx = new RDBMSArrayContext((Array) objResult);
 			} else if (objResult instanceof ResultSet) {
-				fieldCtx = new RDBMSResultSetContext((ResultSet) objResult);
+				//fieldCtx = new RDBMSResultSetContext((ResultSet) objResult);
 			} else if (objResult instanceof Struct) {
-				fieldCtx = new RDBMSStructContext((Struct) objResult);
+				//fieldCtx = new RDBMSStructContext((Struct) objResult);
 			} else {
 				throw new FieldContextException("Unrecognized object type: " + objResult.getClass());
 			}
             return fieldCtx;
 		} else if (ContainerType.LIST.equals(format.getContainerType())) {
 			if (objResult instanceof Array) {
-            	return new RDBMSArrayContext((Array) objResult);
+            	//return new RDBMSArrayContext((Array) objResult);
 			} else {
 				throw new FieldContextException("Unsupported type to be used as a primitive " +
 						"type list: " + objResult.getClass());
 			}
 		} else {
-			return new PrimitiveTypeFieldContext(objResult);
+			return new CachedPrimitiveTypeFieldContext(childPath.getAbsolutePath(), this.getFieldContextCache(), objResult);
 		}
+		return null;
 	}
 	
-	protected abstract Object getRDBMSResultValue(PathComponent comp, DataFormat format) throws SQLException;
+	protected abstract Object getRDBMSResultValue(FieldContextPath childPath, DataFormat format) throws SQLException;
 
 }

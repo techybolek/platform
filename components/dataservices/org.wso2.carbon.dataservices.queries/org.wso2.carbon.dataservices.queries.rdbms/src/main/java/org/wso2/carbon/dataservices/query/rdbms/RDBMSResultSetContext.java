@@ -21,9 +21,10 @@ package org.wso2.carbon.dataservices.query.rdbms;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.wso2.carbon.com.core.model.DataFormat;
-import org.wso2.carbon.com.core.fieldcontext.FieldContextException;
-import org.wso2.carbon.com.core.fieldcontext.FieldContextPath.PathComponent;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextCache;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextException;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextPath;
+import org.wso2.carbon.dataservices.objectmodel.types.DataFormat;
 
 /**
  * This class represents an RDBMS result set based field context implementation. 
@@ -32,14 +33,9 @@ public class RDBMSResultSetContext extends AbstractRDBMSObjectFieldContext {
 	
 	private ResultSet resultSet;
 		
-	public RDBMSResultSetContext(ResultSet resultSet) throws FieldContextException {
+	public RDBMSResultSetContext(String path, FieldContextCache cache, ResultSet resultSet) throws FieldContextException {
+	    super(path, cache);
 		this.resultSet = resultSet;
-	}
-	
-	@Override
-	protected Object getRDBMSResultValue(PathComponent comp, DataFormat format) throws SQLException {
-		return RDBMSResultHelper.getResultSetValue(this.resultSet, comp, 
-				format.getDataType());
 	}
 	
 	@Override
@@ -63,5 +59,12 @@ public class RDBMSResultSetContext extends AbstractRDBMSObjectFieldContext {
 			}
 		}
 	}
+
+    @Override
+    protected Object getRDBMSResultValue(FieldContextPath childPath, DataFormat format)
+            throws SQLException {
+        return RDBMSResultHelper.getResultSetValue(this.resultSet, childPath.getTail(), 
+                format.getDataType());
+    }
 
 }

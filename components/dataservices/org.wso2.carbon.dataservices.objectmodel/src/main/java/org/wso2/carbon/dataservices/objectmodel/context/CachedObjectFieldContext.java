@@ -18,35 +18,19 @@
  */
 package org.wso2.carbon.dataservices.objectmodel.context;
 
-import org.wso2.carbon.dataservices.objectmodel.context.FieldContextPath.PathComponent;
 import org.wso2.carbon.dataservices.objectmodel.types.DataFormat;
 
 /**
  * A default Abstract implementation of FieldContext with data item caching.
  */
 public abstract class CachedObjectFieldContext extends CachedFieldContext {
-
-    private FieldContextCache fieldContextCache;
-    
-    private String path;
     
     private boolean listStarted;
     
     public CachedObjectFieldContext(String path, FieldContextCache fieldContextCache) {
-        this.path = path;
-        this.fieldContextCache = fieldContextCache;
+        super(path, fieldContextCache);
     }
     
-    @Override
-    protected String getPath() {
-        return path;
-    }
-
-    @Override
-    protected FieldContextCache getFieldContextCache() {
-        return fieldContextCache;
-    }
-
     @Override
     public boolean nextListState() throws FieldContextException {
         boolean result = this.moveToNextListResultValue();
@@ -57,17 +41,17 @@ public abstract class CachedObjectFieldContext extends CachedFieldContext {
 
     protected abstract boolean moveToNextListResultValue() throws FieldContextException;
 
-    protected abstract CachedFieldContext getResultValue(PathComponent comp, DataFormat format)
+    protected abstract CachedFieldContext getResultValue(FieldContextPath childPath, DataFormat format)
             throws FieldContextException;
 
     @Override
-    public CachedFieldContext getChildData(PathComponent comp, DataFormat format)
+    public CachedFieldContext getChildData(FieldContextPath childPath, DataFormat format)
             throws FieldContextException {
         if (!this.listStarted) {
             this.nextListState();
             this.listStarted = true;
         }
-        return this.getResultValue(comp, format);
+        return this.getResultValue(childPath, format);
     }
 
     @Override

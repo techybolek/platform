@@ -23,8 +23,8 @@ import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.wso2.carbon.com.core.fieldcontext.FieldContextPath.PathComponent;
-import org.wso2.carbon.com.core.model.DataType;
+import org.wso2.carbon.dataservices.objectmodel.context.FieldContextPath.PathComponent;
+import org.wso2.carbon.dataservices.objectmodel.types.DataType;
 
 /**
  * Helper class for RDBMS field context functionality. 
