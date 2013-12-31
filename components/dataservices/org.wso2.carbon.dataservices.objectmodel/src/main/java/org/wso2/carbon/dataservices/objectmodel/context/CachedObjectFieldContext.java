@@ -45,7 +45,7 @@ public abstract class CachedObjectFieldContext extends CachedFieldContext {
             throws FieldContextException;
 
     @Override
-    public CachedFieldContext getChildData(FieldContextPath childPath, DataFormat format)
+    protected CachedFieldContext getChildData(FieldContextPath childPath, DataFormat format)
             throws FieldContextException {
         if (!this.listStarted) {
             this.nextListState();

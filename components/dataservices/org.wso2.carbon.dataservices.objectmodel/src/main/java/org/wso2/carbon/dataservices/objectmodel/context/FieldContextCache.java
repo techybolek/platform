@@ -39,7 +39,11 @@ public class FieldContextCache {
     }
     
     private void addToSubFieldContextMapping(FieldContextPath path, CachedFieldContext fieldCtx) {
-        String headPath = path.getHeadPath().getAbsolutePath();
+        FieldContextPath headPathCtx = path.getHeadPath();
+        if (headPathCtx == null) {
+            return;
+        }
+        String headPath = headPathCtx.getAbsolutePath();
         List<CachedFieldContext> subFields = this.subFieldContextMapping.get(headPath);
         if (subFields == null) {
             subFields = new ArrayList<CachedFieldContext>();
@@ -53,9 +57,12 @@ public class FieldContextCache {
     }
     
     public void clearCacheForHead(String path) throws FieldContextException {
-        for (CachedFieldContext ctx : this.subFieldContextMapping.get(path)) {
-            this.fieldContextCache.remove(ctx.getPath());
-            ctx.close();
+        List<CachedFieldContext> subCtxs = this.subFieldContextMapping.get(path);
+        if (subCtxs != null) {
+            for (CachedFieldContext ctx : subCtxs) {
+                this.fieldContextCache.remove(ctx.getPath());
+                ctx.close();
+            }
         }
         this.subFieldContextMapping.remove(path);
     }

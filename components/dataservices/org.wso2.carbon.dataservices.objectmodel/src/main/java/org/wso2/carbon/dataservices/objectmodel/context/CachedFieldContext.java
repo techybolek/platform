@@ -41,7 +41,7 @@ public abstract class CachedFieldContext implements FieldContext {
      * @return The sub-field-context 
      * @throws FieldContextException
      */
-    public abstract CachedFieldContext getChildData(FieldContextPath childPath, DataFormat format) 
+    protected abstract CachedFieldContext getChildData(FieldContextPath childPath, DataFormat format) 
             throws FieldContextException;
 
     /**
