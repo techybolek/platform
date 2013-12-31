@@ -24,6 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.dataservices.objectmodel.context.FieldContextCache;
@@ -40,6 +41,35 @@ import org.wso2.carbon.dataservices.query.rdbms.RDBMSResultSetContext;
  */
 public class RDBMSFieldContextTest {
 
+    @Test
+    public void testRDBMSRAWRead() throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection("jdbc:h2:mem:db1");
+            conn.createStatement().execute("CREATE TABLE Entry (id INT, val VARCHAR(200))");
+            int total = 10000;
+            for (int i = 0; i < total; i++) {
+                PreparedStatement stmt = conn.prepareStatement("INSERT INTO Entry VALUES (?, ?)");
+                stmt.setInt(1, i);
+                stmt.setString(2, "OIOIJ@#$)(@JRFONWICNQCOI@WMCOFIJR)@#$IJFO@MWRCOWNDCOWJNIRFEILWRUGNWEILGUHW#$T@#PIQJNAIJNIGUGOIUHVWEI");
+                stmt.execute();
+            }
+            ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM Entry");
+            int c = 0;
+            long start = System.currentTimeMillis();
+            while (rs.next()) {
+                rs.getInt(1);
+                rs.getString(2);
+            }
+            long end = System.currentTimeMillis();
+            System.out.println("testRDBMSRAWRead: Time: " + (end - start) + "ms, TPS: " + total / (double) (end - start) * 1000.0);
+            Assert.assertEquals(c, total);
+        } finally {
+            conn.close();
+        }
+    }
+    
+    
     @Test
     public void testRDBMSRead() throws SQLException, FieldContextException {
         Connection conn = null;
@@ -69,7 +99,7 @@ public class RDBMSFieldContextTest {
                 c++;
             }
             long end = System.currentTimeMillis();
-            System.out.println("Time: " + (end - start) + "ms, TPS: " + total / (double) (end - start) * 1000.0);
+            System.out.println("testRDBMSRead: Time: " + (end - start) + "ms, TPS: " + total / (double) (end - start) * 1000.0);
             Assert.assertEquals(c, total);
         } finally {
             conn.close();
