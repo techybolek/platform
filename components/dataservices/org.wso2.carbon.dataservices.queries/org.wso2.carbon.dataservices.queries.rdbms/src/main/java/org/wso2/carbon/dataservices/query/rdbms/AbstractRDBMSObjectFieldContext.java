@@ -51,21 +51,25 @@ public abstract class AbstractRDBMSObjectFieldContext extends CachedObjectFieldC
 		} catch (SQLException e) {
 			throw new FieldContextException("Error in reading RDBMS result: " + e.getMessage(), e);
 		}
-		CachedFieldContext fieldCtx = null;
+		CachedFieldContext fieldCtx;
 		if (DataType.OBJECT.equals(format.getDataType())) {
 			if (objResult instanceof Array) {
-            	//fieldCtx = new RDBMSArrayContext((Array) objResult);
+            	fieldCtx = new RDBMSArrayContext(childPath.getAbsolutePath(), 
+            	        this.getFieldContextCache(), (Array) objResult);
 			} else if (objResult instanceof ResultSet) {
-				//fieldCtx = new RDBMSResultSetContext((ResultSet) objResult);
+				fieldCtx = new RDBMSResultSetContext(childPath.getAbsolutePath(), 
+                        this.getFieldContextCache(), (ResultSet) objResult);
 			} else if (objResult instanceof Struct) {
-				//fieldCtx = new RDBMSStructContext((Struct) objResult);
+				fieldCtx = new RDBMSStructContext(childPath.getAbsolutePath(), 
+                        this.getFieldContextCache(), (Struct) objResult);
 			} else {
 				throw new FieldContextException("Unrecognized object type: " + objResult.getClass());
 			}
             return fieldCtx;
 		} else if (ContainerType.LIST.equals(format.getContainerType())) {
 			if (objResult instanceof Array) {
-            	//return new RDBMSArrayContext((Array) objResult);
+            	return new RDBMSArrayContext(childPath.getAbsolutePath(), 
+            	        this.getFieldContextCache(), (Array) objResult);
 			} else {
 				throw new FieldContextException("Unsupported type to be used as a primitive " +
 						"type list: " + objResult.getClass());
@@ -73,7 +77,6 @@ public abstract class AbstractRDBMSObjectFieldContext extends CachedObjectFieldC
 		} else {
 			return new CachedPrimitiveTypeFieldContext(childPath.getAbsolutePath(), this.getFieldContextCache(), objResult);
 		}
-		return null;
 	}
 	
 	protected abstract Object getRDBMSResultValue(FieldContextPath childPath, DataFormat format) throws SQLException;

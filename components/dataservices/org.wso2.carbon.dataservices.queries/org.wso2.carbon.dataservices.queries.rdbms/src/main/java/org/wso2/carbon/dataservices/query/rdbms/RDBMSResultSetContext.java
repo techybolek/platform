@@ -33,7 +33,8 @@ public class RDBMSResultSetContext extends AbstractRDBMSObjectFieldContext {
 	
 	private ResultSet resultSet;
 		
-	public RDBMSResultSetContext(String path, FieldContextCache cache, ResultSet resultSet) throws FieldContextException {
+	public RDBMSResultSetContext(String path, FieldContextCache cache, 
+	        ResultSet resultSet) throws FieldContextException {
 	    super(path, cache);
 		this.resultSet = resultSet;
 	}
