@@ -24,7 +24,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.dataservices.objectmodel.context.FieldContextCache;
@@ -47,7 +46,7 @@ public class RDBMSFieldContextTest {
         try {
             conn = DriverManager.getConnection("jdbc:h2:mem:db1");
             conn.createStatement().execute("CREATE TABLE Entry (id INT, val VARCHAR(200))");
-            int total = 10000;
+            int total = 1000000;
             for (int i = 0; i < total; i++) {
                 PreparedStatement stmt = conn.prepareStatement("INSERT INTO Entry VALUES (?, ?)");
                 stmt.setInt(1, i);
@@ -60,6 +59,7 @@ public class RDBMSFieldContextTest {
             while (rs.next()) {
                 rs.getInt(1);
                 rs.getString(2);
+                c++;
             }
             long end = System.currentTimeMillis();
             System.out.println("testRDBMSRAWRead: Time: " + (end - start) + "ms, TPS: " + total / (double) (end - start) * 1000.0);
@@ -76,7 +76,7 @@ public class RDBMSFieldContextTest {
         try {
             conn = DriverManager.getConnection("jdbc:h2:mem:db1");
             conn.createStatement().execute("CREATE TABLE Entry (id INT, val VARCHAR(200))");
-            int total = 10000;
+            int total = 1000000;
             for (int i = 0; i < total; i++) {
                 PreparedStatement stmt = conn.prepareStatement("INSERT INTO Entry VALUES (?, ?)");
                 stmt.setInt(1, i);

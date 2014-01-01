@@ -95,4 +95,15 @@ public abstract class CachedFieldContext implements FieldContext {
         this.clearFieldCache();
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof CachedFieldContext) && 
+                ((CachedFieldContext) obj).getPath().equals(this.getPath());
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.getPath().hashCode();
+    }
+    
 }

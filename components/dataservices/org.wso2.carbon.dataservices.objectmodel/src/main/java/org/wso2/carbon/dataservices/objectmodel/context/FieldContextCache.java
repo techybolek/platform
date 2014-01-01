@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class FieldContextCache { 
     
-    private Map<String, CachedFieldContext> fieldContextCache = new HashMap<String, CachedFieldContext>();
+    private Map<String, CachedFieldContext> fieldContextCache = new HashMap<String, CachedFieldContext>(100);
     
     private Map<String, List<CachedFieldContext>> subFieldContextMapping = new HashMap<String, 
             List<CachedFieldContext>>();
@@ -61,7 +61,7 @@ public class FieldContextCache {
         if (subCtxs != null) {
             for (CachedFieldContext ctx : subCtxs) {
                 this.fieldContextCache.remove(ctx.getPath());
-                ctx.close();
+                ctx.close();    
             }
         }
         this.subFieldContextMapping.remove(path);
