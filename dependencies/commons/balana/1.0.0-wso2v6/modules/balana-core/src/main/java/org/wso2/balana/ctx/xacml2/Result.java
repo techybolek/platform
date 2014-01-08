@@ -204,7 +204,13 @@ public class Result extends AbstractResult {
         }
 
         // encode the decision
-        builder.append("<Decision>").append(DECISIONS[decision]).append("</Decision>");
+        //check whether decision is extended indeterminate values
+        if(decision == 4 || decision == 5 || decision == 6){
+            // if this is extended indeterminate values, we just return the "Indeterminate"
+            builder.append("<Decision>").append(DECISIONS[2]).append("</Decision>");
+        } else {
+            builder.append("<Decision>").append(DECISIONS[decision]).append("</Decision>");
+        }
 
         // encode the status
         if (status != null){
