@@ -49,8 +49,8 @@
             jagg.setUser(ssoRelyingParty.getLoggedInUser(sessionId));
             session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
             log.info("LOGGED_IN_USER " +ssoRelyingParty.getLoggedInUser(sessionId));
-            log.info("Inside session "+  session.get("LOGGED_IN_USER"));
-              response.sendRedirect("/cloudmgt/site/pages/index.jag");
+            response.sendRedirect("/cloudmgt/site/pages/index.jag");
+			createTenantInfoObject();
         } else {
             // if the saml response is log out request from IDP, we log out from web app.
             ssoRelyingParty.invalidateSessionBySessionId(sessionId);
@@ -72,6 +72,17 @@
 
 
 }());
+
+function createTenantInfoObject(){
+    var modManager = jagg.module("manager");
+    var tenantInfo={};
+    tenantInfo.tenantDomain=modManager.getTenantDomain();
+    tenantInfo.tenantId=modManager.getTenantId();
+    tenantInfo.isOTTenant=modManager.getOTtenantProperty();
+    session.put("TENANT_INFO",tenantInfo);
+}
+
+
 
 %>
 

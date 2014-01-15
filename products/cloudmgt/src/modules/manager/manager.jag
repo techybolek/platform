@@ -4,6 +4,8 @@ include("/jagg/constants.jag");
 
 // used for logging
 var log = new Log();
+var carbon = require('carbon');
+var server = carbon.server;
 
 var clock = new Date();
 var file = new File("/site/conf/cloud-mgt.xml");
@@ -200,8 +202,7 @@ var addDataSource = function (applicationId, stageName, name, url, driverClass, 
     var result;
     try {
         var endPoint = AFURL + 'NDataSourceAdmin';
-        log.info("printing end point ..........................................................");
-        log.info(endPoint);
+   
         createDataSourcesService.open(options, endPoint, false, ADMIN_USERNAME + '@' + applicationId, ADMIN_PASSWORD);
         createDataSourcesService.send(payload);
 	    result = createDataSourcesService.responseE4X;
@@ -259,8 +260,7 @@ var createDataSource = function (applicationId, stageName, name, url, driverClas
     var result;
     try {
         var endPoint = AFURL + 'NDataSourceAdmin';
-        log.info("printing end point ..........................................................");
-        log.info(endPoint);
+       
         createDataSourcesService.open(options, endPoint, false, ADMIN_USERNAME + '@' + applicationId, ADMIN_PASSWORD);
         createDataSourcesService.send(payload);
 	    result = createDataSourcesService.responseE4X;
@@ -293,9 +293,11 @@ var getBackendCookie = function () {
 		var token = session.get("SAML_TOKEN");
 		var security =require("sso");
 		var ssoRelyingParty = new security.SSORelyingParty(SSO_NAME);
-		token=ssoRelyingParty.decode(token);           
+		//token=ssoRelyingParty.decode(token);           
 		var encodedToken = ssoRelyingParty.xmlEncode(token);
 		var xhr = new XMLHttpRequest();
+		xhr.setRequestHeader('SOAPAction', 'urn:login');
+	    xhr.setRequestHeader('Content-Type', 'application/soap+xml');
 		var endPoint = AFURL+ "services/SAML2SSOAuthenticationService";
 		xhr.open("POST", endPoint);
 		var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:sso="http://sso.saml2.authenticator.identity.carbon.wso2.org" xmlns:xsd="http://dto.sso.saml2.authenticator.identity.carbon.wso2.org/xsd"><soap:Header/><soap:Body><sso:login><sso:authDto><xsd:response>'+encodedToken+'</xsd:response></sso:authDto></sso:login></soap:Body></soap:Envelope>';
@@ -336,6 +338,22 @@ var getTenantAwareUsername = function(username) {
      return tenantAwareUsername;
 } ;
 
+/*
+ *   getDomainlessUserName is used to get the user name without the domain name.
+ */
+var getDomainlessUserName = function (username) {
+    var seperator = "@";
+    var strippedUserName = "";
+    var index = userName.lastIndexOf(seperator);
+    if (index == -1)
+        strippedUserName = userName;
+    else
+        strippedUserName = userName.substring(0, index);
+
+    return strippedUserName;
+};
+
+
 /**
  * Resolve tenantId from tenantDomain by using carbon TenantManager.
  * @param tenantDomain
@@ -346,5 +364,29 @@ var getTenantId = function (tenantDomain) {
     var tenantManager = carbon.multitenancy.getTenantManager();
     return tenantManager.getTenantId(tenantDomain);
 };
+
+var getOTtenantProperty=function(){
+    var tenantDomain=getTenantDomain() ;
+    var context=multitenancy.getPrivilegedCarbonContext();
+    var tenantManager= multitenancy.getTenantManager();
+    var tenantId=tenantManager.getTenantId(tenantDomain);
+    var index=-1;
+    try{
+        context.startTenantFlow();
+        context.getThreadLocalCarbonContext().setTenantId(tenantId);
+        context.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+        var tenant=tenantManager.getTenant(tenantId);
+        var realm = server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantUserRealm(tenantId);
+        var properties=realm.getRealmConfiguration().getUserStoreProperties();
+        var sProp=properties.toString();
+        var propString ="OTTenant=true";
+        index=sProp.indexOf(propString);
+
+    }finally{
+        context.endTenantFlow();
+    }
+     return index>0;;
+}
+
 
 %>

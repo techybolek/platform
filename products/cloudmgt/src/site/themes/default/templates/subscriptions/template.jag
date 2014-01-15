@@ -49,7 +49,7 @@ file.close();
               </a>
               <ul class="dropdown-menu">
                      <!--li><a href="/your_profile">Your Profile</a></li-->
-                      <li><a onclick="window.location.href='user.jag'" href="#"><nbr>Change Password</nbr></a></li>
+                      <li><a onclick="window.location.href='change-password.jag'" href="#"><nbr>Change Password</nbr></a></li>
                     <li><a href="#" onclick="window.location.href='logout.jag'">Sign Out</a></li>
                   
                </ul>
@@ -92,7 +92,11 @@ file.close();
                  <input type="hidden" name="imagePath" id="imagePath" value=""/>
             </div>
         </div>
- 
+ <div class="af_row">
+                <div class="col-12 help-text-column">
+                   <a  href="<%=jagg.getAbsoluteUrl("/site/pages/user.jag")%>" > Manage Users and Roles</a> &nbsp; 
+                </div>
+            </div>
     </article>
 	<div class="helper_text">
 		<p class="helper_text_bold">You are now signed in.</p> 
