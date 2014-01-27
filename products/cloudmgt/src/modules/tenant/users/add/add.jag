@@ -35,7 +35,7 @@ var addUserRoles = function addUserRoles(username,userRoles) {
             context.startTenantFlow();
             context.getThreadLocalCarbonContext().setTenantId(tenantManager.getTenantId(tenantDomain));
             context.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-            result = server.osgiService('org.wso2.carbon.appfactory.tenant.mgt.service.TenantManagementService').addUserRoles(username,userRoles);
+            result = server.osgiService('org.wso2.carbon.cloudmgt.users.service.UserManagementService').addUserRoles(username,userRoles);
         } finally {
             context.endTenantFlow();
         }
@@ -62,7 +62,7 @@ var updateUserRoles = function updateUserRoles(userName,addRoles,removeRols) {
             context.startTenantFlow();
             context.getThreadLocalCarbonContext().setTenantId(tenantManager.getTenantId(tenantDomain));
             context.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-            result = server.osgiService('org.wso2.carbon.appfactory.tenant.mgt.service.TenantManagementService').updateUserRoles(userName,paraAddRoles,paraRemoveRoles);
+            result = server.osgiService('org.wso2.carbon.cloudmgt.users.service.UserManagementService').updateUserRoles(userName,paraAddRoles,paraRemoveRoles);
         } finally {
             context.endTenantFlow();
         }
@@ -77,7 +77,7 @@ var deleteUserFromTenant = function deleteUserFromTenant(userName){
         context.startTenantFlow();
         context.getThreadLocalCarbonContext().setTenantId(tenantManager.getTenantId(tenantDomain));
         context.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-        isSuccess = server.osgiService('org.wso2.carbon.appfactory.tenant.mgt.service.TenantManagementService').removeUserFromTenant(userName);
+        isSuccess = server.osgiService('org.wso2.carbon.cloudmgt.users.service.UserManagementService').removeUserFromTenant(userName);
     }finally{
         context.endTenantFlow();
     }
@@ -94,7 +94,7 @@ var bulkUserImport = function bulkUserImport(users,defaultPassword){
         context.startTenantFlow();
         context.getThreadLocalCarbonContext().setTenantId(tenantManager.getTenantId(tenantDomain));
         context.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-        isSuccess = server.osgiService('org.wso2.carbon.appfactory.tenant.mgt.service.TenantManagementService').importUsersTotheTenant(users,defaultPassword);
+        isSuccess = server.osgiService('org.wso2.carbon.cloudmgt.users.service.UserManagementService').importUsersTotheTenant(users,defaultPassword);
     }finally{
         context.endTenantFlow();
     }

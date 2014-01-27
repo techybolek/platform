@@ -24,7 +24,7 @@ var getUsersofTenant = function getUsersofTenant() {
         context.startTenantFlow();
         context.getThreadLocalCarbonContext().setTenantId(tenantManager.getTenantId(tenantDomain));
         context.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-        var tenantMgtService = server.osgiService('org.wso2.carbon.appfactory.tenant.mgt.service.TenantManagementService');
+        var tenantMgtService = server.osgiService('org.wso2.carbon.cloudmgt.users.service.UserManagementService');
         var users = tenantMgtService.getUsersofTenant();
         log.info(users.length);
     }catch (e){
@@ -99,7 +99,7 @@ var getUserInfo = function getUserInfo(userName) {
         context.startTenantFlow();
         context.getThreadLocalCarbonContext().setTenantId(tenantManager.getTenantId(tenantDomain));
         context.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-        var tenantMgtService = server.osgiService('org.wso2.carbon.appfactory.tenant.mgt.service.TenantManagementService');
+        var tenantMgtService = server.osgiService('org.wso2.carbon.cloudmgt.users.service.UserManagementService');
         var user = tenantMgtService.getUsersofTenant(userName);  
         var tmpuserName=user.getUserName();
         var tmpemail=user.getEmail();
