@@ -92,7 +92,7 @@
     <!--
 		Enable/Disable JWT generation. Default is false.
 	-->
-	<EnableTokenGeneration>false</EnableTokenGeneration>
+	<EnableTokenGeneration>true</EnableTokenGeneration>
 	
 	<!-- 
 		Remove OAuth headers from outgoing message or keep with it.
@@ -160,7 +160,7 @@
      <!--
 	    Enable/Disable Usage metering and billing for api usage
      -->
-     <EnableBillingAndUsage>false</EnableBillingAndUsage>
+     <EnableBillingAndUsage>true</EnableBillingAndUsage>
 
     <!--
         API usage tracker configuration used by the BAM data publisher and 
@@ -255,13 +255,13 @@
         <!--
             Enable/Disable JWT caching.
         -->
-        <EnableJWTCache>false</EnableJWTCache>
+        <EnableJWTCache>true</EnableJWTCache>
 
         <!--
             Enable/Disable API key validation information caching at key-management server
         -->
 
-        <EnableKeyMgtValidationInfoCache>false</EnableKeyMgtValidationInfoCache>
+        <EnableKeyMgtValidationInfoCache>true</EnableKeyMgtValidationInfoCache>
 
         <!--
         Configurations related to enable thrift support for key-management related communication.
@@ -430,7 +430,7 @@
             Enable/Disable the API Startup Publisher
         -->
 	
-	<Enabled>false</Enabled>
+	<Enabled>true</Enabled>
 	
 	<!--
 	Configuration to create APIs for local endpoints. 
@@ -457,7 +457,7 @@
 	If you do not need to add Icon or Documentation set 
 	'none' as the value for IconPath & DocumentURL.
 	-->
-	<!--APIs>
+	<APIs>
 		<API>	
 			<Context>/resource</Context>
 			<Endpoint>http://localhost:9764/resource</Endpoint>
@@ -467,7 +467,7 @@
 			<DocumentURL>none</DocumentURL>
 			<AuthType>Any</AuthType>
 		</API>
-	</APIs-->
+	</APIs>
 		
     </StartupAPIPublisher>
 
