@@ -348,14 +348,14 @@
             API or only showing the latest version of an API.
 
         -->
-        <DisplayMultipleVersions>false</DisplayMultipleVersions>
+        <DisplayMultipleVersions>true</DisplayMultipleVersions>
         <!--
             This parameter specifies whether to display all the APIs
             [which are having DEPRECATED/PUBLISHED status] or only display the APIs
             with having their status is as 'PUBLISHED'
 
         -->
-        <DisplayAllAPIs>false</DisplayAllAPIs>
+        <DisplayAllAPIs>true</DisplayAllAPIs>
 		
 		 <!--
             This parameter specifies whether to display the comment editing facility or not.
