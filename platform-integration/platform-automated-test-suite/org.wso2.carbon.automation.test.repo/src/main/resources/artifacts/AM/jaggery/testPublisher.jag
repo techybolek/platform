@@ -1,0 +1,11 @@
+<%
+<%
+store = require('apistore');
+var storeHostObj = new store.APIStore();
+print(storeHostObj.isBillingEnabled());
+print(storeHostObj.getHTTPsURL(null,null,null));
+print(storeHostObj.getDeniedTiers());
+print(storeHostObj.getActiveTenantDomains());
+print(storeHostObj.isSelfSignupEnabled());
+%>
+%>
