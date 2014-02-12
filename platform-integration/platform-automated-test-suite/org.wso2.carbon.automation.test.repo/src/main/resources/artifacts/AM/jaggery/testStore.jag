@@ -7,5 +7,15 @@ print(storeHostObj.getHTTPsURL(null,null,null));
 print(storeHostObj.getDeniedTiers());
 print(storeHostObj.getActiveTenantDomains());
 print(storeHostObj.isSelfSignupEnabled());
+var getAPIArgs = new Array();
+getAPIArgs[0] = "admin";
+getAPIArgs[1] = "HostObjectTestAPI";
+getAPIArgs[2] = "1.0.0";
+getAPIArgs[3] = "admin";
+print(storeHostObj.getActiveTenantDomains(null, null, null, null));
+print(storeHostObj.getUserFields(null, null, null, null));
+//print(storeHostObj.hasUserPermissions(null, null, getAPIArgs, null));
+//print(storeHostObj.isUserExists(null, null, getAPIArgs, null));
+//print(storeHostObj.isUserExists(null, null, getAPIArgs, null));
 %>
 %>
