@@ -1,11 +1,32 @@
 <%
-<%
-store = require('apistore');
-var storeHostObj = new store.APIStore();
-print(storeHostObj.isBillingEnabled());
-print(storeHostObj.getHTTPsURL(null,null,null));
-print(storeHostObj.getDeniedTiers());
-print(storeHostObj.getActiveTenantDomains());
-print(storeHostObj.isSelfSignupEnabled());
-%>
+var publisher = require('apipublisher');
+var publisherHostObj = new publisher.APIProvider("admin");
+print(publisherHostObj.getExternalAPIStores());
+print(publisherHostObj.validateRoles('admin', 'admin'));
+print(publisherHostObj.isURLValid("https","https://www.google.com"));
+print(publisherHostObj.getAPIsByProvider("admin"));
+print(publisherHostObj.getSubscribedAPIs("admin"));
+print(publisherHostObj.getAPI("admin","HostObjectTestAPI","1.0.0"));
+print(publisherHostObj.getTierPermissions());
+print(publisherHostObj.getTiers());
+print(publisherHostObj.getAllAPIs());
+print(publisherHostObj.getAPIsByProvider("admin"));
+print(publisherHostObj.getSubscribersOfAPI("admin","HostObjectTestAPI","1.0.0"));
+print(publisherHostObj.isContextExist("HostObjectTestAPI","HostObjectTestAPI"));
+print(publisherHostObj.searchAPIs("admin","HostObjectTestAPI"));
+print(publisherHostObj.hasCreatePermission());
+print(publisherHostObj.hasManageTierPermission());
+print(publisherHostObj.hasUserPermissions("admin"));
+print(publisherHostObj.hasPublishPermission("admin"));
+//print(publisherHostObj.searchAccessTokens("admin"));
+print(publisherHostObj.createNewAPIVersion("admin","HostObjectTestAPI","1.0.0","1.0.1"));
+//print(publisherHostObj.getSubscriberCountByAPIVersions());
+/*var getAPIArgs = new Array();
+getAPIArgs.push("tierName","subscriber");
+getAPIArgs.push("permissiontype","Deny");
+getAPIArgs.push("roles","admin");
+print(publisherHostObj.updateTierPermissions(getAPIArgs));
+isAPIOlderVersionExist
+*/
+
 %>
