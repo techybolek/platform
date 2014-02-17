@@ -1,6 +1,7 @@
 <%
 var publisher = require('apipublisher');
 var publisherHostObj = new publisher.APIProvider("admin");
+print("======Test========");
 print(publisherHostObj.getExternalAPIStores());
 print(publisherHostObj.validateRoles('admin', 'admin'));
 print(publisherHostObj.isURLValid("https","https://www.google.com"));
@@ -13,13 +14,25 @@ print(publisherHostObj.getAllAPIs());
 print(publisherHostObj.getAPIsByProvider("admin"));
 print(publisherHostObj.getSubscribersOfAPI("admin","HostObjectTestAPI","1.0.0"));
 print(publisherHostObj.isContextExist("HostObjectTestAPI","HostObjectTestAPI"));
-print(publisherHostObj.searchAPIs("admin","HostObjectTestAPI"));
+print(publisherHostObj.searchAPIs("admin","name:HostObjectTestAPI"));
 print(publisherHostObj.hasCreatePermission());
 print(publisherHostObj.hasManageTierPermission());
 print(publisherHostObj.hasUserPermissions("admin"));
 print(publisherHostObj.hasPublishPermission("admin"));
+//print(publisherHostObj.createNewAPIVersion("admin","HostObjectTestAPI","1.0.0","1.0.1"));
+//print(publisherHostObj.addInlineContent("HostObjectTestAPI","1.0.0","help","this is help"));
+//print(publisherHostObj.getAllDocumentation("HostObjectTestAPI","1.0.0"));
+print(publisherHostObj.getAuthServerURL());
+print(publisherHostObj.getCustomInSequences());
+print(publisherHostObj.getCustomOutSequences());
+print(publisherHostObj.getHTTPsURL());
+print(publisherHostObj.isSynapseGateway());
+print(publisherHostObj.loadRegistryOfTenant("carbon.super"));
+//print(publisherHostObj.updateDocumentation("admin","HostObjectTestAPI","1.0.0","Doc-Name", "How To", "summary","In-line"));
+//print(publisherHostObj.getInlineContent("admin","HostObjectTestAPI","1.0.0","help"));
+//isAPIOlderVersionExist
+//updateSubscriptionStatus
 //print(publisherHostObj.searchAccessTokens("admin"));
-print(publisherHostObj.createNewAPIVersion("admin","HostObjectTestAPI","1.0.0","1.0.1"));
 //print(publisherHostObj.getSubscriberCountByAPIVersions());
 /*var getAPIArgs = new Array();
 getAPIArgs.push("tierName","subscriber");
@@ -28,5 +41,4 @@ getAPIArgs.push("roles","admin");
 print(publisherHostObj.updateTierPermissions(getAPIArgs));
 isAPIOlderVersionExist
 */
-
 %>
