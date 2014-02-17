@@ -1,21 +1,44 @@
 <%
 <%
 store = require('apistore');
-var storeHostObj = new store.APIStore();
+var storeHostObj = new store.APIStore("admin");
 print(storeHostObj.isBillingEnabled());
-print(storeHostObj.getHTTPsURL(null,null,null));
+print(storeHostObj.getHTTPsURL("localhost"));
+print(storeHostObj.getAuthServerURL());
+print(storeHostObj.getHTTPURL("localhost"));
 print(storeHostObj.getDeniedTiers());
 print(storeHostObj.getActiveTenantDomains());
 print(storeHostObj.isSelfSignupEnabled());
-var getAPIArgs = new Array();
-getAPIArgs[0] = "admin";
-getAPIArgs[1] = "HostObjectTestAPI";
-getAPIArgs[2] = "1.0.0";
-getAPIArgs[3] = "admin";
-print(storeHostObj.getActiveTenantDomains(null, null, null, null));
-print(storeHostObj.getUserFields(null, null, null, null));
-//print(storeHostObj.hasUserPermissions(null, null, getAPIArgs, null));
-//print(storeHostObj.isUserExists(null, null, getAPIArgs, null));
-//print(storeHostObj.isUserExists(null, null, getAPIArgs, null));
+print(storeHostObj.getActiveTenantDomains());
+print(storeHostObj.getUserFields());
+print(storeHostObj.searchPaginatedAPIsByType("HostObjectTestAPI","carbon.super","0","2"));
+print(storeHostObj.searchPaginatedAPIsByType("name:*","carbon.super","0","2"));
+print(storeHostObj.searchAPIbyType("name:*","carbon.super"));
+print(storeHostObj.searchAPIbyType("HostObjectTestAPI","carbon.super"));
+print(storeHostObj.getPaginatedAPIsWithTag("youtube","0","1"));
+print(storeHostObj.getPublishedAPIsByProvider("admin@carbon.super","admin"));
+print(storeHostObj.getAllSubscriptions("admin@carbon.super"));
+print(storeHostObj.rateAPI("admin","HostObjectTestAPI","1.0.0","3"));
+print(storeHostObj.removeAPIRating("admin","HostObjectTestAPI","1.0.0"));
+print(storeHostObj.getAllPaginatedPublishedAPIs("carbon.super","0","2"));
+print(storeHostObj.getAPIsWithTag("youtube"));
+print(storeHostObj.getAllPublishedAPIs("carbon.super"));
+print(storeHostObj.getComments("admin","HostObjectTestAPI","1.0.0"));
+print(storeHostObj.isUserExists("admin"));
+print(storeHostObj.getAPI("admin","HostObjectTestAPI","1.0.0","admin"));
+print(storeHostObj.isSubscribed("admin","HostObjectTestAPI","1.0.0","admin"));
+print(storeHostObj.getSubscriptions("admin","HostObjectTestAPI","1.0.0","admin"));
+print(storeHostObj.getSubscribedAPIs("3"));
+print(storeHostObj.hasUserPermissions("admin"));
+print(storeHostObj.getTiers("admin"));
+print(storeHostObj.getAPIUsageforSubscriber("admin"));
+print(storeHostObj.getDeniedTiers("admin"));
+print(storeHostObj.getRecentlyAddedAPIs("5","carbon.super"));
+print(storeHostObj.getTopRatedAPIs("5"));
+print(storeHostObj.isBillingEnabled());
+print(storeHostObj.hasSubscribePermission());
+print(storeHostObj.isEnableEmailUsername());
+print(storeHostObj.updateApplicationTier("DefaultApplication","gold","admin"));
+print(storeHostObj.updateApplication("DefaultApplicationTest","DefaultApplication","admin","gold","test-url","updated-application"));
 %>
 %>
