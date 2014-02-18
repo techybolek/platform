@@ -44,5 +44,6 @@ print(storeHostObj.validateWFPermission("Basic YWRtaW46YWRtaW4="));
 print(storeHostObj.getSwaggerDiscoveryUrl("HostObjectTestAPI","1.0.0","admin"));
 //print(storeHostObj.removeSubscriber("admin","HostObjectTestAPI","1.0.0","DefaultApplication","1"));
 //print(storeHostObj.removeSubscription("admin","HostObjectTestAPI","1.0.0","DefaultApplication","1"));
+//
 %>
 %>
