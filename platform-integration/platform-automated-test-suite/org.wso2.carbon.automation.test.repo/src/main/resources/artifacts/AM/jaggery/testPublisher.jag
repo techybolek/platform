@@ -19,26 +19,37 @@ print(publisherHostObj.hasCreatePermission());
 print(publisherHostObj.hasManageTierPermission());
 print(publisherHostObj.hasUserPermissions("admin"));
 print(publisherHostObj.hasPublishPermission("admin"));
-//print(publisherHostObj.createNewAPIVersion("admin","HostObjectTestAPI","1.0.0","1.0.1"));
-//print(publisherHostObj.addInlineContent("HostObjectTestAPI","1.0.0","help","this is help"));
-//print(publisherHostObj.getAllDocumentation("HostObjectTestAPI","1.0.0"));
 print(publisherHostObj.getAuthServerURL());
 print(publisherHostObj.getCustomInSequences());
 print(publisherHostObj.getCustomOutSequences());
 print(publisherHostObj.getHTTPsURL());
 print(publisherHostObj.isSynapseGateway());
 print(publisherHostObj.loadRegistryOfTenant("carbon.super"));
-//print(publisherHostObj.updateDocumentation("admin","HostObjectTestAPI","1.0.0","Doc-Name", "How To", "summary","In-line"));
-//print(publisherHostObj.getInlineContent("admin","HostObjectTestAPI","1.0.0","help"));
-//isAPIOlderVersionExist
-//updateSubscriptionStatus
+print(publisherHostObj.updateDocumentation("admin","HostObjectTestAPI","1.0.0","Doc-Name", "How To", "summary","In-line"));
+print(publisherHostObj.addInlineContent("admin","HostObjectTestAPI","1.0.0","help","this is helpe"));
+print(publisherHostObj.getInlineContent("admin","HostObjectTestAPI","1.0.0","help"));
+print(publisherHostObj.getAllDocumentation("admin@carbon.super","HostObjectTestAPI","1.0.0"));
+print(publisherHostObj.searchAccessTokens("*:*"));
+print(publisherHostObj.getSubscriberCountByAPIs("admin@carbon.super"));
+print(publisherHostObj.getSubscriberCountByAPIVersions("admin@carbon.super"));
+print(publisherHostObj.getExternalAPIStores());
+var apiData = {};
+apiData["provider"] = "admin";
+apiData["name"] = "HostObjectTestAPI";
+apiData["version"] = "1.0.0";
+apiData["apiName"] = "HostObjectTestAPI";
+print(publisherHostObj.isAPIOlderVersionExist(apiData));
+print(publisherHostObj.updateSubscriptionStatus(apiData,"BLOCKED","1"));
+
+var tierData = {};
+tierData["tierName"] = "Gold";
+tierData["permissiontype"] = "Deny";
+tierData["roles"] = "admin";
+
+print(publisherHostObj.updateTierPermissions(tierData));
+//print(publisherHostObj.updateExternalAPIStores(apiData));
+
+//print(publisherHostObj.createNewAPIVersion("admin","HostObjectTestAPI","1.0.0","1.0.1"));
 //print(publisherHostObj.searchAccessTokens("admin"));
 //print(publisherHostObj.getSubscriberCountByAPIVersions());
-/*var getAPIArgs = new Array();
-getAPIArgs.push("tierName","subscriber");
-getAPIArgs.push("permissiontype","Deny");
-getAPIArgs.push("roles","admin");
-print(publisherHostObj.updateTierPermissions(getAPIArgs));
-isAPIOlderVersionExist
-*/
 %>
