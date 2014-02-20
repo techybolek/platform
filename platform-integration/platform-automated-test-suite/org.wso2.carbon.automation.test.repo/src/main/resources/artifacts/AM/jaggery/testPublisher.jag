@@ -84,8 +84,13 @@ tierData["roles"] = "admin";
 print(publisherHostObj.updateTierPermissions(tierData));
 print("==");
 //print(publisherHostObj.updateExternalAPIStores(apiData));
-
 //print(publisherHostObj.createNewAPIVersion("admin","HostObjectTestAPI","1.0.0","1.0.1"));
 //print(publisherHostObj.searchAccessTokens("admin"));
 //print(publisherHostObj.getSubscriberCountByAPIVersions());
+var apiData1 = {};
+apiData1["provider"] = "admin";
+apiData1["name"] = "HostObjectTestAPI";
+apiData1["version"] = "1.0.0";
+apiData1["apiName"] = "HostObjectTestAPI";
+//print(publisherHostObj.updateExternalAPIStores(apiData1));
 %>
