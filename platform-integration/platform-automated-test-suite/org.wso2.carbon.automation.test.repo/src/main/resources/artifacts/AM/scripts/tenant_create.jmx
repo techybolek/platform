@@ -201,7 +201,7 @@
    &lt;soapenv:Body&gt;
       &lt;ser:getTenant&gt;
          &lt;!--Optional:--&gt;
-         &lt;ser:tenantDomain&gt;domain${tenant_number}.com&lt;/ser:tenantDomain&gt;
+         &lt;ser:tenantDomain&gt;tenantdomain${tenant_number}.com&lt;/ser:tenantDomain&gt;
       &lt;/ser:getTenant&gt;
    &lt;/soapenv:Body&gt;
 &lt;/soapenv:Envelope&gt;</stringProp>
@@ -260,7 +260,7 @@
             &lt;!--Optional:--&gt;
             &lt;xsd:lastname&gt;LastName1&lt;/xsd:lastname&gt;
             &lt;!--Optional:--&gt;
-            &lt;xsd:tenantDomain&gt;domain${tenant_number}.com&lt;/xsd:tenantDomain&gt;
+            &lt;xsd:tenantDomain&gt;tenantdomain${tenant_number}.com&lt;/xsd:tenantDomain&gt;
             &lt;!--Optional:--&gt;
             &lt;xsd:tenantId&gt;0&lt;/xsd:tenantId&gt;
             &lt;!--Optional:--&gt;
@@ -381,7 +381,7 @@
    &lt;soapenv:Body&gt;
       &lt;aut:login&gt;
          &lt;!--Optional:--&gt;
-         &lt;aut:username&gt;${userPrefix}${tenant_counter}@domain${tenant_counter}.com&lt;/aut:username&gt;
+         &lt;aut:username&gt;${userPrefix}${tenant_counter}@tenantdomain${tenant_counter}.com&lt;/aut:username&gt;
          &lt;!--Optional:--&gt;
          &lt;aut:password&gt;test123&lt;/aut:password&gt;
          &lt;!--Optional:--&gt;
