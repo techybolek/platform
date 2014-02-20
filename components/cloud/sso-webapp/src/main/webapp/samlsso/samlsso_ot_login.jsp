@@ -59,14 +59,14 @@
             <meta name="description" content="">
             <meta name="viewport" content="width=device-width">
 
-            <link rel="stylesheet" href="samlsso/assets/css/font-awesome.min.css">
+            <link rel="stylesheet" href="../samlsso/assets/css/font-awesome.min.css">
             <!--[if IE 7]>
-              <link rel="stylesheet" href="samlsso/assets/css/font-awesome-ie7.min.css">
+              <link rel="stylesheet" href="../samlsso/assets/css/font-awesome-ie7.min.css">
             <![endif]-->
-            <link rel="stylesheet" href="samlsso/assets/css/normalize.min.css">
-    		<link type="text/css" rel="stylesheet" href="samlsso/assets/css/jquery.qtip.min.css" />
-            <link rel="stylesheet" href="samlsso/assets/css/start.css">
-            <link rel="stylesheet" href="samlsso/assets/css/development.css">
+            <link rel="stylesheet" href="../samlsso/assets/css/normalize.min.css">
+    		<link type="text/css" rel="stylesheet" href="../samlsso/assets/css/jquery.qtip.min.css" />
+            <link rel="stylesheet" href="../samlsso/assets/css/start.css">
+            <link rel="stylesheet" href="../samlsso/assets/css/development.css">
 
 
         </head>
@@ -75,19 +75,21 @@
                 <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
             <![endif]-->
 
-
         <div class="wrapper">
         			<div class="branding">
-                        <h1><img src="samlsso/assets/img/wso2-cloud-logo-2.png" alt="App Factory" /></h1>
+                        <h1><img src="../samlsso/assets/img/wso2-cloud-logo-2.png" alt="App Factory" /></h1>
                     </div>
      				<article class="start">
-                            <%@ include file="../authenticator-pages/basicauth.jsp" %>
+                            <header class="start_header">
+                                     <h2 class="account">Use your <img src="../samlsso/assets/img/wso2-oxygen-tank.png" alt="wso2 oxygen tank" /> account.</h2>
+                            </header>
+                            <%@ include file="../authenticator-pages/ot_basicauth.jsp" %>
 
                      </article>
      		</div><!-- /wrapper -->
             <footer></footer>
-            <script type="text/javascript" src="samlsso/assets/js/vendor/jquery-1.7.1.min.js"></script>
-       		<script type="text/javascript"  src="samlsso/assets/js/start.js"></script>
+            <script type="text/javascript" src="../samlsso/assets/js/vendor/jquery-1.7.1.min.js"></script>
+       		<script type="text/javascript"  src="../samlsso/assets/js/start.js"></script>
          </body>
     </html>
 
