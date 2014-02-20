@@ -49,7 +49,7 @@
             jagg.setUser(ssoRelyingParty.getLoggedInUser(sessionId));
             session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
             log.info("LOGGED_IN_USER " +ssoRelyingParty.getLoggedInUser(sessionId));
-            response.sendRedirect("/cloudmgt/site/pages/index.jag");
+            response.sendRedirect(requestedURI);
 			createTenantInfoObject();
         } else {
             // if the saml response is log out request from IDP, we log out from web app.

@@ -323,6 +323,21 @@ return getThemePath() + path;
         return site.context + path;
     };
 
+    var getCloudAppBasedUrl = function (cloudType, urlType, defaultUrl){
+       if(cloudType === null || urlType === null){
+            return getAbsoluteUrl(defaultUrl);
+       }else{
+       	var file = new File("/site/conf/cloud-mgt.xml");
+       	file.open("r");
+       	var data = file.readAll();
+       	var doc= new XML(data);
+       	var baseUrl = doc["CloudApplicationsUrls"][cloudType]["BaseUrl"].toString();
+        var context = doc["CloudApplicationsUrls"][cloudType][urlType].toString();
+        return baseUrl + context;
+       }
+
+    };
+
     var module = function (name, module) {
         if (module) {
             return modules[name] = module;
@@ -528,6 +543,7 @@ return getThemePath() + path;
         template:template,
         require:requir,
         getAbsoluteUrl:getAbsoluteUrl,
+        getCloudAppBasedUrl:getCloudAppBasedUrl,
         getMappedUrl:getMappedUrl,
         printData:printData,
         getModulesDir:getModulesDir,

@@ -12,7 +12,7 @@
         <Greg>https://localhost:9443/services/</Greg>
     </ServerUrls>
     <SSORelyingParty>
-        <Name>appserver</Name>
+        <Name>cloudmgt</Name>
         <DashboardName>WSO2 AppFactory Dashboard</DashboardName>
         <IdentityProviderURL>https://milestones.appfactory.wso2.com:9443/samlsso</IdentityProviderURL>
         <KeyStorePassword>wso2carbon</KeyStorePassword>
@@ -22,6 +22,15 @@
          <AdminUserName>admin</AdminUserName>
          <AdminPassword>admin</AdminPassword>
     </SSORelyingParty>
-
+    
+    <CloudApplicationsUrls>
+         <AppCloud>
+             <BaseUrl>https://milestones.appfactory.wso2.com:9443/appmgt</BaseUrl>
+             <HomePageContext>/site/pages/</HomePageContext>
+             <LogoutContext>/site/pages/logout.jag</LogoutContext>
+         </AppCloud>
+         <APICloud>
+         </APICloud> 
+    </CloudApplicationsUrls>
 
 </cloudmgt>
