@@ -31,7 +31,7 @@
 
 </body>
 <script type="text/javascript">
-window.location.replace("https://cloudmgt.cloudpreview.wso2.com/cloudmgt");
+window.location.replace("https://cloudmgt.cloudpreview.staging.wso2.com/cloudmgt");
 </script>
 
 
