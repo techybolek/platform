@@ -27,33 +27,12 @@
     }
     session.invalidate();
 %>
-<style>
-.info-box{
-background-color:#EEF3F6;
-border:1px solid #ABA7A7;
-font-size:13px;
-font-weight:bold;
-margin-bottom:10px;
-padding:10px;
-}
-</style>
+<body bgcolor="#292E38">
 
-<div id="middle">
-
-	<div id="workArea">
-		<div class="info-box">
-			<%=stat%>
-		</div>
-		<table class="styledLeft">
-			<tbody>
-				<tr>
-					<td><%=statusMessage%></td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-</div>
-
+</body>
+<script type="text/javascript">
+window.location.replace("https://cloudmgt.cloudpreview.wso2.com/cloudmgt");
+</script>
 
 
 
