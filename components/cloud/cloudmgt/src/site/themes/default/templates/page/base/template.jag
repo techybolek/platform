@@ -1,0 +1,127 @@
+<% jagg.template("page/base", function(inputs, outputs, jagg) {%>
+<!DOCTYPE html>
+<!--[if lt IE 7]>
+<html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>
+<html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js"> <!--<![endif]-->
+<head>
+<head>
+        <%
+    jagg.includeBlock("header", {});
+    userName = session.get("LOGGED_IN_USER");
+    var applicationKey = request.getParameter('applicationKey');
+    var applicationName = request.getParameter('applicationName');
+
+    if(session.get("iconsAvailableApps") != null && applicationKey != null){
+        var iconList = session.get("iconsAvailableApps");
+        var iconUrl = iconList[applicationKey];
+    }
+    %>
+
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-XXXXXXXX']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+      function loadAppIcon(appKey) {
+          jagg.post("../blocks/resource/get/ajax/get.jag", {
+                  action: "isAppIconAvailable",
+                  applicationKey: appKey
+          },
+
+          function (result) {
+               if(result == 101){
+                    $("#icon").attr('src','<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/img/app_icon.png'))%>');
+                   }
+              },
+
+              function (jqXHR, textStatus, errorThrown) {
+              });
+
+            }
+
+            $(document).ready(function () {
+        	  loadAppIcon('<%=applicationKey%>');
+        	});
+
+        </script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('new-assets/css/bootstrap.css'))%>" rel="stylesheet">
+    <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('new-assets/css/bootstrap-theme.css'))%>" rel="stylesheet">
+    <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('new-assets/css/bootstrap-missing.css'))%>" rel="stylesheet">
+    <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('new-assets/font-awesome/css/font-awesome.min.css'))%>" rel="stylesheet">
+
+    <style>
+        body {
+            padding-top: 50px;
+            padding-bottom: 20px;
+        }
+    </style>
+    <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('new-assets/css/main.css'))%>">
+    <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/css/main.css'))%>">
+
+
+
+
+    <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/css/jquery.qtip.min.css'))%>">
+    <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/js/vendor/select2/select2.css'))%>">
+
+    <link rel="icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/img/favicon.png'))%>" type="image/x-icon"/>
+    <link rel="shortcut icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/img/favicon.png'))%>" type="image/x-icon"/>
+</head>
+<body>
+<!--[if lt IE 7]>
+<p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+    your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to
+    improve your experience.</p>
+<![endif]-->
+
+
+<!-- Part 1: Wrap all page content here -->
+<div id="wrap">
+
+
+
+
+    <% jagg.includeBlock("toplinks", {}); %>
+    <% jagg.includeBlocks(outputs.body); %>
+
+
+    <!-- /container -->
+    <div id="push"></div>
+</div>
+
+<!-- footer id="footer">
+    <div class="container">
+        <p class="muted credit">&copy; WSO2 2013</p>
+    </div>
+</footer -->
+
+
+    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/js/vendor/bootstrap-dropdown.min.js'))%>"></script>
+    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/js/vendor/select2/select2.min.js'))%>"></script>
+    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/js/vendor/jquery.sticky.js'))%>"></script>
+    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.validate.min.js'))%>"></script>
+    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/js/main.js'))%>"></script>
+    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/js/vendor/jquery.qtip.min.js'))%>"></script>
+    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/custom.js'))%>"></script>
+    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('new-assets/js/vendor/bootstrap.min.js'))%>"></script>
+</body>
+</html>
+<% }); %>

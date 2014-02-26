@@ -1,0 +1,73 @@
+<% jagg.template("subscriptions", function(inputs, outputs, jagg) { %>
+<%
+
+ var log = new Log();
+ var userName =  session.get("LOGGED_IN_USER");
+if(userName !=null ) {
+
+ var file = new File("/site/conf/cloud-mgt.xml");
+ file.open("r");
+ var data = file.readAll();
+ var doc= new XML(data);
+ var types = doc.subscriptions.type;
+file.close();
+ var subscriptionInfo = {};
+ var db = new Database("cloud_mgt");
+ for(var i=0;i<types.length();i++) {
+   var columnName = types[i].toString();
+   var url = types[i].@url;
+    var domainName = userName.substring(userName.indexOf("@")+1,userName.length); 
+     var isRegistered = db.query("SELECT "+columnName+" FROM SUBSCRIPTIONS WHERE tenantDomain ='"+domainName+"'");
+
+   subscriptionInfo[columnName] = isRegistered[0][columnName];
+ }
+ db.close();
+
+%>
+<link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/index.css'))%>" />
+<link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/grid.css'))%>" />
+
+ <div class="container content-starter">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1>Subscription</h1>
+            <p>Click the logo of the cloud you want to access.</p>
+        </div>
+    </div>
+</div>
+<div class="container content-section-wrapper cloud-shifter">
+    <div class="row">
+        <div class="">
+                    <%
+                    for(var i=0;i<types.length();i++) {
+                        if(subscriptionInfo[types[i].toString()] == true) {
+                            %>
+                            <div class="col-lg-4">
+                                               <%  if(types[i].toString()=="integration_cloud") {%>
+                                                              <i class="<%=types[i].toString()%>_disabled"></i>
+                                                             <div class="helper_text"> Coming Soon...</div>
+                                                       <%} else {%>
+
+                                        <a title="Go to <%=types[i].@display_name.toString()%>" href="<%=types[i].@url.toString()%>"><i class="<%=types[i].toString()%>"></i></a> <%} %>
+                                   </div>
+                                  <% }else{ %>
+                                    <div class="col-lg-4">
+                                        <i class="<%=types[i].toString()%>_disabled"></i>
+                                    </div>
+                                  <% }
+                    } %>
+                                 <input type="hidden" name="secretKey" id="secretKey" value=""/>
+                                 <input type="hidden" name="imagePath" id="imagePath" value=""/>
+            <div class="helper_text">
+                <p class="helper_text_bold">You are now signed in.</p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+ 
+  <% } 
+ %>
+<% }); %>
+

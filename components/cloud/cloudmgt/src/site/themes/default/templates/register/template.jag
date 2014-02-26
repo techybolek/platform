@@ -1,0 +1,463 @@
+<% jagg.template("register", function(inputs, outputs, jagg) { %>
+<%
+
+var log = new Log();
+var file = new File("/site/conf/cloud-mgt.xml");
+file.open("r");
+var data = file.readAll();
+var doc= new XML(data);
+var types = doc.subscriptions.type;
+var typeArr = new Array();
+for(var i=0;i<doc.subscriptions.type.length();i++) {
+   typeArr[i] =types[i].toString();
+}
+var AFServerUrl = doc.ServerUrls.AppFactory.toString();
+var cloudmgtURL =  doc.ServerUrls.cloudmgtURL.toString();
+file.close();
+var eulaFile = new File("/site/conf/eula.xml");
+eulaFile.open("r");
+var eulaData = eulaFile.readAll();
+var eulaDoc= new XML(eulaData);
+var eulaContent =  eulaDoc.EULA.text();
+eulaFile.close();
+%>
+
+<style>
+header{
+	display:none;
+}
+body#home{
+	background:none #292E38;
+}
+.sticky-wrapper{
+	position:relative;
+	height:auto !important;
+}
+
+.warning_message{
+	background-color:#ffffff;
+}
+.info_message .close_message {
+    position: absolute;
+    right: 13px;
+    top: 7px;
+}
+.info_message{
+	background-color:#ffffff;
+	width: 400px;
+}
+
+.txt-right{
+	text-align: right;
+}
+#tenantDomain{
+	width: 87%;
+	margin-left: 7px;
+}
+
+
+#captchaImgDiv img{
+	width:100%;
+	   height: 39px;
+}
+#aPaaS, #iPaaS{
+	width:20%;
+}
+#lblLoginID{
+	color:#888;
+	display:none;
+}
+
+#preAt{
+	margin-left: -3px;
+	margin-right: -3px;
+}
+
+section.start_content div.subs-cont{
+	margin-top:20px;
+	margin-bottom:30px;
+}
+.subs-cont span.error{
+	position: absolute; 
+	margin-top: 71px; 
+	margin-left: -14px;
+}
+span.error {
+    padding-left: 0;
+}
+#submitbtn {
+    background-color: #F9BFBB;
+    border: #F9BFBB;
+}
+
+</style>
+ 
+<script type="text/javascript">
+
+
+   function doSubmit() {
+        var isOrganizationNameValid = validateOrganizationNameAlphaNumeric();
+        if(isOrganizationNameValid){
+        var submitButton = document.getElementById('submitbtn');
+    	submitButton.disabled = true;
+        $('#submitbtn').css('background-color','#F9BFBB');
+        var data = {
+            action:"storeSubscription",
+            domainName:$("#domainName").attr('value')
+        };
+        var max=<%=types.length() %>;
+        var input=<%=typeArr %>;
+        for(var i = 0; i < input.length; i++){
+            if(document.getElementById(input[i]).checked.toString() == "true") {
+                data[input[i]] = input[i];
+            }
+        }
+        var firstName = $("#firstName").attr('value');
+        var lastName  = $("#lastName").attr('value');
+        var email     = $("#email").attr('value');
+        var adminUsername = $("#adminUsername").attr('value');
+        var adminPassword = $("#password").attr('value');
+        var organizationDomain = $("#domainName").attr('value');
+        var imagePath = document.getElementById("imagePath").val;
+        var secretKey = document.getElementById("secretKey").val;
+        var cloudmgtURL =  $("#cloudmgtURL").attr('value');;
+        var userAnswer = $("#captcha-user-answer").attr('value');
+        document.getElementById('form_div').innerHTML = "";
+
+        jagg.message({content:'Your request to register in WSO2 Cloud has been submitted. Please wait.',type:'info'});
+
+        jagg.post("../blocks/register/ajax/register.jag", {
+                action:"registerOrg",
+                firstName:firstName,
+                lastName:lastName,
+                email:email,
+                adminUsername:adminUsername,
+                adminPassword:adminPassword ,
+                organizationDomain:organizationDomain,
+                usagePlan:'Demo',
+                imagePath:imagePath,
+                secretKey:secretKey,
+                userAnswer:userAnswer
+            },
+            function (result) {
+                jagg.post("../blocks/register/ajax/register.jag", data,
+                    function (result) {
+                        jagg.post("../blocks/register/ajax/register.jag", {
+                             action:"sendEmail",
+                             firstName:firstName,
+                             adminUsername:adminUsername,
+                             email:email,
+                             domainName:organizationDomain
+                        },
+                        function (result) {
+                            $('.message_box').empty();
+                            jagg.message({content:'You have successfully registered to WSO2 Cloud.',type:'info',cbk:function(){
+                                    window.location.href = cloudmgtURL;
+                                }
+                            });
+                        },
+                        function (jqXHR, textStatus, errorThrown) {
+                            $('.message_box').empty();
+                            jagg.message({content:'Error while sending registration email.',type:'error',cbk:function(){
+                                    window.location.href = cloudmgtURL;
+                                }
+                            });
+                        });
+                    },
+                    function (jqXHR, textStatus, errorThrown) {
+                        $('.message_box').empty();
+                        jagg.message({content:'Error while storing subscription details.',type:'error',cbk:function(){
+                                window.location.href = cloudmgtURL;
+                            }
+                        });
+                    });
+            },
+            function (jqXHR, textStatus, errorThrown) {
+                $('.message_box').empty();
+                jagg.message({content:jqXHR.responseText, type:'error',cbk:function(){
+                        window.location.href = "register.jag";
+                    }
+                });
+            });
+       }
+    }
+ 
+ 
+    function activateSubmit(fld) {
+    	var submitButton = document.getElementById('submitbtn');
+    	submitButton.disabled = !fld;
+    	if(fld){
+            $('#submitbtn').css('background-color','#EB7067');
+        }else{
+            $('#submitbtn').css('background-color','#F9BFBB');
+        }
+
+    }
+
+    function validateEmail(){
+    	  jagg.post("../blocks/application/users/get/ajax/list.jag", {
+    		action:"validateUser",
+    		userName:$("#email").attr('value')
+	      },
+	      function (result) {
+	    	result = result.replace(/[\r\n]/g, "");
+	    	if(result=="false"){
+	    		doSubmit();
+			}else{
+				jagg.message({content:'Your email address is already registered.',type:'warning'});
+			}
+	      },
+	      function (jqXHR, textStatus, errorThrown) {
+              jagg.message({content:jqXHR+textStatus+errorThrown,type:'error',id:'myuniqeid' });
+	    	  return false ;
+	      });
+
+    }
+
+function generateCaptcha() {
+
+            jagg.post("../blocks/register/ajax/register.jag", {
+            		action:"generateCaptcha"
+              },
+              function (result) {
+            		showKaptcha(result);
+              },
+              function (jqXHR, textStatus, errorThrown) {
+                  jagg.message({content:'getting captcha - ERROR.',type:'info', cbk:function(){
+            		window.location.href = "#";
+                  	}
+                  });
+        });
+    }
+
+function validateOrganizationNameAlphaNumeric(){
+                      var isOrganizationNameValid=true;
+               var organizationName = $("#organization").val();
+               var patternForSpace = / /g;
+                var isSpace = patternForSpace.test(organizationName);
+
+                var patternForNonAlphaNumericChars = /[^\w\s]/gi;
+                var isInvalidChar = patternForNonAlphaNumericChars.test(organizationName);
+
+                if (isSpace == true || isInvalidChar == true) {
+                       jagg.message({
+                        content: 'Invalid Organization Name - Create an Organization which has only alphanumeric characters', type: 'error'
+                    });
+                               isOrganizationNameValid = false;
+                } else {
+                       $('#organization').val(organizationName);
+                               isOrganizationNameValid = true;
+                }
+                       return isOrganizationNameValid;
+     }
+function showKaptcha(captcha) {
+    var captchaInfo = jQuery.parseJSON(captcha);
+    var captchaPath = captchaInfo.path;
+    document.getElementById("secretKey").val = captchaInfo.secretKey;
+    document.getElementById("imagePath").val = captchaPath;
+
+    var AFServiceUrl = '<%=AFServerUrl %>';
+    var serverUrl = AFServiceUrl.split("services")[0];
+    var captchaURL = serverUrl+captchaPath;
+    var captchaImg = document.getElementById("captchaImgDiv");
+    captchaImg.innerHTML = '<img src= "' + captchaURL + '" alt="If you can not see the captcha image please refresh the page."/>';
+
+    // TODO so this part.........   >>  setTimeout("showKaptchaTimely()", 4000);
+
+}
+
+    $(document).ready(function($){
+        $('#activateButton').attr('checked',false);
+        $('#submitbtn').attr('disabled','disabled');
+        generateCaptcha();
+        jQuery.validator.setDefaults({
+                errorElement:'span'
+            });
+        jQuery.validator.addMethod("domain", function(value, element) {
+            var isSuccess = false;
+            $.ajax({ url: "../blocks/register/ajax/register.jag",
+                    data: {
+                        action:"checkDomainAvailability",
+                        domainName:value
+                    },
+                    async: false,
+                success:
+                    function(msg) {
+                        msg = msg.replace(/[\r\n]/g, "");
+                        if(msg == "true"){
+                            isSuccess = true;
+                        }
+                     }
+            });
+            return isSuccess;
+        }, "Domain is not available");
+		$('#registerForm').validate({
+			rules : {
+                password: {
+                    required: true,
+                    minlength: 5
+                } ,
+                clouds: {	
+                    required: true,
+		    minlength: 1
+		},
+                domainName: {
+                    domain: true
+                }
+            },
+            messages: {
+                password: {
+                    minlength: "Minimum is 5 characters "
+                },
+                clouds: "Select atleast one subscription.",
+            },
+
+			submitHandler: function(form) {
+				doSubmit();
+		    }
+		});
+    });
+</script>
+
+<div class="container content-starter">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1>Register</h1>
+        </div>
+    </div>
+</div>
+<div class="container content-section-wrapper">
+    <div class="row">
+        <div class="col-lg-12 content-section">
+             <form method='post' name="inputData" class='form-horizontal' id='registerForm' role="form" >
+                   <!--first name-->
+                  <div class="form-group">
+                        <label for="firstName" class="col-sm-2 control-label">First name</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="firstName" name="firstName" class="required" />
+                        </div>
+                  </div>
+
+                  <!--last name-->
+                  <div class="form-group">
+                        <label for="lastName" class="col-sm-2 control-label">Last name</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="lastName" name="lastName" class="required" />
+                        </div>
+                  </div>
+
+
+                  <!--email-->
+                  <div class="form-group">
+                        <label for="email" class="col-sm-2 control-label">Email</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="email" name="email" class="required email" />
+                        </div>
+                  </div>
+
+
+                  <!--Organization-->
+                  <div class="form-group">
+                        <label for="organization" class="col-sm-2 control-label">Organization</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="organization" name="organization" class="required" />
+                        </div>
+                  </div>
+
+                  <!--Domain-->
+                  <div class="form-group">
+                        <label for="domainName" class="col-sm-2 control-label">Domain</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="domainName" name="domainName" class="required domain" />
+                            <label id="lblLoginID" class="col-sm-2 control-label">Your Login ID:
+                                <span id="preAdmin"></span>
+                                <span id="preAt">&#64;</span>
+                                <span id="preDomain"></span>
+                            </label>
+                        </div>
+                  </div>
+
+
+
+
+                  <!--Admin Username-->
+                  <div class="form-group">
+                        <label for="adminUsername" class="col-sm-2 control-label">Admin Username:</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="adminUsername" name="adminUsername" class="required" />
+                        </div>
+                  </div>
+
+
+                  <!--Admin Password-->
+                  <div class="form-group">
+                        <label for="password" class="col-sm-2 control-label">Password</label>
+                        <div class="col-sm-8">
+                            <input type="password" id="password" name="password" class="required password"  />
+                        </div>
+                  </div>
+
+                  <!--Admin Re Password-->
+                  <div class="form-group">
+                        <label for="password2" class="col-sm-2 control-label">Confirm Password</label>
+                        <div class="col-sm-8">
+                            <input type="password" id="password2" name="password2" class="required password_match"  />
+                        </div>
+                  </div>
+
+                    <!--Word Verification-->
+                  <div class="form-group">
+                        <label for="captcha-user-answer" class="col-sm-2 control-label">Word Verification</label>
+                        <div class="col-sm-8">
+                            <label for="captcha-user-answer" style="font-size:10px;color:red;display:none;">Captcha image is not visible due to untrusted certificates. Please open the image in a new tab to accept the certificate.</label>
+                            <div id="captchaImgDiv" style="width:150px;"></div>
+                            <input type="text" id="captcha-user-answer" name="captcha-user-answer" class="required" style="margin-top:10px" />
+                            <a class="link" onclick="generateCaptcha();"><i class="fa fa-refresh"></i> Regenerate captcha</a>
+                        </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="captcha-user-answer" class="col-sm-2 control-label">Subscriptions</label>
+                    <div class="col-sm-8">
+                        <% for(var i=0;i<doc.subscriptions.type.length();i++) { %>
+                            <div class="checkbox">
+                                <label>
+                                  <input type="checkbox" name="<%=types[i].toString()%>" id="<%=types[i].toString()%>"> <%=doc.subscriptions.type[i].@display_name.toString()%>
+                                </label>
+                            </div>
+                        <% } %>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                    <textarea rows="10" readonly="readonly" class="license_txt" name="license-text"
+                               style="width:98%"><%=eulaContent%>
+                     </textarea>
+                     <div class="checkbox">
+                     <label><input type="checkbox" name="activateButton" id="activateButton"
+                                   onclick="activateSubmit(form.activateButton.checked)"/>I have read and accepted
+                         the terms in the license agreement above.</label>
+                      </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-8">
+                    <input id="submitbtn" type='submit' disabled="disabled" value='Create My Account' class="btn btn-primary"/>
+                    Already have an Account? <a href="<%='https://cloudmgt.cloudpreview.wso2.com/cloudmgt/'%>" class="link">Sign in</a>
+                    </div>
+                  </div>
+
+                    <input type="hidden" name="cloudmgtURL" id="cloudmgtURL" value="<%=cloudmgtURL%>"/>
+                    <input type="hidden" name="secretKey" id="secretKey" value=""/>
+                    <input type="hidden" name="imagePath" id="imagePath" value=""/>
+                </form>
+                <div class="signin">
+
+                </div>
+        </div>
+    </div>
+</div>
+<% }); %>
+

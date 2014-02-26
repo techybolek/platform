@@ -1,0 +1,7 @@
+<%
+jagg.block("toplinks", {
+    initialize:function (data) {
+
+    }
+});
+%>
