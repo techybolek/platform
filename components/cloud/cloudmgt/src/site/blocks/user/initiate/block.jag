@@ -1,8 +1,0 @@
-<%
-jagg.block("user/initiate", {
-    initialize:function (data) {
-    }
-
-
-});
-%>

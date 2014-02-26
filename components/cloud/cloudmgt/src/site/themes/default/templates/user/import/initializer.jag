@@ -1,8 +1,0 @@
-<%
-jagg.initializer("user/import", {
-
-    preInitialize:function () {
-
-    }
-});
-%>

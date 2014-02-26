@@ -1,9 +1,0 @@
-<%
-jagg.block("register", {
-    initialize:function (data) {
-
-    }
-
-
-});
-%>

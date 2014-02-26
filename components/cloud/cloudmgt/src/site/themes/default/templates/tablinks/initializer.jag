@@ -1,8 +1,0 @@
-<%
-jagg.initializer("tablinks", {
-
-    preInitialize:function () {
-
-    }
-});
-%>

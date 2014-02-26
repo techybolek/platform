@@ -1,8 +1,0 @@
-<%
-jagg.block("user/reset", {
-    initialize:function (data) {
-    }
-
-
-});
-%>
