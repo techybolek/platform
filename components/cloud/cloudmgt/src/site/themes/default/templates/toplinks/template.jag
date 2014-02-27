@@ -4,8 +4,9 @@ jagg.template("toplinks", function(inputs, outputs, jagg) { %>
 
     var log = new Log();
     var userName =  session.get("LOGGED_IN_USER");
-
-
+    var requestURI = request.getRequestURI();
+    if(userName != null ){
+     
     %>
 <div class="navbar navbar-inverse navbar-fixed-top main-menu">
     <div class="container">
@@ -35,4 +36,4 @@ jagg.template("toplinks", function(inputs, outputs, jagg) { %>
 </div>
 </div>
 
-<% }); %>
+<%  } }); %>

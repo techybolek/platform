@@ -122,10 +122,8 @@ span.error {
         var secretKey = document.getElementById("secretKey").val;
         var cloudmgtURL =  $("#cloudmgtURL").attr('value');;
         var userAnswer = $("#captcha-user-answer").attr('value');
-        document.getElementById('form_div').innerHTML = "";
-
-        jagg.message({content:'Your request to register in WSO2 Cloud has been submitted. Please wait.',type:'info'});
-
+ 
+       
         jagg.post("../blocks/register/ajax/register.jag", {
                 action:"registerOrg",
                 firstName:firstName,
@@ -150,14 +148,12 @@ span.error {
                              domainName:organizationDomain
                         },
                         function (result) {
-                            $('.message_box').empty();
                             jagg.message({content:'You have successfully registered to WSO2 Cloud.',type:'info',cbk:function(){
                                     window.location.href = cloudmgtURL;
                                 }
                             });
                         },
                         function (jqXHR, textStatus, errorThrown) {
-                            $('.message_box').empty();
                             jagg.message({content:'Error while sending registration email.',type:'error',cbk:function(){
                                     window.location.href = cloudmgtURL;
                                 }
@@ -165,7 +161,6 @@ span.error {
                         });
                     },
                     function (jqXHR, textStatus, errorThrown) {
-                        $('.message_box').empty();
                         jagg.message({content:'Error while storing subscription details.',type:'error',cbk:function(){
                                 window.location.href = cloudmgtURL;
                             }
@@ -173,7 +168,6 @@ span.error {
                     });
             },
             function (jqXHR, textStatus, errorThrown) {
-                $('.message_box').empty();
                 jagg.message({content:jqXHR.responseText, type:'error',cbk:function(){
                         window.location.href = "register.jag";
                     }
@@ -329,6 +323,7 @@ function showKaptcha(captcha) {
 <div class="container content-section-wrapper">
     <div class="row">
         <div class="col-lg-12 content-section">
+              <div class="alert alert-error error" id="registerError"><% jagg.includeBlock("page/messages", null); %></div>
              <form method='post' name="inputData" class='form-horizontal' id='registerForm' role="form" >
                    <!--first name-->
                   <div class="form-group">
@@ -369,11 +364,12 @@ function showKaptcha(captcha) {
                         <label for="domainName" class="col-sm-2 control-label">Domain</label>
                         <div class="col-sm-8">
                             <input type="text" id="domainName" name="domainName" class="required domain" />
-                            <label id="lblLoginID" class="col-sm-2 control-label">Your Login ID:
+                            <br/>
+                            <nobr><label id="lblLoginID" class="col-sm-2 control-label">Your Login ID:
                                 <span id="preAdmin"></span>
                                 <span id="preAt">&#64;</span>
                                 <span id="preDomain"></span>
-                            </label>
+                            </label></nobr>
                         </div>
                   </div>
 

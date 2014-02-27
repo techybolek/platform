@@ -83,7 +83,7 @@ options.mep = "in-only";
                     <rampart:timestampTTL>300</rampart:timestampTTL>
                     <rampart:timestampMaxSkew>300</rampart:timestampMaxSkew>
                     <rampart:timestampStrict>false</rampart:timestampStrict>
-                    <rampart:passwordCallbackClass>org.wso2.carbon.appfactory.utilities.security.PWCBHandler</rampart:passwordCallbackClass>
+                    <rampart:passwordCallbackClass>org.wso2.carbon.cloudmgt.users.util.security.PWCBHandler</rampart:passwordCallbackClass>
                     <rampart:tokenStoreClass>org.wso2.carbon.security.util.SecurityTokenStore</rampart:tokenStoreClass>
                     <rampart:nonceLifeTime>300</rampart:nonceLifeTime>
                 </rampart:RampartConfig>
