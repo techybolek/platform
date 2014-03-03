@@ -82,12 +82,10 @@ section.start_content div.subs-cont{
                          password:password
                   },
                   function (result) {
-                    $('#successBox').show();
-                    $('#errorBox').hide();
+                    jagg.message({type:'success',content:'You have successfully change the password.'});
                   },
                   function (jqXHR, textStatus, errorThrown) {
-                    $('#errorBox').show();
-                    $('#successBox').hide();
+                    jagg.message({type:'error',content:'<strong>Error!</strong> Old credential does not match with the existing credentials.'});
                  })
     } 
  
@@ -134,16 +132,10 @@ section.start_content div.subs-cont{
         </div>
     </div>
 </div>
+<% jagg.includeBlock("page/messages", null); %>
 <div class="container content-section-wrapper">
 <div class="row">
     <div class="col-lg-12 content-section">
-        <div class="alert alert-danger alert-dismissable" style="display:none" id="errorBox">
-          <strong>Error!</strong> Old credential does not match with the existing credentials.
-        </div>
-
-        <div class="alert alert-success alert-dismissable" style="display:none" id="successBox">
-            You have successfully change the password.
-        </div>
         <form method='post' name="inputData" class='form-horizontal' id='userForm' action="javascript:doSubmit()"  role="form">
           <div class="form-group">
             <label for="inputEmail3" class="col-sm-2 control-label">Current Password</label>

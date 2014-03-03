@@ -20,6 +20,15 @@
     color:#898989;
     font-size: 18px;
 }
+.helper_text {
+    color: #1190A5;
+    text-align: center;
+    font-size:15px;
+}
+
+.helper_text .helper_text_bold {
+    font-weight: bold;
+}
 .main-menu li.active i{
     color: #2877aa;
 }

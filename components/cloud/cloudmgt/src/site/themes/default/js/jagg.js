@@ -126,11 +126,11 @@ var messageTimer;
 
         if($appendTo == undefined){
             if(typeof message_html == 'object'){
-                var $message = $('<div class="message '+message_type+'_message" style="display:none"><div class="content"><div class="left message-container"></div><a class="close_message right icon-remove-sign js_close_message"></a></div></div>');
+                var $message = $('<div class="container"><div class="row"><div class="col-lg-12"><div class="message '+message_type+'_message" style="display:none"><div class="content"><div class="left message-container"></div><a class="close_message right icon-remove-sign js_close_message"><i class="fa fa-times-circle"></i></a></div></div></div></div></div>');
                 $('.message-container',$message).append(message_html);
                 $(".message_box").append($message);
             }else{
-                var $message = $('<div class="message '+message_type+'_message" style="display:none"><div class="content"><div class="left message-container">'+message_html+'</div><a class="close_message right icon-remove-sign js_close_message"></a></div></div>');
+                var $message = $('<div class="container"><div class="row"><div class="col-lg-12"><div class="message '+message_type+'_message" style="display:none"><div class="content"><div class="left message-container">'+message_html+'</div><a class="close_message right icon-remove-sign js_close_message"><i class="fa fa-times-circle"></i></a></div></div></div></div></div>');
                 $(".message_box").append($message);
             }
             var $messageObj = $(".message_box .message:last-child");
@@ -174,8 +174,8 @@ var messageTimer;
         if(params.type == "confirm"){
             //show ok and cancel buttons and register callbacks for each.
             $buttonRow = $('<ul class="inline_list">'+
-                                '<li class="inline_item"><a href="#" class="btn sub big modal_cancel" >Cancel</a></li>'+
                                 '<li class="inline_item"><a href="#" class="btn main big modal_action">Ok</a></li>'+
+                                '<li class="inline_item"><a href="#" class="btn sub big modal_cancel" >Cancel</a></li>'+
                             '</ul>');
 
             $('.modal_action',$buttonRow).click(function(){
@@ -192,7 +192,7 @@ var messageTimer;
             }
         }
 
-        if(params.type == "ok"){
+        if(params.type == "ok" || params.type == "error"){
             //show ok and cancel buttons and register callbacks for each.
             $buttonRow = $('<ul class="inline_list">'+
                 '<li class="inline_item"><a href="#" class="btn main big modal_action">Ok</a></li>'+
@@ -208,7 +208,6 @@ var messageTimer;
             $('.modal_msg',$modelObject ).remove();
             $('.img',$modelObject ).remove();
         }
-
 
         if( (typeof $buttonRow) == "object"){
             $('#buttonRowContainer',$modelObject).append($buttonRow);

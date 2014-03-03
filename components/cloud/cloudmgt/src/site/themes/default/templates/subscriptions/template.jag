@@ -30,8 +30,8 @@ file.close();
  <div class="container content-starter">
     <div class="row">
         <div class="col-lg-12">
-            <h1>Subscription</h1>
-            <p>Click the logo of the cloud you want to access.</p>
+            <h1>Home</h1>
+           
         </div>
     </div>
 </div>
@@ -53,20 +53,21 @@ file.close();
                                   <% }else{ %>
                                     <div class="col-lg-4">
                                         <i class="<%=types[i].toString()%>_disabled"></i>
+                                                  <center>  <font size="3" color="#1190A5" text-align="center"> Coming Soon..</font></center>
                                     </div>
+
                                   <% }
                     } %>
                                  <input type="hidden" name="secretKey" id="secretKey" value=""/>
                                  <input type="hidden" name="imagePath" id="imagePath" value=""/>
-            <div class="helper_text">
-                <p class="helper_text_bold">You are now signed in.</p>
 
-            </div>
-        </div>
-    </div>
+        </div> <br/>
+     
+    </div>  <div class="helper_text">
+           <br/><p class="helper_text_bold">You are now signed in.</p>
+           <p>Click the logo of the cloud you want to access.</p>
+       </div> 
 </div>
-
- 
   <% } 
  %>
 <% }); %>

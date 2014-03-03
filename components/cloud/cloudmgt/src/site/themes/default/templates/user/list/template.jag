@@ -621,7 +621,7 @@ $('#removeUsers').click(function(){
         <header class="separator">
             <div class="content">
                 <div class="left">
-                    <a id="btnAddMembers" href="<%=jagg.getAbsoluteUrl("/site/pages/user-import.jag")%>" class="btn main head">Import Members</a>
+                    <a id="btnAddMembers" href="<%=jagg.getAbsoluteUrl("/site/pages/user-import.jag")%>" class='btn btn-primary'>Import Members</a>
                 </div>
                 <ul class="screen_option right">
                     <li class="screen_option_item">

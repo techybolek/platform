@@ -610,3 +610,18 @@ ul.icons-ul { margin: 0; text-indent: 0;  }
 .page_message .message_action { padding: 20px 20px 20px 0;  }
 .page_message .icon-circle {  font-size: 60px; line-height: 60px; }
 .page_message .icon-exclamation { font-size: 40px; line-height: 60px; }
+
+/* Message styles
+================== */
+.sticky-wrapper { position: absolute; width: 100%; }
+.message_box { font-weight: 700;  width: 100%; z-index: 11111;position: absolute   }
+.error_message { background: url(../img/error_bg.png) repeat left top; border-bottom: 1px solid #EB7067; color: #FFF; }
+.info_message { background: url(../img/info_bg.png) repeat left top; border-bottom: 1px solid #FFE; color: #999; }
+.warning_message { background: url(../img/warning_bg.png) repeat left top; border-bottom: 1px solid #F47A20; color: #FFF; }
+.success_message { background: url(../img/success_bg.png) repeat left top; border-bottom: 1px solid #6EA66C; color: #FFF; }
+.message .content { padding: 10px 40px; overflow: auto;  }
+.message .content ul { margin-left: 0; margin-right: 0; padding: 0; list-style: none; }
+.close_message { margin-top: 13px; width: 14px; text-decoration: none; color: #FFF; font-size: 1.14285714em; cursor: pointer; }
+.close_message:hover { color: #000; }
+.info_message  .close_message { color: #FFCC66; }
+.info_message  .close_message:hover { color: #000; }

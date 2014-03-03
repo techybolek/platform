@@ -134,7 +134,7 @@
                                     <span for="password2" generated="true" class="error" style="display:none;" id="pwdError">Password does not match</span>
                                 </div>
                                 <div class="buttonrow">
-                                <button class="btn btn-primary" id="btnImport">Import</button><a id="btn_cancel" href="javascript:location.href='/appmgt/site/pages/user.jag'">Cancel</a>
+                                <button class="btn btn-primary" id="btnImport">Import</button><a id="btn_cancel" href="javascript:location.href='/cloudmgt/site/pages/user.jag'">Cancel</a>
                                 </div>
                                     </fieldset>
                                </form>
